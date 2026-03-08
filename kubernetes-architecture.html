@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kubernetes Architecture — Complete Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d1117;
+    --bg2: #161b22;
+    --bg3: #21262d;
+    --border: #30363d;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --blue: #58a6ff;
+    --blue-bg: #1a2332;
+    --green: #3fb950;
+    --green-bg: #122118;
+    --purple: #bc8cff;
+    --purple-bg: #1e1433;
+    --yellow: #d29922;
+    --yellow-bg: #2d2000;
+    --red: #f85149;
+    --red-bg: #2d1217;
+    --cyan: #39c5cf;
+    --cyan-bg: #0f2832;
+    --pink: #f778ba;
+    --pink-bg: #2d1229;
+    --orange: #f0883e;
+    --orange-bg: #2d1f0a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    padding: 0 0 80px 0;
+  }
+  .header {
+    background: linear-gradient(135deg, #0d1117 0%, #1a2332 50%, #0d1117 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 40px 60px;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -20%;
+    width: 60%;
+    height: 200%;
+    background: radial-gradient(ellipse, rgba(88,166,255,0.07) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .header-badge {
+    display: inline-block;
+    background: var(--blue-bg);
+    border: 1px solid var(--blue);
+    color: var(--blue);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 16px;
+    letter-spacing: 1px;
+  }
+  .header h1 {
+    font-size: 42px;
+    font-weight: 800;
+    background: linear-gradient(90deg, #58a6ff, #bc8cff, #3fb950);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 10px;
+    line-height: 1.1;
+  }
+  .header p { color: var(--muted); font-size: 16px; max-width: 700px; }
+
+  .container { max-width: 1500px; margin: 0 auto; padding: 0 40px; }
+  .section { margin-top: 50px; }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 28px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-num {
+    background: var(--blue);
+    color: #000;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .section-title { font-size: 22px; font-weight: 700; }
+
+  /* Section 1 - Why K8s */
+  .why-grid { display: grid; grid-template-columns: 1fr auto 1fr 1fr; gap: 20px; align-items: center; }
+  .arrow-box { text-align: center; }
+  .arrow-box .arrow-label { color: var(--green); font-family: 'JetBrains Mono', monospace; font-size: 13px; margin-bottom: 8px; }
+  .arrow-box .arrow { font-size: 32px; color: var(--green); }
+
+  /* Cards */
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+  }
+  .card-title {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .card-icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .card ul { list-style: none; }
+  .card ul li {
+    font-size: 13px;
+    color: var(--muted);
+    padding: 5px 0;
+    padding-left: 18px;
+    position: relative;
+    line-height: 1.5;
+  }
+  .card ul li::before { content: '→'; position: absolute; left: 0; color: var(--blue); font-size: 11px; top: 6px; }
+
+  .card.danger { border-color: #f85149; background: var(--red-bg); }
+  .card.danger .card-title { color: var(--red); }
+  .card.success { border-color: var(--green); background: var(--green-bg); }
+  .card.success .card-title { color: var(--green); }
+  .card.info { border-color: var(--blue); background: var(--blue-bg); }
+  .card.info .card-title { color: var(--blue); }
+
+  /* Section 2 - Building Blocks */
+  .blocks-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; }
+  .block-card {
+    padding: 28px 24px;
+    border: 1px solid var(--border);
+    position: relative;
+    background: var(--bg2);
+  }
+  .block-card:first-child { border-radius: 12px 0 0 12px; }
+  .block-card:last-child { border-radius: 0 12px 12px 0; }
+  .block-card + .block-card { border-left: none; }
+  .block-arrow {
+    position: absolute;
+    right: -16px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    z-index: 2;
+    color: var(--muted);
+  }
+  .block-emoji { font-size: 36px; margin-bottom: 14px; display: block; }
+  .block-name { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+  .block-sub { font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--muted); margin-bottom: 14px; }
+  .block-desc { font-size: 13px; color: var(--muted); line-height: 1.6; }
+  .block-tag {
+    display: inline-block;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    padding: 3px 8px;
+    border-radius: 4px;
+    margin-top: 12px;
+  }
+
+  /* Section 3 - Cluster Architecture */
+  .cluster-wrapper {
+    border: 2px solid var(--border);
+    border-radius: 16px;
+    padding: 30px;
+    background: linear-gradient(135deg, #0d1117, #161b22);
+    position: relative;
+  }
+  .cluster-label {
+    position: absolute;
+    top: -14px;
+    left: 30px;
+    background: var(--bg);
+    padding: 0 12px;
+    font-size: 13px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+  }
+  .cluster-grid { display: grid; grid-template-columns: 1fr 22px 1fr; gap: 0; align-items: stretch; }
+  .cluster-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .cluster-divider-line {
+    width: 2px;
+    height: 100%;
+    background: var(--border);
+    border-radius: 2px;
+    position: relative;
+  }
+
+  .plane-box {
+    border: 1px solid #58a6ff44;
+    border-radius: 12px;
+    background: #1a233222;
+    padding: 24px;
+  }
+  .plane-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--blue);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .plane-sub { font-size: 12px; color: var(--muted); margin-bottom: 20px; font-family: 'JetBrains Mono', monospace; }
+  .cp-components { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+  .cp-comp {
+    border-radius: 10px;
+    padding: 16px;
+    border: 1px solid var(--border);
+  }
+  .cp-comp-name {
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .cp-comp p { font-size: 12px; color: var(--muted); line-height: 1.6; }
+  .cp-comp-full { grid-column: 1 / -1; }
+
+  .worker-box {
+    border: 1px solid #3fb95044;
+    border-radius: 12px;
+    background: #12211822;
+    padding: 24px;
+  }
+  .worker-title { font-size: 15px; font-weight: 700; color: var(--green); margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+  .worker-sub { font-size: 12px; color: var(--muted); margin-bottom: 20px; font-family: 'JetBrains Mono', monospace; }
+  .nodes-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .node-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+  }
+  .node-name { font-size: 13px; font-weight: 700; color: var(--green); margin-bottom: 12px; }
+  .node-layer {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 7px 12px;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .pods-row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+  .pod-mini {
+    background: var(--purple-bg);
+    border: 1px solid #bc8cff55;
+    border-radius: 8px;
+    padding: 8px 12px;
+    flex: 1;
+    min-width: 90px;
+  }
+  .pod-mini-name { font-size: 11px; font-weight: 700; color: var(--purple); font-family: 'JetBrains Mono', monospace; margin-bottom: 6px; }
+  .container-mini {
+    background: var(--blue-bg);
+    border: 1px solid #58a6ff44;
+    border-radius: 4px;
+    padding: 3px 8px;
+    font-size: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--blue);
+    margin-bottom: 3px;
+  }
+
+  /* Section 4 - K8s Objects */
+  .objects-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .obj-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 26px;
+    transition: border-color 0.2s;
+  }
+  .obj-card:hover { border-color: var(--blue); }
+  .obj-icon { font-size: 32px; margin-bottom: 14px; }
+  .obj-name { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
+  .obj-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-bottom: 14px;
+  }
+  .obj-desc { font-size: 13px; color: var(--muted); line-height: 1.65; margin-bottom: 14px; }
+  .obj-use {
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    padding: 8px 12px;
+    border-radius: 6px;
+    background: var(--bg3);
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+  .obj-analogy {
+    font-size: 12px;
+    color: var(--purple);
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+    font-style: italic;
+  }
+
+  /* Section 5 - Advanced */
+  .advanced-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+
+  /* Section 6 - Request Flow */
+  .flow-steps { display: flex; align-items: stretch; gap: 0; }
+  .flow-step {
+    flex: 1;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 0;
+    padding: 24px 20px;
+    position: relative;
+    text-align: center;
+  }
+  .flow-step:first-child { border-radius: 12px 0 0 12px; }
+  .flow-step:last-child { border-radius: 0 12px 12px 0; }
+  .flow-step + .flow-step { border-left: none; }
+  .flow-step::after {
+    content: '▶';
+    position: absolute;
+    right: -14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--blue);
+    font-size: 18px;
+    z-index: 3;
+  }
+  .flow-step:last-child::after { display: none; }
+  .flow-step-num {
+    width: 28px; height: 28px;
+    background: var(--blue);
+    color: #000;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    margin: 0 auto 12px;
+  }
+  .flow-step-icon { font-size: 28px; margin-bottom: 10px; }
+  .flow-step-title { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+  .flow-step-desc { font-size: 11px; color: var(--muted); line-height: 1.5; }
+
+  /* Cheatsheet */
+  .cheat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .cheat-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+  }
+  .cheat-title { font-size: 15px; font-weight: 700; margin-bottom: 16px; color: var(--blue); }
+  .cmd-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .cmd-row:last-child { border-bottom: none; }
+  .cmd {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--green);
+    background: var(--bg3);
+    padding: 3px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .cmd-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+  .tag { display: inline-block; font-size: 11px; font-family: 'JetBrains Mono', monospace; padding: 2px 8px; border-radius: 4px; font-weight: 600; }
+  .tag-blue { background: var(--blue-bg); color: var(--blue); border: 1px solid #58a6ff44; }
+  .tag-green { background: var(--green-bg); color: var(--green); border: 1px solid #3fb95044; }
+  .tag-purple { background: var(--purple-bg); color: var(--purple); border: 1px solid #bc8cff44; }
+  .tag-yellow { background: var(--yellow-bg); color: var(--yellow); border: 1px solid #d2992244; }
+  .tag-red { background: var(--red-bg); color: var(--red); border: 1px solid #f8514944; }
+  .tag-cyan { background: var(--cyan-bg); color: var(--cyan); border: 1px solid #39c5cf44; }
+  .tag-pink { background: var(--pink-bg); color: var(--pink); border: 1px solid #f778ba44; }
+  .tag-orange { background: var(--orange-bg); color: var(--orange); border: 1px solid #f0883e44; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-badge">☸ KUBERNETES ARCHITECTURE</div>
+  <h1>Complete K8s Guide for Beginners</h1>
+  <p>From Containers → Pods → Nodes → Cluster — every concept, every component, with analogies and examples.</p>
+</div>
+
+<div class="container">
+
+  <!-- SECTION 1: WHY K8S -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">1</div>
+      <div class="section-title">Why Kubernetes? The Problem It Solves</div>
+    </div>
+    <div class="why-grid">
+      <div class="card danger">
+        <div class="card-title">
+          <div class="card-icon" style="background:var(--red-bg); color:var(--red);">💀</div>
+          Without Kubernetes
+        </div>
+        <ul>
+          <li>App crashes? Someone must restart it manually</li>
+          <li>Traffic spike? Add servers manually</li>
+          <li>Deploy update? Risk of downtime</li>
+          <li>100s of containers? Pure operational chaos</li>
+          <li>Server dies? All apps on it are gone</li>
+        </ul>
+      </div>
+      <div class="arrow-box">
+        <div class="arrow-label">K8s</div>
+        <div class="arrow">→</div>
+      </div>
+      <div class="card success">
+        <div class="card-title">
+          <div class="card-icon" style="background:var(--green-bg); color:var(--green);">🚀</div>
+          With Kubernetes
+        </div>
+        <ul>
+          <li>Auto-restarts crashed containers instantly</li>
+          <li>Auto-scales pods up/down based on load</li>
+          <li>Zero-downtime rolling updates</li>
+          <li>Manages 1000s of containers automatically</li>
+          <li>Reschedules pods to healthy nodes</li>
+        </ul>
+      </div>
+      <div class="card info">
+        <div class="card-title">
+          <div class="card-icon" style="background:var(--blue-bg); color:var(--blue);">✈️</div>
+          Analogy — Airport Control Tower
+        </div>
+        <ul>
+          <li><strong>K8s</strong> = Control Tower (manages everything)</li>
+          <li><strong>Containers</strong> = Airplanes (your apps)</li>
+          <li><strong>Pods</strong> = Flight groups</li>
+          <li><strong>Nodes</strong> = Runways (machines)</li>
+          <li><strong>Cluster</strong> = The entire Airport!</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 2: BUILDING BLOCKS -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">2</div>
+      <div class="section-title">Building Blocks — Container → Pod → Node → Cluster</div>
+    </div>
+    <div class="blocks-grid">
+      <div class="block-card">
+        <div class="block-arrow">→</div>
+        <span class="block-emoji">📦</span>
+        <div class="block-name" style="color:var(--blue)">Container</div>
+        <div class="block-sub">Smallest runnable unit</div>
+        <div class="block-desc">A packaged app with all its dependencies (code + libraries + runtime). Built from a Docker Image. Runs the same on any machine. Each container is an isolated process on the OS — like a sealed shipping box.</div>
+        <span class="block-tag tag-blue">kubectl describe container</span>
+      </div>
+      <div class="block-card">
+        <div class="block-arrow">→</div>
+        <span class="block-emoji">🫛</span>
+        <div class="block-name" style="color:var(--purple)">Pod</div>
+        <div class="block-sub">Smallest K8s unit</div>
+        <div class="block-desc">Wraps 1 or more containers. All containers in a pod share the same IP address and storage volumes. Pods are ephemeral — they die and get recreated. Think of it as a logical host for your containers.</div>
+        <span class="block-tag tag-purple">kubectl get pods</span>
+      </div>
+      <div class="block-card">
+        <div class="block-arrow">→</div>
+        <span class="block-emoji">🖥️</span>
+        <div class="block-name" style="color:var(--green)">Node</div>
+        <div class="block-sub">Worker machine</div>
+        <div class="block-desc">A physical or virtual machine that runs Pods. Each node has a kubelet (agent), kube-proxy (networking), and a Container Runtime (like Docker or containerd). Reports health to the Control Plane continuously.</div>
+        <span class="block-tag tag-green">kubectl get nodes</span>
+      </div>
+      <div class="block-card">
+        <span class="block-emoji">🌐</span>
+        <div class="block-name" style="color:var(--yellow)">Cluster</div>
+        <div class="block-sub">The full K8s system</div>
+        <div class="block-desc">A group of Nodes managed together by Kubernetes. Contains 1 Control Plane (brain) + N Worker Nodes (muscle). Acts as a single logical unit. Can span multiple data centers and cloud regions.</div>
+        <span class="block-tag tag-yellow">kubectl cluster-info</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 3: CLUSTER ARCHITECTURE -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">3</div>
+      <div class="section-title">Full Cluster Architecture — Control Plane + Worker Nodes</div>
+    </div>
+    <div class="cluster-wrapper">
+      <div class="cluster-label">☸ Kubernetes Cluster</div>
+      <div class="cluster-grid">
+
+        <!-- CONTROL PLANE -->
+        <div class="plane-box">
+          <div class="plane-title">🧠 CONTROL PLANE <span class="tag tag-blue" style="font-size:11px">Master Node</span></div>
+          <div class="plane-sub">Brain of the cluster — manages state, scheduling, and the API</div>
+          <div class="cp-components">
+
+            <div class="cp-comp" style="background:var(--blue-bg); border-color:#58a6ff44">
+              <div class="cp-comp-name" style="color:var(--blue)">🔌 kube-apiserver</div>
+              <p>The <strong>front door</strong> of the cluster. Every kubectl command, every internal component talks to the API server. Validates and processes all REST API requests. <em>Analogy: Reception desk of an office</em></p>
+            </div>
+
+            <div class="cp-comp" style="background:var(--cyan-bg); border-color:#39c5cf44">
+              <div class="cp-comp-name" style="color:var(--cyan)">🗄️ etcd</div>
+              <p>Distributed key-value store that saves <strong>ALL cluster state</strong> — what pods exist, their status, config, secrets. If etcd dies, the cluster loses its memory. <strong>Always back this up!</strong> <em>Analogy: The cluster's hard drive</em></p>
+            </div>
+
+            <div class="cp-comp" style="background:var(--yellow-bg); border-color:#d2992244">
+              <div class="cp-comp-name" style="color:var(--yellow)">📋 kube-scheduler</div>
+              <p>Watches for newly created pods with no assigned node and <strong>decides which node</strong> to place them on. Considers CPU, RAM, affinity rules, taints, tolerations. <em>Analogy: Job placement manager</em></p>
+            </div>
+
+            <div class="cp-comp" style="background:var(--pink-bg); border-color:#f778ba44">
+              <div class="cp-comp-name" style="color:var(--pink)">🔄 controller-manager</div>
+              <p>Runs <strong>control loops</strong> that watch the cluster state and fix it. If you want 3 replicas and only 2 are running — it creates the 3rd. Handles node failures, service accounts, etc. <em>Analogy: Maintenance crew</em></p>
+            </div>
+
+            <div class="cp-comp cp-comp-full" style="background:var(--purple-bg); border-color:#bc8cff44">
+              <div class="cp-comp-name" style="color:var(--purple)">☁️ cloud-controller-manager</div>
+              <p>Links the cluster to cloud-provider APIs (AWS, GCP, Azure). Manages cloud load balancers, storage volumes, and node lifecycle in the cloud. Only runs if you're on a cloud provider.</p>
+            </div>
+
+            <div class="cp-comp cp-comp-full" style="background:var(--bg3); border-color:var(--border)">
+              <div class="cp-comp-name" style="color:var(--orange)">💻 kubectl (CLI)</div>
+              <p>Command-line tool <strong>you use</strong> to talk to the API server. Not part of the control plane itself, but how you interact with it. <code style="color:var(--green); font-family:'JetBrains Mono',monospace">kubectl apply -f app.yaml</code> sends your config to the API server.</p>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- DIVIDER -->
+        <div class="cluster-divider">
+          <div style="display:flex; flex-direction:column; align-items:center; gap:8px; height:100%">
+            <div style="flex:1; width:2px; background:var(--border); border-radius:2px"></div>
+            <div style="color:var(--muted); font-size:20px; transform:rotate(0deg)">→</div>
+            <div style="flex:1; width:2px; background:var(--border); border-radius:2px"></div>
+          </div>
+        </div>
+
+        <!-- WORKER NODES -->
+        <div class="worker-box">
+          <div class="worker-title">💪 WORKER NODES <span class="tag tag-green" style="font-size:11px">Where apps run</span></div>
+          <div class="worker-sub">Each node is a machine running your Pods, reporting back to Control Plane</div>
+          <div class="nodes-grid">
+            <div class="node-card">
+              <div class="node-name">🖥️ Worker Node 1</div>
+              <div class="node-layer">🤖 kubelet — agent, talks to API server</div>
+              <div class="node-layer">🔀 kube-proxy — networking + iptables</div>
+              <div class="node-layer">📦 containerd — container runtime</div>
+              <div class="pods-row">
+                <div class="pod-mini">
+                  <div class="pod-mini-name">Pod A</div>
+                  <div class="container-mini">app-container</div>
+                  <div class="container-mini">sidecar</div>
+                </div>
+                <div class="pod-mini">
+                  <div class="pod-mini-name">Pod B</div>
+                  <div class="container-mini">api-container</div>
+                </div>
+              </div>
+            </div>
+            <div class="node-card">
+              <div class="node-name">🖥️ Worker Node 2</div>
+              <div class="node-layer">🤖 kubelet — node agent</div>
+              <div class="node-layer">🔀 kube-proxy — networking</div>
+              <div class="node-layer">📦 containerd — container runtime</div>
+              <div class="pods-row">
+                <div class="pod-mini">
+                  <div class="pod-mini-name">Pod C</div>
+                  <div class="container-mini">db-container</div>
+                </div>
+                <div class="pod-mini">
+                  <div class="pod-mini-name">Pod D</div>
+                  <div class="container-mini">cache</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 4: CORE OBJECTS -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div class="section-title">Core K8s Objects — What You Deploy</div>
+    </div>
+    <div class="objects-grid">
+
+      <div class="obj-card">
+        <div class="obj-icon">🚀</div>
+        <div class="obj-name">Deployment</div>
+        <span class="obj-badge tag-green">Stateless Apps</span>
+        <div class="obj-desc">Manages a set of identical Pods (replicas). Declares your <strong>desired state</strong> — K8s makes it happen. Handles rolling updates (zero downtime) and rollbacks on failure. Always maintains the replica count you specify.</div>
+        <div class="obj-use">kubectl create deployment nginx --image=nginx --replicas=3</div>
+        <div class="obj-analogy">💡 Analogy: Factory manager — always keeps 3 workers on the floor, replaces if one leaves</div>
+      </div>
+
+      <div class="obj-card">
+        <div class="obj-icon">🔌</div>
+        <div class="obj-name">Service</div>
+        <span class="obj-badge tag-blue">Networking</span>
+        <div class="obj-desc">Provides a <strong>stable network endpoint</strong> for Pods. Pods die and get new IPs — but the Service IP stays the same. Types: <strong>ClusterIP</strong> (internal), <strong>NodePort</strong> (external via port), <strong>LoadBalancer</strong> (cloud LB).</div>
+        <div class="obj-use">kubectl expose deployment nginx --port=80 --type=LoadBalancer</div>
+        <div class="obj-analogy">💡 Analogy: Phone number — stays the same even if the person (pod) moves</div>
+      </div>
+
+      <div class="obj-card">
+        <div class="obj-icon">⚙️</div>
+        <div class="obj-name">ConfigMap + Secret</div>
+        <span class="obj-badge tag-yellow">Configuration</span>
+        <div class="obj-desc"><strong>ConfigMap</strong>: stores non-sensitive config (DB URL, port numbers). <strong>Secret</strong>: stores sensitive data (passwords, API keys) — base64 encoded. Both are injected into pods as env vars or mounted as files. Decouples config from code.</div>
+        <div class="obj-use">kubectl create configmap app-config --from-literal=DB_URL=...</div>
+        <div class="obj-analogy">💡 Analogy: .env file — app reads settings from it without hardcoding them</div>
+      </div>
+
+      <div class="obj-card">
+        <div class="obj-icon">💾</div>
+        <div class="obj-name">PersistentVolume (PV/PVC)</div>
+        <span class="obj-badge tag-purple">Storage</span>
+        <div class="obj-desc">Pods are ephemeral — storage dies with them. <strong>PersistentVolume (PV)</strong> = actual storage resource (disk). <strong>PVC</strong> = pod's claim to use that storage. <strong>StorageClass</strong> = type of storage (SSD, HDD). Storage survives pod restarts.</div>
+        <div class="obj-use">kubectl get pvc  →  shows all storage claims</div>
+        <div class="obj-analogy">💡 Analogy: USB drive — plug into any pod, data survives even if pod is deleted</div>
+      </div>
+
+      <div class="obj-card">
+        <div class="obj-icon">🗂️</div>
+        <div class="obj-name">Namespace</div>
+        <span class="obj-badge tag-cyan">Isolation</span>
+        <div class="obj-desc">Virtual cluster inside a cluster. Isolates resources by team or environment. Defaults: <strong>default</strong> (your app), <strong>kube-system</strong> (K8s internals), <strong>kube-public</strong> (public info). Apply RBAC and resource quotas per namespace.</div>
+        <div class="obj-use">kubectl create namespace staging</div>
+        <div class="obj-analogy">💡 Analogy: Floors in an office building — Finance on 2nd, Engineering on 3rd</div>
+      </div>
+
+      <div class="obj-card">
+        <div class="obj-icon">🗃️</div>
+        <div class="obj-name">StatefulSet</div>
+        <span class="obj-badge tag-red">Stateful Apps</span>
+        <div class="obj-desc">Like Deployment but for <strong>stateful apps</strong> (databases). Pods get stable, ordered names: <code style="color:var(--green)">mysql-0, mysql-1, mysql-2</code>. Ordered startup/shutdown. Each pod gets its own PVC. Pods are not interchangeable — they have identity.</div>
+        <div class="obj-use">Use for: MySQL, MongoDB, Kafka, Zookeeper</div>
+        <div class="obj-analogy">💡 Analogy: Numbered seats on a flight — you always sit in seat-0, not just any seat</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SECTION 5: ADVANCED OBJECTS -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div class="section-title">Advanced Objects — Ingress, HPA, DaemonSet, RBAC</div>
+    </div>
+    <div class="advanced-grid">
+
+      <div class="obj-card">
+        <div class="obj-icon">🚦</div>
+        <div class="obj-name">Ingress</div>
+        <span class="obj-badge tag-orange">HTTP Routing</span>
+        <div class="obj-desc">Single entry point for HTTP/HTTPS traffic. Routes based on URL path or hostname to different Services. Handles TLS (HTTPS). Needs an <strong>Ingress Controller</strong> (like nginx-ingress) to work.</div>
+        <div class="obj-use">/api → api-service<br>/web → frontend-service</div>
+        <div class="obj-analogy">💡 Receptionist routing callers to right dept</div>
+      </div>
+
+      <div class="obj-card">
+        <div class="obj-icon">📈</div>
+        <div class="obj-name">HPA</div>
+        <span class="obj-badge tag-green">Auto Scaling</span>
+        <div class="obj-desc"><strong>Horizontal Pod Autoscaler</strong> — scales pods up/down based on CPU/memory metrics. CPU > 70%? Adds more pods. Traffic drops? Removes them. Set minReplicas and maxReplicas.</div>
+        <div class="obj-use">minReplicas: 2, maxReplicas: 10<br>targetCPU: 70%</div>
+        <div class="obj-analogy">💡 Hiring more cashiers when queue grows</div>
+      </div>
+
+      <div class="obj-card">
+        <div class="obj-icon">👹</div>
+        <div class="obj-name">DaemonSet</div>
+        <span class="obj-badge tag-cyan">Node-level</span>
+        <div class="obj-desc">Ensures ONE pod runs on <strong>every node</strong> (or selected nodes). Automatically adds pods when new nodes join, removes when nodes leave. Used for monitoring, logging, networking agents.</div>
+        <div class="obj-use">Use for: Fluentd, Prometheus node-exporter<br>Calico, Flannel (CNI plugins)</div>
+        <div class="obj-analogy">💡 Security guard on every floor of building</div>
+      </div>
+
+      <div class="obj-card">
+        <div class="obj-icon">🔐</div>
+        <div class="obj-name">RBAC</div>
+        <span class="obj-badge tag-red">Security</span>
+        <div class="obj-desc"><strong>Role Based Access Control</strong>. Controls who can do what in K8s. <strong>Role/ClusterRole</strong>: defines permissions. <strong>RoleBinding</strong>: assigns role to a user/service account. Principle of least privilege.</div>
+        <div class="obj-use">Role → what actions allowed<br>RoleBinding → who gets the role</div>
+        <div class="obj-analogy">💡 Office ID card — only opens permitted doors</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SECTION 6: REQUEST FLOW -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">6</div>
+      <div class="section-title">How a User Request Flows Through K8s</div>
+    </div>
+    <div class="flow-steps">
+      <div class="flow-step">
+        <div class="flow-step-num">1</div>
+        <div class="flow-step-icon">🌍</div>
+        <div class="flow-step-title">User Request</div>
+        <div class="flow-step-desc">User hits your app URL in browser or API client</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-step-num">2</div>
+        <div class="flow-step-icon">🚦</div>
+        <div class="flow-step-title">Ingress Controller</div>
+        <div class="flow-step-desc">Routes HTTP traffic based on path/host rules to correct Service</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-step-num">3</div>
+        <div class="flow-step-icon">🔌</div>
+        <div class="flow-step-title">Service</div>
+        <div class="flow-step-desc">Load balances across healthy Pods using kube-proxy / iptables</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-step-num">4</div>
+        <div class="flow-step-icon">🫛</div>
+        <div class="flow-step-title">Pod Selected</div>
+        <div class="flow-step-desc">Request lands on a specific Pod (selected by label selector)</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-step-num">5</div>
+        <div class="flow-step-icon">📦</div>
+        <div class="flow-step-title">Container</div>
+        <div class="flow-step-desc">Your app container handles the request and returns a response</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-step-num">6</div>
+        <div class="flow-step-icon">↩️</div>
+        <div class="flow-step-title">Response</div>
+        <div class="flow-step-desc">Response travels back the same path to the user</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 7: CHEATSHEET -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">7</div>
+      <div class="section-title">kubectl Cheatsheet + Interview Tips</div>
+    </div>
+    <div class="cheat-grid">
+      <div class="cheat-card">
+        <div class="cheat-title">⚡ Essential kubectl Commands</div>
+        <div class="cmd-row"><span class="cmd">kubectl get pods</span><span class="cmd-desc">List all pods in current namespace</span></div>
+        <div class="cmd-row"><span class="cmd">kubectl get pods -A</span><span class="cmd-desc">List pods in ALL namespaces</span></div>
+        <div class="cmd-row"><span class="cmd">kubectl describe pod X</span><span class="cmd-desc">Detailed info + events for a pod</span></div>
+        <div class="cmd-row"><span class="cmd">kubectl logs pod-name</span><span class="cmd-desc">View container logs</span></div>
+        <div class="cmd-row"><span class="cmd">kubectl apply -f app.yaml</span><span class="cmd-desc">Create or update resources from YAML</span></div>
+        <div class="cmd-row"><span class="cmd">kubectl delete pod X</span><span class="cmd-desc">Delete a pod (Deployment recreates it)</span></div>
+        <div class="cmd-row"><span class="cmd">kubectl exec -it pod-name -- sh</span><span class="cmd-desc">SSH into a running container</span></div>
+        <div class="cmd-row"><span class="cmd">kubectl scale deploy X --replicas=5</span><span class="cmd-desc">Manually scale a deployment</span></div>
+        <div class="cmd-row"><span class="cmd">kubectl rollout undo deploy X</span><span class="cmd-desc">Rollback to previous deployment</span></div>
+      </div>
+      <div class="cheat-card">
+        <div class="cheat-title">🎯 Interview Questions & Answers</div>
+        <div class="cmd-row">
+          <span class="cmd">Pod vs Container?</span>
+          <span class="cmd-desc">Pod is the K8s unit (can hold multiple containers sharing IP+storage). Container is the actual running app process.</span>
+        </div>
+        <div class="cmd-row">
+          <span class="cmd">Deployment vs StatefulSet?</span>
+          <span class="cmd-desc">Deployment for stateless apps (interchangeable pods). StatefulSet for stateful apps (pods have stable identity, ordered scaling).</span>
+        </div>
+        <div class="cmd-row">
+          <span class="cmd">Service types?</span>
+          <span class="cmd-desc">ClusterIP (internal only), NodePort (external on a fixed port), LoadBalancer (cloud managed LB), ExternalName (DNS alias).</span>
+        </div>
+        <div class="cmd-row">
+          <span class="cmd">etcd failure?</span>
+          <span class="cmd-desc">Cluster loses its state — no new scheduling, existing pods keep running. Critical to back up etcd regularly.</span>
+        </div>
+        <div class="cmd-row">
+          <span class="cmd">liveness vs readiness?</span>
+          <span class="cmd-desc">Liveness probe: is the container alive? (restart if dead). Readiness probe: is it ready to serve traffic? (remove from Service if not).</span>
+        </div>
+        <div class="cmd-row">
+          <span class="cmd">How does K8s scale?</span>
+          <span class="cmd-desc">HPA scales pods horizontally. VPA adjusts CPU/RAM requests. Cluster Autoscaler adds/removes Nodes based on pending pods.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
