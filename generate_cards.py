@@ -1,48 +1,42 @@
 import os
+import re
 
-cards = ""
+START_MARKER = "<!-- AUTO-CARDS-START -->"
+END_MARKER = "<!-- AUTO-CARDS-END -->"
+
+cards = []
 
 for file in os.listdir("."):
     if file.endswith(".html") and file != "index.html":
-        name = file.replace(".html", "").replace("-", " ").title()
+        title = file.replace(".html", "").replace("-", " ").title()
 
-        cards += f"""
-        <div class="card" onclick="openPage('{file}')">
-            <div class="card-icon">📄</div>
-            <div class="card-title">{name}</div>
-            <div class="card-desc">
-                Deep dive documentation for {name}
-            </div>
-        </div>
-        """
-
-index_template = f"""
-<!DOCTYPE html>
-<html>
-<head>
-<title>Sai Portfolio</title>
-<link rel="stylesheet" href="style.css">
-</head>
-
-<body>
-
-<h1>🚀 Sai's Tech Deep Dives</h1>
-
-<div class="container">
-
-{cards}
-
+        card = f"""
+<div class="card" onclick="openPage('{file}')">
+<div class="card-icon">📄</div>
+<div class="card-title">{title}</div>
+<div class="card-desc">
+Deep dive documentation for {title}
 </div>
-
-<script>
-function openPage(url){{
-window.open(url,"_blank");
-}}
-</script>
-
-</body>
-</html>
+</div>
 """
+        cards.append(card)
 
-with open("index.html","w") as f:
-    f.write(index_template)
+generated_cards = "\n".join(sorted(cards))
+
+# read existing index
+with open("index.html", "r") as f:
+    content = f.read()
+
+pattern = re.compile(
+    f"{START_MARKER}.*?{END_MARKER}",
+    re.DOTALL
+)
+
+replacement = f"{START_MARKER}\n{generated_cards}\n{END_MARKER}"
+
+new_content = pattern.sub(replacement, content)
+
+with open("index.html", "w") as f:
+    f.write(new_content)
+
+print("Index updated successfully.")
