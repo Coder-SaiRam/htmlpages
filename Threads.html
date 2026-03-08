@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<title>JVM Threads & Request Journey</title>
+
+<style>
+
+body{
+font-family:Segoe UI;
+margin:0;
+background:#1e2933;
+color:#f4f7fa;
+line-height:1.7;
+}
+
+header{
+text-align:center;
+padding:35px;
+background:#111820;
+}
+
+h1{
+font-size:40px;
+margin:0;
+}
+
+h2{
+color:#7dd3fc;
+margin-top:35px;
+}
+
+.container{
+max-width:900px;
+margin:auto;
+padding:40px;
+}
+
+.card{
+background:#2b3743;
+padding:22px;
+margin-top:20px;
+border-radius:10px;
+}
+
+.icon{
+font-size:26px;
+}
+
+.diagram{
+background:#111820;
+padding:20px;
+margin:20px 0;
+border-radius:10px;
+font-family:monospace;
+color:#7dd3fc;
+}
+
+.tip{
+background:#fff3cd;
+color:#222;
+padding:15px;
+border-radius:6px;
+margin-top:15px;
+}
+
+footer{
+text-align:center;
+padding:25px;
+margin-top:50px;
+background:#111820;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+<h1>🧵 JVM Threads Deep Dive</h1>
+<p>How a request travels from Internet → Server → JVM → CPU</p>
+</header>
+
+<div class="container">
+
+<h2>🌍 1. The Journey Begins — Client Request</h2>
+
+<div class="card">
+<span class="icon">🌐</span>
+A user opens a browser and sends a request:
+
+Example:  
+"GET /orders/123"
+
+This request travels across the internet as **network packets** until it reaches your server machine.
+
+Your server might be running:
+
+• Linux  
+• Tomcat  
+• JVM  
+• Your Spring Boot Application
+</div>
+
+---
+
+<h2>📡 2. Network Interface Receives the Request</h2>
+
+<div class="card">
+<span class="icon">📡</span>
+The request first reaches the **Network Interface Card (NIC)** of the server.
+
+The NIC converts electrical signals into network packets and hands them to the **Operating System Kernel**.
+
+At this stage:
+
+• Hardware interrupts notify the CPU  
+• The OS networking stack processes packets  
+• TCP reconstructs the request stream
+</div>
+
+<div class="diagram">
+
+Internet  
+   ↓  
+Router  
+   ↓  
+Server Network Card (NIC)  
+   ↓  
+Linux Kernel Network Stack  
+   ↓  
+Application Port (8080)
+
+</div>
+
+---
+
+<h2>⚙️ 3. Operating System Handles the Socket</h2>
+
+<div class="card">
+<span class="icon">⚙️</span>
+
+Your server application (Tomcat) is listening on a **TCP port**.
+
+Example:
+
+Port 8080
+
+The OS maintains a **socket queue** where incoming requests wait until the server processes them.
+
+The OS wakes up a server thread when data is available.
+
+</div>
+
+---
+
+<h2>🧵 4. Tomcat Acceptor Thread</h2>
+
+<div class="card">
+
+<span class="icon">🚪</span>
+
+Tomcat uses a special thread called the **Acceptor Thread**.
+
+Its job is simple:
+
+Accept new incoming connections.
+
+It does not process requests.
+
+Instead it delegates them to worker threads.
+
+</div>
+
+<div class="diagram">
+
+Incoming Connections  
+        ↓
+   Acceptor Thread
+        ↓
+   Connection Queue
+
+</div>
+
+---
+
+<h2>🏭 5. Tomcat Worker Thread Pool</h2>
+
+<div class="card">
+
+<span class="icon">👷</span>
+
+Tomcat maintains a **Thread Pool**.
+
+Example:
+
+50 worker threads
+
+Each thread waits for a request.
+
+When a request arrives:
+
+1️⃣ Worker thread picks it  
+2️⃣ Parses HTTP request  
+3️⃣ Passes request into your application
+
+</div>
+
+<div class="diagram">
+
+Thread Pool
+
+Thread-1  → Processing Request  
+Thread-2  → Idle  
+Thread-3  → Processing Request  
+Thread-4  → Idle
+
+</div>
+
+<div class="tip">
+
+Why thread pools exist?
+
+Creating threads is expensive.
+
+Instead of creating a new thread per request, Tomcat reuses threads.
+
+</div>
+
+---
+
+<h2>☕ 6. JVM Thread Execution</h2>
+
+<div class="card">
+
+<span class="icon">☕</span>
+
+Each Tomcat worker is a **JVM thread**.
+
+The JVM maps most Java threads directly to **Operating System threads**.
+
+This means:
+
+Java Thread → OS Thread → CPU Scheduling
+
+</div>
+
+<div class="diagram">
+
+HTTP Request  
+      ↓  
+Tomcat Worker Thread  
+      ↓  
+Spring Controller  
+      ↓  
+Business Logic  
+      ↓  
+Database / External Calls
+
+</div>
+
+---
+
+<h2>💡 7. What Happens Inside Your Application</h2>
+
+<div class="card">
+
+The worker thread now executes your code:
+
+• Controller  
+• Service  
+• Repository  
+• Database calls
+
+This execution happens in the **same thread** unless you explicitly create more threads.
+
+Example scenarios:
+
+Database query  
+External API call  
+File read  
+
+The thread may wait during these operations.
+
+</div>
+
+---
+
+<h2>🧠 8. CPU Scheduling</h2>
+
+<div class="card">
+
+<span class="icon">🧠</span>
+
+The Operating System scheduler decides which thread runs on CPU.
+
+Important concepts:
+
+• CPU Cores  
+• Hardware Threads  
+• Context Switching
+
+Example machine:
+
+4 CPU cores  
+8 hardware threads
+
+Only **8 threads can run simultaneously**.
+
+All other threads wait in the scheduler queue.
+
+</div>
+
+---
+
+<h2>🔁 9. Context Switching</h2>
+
+<div class="card">
+
+If many threads exist, the OS switches between them rapidly.
+
+This is called **context switching**.
+
+The CPU saves state of one thread and loads another.
+
+Too many threads cause:
+
+• CPU overhead  
+• Reduced performance
+
+</div>
+
+---
+
+<h2>🚀 10. Virtual Threads (Modern JVM)</h2>
+
+<div class="card">
+
+<span class="icon">🚀</span>
+
+Modern Java introduces **Virtual Threads**.
+
+These are lightweight threads managed by the JVM.
+
+Instead of mapping 1:1 to OS threads:
+
+Many virtual threads share fewer OS threads.
+
+Benefits:
+
+• Millions of concurrent tasks  
+• Minimal memory usage  
+• Ideal for I/O workloads
+
+</div>
+
+<div class="diagram">
+
+Virtual Threads
+      ↓
+JVM Scheduler
+      ↓
+Few OS Threads
+      ↓
+CPU
+
+</div>
+
+---
+
+<h2>🔒 11. Locks and Synchronization</h2>
+
+<div class="card">
+
+When multiple threads access shared data, problems occur:
+
+• Race conditions  
+• Data corruption
+
+Java provides mechanisms:
+
+• synchronized blocks  
+• locks  
+• atomic variables
+
+These ensure only one thread modifies critical data at a time.
+
+</div>
+
+---
+
+<h2>⚠️ 12. Common Problems in Multithreading</h2>
+
+<div class="card">
+
+Common concurrency issues:
+
+Deadlock  
+Two threads waiting for each other.
+
+Starvation  
+Thread never gets CPU time.
+
+Race Condition  
+Two threads update data simultaneously.
+
+These problems make concurrency complex.
+
+</div>
+
+---
+
+<h2>🏁 13. Response Returned</h2>
+
+<div class="card">
+
+Once processing completes:
+
+Worker thread generates HTTP response.
+
+The response travels back through:
+
+Application  
+Tomcat  
+Operating System  
+Network Card  
+Internet  
+Browser
+
+</div>
+
+<div class="diagram">
+
+Application Response  
+       ↓  
+Tomcat Worker Thread  
+       ↓  
+OS TCP Stack  
+       ↓  
+Network Card  
+       ↓  
+Internet  
+       ↓  
+Client Browser
+
+</div>
+
+---
+
+<h2>🎯 Final Mental Model</h2>
+
+<div class="diagram">
+
+Client Browser
+      ↓
+Internet
+      ↓
+Server NIC
+      ↓
+Linux Kernel TCP Stack
+      ↓
+Tomcat Acceptor Thread
+      ↓
+Tomcat Worker Thread Pool
+      ↓
+JVM Thread Execution
+      ↓
+OS Thread Scheduling
+      ↓
+CPU Hardware Thread
+
+</div>
+
+<div class="tip">
+
+Understanding this flow helps debug:
+
+• Slow APIs  
+• Thread starvation  
+• CPU spikes  
+• Blocking operations
+
+</div>
+
+</div>
+
+<footer>
+
+Built for Deep Learning 🚀  
+Understanding JVM Concurrency
+
+</footer>
+
+</body>
+</html>
