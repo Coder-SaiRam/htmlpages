@@ -1,85 +1,9 @@
+
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Sai | Dev Deep Dive</title>
-
-<style>
-
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family: "Segoe UI", sans-serif;
-}
-
-body{
-    min-height:100vh;
-    background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    color:white;
-}
-
-h1{
-    margin-bottom:40px;
-    font-size:42px;
-    letter-spacing:1px;
-}
-
-.container{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
-    gap:30px;
-    width:80%;
-    max-width:900px;
-}
-
-.card{
-    background:rgba(255,255,255,0.08);
-    backdrop-filter:blur(12px);
-    border-radius:18px;
-    padding:30px;
-    text-align:center;
-    cursor:pointer;
-    transition:all 0.35s ease;
-    border:1px solid rgba(255,255,255,0.2);
-}
-
-.card:hover{
-    transform:translateY(-10px) scale(1.03);
-    box-shadow:0 20px 40px rgba(0,0,0,0.4);
-}
-
-.card-icon{
-    font-size:50px;
-    margin-bottom:15px;
-}
-
-.card-title{
-    font-size:22px;
-    margin-bottom:10px;
-    font-weight:600;
-}
-
-.card-desc{
-    font-size:14px;
-    opacity:0.8;
-}
-
-footer{
-    position:fixed;
-    bottom:20px;
-    opacity:0.6;
-    font-size:14px;
-}
-
-</style>
-
+<title>Sai Portfolio</title>
+<link rel="stylesheet" href="style.css">
 </head>
 
 <body>
@@ -88,34 +12,30 @@ footer{
 
 <div class="container">
 
-    <div class="card" onclick="openPage('https://coder-sairam.github.io/htmlpages/kubernetes-architecture.html')">
-        <div class="card-icon">☸️</div>
-        <div class="card-title">Kubernetes Deep Dive</div>
-        <div class="card-desc">
-            Visual notes and architecture explanations for Kubernetes internals.
-        </div>
-    </div>
 
-    <div class="card" onclick="openPage('https://coder-sairam.github.io/htmlpages/docker-complete-guide.html')">
-        <div class="card-icon">🐳</div>
-        <div class="card-title">Docker Deep Dive</div>
-        <div class="card-desc">
-            Container internals, image layers, networking and runtime concepts.
+        <div class="card" onclick="openPage('docker-complete-guide.html')">
+            <div class="card-icon">📄</div>
+            <div class="card-title">Docker Complete Guide</div>
+            <div class="card-desc">
+                Deep dive documentation for Docker Complete Guide
+            </div>
         </div>
-    </div>
+        
+        <div class="card" onclick="openPage('kubernetes-architecture.html')">
+            <div class="card-icon">📄</div>
+            <div class="card-title">Kubernetes Architecture</div>
+            <div class="card-desc">
+                Deep dive documentation for Kubernetes Architecture
+            </div>
+        </div>
+        
 
 </div>
 
-<footer>
-Built with curiosity ⚡
-</footer>
-
 <script>
-
 function openPage(url){
-    window.open(url, "_blank");
+window.open(url,"_blank");
 }
-
 </script>
 
 </body>
