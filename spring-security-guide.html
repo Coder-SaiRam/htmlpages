@@ -1,0 +1,1667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spring Security — Complete Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/java.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/yaml.min.js"></script>
+<style>
+:root {
+  --bg:        #080f0a;
+  --bg2:       #0d1710;
+  --bg3:       #121f15;
+  --bg4:       #182b1c;
+  --border:    #1f3325;
+  --border2:   #2a4535;
+  --text:      #cfe8d4;
+  --muted:     #5f8a6a;
+  --faint:     #2a4030;
+  --spring:    #6db33f;
+  --spring-bg: #091408;
+  --teal:      #2dd4bf;
+  --teal-bg:   #021310;
+  --amber:     #fbbf24;
+  --amber-bg:  #160f00;
+  --red:       #f87171;
+  --red-bg:    #160404;
+  --blue:      #60a5fa;
+  --blue-bg:   #040d1a;
+  --purple:    #c084fc;
+  --purple-bg: #100818;
+  --pink:      #f472b6;
+  --pink-bg:   #160410;
+  --cyan:      #22d3ee;
+  --cyan-bg:   #021216;
+  --orange:    #fb923c;
+  --orange-bg: #160800;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--text); font-family: 'Outfit', sans-serif; font-size: 15px; line-height: 1.6; }
+
+/* HERO */
+.hero {
+  padding: 56px 64px 52px; border-bottom: 1px solid var(--border);
+  background: radial-gradient(ellipse 70% 60% at 60% -10%, #6db33f14 0%, transparent 65%),
+              radial-gradient(ellipse 40% 40% at 5% 90%, #2dd4bf07 0%, transparent 55%), var(--bg2);
+  position: relative; overflow: hidden;
+}
+.hero-dots { position: absolute; inset: 0; background-image: radial-gradient(var(--border) 1px, transparent 1px); background-size: 30px 30px; opacity: 0.5; pointer-events: none; }
+.hero-badge { display: inline-flex; align-items: center; gap: 8px; background: var(--spring-bg); border: 1px solid var(--spring); color: var(--spring); font-family: 'Fira Code', monospace; font-size: 11px; font-weight: 600; letter-spacing: 1.5px; padding: 5px 16px; border-radius: 20px; margin-bottom: 22px; }
+.hero h1 { font-size: 52px; font-weight: 900; line-height: 1.05; margin-bottom: 16px; background: linear-gradient(110deg, #cfe8d4 0%, #6db33f 35%, #2dd4bf 65%, #60a5fa 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.hero p { color: var(--muted); font-size: 17px; max-width: 720px; line-height: 1.75; }
+.hero-icon { position: absolute; right: 60px; top: 50%; transform: translateY(-50%); font-size: 160px; opacity: 0.06; pointer-events: none; }
+
+/* NAV */
+.toc { display: flex; flex-wrap: wrap; gap: 8px; padding: 16px 64px; background: var(--bg2); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
+.toc a { font-family: 'Fira Code', monospace; font-size: 11px; font-weight: 600; color: var(--muted); text-decoration: none; background: var(--bg3); border: 1px solid var(--border); padding: 5px 12px; border-radius: 6px; transition: all .2s; }
+.toc a:hover { color: var(--spring); border-color: var(--spring); }
+
+/* LAYOUT */
+.page { max-width: 1500px; margin: 0 auto; padding: 0 52px 100px; }
+.section { margin-top: 68px; scroll-margin-top: 68px; }
+.sec-header { display: flex; align-items: center; gap: 16px; margin-bottom: 32px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+.sec-num { font-family: 'Fira Code', monospace; font-size: 11px; font-weight: 700; background: var(--spring); color: #000; width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.sec-title { font-size: 24px; font-weight: 800; }
+.sec-sub { font-size: 12px; color: var(--muted); margin-left: auto; font-family: 'Fira Code', monospace; }
+
+/* CARDS */
+.card { background: var(--bg2); border: 1px solid var(--border); border-radius: 14px; padding: 28px; transition: border-color .2s, transform .15s; }
+.card:hover { border-color: var(--border2); transform: translateY(-2px); }
+.card-head { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 18px; }
+.card-ico { font-size: 30px; line-height: 1; flex-shrink: 0; margin-top: 2px; }
+.card-name { font-size: 18px; font-weight: 800; margin-bottom: 4px; }
+.card-sub2 { font-size: 12px; font-family: 'Fira Code', monospace; color: var(--muted); }
+.card-body { font-size: 13.5px; color: var(--muted); line-height: 1.8; margin-bottom: 14px; }
+
+/* TAGS */
+.tag { display: inline-flex; align-items: center; font-family: 'Fira Code', monospace; font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; margin: 2px; }
+.t-spring { background: var(--spring-bg); color: var(--spring); border: 1px solid #6db33f35; }
+.t-teal   { background: var(--teal-bg);   color: var(--teal);   border: 1px solid #2dd4bf35; }
+.t-amber  { background: var(--amber-bg);  color: var(--amber);  border: 1px solid #fbbf2435; }
+.t-red    { background: var(--red-bg);    color: var(--red);    border: 1px solid #f8717135; }
+.t-blue   { background: var(--blue-bg);   color: var(--blue);   border: 1px solid #60a5fa35; }
+.t-purple { background: var(--purple-bg); color: var(--purple); border: 1px solid #c084fc35; }
+.t-pink   { background: var(--pink-bg);   color: var(--pink);   border: 1px solid #f472b635; }
+.t-cyan   { background: var(--cyan-bg);   color: var(--cyan);   border: 1px solid #22d3ee35; }
+.t-orange { background: var(--orange-bg); color: var(--orange); border: 1px solid #fb923c35; }
+
+/* GRIDS */
+.g2  { display: grid; grid-template-columns: 1fr 1fr;         gap: 22px; }
+.g3  { display: grid; grid-template-columns: 1fr 1fr 1fr;     gap: 20px; }
+.g4  { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 18px; }
+.g23 { display: grid; grid-template-columns: 2fr 3fr;         gap: 22px; }
+.g32 { display: grid; grid-template-columns: 3fr 2fr;         gap: 22px; }
+
+/* ANALOGY */
+.analogy { background: var(--bg3); border-left: 3px solid var(--spring); border-radius: 0 8px 8px 0; padding: 11px 16px; font-size: 13px; color: var(--spring); font-style: italic; margin-top: 12px; }
+
+/* ALERTS */
+.alert { border-radius: 10px; padding: 14px 18px; font-size: 13px; line-height: 1.75; margin: 14px 0; display: flex; gap: 12px; align-items: flex-start; }
+.al-warn { background: var(--amber-bg); border: 1px solid #fbbf2440; color: var(--amber); }
+.al-info { background: var(--blue-bg);  border: 1px solid #60a5fa40; color: var(--blue); }
+.al-good { background: var(--spring-bg);border: 1px solid #6db33f40; color: var(--spring); }
+.al-bad  { background: var(--red-bg);   border: 1px solid #f8717140; color: var(--red); }
+.al-ico  { font-size: 18px; flex-shrink: 0; margin-top: 2px; }
+
+/* TABLE */
+.tbl { width: 100%; border-collapse: collapse; border-radius: 12px; overflow: hidden; }
+.tbl th { background: var(--bg4); padding: 13px 18px; font-family: 'Fira Code', monospace; font-size: 11px; color: var(--muted); text-align: left; font-weight: 600; letter-spacing: .5px; border-bottom: 1px solid var(--border2); }
+.tbl td { padding: 12px 18px; font-size: 13px; color: var(--text); border-bottom: 1px solid var(--border); vertical-align: top; line-height: 1.6; }
+.tbl tr:last-child td { border-bottom: none; }
+.tbl tr:hover td { background: var(--bg3); }
+.tbl td:first-child { font-family: 'Fira Code', monospace; font-size: 12px; color: var(--amber); font-weight: 700; }
+
+/* FILTER CHAIN TABLE */
+.fc { border: 1px solid var(--border2); border-radius: 14px; overflow: hidden; }
+.fc-hdr { background: var(--bg4); display: grid; grid-template-columns: 290px 1fr 150px; padding: 12px 20px; border-bottom: 1px solid var(--border2); }
+.fc-hdr span { font-family: 'Fira Code', monospace; font-size: 11px; color: var(--faint); font-weight: 600; letter-spacing: .5px; }
+.fc-row { display: grid; grid-template-columns: 290px 1fr 150px; align-items: center; border-bottom: 1px solid var(--border); transition: background .15s; }
+.fc-row:hover { background: var(--bg3); }
+.fc-row:last-child { border-bottom: none; }
+.fc-name { padding: 14px 20px; font-family: 'Fira Code', monospace; font-size: 12px; font-weight: 700; border-right: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
+.fc-desc { padding: 14px 20px; font-size: 13px; color: var(--muted); line-height: 1.6; }
+.fc-tag  { padding: 14px 14px; display: flex; align-items: center; justify-content: flex-end; border-left: 1px solid var(--border); }
+
+/* FLOW HORIZONTAL */
+.flow-h { display: flex; align-items: stretch; border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+.fh-step { flex: 1; padding: 24px 16px; background: var(--bg2); border-right: 1px solid var(--border); position: relative; text-align: center; }
+.fh-step:last-child { border-right: none; }
+.fh-step::after { content: '›'; position: absolute; right: -13px; top: 50%; transform: translateY(-50%); font-size: 26px; color: var(--spring); z-index: 2; }
+.fh-step:last-child::after { display: none; }
+.fh-num { width: 30px; height: 30px; border-radius: 50%; background: var(--spring); color: #000; font-family: 'Fira Code', monospace; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; }
+.fh-ico { font-size: 28px; margin-bottom: 10px; }
+.fh-ttl { font-size: 13px; font-weight: 800; margin-bottom: 6px; }
+.fh-dsc { font-size: 11.5px; color: var(--muted); line-height: 1.6; }
+
+/* FLOW VERTICAL */
+.flow-v { border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+.fv-step { display: flex; align-items: flex-start; gap: 18px; padding: 18px 22px; background: var(--bg2); border-bottom: 1px solid var(--border); position: relative; }
+.fv-step:last-child { border-bottom: none; }
+.fv-step::before { content: ''; position: absolute; left: 37px; top: 62px; bottom: -1px; width: 2px; background: var(--faint); }
+.fv-step:last-child::before { display: none; }
+.fv-num { width: 32px; height: 32px; border-radius: 50%; background: var(--spring); color: #000; font-family: 'Fira Code', monospace; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+.fv-ttl { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+.fv-dsc { font-size: 13px; color: var(--muted); line-height: 1.7; }
+
+/* ARCH BOX */
+.arch { border: 1px solid var(--border2); border-radius: 16px; padding: 34px; background: radial-gradient(ellipse 60% 40% at 50% 0%, #6db33f0c 0%, transparent 65%), var(--bg2); position: relative; }
+.arch-lbl { position: absolute; top: -14px; left: 30px; background: var(--bg); padding: 0 14px; font-family: 'Fira Code', monospace; font-size: 11px; color: var(--muted); border: 1px solid var(--border); border-radius: 6px; }
+
+/* LAYER ITEMS */
+.layer { border: 1px solid var(--border); border-radius: 10px; padding: 18px 22px; margin-bottom: 14px; background: var(--bg3); }
+.layer:last-child { margin-bottom: 0; }
+.layer-title { font-size: 13px; font-weight: 700; font-family: 'Fira Code', monospace; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; }
+.layer-items { display: flex; flex-wrap: wrap; gap: 10px; }
+.layer-item { background: var(--bg4); border: 1px solid var(--border2); border-radius: 8px; padding: 13px 16px; flex: 1; min-width: 180px; }
+.li-name { font-size: 13px; font-weight: 700; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+.li-desc { font-size: 12px; color: var(--muted); line-height: 1.6; }
+
+/* CODE BLOCK WRAPPER */
+.code-wrap { border-radius: 10px; overflow: hidden; margin: 14px 0; border: 1px solid var(--border2); }
+.code-label { background: var(--bg4); padding: 8px 18px; font-family: 'Fira Code', monospace; font-size: 11px; color: var(--muted); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
+.code-label .dots { display: flex; gap: 5px; }
+.code-label .dot { width: 10px; height: 10px; border-radius: 50%; }
+.code-label .dot-r { background: #f87171; }
+.code-label .dot-y { background: #fbbf24; }
+.code-label .dot-g { background: #4ade80; }
+.code-wrap pre { margin: 0 !important; border-radius: 0 !important; }
+.code-wrap pre code { font-size: 13px !important; line-height: 1.85 !important; padding: 20px 22px !important; }
+/* override hljs background */
+.hljs { background: #020c04 !important; }
+
+/* SCENARIO */
+.scenario { border: 1px solid var(--border2); border-radius: 14px; overflow: hidden; margin-bottom: 24px; }
+.sc-hdr { background: var(--bg4); padding: 14px 22px; display: flex; align-items: center; gap: 14px; border-bottom: 1px solid var(--border); }
+.sc-title { font-size: 16px; font-weight: 800; }
+.sc-body { padding: 24px; background: var(--bg2); }
+
+/* CHEATSHEET */
+.cheat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.cheat-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 24px; }
+.cheat-title { font-size: 16px; font-weight: 800; margin-bottom: 18px; color: var(--spring); display: flex; align-items: center; gap: 10px; }
+.cmd-row { display: flex; align-items: flex-start; gap: 14px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.cmd-row:last-child { border-bottom: none; }
+.cmd { font-family: 'Fira Code', monospace; font-size: 11px; color: var(--teal); background: var(--bg4); padding: 4px 10px; border-radius: 5px; white-space: nowrap; flex-shrink: 0; }
+.cmd-d { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+/* BOX HELPERS */
+.box { border-radius: 10px; padding: 16px 18px; margin-bottom: 10px; }
+.box-blue   { background: var(--blue-bg);   border: 1px solid #60a5fa40; }
+.box-purple { background: var(--purple-bg); border: 1px solid #c084fc40; }
+.box-green  { background: var(--spring-bg); border: 1px solid #6db33f40; }
+.box-amber  { background: var(--amber-bg);  border: 1px solid #fbbf2440; }
+.box-red    { background: var(--red-bg);    border: 1px solid #f8717140; }
+.box-teal   { background: var(--teal-bg);   border: 1px solid #2dd4bf40; }
+.box-pink   { background: var(--pink-bg);   border: 1px solid #f472b640; }
+.box-title  { font-size: 13px; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+.box-desc   { font-size: 12.5px; color: var(--muted); line-height: 1.7; }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-dots"></div>
+  <div class="hero-badge">🔐 SPRING SECURITY — COMPLETE GUIDE</div>
+  <h1>Spring Security<br>Zero to Production</h1>
+  <p>Authentication · Authorization · JWT · OAuth2 · Filter Chain · CSRF · CORS · Method Security — every concept with real-world scenarios, architecture diagrams, and production-ready code.</p>
+  <div class="hero-icon">🛡️</div>
+</div>
+
+<!-- TOC -->
+<nav class="toc">
+  <a href="#s1">1. Why Spring Security</a>
+  <a href="#s2">2. Core Concepts</a>
+  <a href="#s3">3. Architecture</a>
+  <a href="#s4">4. Filter Chain</a>
+  <a href="#s5">5. Authentication Flow</a>
+  <a href="#s6">6. Authorization</a>
+  <a href="#s7">7. JWT</a>
+  <a href="#s8">8. OAuth2 / OIDC</a>
+  <a href="#s9">9. CSRF &amp; CORS</a>
+  <a href="#s10">10. Method Security</a>
+  <a href="#s11">11. Real Scenarios</a>
+  <a href="#s12">12. Cheatsheet</a>
+</nav>
+
+<div class="page">
+
+<!-- ═══════════════════════════════════════════════════
+     S1 — WHY SPRING SECURITY
+════════════════════════════════════════════════════ -->
+<div class="section" id="s1">
+  <div class="sec-header">
+    <div class="sec-num">1</div>
+    <div class="sec-title">Why Spring Security?</div>
+    <div class="sec-sub">the bodyguard framework</div>
+  </div>
+  <div class="g2" style="margin-bottom:22px">
+    <div class="card" style="border-color:#f8717140;background:var(--red-bg)">
+      <div class="card-head">
+        <div class="card-ico">😱</div>
+        <div><div class="card-name" style="color:var(--red)">Without Spring Security</div><div class="card-sub2">naked REST API</div></div>
+      </div>
+      <div class="card-body">Your REST API is fully open — anyone calls any endpoint, reads any data, deletes everything. No login, no roles, no session management, no CSRF protection, no password hashing. You'd build ALL of this from scratch, correctly, under time pressure.</div>
+      <div style="font-size:13px;color:var(--muted)">
+        ❌ Anyone can hit /admin/deleteAll<br>
+        ❌ Passwords stored in plain text<br>
+        ❌ No session expiry / invalidation<br>
+        ❌ CSRF attacks on every form submit<br>
+        ❌ No brute-force login protection<br>
+        ❌ Security bugs ship to production
+      </div>
+    </div>
+    <div class="card" style="border-color:#6db33f40;background:var(--spring-bg)">
+      <div class="card-head">
+        <div class="card-ico">🛡️</div>
+        <div><div class="card-name" style="color:var(--spring)">With Spring Security</div><div class="card-sub2">enterprise-grade security</div></div>
+      </div>
+      <div class="card-body">Add one dependency and get a complete security framework. Authentication (WHO are you?), Authorization (what can you DO?), BCrypt passwords, session management, CSRF tokens, CORS, OAuth2, JWT, method-level security — all configurable via clean API.</div>
+      <div style="font-size:13px;color:var(--muted)">
+        ✅ Protect endpoints by role with 1 line<br>
+        ✅ BCrypt password hashing built-in<br>
+        ✅ Session management &amp; remember-me<br>
+        ✅ CSRF protection for web forms<br>
+        ✅ OAuth2 / JWT / SAML support<br>
+        ✅ @PreAuthorize method-level security
+      </div>
+    </div>
+  </div>
+  <div class="g3">
+    <div class="card" style="border-color:#60a5fa40">
+      <div class="card-head"><div class="card-ico">🏦</div><div><div class="card-name" style="color:var(--blue)">Banking App</div></div></div>
+      <div class="card-body">Customers log in. Only ADMIN approves loans. Only account OWNER views their balance. Transactions need re-auth. Audit every access. Zero custom security code needed.</div>
+      <div class="analogy">🏦 Bank vault — different keys for rooms, logged entry, timed lockout</div>
+    </div>
+    <div class="card" style="border-color:#c084fc40">
+      <div class="card-head"><div class="card-ico">🛒</div><div><div class="card-name" style="color:var(--purple)">E-Commerce</div></div></div>
+      <div class="card-body">Guests browse. Logged-in users checkout. SELLER manages their products. ADMIN manages everything. OAuth2 via Google. JWT for mobile API. All standard Spring Security config.</div>
+      <div class="analogy">🛒 Mall — public areas open, staff doors need keycard, manager room needs master key</div>
+    </div>
+    <div class="card" style="border-color:#2dd4bf40">
+      <div class="card-head"><div class="card-ico">🏥</div><div><div class="card-name" style="color:var(--teal)">Healthcare</div></div></div>
+      <div class="card-body">Patients see only their records. Doctors see their patients. Admins see all. Audit log for every record access. Session timeout on shared terminals.</div>
+      <div class="analogy">🏥 Hospital — patient wristband, doctor badge, admin master ID, each opens different doors</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     S2 — CORE CONCEPTS
+════════════════════════════════════════════════════ -->
+<div class="section" id="s2">
+  <div class="sec-header">
+    <div class="sec-num">2</div>
+    <div class="sec-title">Core Concepts — Authentication vs Authorization</div>
+    <div class="sec-sub">WHO are you? WHAT can you do?</div>
+  </div>
+  <div class="g2" style="margin-bottom:22px">
+    <div class="card" style="border-color:#60a5fa40">
+      <div class="card-head"><div class="card-ico">🪪</div><div><div class="card-name" style="color:var(--blue)">Authentication — WHO are you?</div><div class="card-sub2">identity verification</div></div></div>
+      <div class="card-body">Verifying <strong>who the user is</strong>. User provides credentials. System validates them. On success, creates a <code style="color:var(--teal);font-family:'Fira Code',monospace">SecurityContext</code> with the user's <code style="color:var(--teal);font-family:'Fira Code',monospace">Authentication</code> object for the thread.</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:12px">Methods: Username+Password · JWT Token · OAuth2 · SAML · API Key · Certificate</div>
+      <div class="tag t-blue">UsernamePasswordAuthenticationToken</div>
+      <div class="tag t-teal">AuthenticationManager</div>
+      <div class="analogy">✈️ Airport check-in — show passport, prove you are who you claim</div>
+    </div>
+    <div class="card" style="border-color:#c084fc40">
+      <div class="card-head"><div class="card-ico">🚪</div><div><div class="card-name" style="color:var(--purple)">Authorization — WHAT can you do?</div><div class="card-sub2">permission enforcement</div></div></div>
+      <div class="card-body">After authentication, determines <strong>what the user is allowed to access</strong>. Checks roles/authorities against required permissions. Happens AFTER authentication — cannot authorize an unknown user.</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:12px">Methods: Roles (ROLE_ADMIN) · Authorities (read:users) · ACL · SpEL expressions</div>
+      <div class="tag t-purple">AccessDecisionManager</div>
+      <div class="tag t-pink">GrantedAuthority</div>
+      <div class="analogy">🎫 Boarding gate — identity proven at check-in, boarding pass grants access to specific flight</div>
+    </div>
+  </div>
+  <div class="g4">
+    <div class="card">
+      <div class="card-head"><div class="card-ico">🧩</div><div><div class="card-name" style="color:var(--spring)">SecurityContext</div></div></div>
+      <div class="card-body">Holds the authenticated user's <code style="font-family:'Fira Code',monospace;color:var(--teal)">Authentication</code> object. Thread-local per request. Automatically cleared after response.</div>
+      <div class="tag t-spring">ThreadLocal</div>
+    </div>
+    <div class="card">
+      <div class="card-head"><div class="card-ico">🎫</div><div><div class="card-name" style="color:var(--amber)">Authentication</div></div></div>
+      <div class="card-body">Core interface containing: <strong>principal</strong> (who), <strong>credentials</strong> (password), <strong>authorities</strong> (roles), <strong>isAuthenticated</strong> flag.</div>
+      <div class="tag t-amber">principal + roles</div>
+    </div>
+    <div class="card">
+      <div class="card-head"><div class="card-ico">👤</div><div><div class="card-name" style="color:var(--teal)">UserDetails</div></div></div>
+      <div class="card-body">Interface your User entity implements. Provides username, password hash, authorities, and account status flags (locked, expired, enabled).</div>
+      <div class="tag t-teal">implements UserDetails</div>
+    </div>
+    <div class="card">
+      <div class="card-head"><div class="card-ico">🔑</div><div><div class="card-name" style="color:var(--pink)">GrantedAuthority</div></div></div>
+      <div class="card-body">A permission granted to a user. Roles are prefixed <code style="font-family:'Fira Code',monospace;color:var(--teal)">ROLE_</code>. Fine-grained authorities like <code style="font-family:'Fira Code',monospace;color:var(--teal)">user:read</code> are also common.</div>
+      <div class="tag t-pink">ROLE_ADMIN</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     S3 — ARCHITECTURE
+════════════════════════════════════════════════════ -->
+<div class="section" id="s3">
+  <div class="sec-header">
+    <div class="sec-num">3</div>
+    <div class="sec-title">Spring Security Architecture</div>
+    <div class="sec-sub">the full picture</div>
+  </div>
+
+  <div class="arch" style="margin-bottom:24px">
+    <div class="arch-lbl">Request Processing Architecture</div>
+    <div class="g2">
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--spring);font-family:'Fira Code',monospace;margin-bottom:16px">📥 INCOMING REQUEST PATH</div>
+        <div class="flow-v">
+          <div class="fv-step">
+            <div class="fv-num">1</div>
+            <div><div class="fv-ttl" style="color:var(--blue)">🌐 HTTP Request</div><div class="fv-dsc">Browser / Mobile / API Client sends request to your Spring Boot app</div></div>
+          </div>
+          <div class="fv-step">
+            <div class="fv-num">2</div>
+            <div><div class="fv-ttl" style="color:var(--spring)">🔗 DelegatingFilterProxy</div><div class="fv-dsc">Servlet container bridge. Delegates to Spring's <code style="font-family:'Fira Code',monospace">springSecurityFilterChain</code> bean</div></div>
+          </div>
+          <div class="fv-step">
+            <div class="fv-num">3</div>
+            <div><div class="fv-ttl" style="color:var(--spring)">🔒 FilterChainProxy</div><div class="fv-dsc">Central Spring Security interceptor. Selects the matching <code style="font-family:'Fira Code',monospace">SecurityFilterChain</code> by URL pattern</div></div>
+          </div>
+          <div class="fv-step">
+            <div class="fv-num">4</div>
+            <div><div class="fv-ttl" style="color:var(--amber)">⛓️ SecurityFilterChain (15+ filters)</div><div class="fv-dsc">Ordered filter pipeline: CORS → CSRF → Auth → Session → Exception handling...</div></div>
+          </div>
+          <div class="fv-step">
+            <div class="fv-num">5</div>
+            <div><div class="fv-ttl" style="color:var(--teal)">🎯 DispatcherServlet → @RestController</div><div class="fv-dsc">Request reaches your business code ONLY if all security checks pass</div></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--spring);font-family:'Fira Code',monospace;margin-bottom:16px">🔐 AUTHENTICATION INTERNALS</div>
+        <div class="flow-v">
+          <div class="fv-step">
+            <div class="fv-num">A</div>
+            <div><div class="fv-ttl" style="color:var(--amber)">📩 UsernamePasswordAuthenticationFilter</div><div class="fv-dsc">Extracts username+password from request, creates <code style="font-family:'Fira Code',monospace">UsernamePasswordAuthenticationToken</code></div></div>
+          </div>
+          <div class="fv-step">
+            <div class="fv-num">B</div>
+            <div><div class="fv-ttl" style="color:var(--purple)">🔀 AuthenticationManager (ProviderManager)</div><div class="fv-dsc">Delegates to a list of <code style="font-family:'Fira Code',monospace">AuthenticationProvider</code>s — tries each until one succeeds</div></div>
+          </div>
+          <div class="fv-step">
+            <div class="fv-num">C</div>
+            <div><div class="fv-ttl" style="color:var(--teal)">⚙️ DaoAuthenticationProvider</div><div class="fv-dsc">Default provider — calls <code style="font-family:'Fira Code',monospace">UserDetailsService</code>, then verifies password with <code style="font-family:'Fira Code',monospace">PasswordEncoder</code></div></div>
+          </div>
+          <div class="fv-step">
+            <div class="fv-num">D</div>
+            <div><div class="fv-ttl" style="color:var(--blue)">📚 UserDetailsService.loadUserByUsername()</div><div class="fv-dsc"><strong>YOUR code</strong> — load the User from DB. Return a UserDetails object with roles.</div></div>
+          </div>
+          <div class="fv-step">
+            <div class="fv-num">E</div>
+            <div><div class="fv-ttl" style="color:var(--spring)">✅ SecurityContextHolder.setAuthentication()</div><div class="fv-dsc">User authenticated! Context populated for this thread. Downstream code can call <code style="font-family:'Fira Code',monospace">getContext().getAuthentication()</code></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><div class="card-ico">⚙️</div><div><div class="card-name" style="color:var(--spring)">SecurityConfig — Spring Boot 3.x / Security 6.x</div><div class="card-sub2">the main configuration class</div></div></div>
+    <div class="code-wrap">
+      <div class="code-label"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>SecurityConfig.java</div>
+      <pre><code class="language-java">@Configuration
+@EnableWebSecurity
+@EnableMethodSecurity          // enables @PreAuthorize, @PostAuthorize
+public class SecurityConfig {
+
+    private final JwtAuthFilter jwtAuthFilter;
+    private final UserDetailsService userDetailsService;
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        return http
+            .csrf(csrf -> csrf.disable())                          // disable for REST APIs
+            .cors(cors -> cors.configurationSource(corsConfig()))   // allow frontend origin
+            .sessionManagement(s -> s
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // no sessions - JWT
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/api/auth/**").permitAll()        // public: login, register
+                .requestMatchers("/api/public/**").permitAll()      // public: health, docs
+                .requestMatchers("/api/admin/**").hasRole("ADMIN")  // admin only
+                .requestMatchers(HttpMethod.GET, "/api/products/**").hasAnyRole("USER","ADMIN")
+                .anyRequest().authenticated()                       // everything else needs auth
+            )
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+            .exceptionHandling(ex -> ex
+                .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
+                .accessDeniedHandler(new BearerTokenAccessDeniedHandler())
+            )
+            .build();
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder(12);   // strength 12 — never store plain text!
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(
+            AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
+    }
+}</code></pre>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     S4 — FILTER CHAIN
+════════════════════════════════════════════════════ -->
+<div class="section" id="s4">
+  <div class="sec-header">
+    <div class="sec-num">4</div>
+    <div class="sec-title">Security Filter Chain — The Request Pipeline</div>
+    <div class="sec-sub">every request passes through these in order</div>
+  </div>
+
+  <div class="alert al-info"><div class="al-ico">💡</div><div>Every HTTP request passes through the Security Filter Chain. Each filter can: <strong>allow</strong> the request to continue, <strong>reject</strong> it (throw exception), or <strong>modify</strong> it. Filters run in a <strong>fixed order</strong> — order matters! Your custom filters are inserted at specific positions.</div></div>
+
+  <div class="fc" style="margin-bottom:24px">
+    <div class="fc-hdr"><span>Filter Class</span><span>What It Does</span><span>When Active</span></div>
+    <div class="fc-row">
+      <div class="fc-name" style="color:var(--red)">① DisableEncodeUrlFilter</div>
+      <div class="fc-desc">Prevents session ID being appended to URLs (security risk). First filter, always runs.</div>
+      <div class="fc-tag"><span class="tag t-red">Always</span></div>
+    </div>
+    <div class="fc-row">
+      <div class="fc-name" style="color:var(--orange)">② SecurityContextHolder­Filter</div>
+      <div class="fc-desc">Loads SecurityContext from repository at request start; saves it back at end. Replaces old SecurityContextPersistenceFilter in Security 6.</div>
+      <div class="fc-tag"><span class="tag t-orange">Always</span></div>
+    </div>
+    <div class="fc-row">
+      <div class="fc-name" style="color:var(--amber)">③ HeaderWriterFilter</div>
+      <div class="fc-desc">Adds security response headers: X-Content-Type-Options, X-Frame-Options (clickjacking), X-XSS-Protection, HSTS (HTTPS enforcement).</div>
+      <div class="fc-tag"><span class="tag t-amber">Always</span></div>
+    </div>
+    <div class="fc-row">
+      <div class="fc-name" style="color:var(--spring)">④ CorsFilter</div>
+      <div class="fc-desc">Handles CORS preflight OPTIONS requests early. Sets Access-Control-Allow-* headers. Must run before auth filters to allow preflight through.</div>
+      <div class="fc-tag"><span class="tag t-spring">CORS on</span></div>
+    </div>
+    <div class="fc-row">
+      <div class="fc-name" style="color:var(--spring)">⑤ CsrfFilter</div>
+      <div class="fc-desc">Validates CSRF token on state-changing requests (POST/PUT/DELETE/PATCH). Disabled for stateless REST APIs that use JWT — tokens are CSRF-safe.</div>
+      <div class="fc-tag"><span class="tag t-spring">Web apps</span></div>
+    </div>
+    <div class="fc-row">
+      <div class="fc-name" style="color:var(--blue)">⑥ LogoutFilter</div>
+      <div class="fc-desc">Intercepts logout URL (default /logout). Clears SecurityContext, invalidates HTTP session, deletes remember-me cookies. Fully configurable.</div>
+      <div class="fc-tag"><span class="tag t-blue">Session auth</span></div>
+    </div>
+    <div class="fc-row">
+      <div class="fc-name" style="color:var(--purple)">⑦ YOUR JwtAuthFilter</div>
+      <div class="fc-desc"><strong>Custom filter you write!</strong> Extracts JWT from Authorization header, validates signature + expiry, sets Authentication in SecurityContext.</div>
+      <div class="fc-tag"><span class="tag t-purple">JWT apps</span></div>
+    </div>
+    <div class="fc-row">
+      <div class="fc-name" style="color:var(--teal)">⑧ UsernamePassword­AuthenticationFilter</div>
+      <div class="fc-desc">Handles POST /login — extracts username+password, delegates to AuthenticationManager. On success calls successHandler; on fail calls failureHandler.</div>
+      <div class="fc-tag"><span class="tag t-teal">Form login</span></div>
+    </div>
+    <div class="fc-row">
+      <div class="fc-name" style="color:var(--teal)">⑨ BasicAuthentication­Filter</div>
+      <div class="fc-desc">Handles HTTP Basic auth — decodes Base64 from Authorization: Basic {base64(user:pass)} header. Simple but credentials sent every request.</div>
+      <div class="fc-tag"><span class="tag t-teal">Basic auth</span></div>
+    </div>
+    <div class="fc-row">
+      <div class="fc-name" style="color:var(--pink)">⑩ BearerTokenAuthentication­Filter</div>
+      <div class="fc-desc">Handles OAuth2 Bearer tokens. Validates against auth server introspection or local JWT keys. Used when Spring Security OAuth2 Resource Server is configured.</div>
+      <div class="fc-tag"><span class="tag t-pink">OAuth2</span></div>
+    </div>
+    <div class="fc-row">
+      <div class="fc-name" style="color:var(--cyan)">⑪ RequestCacheAware­Filter</div>
+      <div class="fc-desc">After login, redirects user to the original URL they were trying to access before being redirected to login. Restores saved request from cache.</div>
+      <div class="fc-tag"><span class="tag t-cyan">Session</span></div>
+    </div>
+    <div class="fc-row">
+      <div class="fc-name" style="color:var(--red)">⑫ ExceptionTranslation­Filter</div>
+      <div class="fc-desc">Catches <code style="font-family:'Fira Code',monospace">AuthenticationException</code> → 401, and <code style="font-family:'Fira Code',monospace">AccessDeniedException</code> → 403. The bridge between Java exceptions and HTTP error responses.</div>
+      <div class="fc-tag"><span class="tag t-red">Always</span></div>
+    </div>
+    <div class="fc-row">
+      <div class="fc-name" style="color:var(--red)">⑬ AuthorizationFilter</div>
+      <div class="fc-desc">Final authorization check — evaluates the URL-based access rules from your <code style="font-family:'Fira Code',monospace">authorizeHttpRequests()</code> config. Replaces FilterSecurityInterceptor in Security 6.</div>
+      <div class="fc-tag"><span class="tag t-red">Always</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><div class="card-ico">🔧</div><div><div class="card-name" style="color:var(--purple)">Writing a Custom Filter — JWT Auth Filter</div><div class="card-sub2">the most common custom filter you'll write</div></div></div>
+    <div class="code-wrap">
+      <div class="code-label"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>JwtAuthFilter.java</div>
+      <pre><code class="language-java">@Component
+@RequiredArgsConstructor
+public class JwtAuthFilter extends OncePerRequestFilter {
+
+    private final JwtService jwtService;
+    private final UserDetailsService userDetailsService;
+
+    @Override
+    protected void doFilterInternal(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain filterChain) throws ServletException, IOException {
+
+        // 1. Extract Authorization header
+        final String authHeader = request.getHeader("Authorization");
+
+        // 2. Skip if no Bearer token present
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            filterChain.doFilter(request, response);  // pass to next filter
+            return;
+        }
+
+        // 3. Extract JWT from header
+        final String jwt = authHeader.substring(7);   // "Bearer " is 7 chars
+        final String username = jwtService.extractUsername(jwt);
+
+        // 4. Only authenticate if user not already authenticated in context
+        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
+            // 5. Validate token signature + expiry
+            if (jwtService.isTokenValid(jwt, userDetails)) {
+                UsernamePasswordAuthenticationToken authToken =
+                    new UsernamePasswordAuthenticationToken(
+                        userDetails, null, userDetails.getAuthorities()
+                    );
+                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+                // 6. Set authentication in SecurityContext for this request
+                SecurityContextHolder.getContext().setAuthentication(authToken);
+            }
+        }
+        // 7. Always continue filter chain
+        filterChain.doFilter(request, response);
+    }
+}</code></pre>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     S5 — AUTHENTICATION FLOW
+════════════════════════════════════════════════════ -->
+<div class="section" id="s5">
+  <div class="sec-header">
+    <div class="sec-num">5</div>
+    <div class="sec-title">Authentication Flow — Login to Token</div>
+    <div class="sec-sub">step by step internals</div>
+  </div>
+
+  <div style="margin-bottom:24px">
+    <div class="flow-h">
+      <div class="fh-step">
+        <div class="fh-num">1</div>
+        <div class="fh-ico">📱</div>
+        <div class="fh-ttl">Client Sends Credentials</div>
+        <div class="fh-dsc">POST /api/auth/login with JSON body {username, password}</div>
+      </div>
+      <div class="fh-step">
+        <div class="fh-num">2</div>
+        <div class="fh-ico">🎯</div>
+        <div class="fh-ttl">AuthController</div>
+        <div class="fh-dsc">Receives request, calls authenticationManager.authenticate()</div>
+      </div>
+      <div class="fh-step">
+        <div class="fh-num">3</div>
+        <div class="fh-ico">🔀</div>
+        <div class="fh-ttl">ProviderManager</div>
+        <div class="fh-dsc">Delegates to DaoAuthenticationProvider — the default provider</div>
+      </div>
+      <div class="fh-step">
+        <div class="fh-num">4</div>
+        <div class="fh-ico">📚</div>
+        <div class="fh-ttl">UserDetailsService</div>
+        <div class="fh-dsc">loadUserByUsername() — YOUR code loads user from DB</div>
+      </div>
+      <div class="fh-step">
+        <div class="fh-num">5</div>
+        <div class="fh-ico">🔐</div>
+        <div class="fh-ttl">BCryptPasswordEncoder</div>
+        <div class="fh-dsc">matches(rawPassword, storedHash) — verifies without decrypting</div>
+      </div>
+      <div class="fh-step">
+        <div class="fh-num">6</div>
+        <div class="fh-ico">🎟️</div>
+        <div class="fh-ttl">JWT Generated</div>
+        <div class="fh-dsc">Token signed with secret key, returned to client in response body</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="card-head"><div class="card-ico">🎯</div><div><div class="card-name" style="color:var(--blue)">AuthController — Login Endpoint</div></div></div>
+      <div class="code-wrap">
+        <div class="code-label"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>AuthController.java</div>
+        <pre><code class="language-java">@RestController
+@RequestMapping("/api/auth")
+@RequiredArgsConstructor
+public class AuthController {
+
+    private final AuthenticationManager authManager;
+    private final UserDetailsService userDetailsService;
+    private final JwtService jwtService;
+    private final PasswordEncoder passwordEncoder;
+    private final UserRepository userRepository;
+
+    @PostMapping("/login")
+    public ResponseEntity&lt;AuthResponse&gt; login(
+            @RequestBody LoginRequest request) {
+
+        // This throws AuthenticationException if credentials are wrong
+        authManager.authenticate(
+            new UsernamePasswordAuthenticationToken(
+                request.getUsername(),
+                request.getPassword()
+            )
+        );
+
+        // If we reach here, authentication succeeded
+        UserDetails user = userDetailsService
+            .loadUserByUsername(request.getUsername());
+
+        String token = jwtService.generateToken(user);
+        return ResponseEntity.ok(new AuthResponse(token));
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity&lt;String&gt; register(
+            @RequestBody RegisterRequest request) {
+        User user = User.builder()
+            .username(request.getUsername())
+            // ALWAYS encode before saving!
+            .password(passwordEncoder.encode(request.getPassword()))
+            .roles(List.of("ROLE_USER"))
+            .build();
+        userRepository.save(user);
+        return ResponseEntity.ok("User registered successfully");
+    }
+}</code></pre>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><div class="card-ico">👤</div><div><div class="card-name" style="color:var(--teal)">UserDetailsService Implementation</div></div></div>
+      <div class="code-wrap">
+        <div class="code-label"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>CustomUserDetailsService.java</div>
+        <pre><code class="language-java">@Service
+@RequiredArgsConstructor
+public class CustomUserDetailsService implements UserDetailsService {
+
+    private final UserRepository userRepository;
+
+    @Override
+    public UserDetails loadUserByUsername(String username)
+            throws UsernameNotFoundException {
+        // Load from YOUR database
+        User user = userRepository.findByUsername(username)
+            .orElseThrow(() ->
+                new UsernameNotFoundException("User not found: " + username)
+            );
+
+        // Convert to Spring Security's UserDetails
+        return org.springframework.security.core.userdetails.User
+            .withUsername(user.getUsername())
+            .password(user.getPassword())       // already BCrypt hashed
+            .authorities(user.getRoles().stream()
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toList()))
+            .accountExpired(!user.isActive())
+            .credentialsExpired(false)
+            .disabled(!user.isEnabled())
+            .build();
+    }
+}
+
+// Your JPA User entity
+@Entity
+@Data
+@Builder
+public class User {
+    @Id @GeneratedValue
+    private Long id;
+    @Column(unique = true)
+    private String username;
+    private String password;           // BCrypt hash stored here
+    @ElementCollection(fetch = EAGER)
+    private List&lt;String&gt; roles;       // ["ROLE_USER", "ROLE_ADMIN"]
+    private boolean enabled = true;
+    private boolean active = true;
+}</code></pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     S6 — AUTHORIZATION
+════════════════════════════════════════════════════ -->
+<div class="section" id="s6">
+  <div class="sec-header">
+    <div class="sec-num">6</div>
+    <div class="sec-title">Authorization — Controlling Access</div>
+    <div class="sec-sub">URL-based and method-level</div>
+  </div>
+
+  <div class="g2" style="margin-bottom:22px">
+    <div class="card">
+      <div class="card-head"><div class="card-ico">🔗</div><div><div class="card-name" style="color:var(--amber)">URL-Based Authorization</div><div class="card-sub2">in SecurityFilterChain</div></div></div>
+      <div class="code-wrap">
+        <div class="code-label"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>SecurityConfig.java — authorizeHttpRequests</div>
+        <pre><code class="language-java">.authorizeHttpRequests(auth -> auth
+    // Public - no auth needed
+    .requestMatchers("/api/auth/**").permitAll()
+    .requestMatchers("/api/public/**").permitAll()
+    .requestMatchers("/actuator/health").permitAll()
+
+    // Role-based access
+    .requestMatchers("/api/admin/**").hasRole("ADMIN")
+    .requestMatchers("/api/manager/**").hasAnyRole("ADMIN", "MANAGER")
+
+    // Authority-based (fine-grained)
+    .requestMatchers(HttpMethod.DELETE, "/api/**")
+        .hasAuthority("permission:delete")
+
+    // Authenticated users only (any role)
+    .requestMatchers("/api/user/**").authenticated()
+
+    // SpEL expression for complex rules
+    .requestMatchers("/api/reports/**")
+        .access(new WebExpressionAuthorizationManager(
+            "hasRole('ADMIN') or (hasRole('MANAGER') and @reportService.canAccess(authentication))"
+        ))
+
+    // Catch-all — deny everything else
+    .anyRequest().authenticated()
+)</code></pre>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:20px">
+        <div class="card-head"><div class="card-ico">📊</div><div><div class="card-name" style="color:var(--spring)">Role vs Authority</div></div></div>
+        <table class="tbl">
+          <thead><tr><th>Concept</th><th>Example</th><th>Use When</th></tr></thead>
+          <tbody>
+            <tr><td>Role</td><td>ROLE_ADMIN, ROLE_USER</td><td>Broad, coarse-grained access groups</td></tr>
+            <tr><td>Authority</td><td>user:read, order:delete</td><td>Fine-grained per-action permissions</td></tr>
+            <tr><td>hasRole()</td><td>hasRole("ADMIN")</td><td>Auto-prepends ROLE_ prefix</td></tr>
+            <tr><td>hasAuthority()</td><td>hasAuthority("ROLE_ADMIN")</td><td>Exact string match, no prefix</td></tr>
+            <tr><td>hasAnyRole()</td><td>hasAnyRole("A","B")</td><td>Multiple allowed roles</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="alert al-warn"><div class="al-ico">⚠️</div><div><strong>Order matters!</strong> Rules are evaluated top-to-bottom. More specific patterns must come BEFORE <code style="font-family:'Fira Code',monospace">.anyRequest()</code>. Put <code style="font-family:'Fira Code',monospace">permitAll()</code> rules first.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     S7 — JWT
+════════════════════════════════════════════════════ -->
+<div class="section" id="s7">
+  <div class="sec-header">
+    <div class="sec-num">7</div>
+    <div class="sec-title">JWT — JSON Web Tokens</div>
+    <div class="sec-sub">stateless authentication tokens</div>
+  </div>
+
+  <div class="g2" style="margin-bottom:22px">
+    <div class="card">
+      <div class="card-head"><div class="card-ico">🎟️</div><div><div class="card-name" style="color:var(--amber)">JWT Structure — 3 Parts</div><div class="card-sub2">Header.Payload.Signature</div></div></div>
+      <div style="margin-bottom:14px">
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:16px 18px;font-family:'Fira Code',monospace;font-size:12px;word-break:break-all;line-height:2">
+          <span style="color:var(--red)">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9</span>.<span style="color:var(--purple)">eyJzdWIiOiJ1c2VyMTIzIiwicm9sZXMiOlsiUk9MRV9VU0VSIl0sImlhdCI6MTcwMDAwMDAwMCwiZXhwIjoxNzAwMDg2NDAwfQ</span>.<span style="color:var(--teal)">SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c</span>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="background:var(--red-bg);border:1px solid #f8717140;border-radius:8px;padding:13px 16px">
+          <div style="font-size:13px;font-weight:700;color:var(--red);margin-bottom:6px">🔴 Header (red)</div>
+          <div style="font-family:'Fira Code',monospace;font-size:12px;color:var(--muted)">{ "alg": "HS256", "typ": "JWT" }</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:6px">Algorithm used to sign the token. Base64Url encoded.</div>
+        </div>
+        <div style="background:var(--purple-bg);border:1px solid #c084fc40;border-radius:8px;padding:13px 16px">
+          <div style="font-size:13px;font-weight:700;color:var(--purple);margin-bottom:6px">🟣 Payload / Claims (purple)</div>
+          <div style="font-family:'Fira Code',monospace;font-size:12px;color:var(--muted)">{ "sub": "user123", "roles": ["ROLE_USER"], "iat": 1700000000, "exp": 1700086400 }</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:6px"><strong>NOT encrypted</strong> — anyone can read it. Never put passwords or sensitive data here!</div>
+        </div>
+        <div style="background:var(--teal-bg);border:1px solid #2dd4bf40;border-radius:8px;padding:13px 16px">
+          <div style="font-size:13px;font-weight:700;color:var(--teal);margin-bottom:6px">🟢 Signature (teal)</div>
+          <div style="font-family:'Fira Code',monospace;font-size:12px;color:var(--muted)">HMACSHA256(base64(header) + "." + base64(payload), secretKey)</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:6px">Proves the token wasn't tampered with. Only server can produce/verify with secret key.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><div class="card-ico">⚙️</div><div><div class="card-name" style="color:var(--teal)">JwtService — Complete Implementation</div></div></div>
+      <div class="code-wrap">
+        <div class="code-label"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>JwtService.java</div>
+        <pre><code class="language-java">@Service
+public class JwtService {
+
+    // Store secret in application.properties, not in code!
+    @Value("${jwt.secret}")
+    private String secretKey;
+
+    @Value("${jwt.expiration:86400000}") // 24 hours default
+    private long jwtExpiration;
+
+    // Generate token for a user
+    public String generateToken(UserDetails userDetails) {
+        Map&lt;String, Object&gt; claims = new HashMap&lt;&gt;();
+        claims.put("roles", userDetails.getAuthorities().stream()
+            .map(GrantedAuthority::getAuthority)
+            .collect(Collectors.toList()));
+        return buildToken(claims, userDetails.getUsername());
+    }
+
+    private String buildToken(Map&lt;String, Object&gt; claims, String subject) {
+        return Jwts.builder()
+            .claims(claims)
+            .subject(subject)
+            .issuedAt(new Date())
+            .expiration(new Date(System.currentTimeMillis() + jwtExpiration))
+            .signWith(getSigningKey())
+            .compact();
+    }
+
+    // Validate token
+    public boolean isTokenValid(String token, UserDetails userDetails) {
+        final String username = extractUsername(token);
+        return username.equals(userDetails.getUsername())
+            &amp;&amp; !isTokenExpired(token);
+    }
+
+    public String extractUsername(String token) {
+        return extractClaim(token, Claims::getSubject);
+    }
+
+    private boolean isTokenExpired(String token) {
+        return extractExpiration(token).before(new Date());
+    }
+
+    private Date extractExpiration(String token) {
+        return extractClaim(token, Claims::getExpiration);
+    }
+
+    public &lt;T&gt; T extractClaim(String token, Function&lt;Claims, T&gt; resolver) {
+        return resolver.apply(extractAllClaims(token));
+    }
+
+    private Claims extractAllClaims(String token) {
+        return Jwts.parser()
+            .verifyWith(getSigningKey())
+            .build()
+            .parseSignedClaims(token)
+            .getPayload();
+    }
+
+    private SecretKey getSigningKey() {
+        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
+        return Keys.hmacShaKeyFor(keyBytes);
+    }
+}</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="alert al-warn"><div class="al-ico">⚠️</div><div><strong>JWT Security Best Practices:</strong> Use HS256+ or RS256. Set short expiry (15min–24h). Use Refresh Tokens for long sessions. Store in HttpOnly cookies (not localStorage — XSS risk!). Rotate signing keys regularly. Never put sensitive data in payload — it's only Base64, not encrypted.</div></div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="card-head"><div class="card-ico">🔁</div><div><div class="card-name" style="color:var(--pink)">Refresh Token Pattern</div><div class="card-sub2">keep sessions alive securely</div></div></div>
+      <div class="card-body">Access tokens should be short-lived (15–60 min). Refresh tokens are long-lived (7–30 days) and stored in DB. When access token expires, client uses refresh token to get a new access token without re-login.</div>
+      <div class="code-wrap">
+        <div class="code-label"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>RefreshToken flow</div>
+        <pre><code class="language-java">@PostMapping("/refresh")
+public ResponseEntity&lt;AuthResponse&gt; refreshToken(
+        @RequestBody RefreshTokenRequest request) {
+
+    return refreshTokenService
+        .findByToken(request.getRefreshToken())
+        .map(refreshTokenService::verifyExpiration)  // throws if expired
+        .map(RefreshToken::getUser)
+        .map(user -> {
+            String accessToken = jwtService.generateToken(user);
+            return ResponseEntity.ok(new AuthResponse(accessToken));
+        })
+        .orElseThrow(() -> new RuntimeException("Invalid refresh token"));
+}</code></pre>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><div class="card-ico">📦</div><div><div class="card-name" style="color:var(--orange)">application.yml JWT Config</div></div></div>
+      <div class="code-wrap">
+        <div class="code-label"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>application.yml</div>
+        <pre><code class="language-yaml">spring:
+  application:
+    name: my-secure-api
+
+jwt:
+  # Generate with: openssl rand -base64 64
+  secret: dGhpcyBpcyBhIHZlcnkgc2VjdXJlIHNlY3JldCBrZXkgZm9yIGp3dCBzaWduaW5n
+  expiration: 3600000       # 1 hour in milliseconds
+  refresh-expiration: 604800000  # 7 days
+
+# NEVER put real secrets here - use env vars or Vault
+# jwt.secret=${JWT_SECRET}  ← use this in production</code></pre>
+      </div>
+      <div class="alert al-bad"><div class="al-ico">🚫</div><div>Never hardcode JWT secrets in code or properties files committed to git. Use environment variables or a secrets manager (AWS Secrets Manager, HashiCorp Vault).</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     S8 — OAUTH2 / OIDC
+════════════════════════════════════════════════════ -->
+<div class="section" id="s8">
+  <div class="sec-header">
+    <div class="sec-num">8</div>
+    <div class="sec-title">OAuth2 &amp; OpenID Connect (OIDC)</div>
+    <div class="sec-sub">delegated authorization + social login</div>
+  </div>
+
+  <div class="g2" style="margin-bottom:22px">
+    <div class="card">
+      <div class="card-head"><div class="card-ico">🌐</div><div><div class="card-name" style="color:var(--blue)">OAuth2 Roles Explained</div></div></div>
+      <table class="tbl">
+        <thead><tr><th>Role</th><th>Who / What</th><th>Real Example</th></tr></thead>
+        <tbody>
+          <tr><td>Resource Owner</td><td>The end user who owns the data</td><td>You — the Google account holder</td></tr>
+          <tr><td>Client</td><td>Your Spring Boot app requesting access</td><td>Your app wanting user's Google profile</td></tr>
+          <tr><td>Authorization Server</td><td>Issues tokens after user consents</td><td>accounts.google.com</td></tr>
+          <tr><td>Resource Server</td><td>API that holds protected data</td><td>googleapis.com/userinfo</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-head"><div class="card-ico">🔄</div><div><div class="card-name" style="color:var(--purple)">Authorization Code Flow (PKCE)</div></div></div>
+      <div class="flow-v">
+        <div class="fv-step"><div class="fv-num">1</div><div><div class="fv-ttl">User clicks "Login with Google"</div><div class="fv-dsc">Your app redirects to Google with client_id, redirect_uri, scope=openid email profile, code_challenge (PKCE)</div></div></div>
+        <div class="fv-step"><div class="fv-num">2</div><div><div class="fv-ttl">User authenticates at Google</div><div class="fv-dsc">Google shows login page. User enters credentials, sees consent screen, clicks Allow.</div></div></div>
+        <div class="fv-step"><div class="fv-num">3</div><div><div class="fv-ttl">Google redirects back with code</div><div class="fv-dsc">Redirects to your redirect_uri with a short-lived authorization code (valid ~60 seconds)</div></div></div>
+        <div class="fv-step"><div class="fv-num">4</div><div><div class="fv-ttl">Backend exchanges code for tokens</div><div class="fv-dsc">Spring Security sends code + code_verifier to Google token endpoint. Receives access_token + id_token (JWT).</div></div></div>
+        <div class="fv-step"><div class="fv-num">5</div><div><div class="fv-ttl">User info fetched, session created</div><div class="fv-dsc">Spring calls /userinfo endpoint, loads or creates user in your DB, establishes session.</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="card-head"><div class="card-ico">⚙️</div><div><div class="card-name" style="color:var(--spring)">OAuth2 Login Config — Google + GitHub</div></div></div>
+      <div class="code-wrap">
+        <div class="code-label"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>application.yml</div>
+        <pre><code class="language-yaml">spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            scope: openid, email, profile
+          github:
+            client-id: ${GITHUB_CLIENT_ID}
+            client-secret: ${GITHUB_CLIENT_SECRET}
+            scope: read:user, user:email</code></pre>
+      </div>
+      <div class="code-wrap">
+        <div class="code-label"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>SecurityConfig.java</div>
+        <pre><code class="language-java">@Bean
+public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    return http
+        .authorizeHttpRequests(auth -> auth
+            .requestMatchers("/", "/login").permitAll()
+            .anyRequest().authenticated()
+        )
+        .oauth2Login(oauth2 -> oauth2
+            .loginPage("/login")
+            .successHandler(customOAuth2SuccessHandler)
+            .userInfoEndpoint(ui -> ui
+                .userService(customOAuth2UserService)) // load/create user in DB
+        )
+        .build();
+}</code></pre>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><div class="card-ico">🔧</div><div><div class="card-name" style="color:var(--cyan)">Custom OAuth2 User Service</div></div></div>
+      <div class="code-wrap">
+        <div class="code-label"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>CustomOAuth2UserService.java</div>
+        <pre><code class="language-java">@Service
+@RequiredArgsConstructor
+public class CustomOAuth2UserService
+        extends DefaultOAuth2UserService {
+
+    private final UserRepository userRepository;
+
+    @Override
+    public OAuth2User loadUser(OAuth2UserRequest request)
+            throws OAuth2AuthenticationException {
+
+        OAuth2User oAuth2User = super.loadUser(request);
+        String provider = request.getClientRegistration()
+            .getRegistrationId();                     // "google" or "github"
+
+        String email = oAuth2User.getAttribute("email");
+        String name  = oAuth2User.getAttribute("name");
+
+        // Load or create user in your DB
+        User user = userRepository.findByEmail(email)
+            .orElseGet(() -> User.builder()
+                .email(email)
+                .name(name)
+                .provider(provider)
+                .roles(List.of("ROLE_USER"))
+                .build());
+        userRepository.save(user);
+
+        // Return enriched OAuth2User with your roles
+        return new CustomOAuth2User(oAuth2User, user.getRoles());
+    }
+}</code></pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     S9 — CSRF & CORS
+════════════════════════════════════════════════════ -->
+<div class="section" id="s9">
+  <div class="sec-header">
+    <div class="sec-num">9</div>
+    <div class="sec-title">CSRF &amp; CORS — Web Security Essentials</div>
+    <div class="sec-sub">cross-origin attacks and access control</div>
+  </div>
+
+  <div class="g2" style="margin-bottom:22px">
+    <div class="card">
+      <div class="card-head"><div class="card-ico">🎭</div><div><div class="card-name" style="color:var(--red)">CSRF — Cross-Site Request Forgery</div><div class="card-sub2">tricking your browser into sending requests</div></div></div>
+      <div class="card-body"><strong>Attack:</strong> Evil site tricks your browser into making a request to your bank with your cookies. Browser auto-sends cookies — so bank thinks it's you. <strong>Defence:</strong> Include a secret CSRF token that evil site can't read (same-origin policy).</div>
+      <div class="alert al-good"><div class="al-ico">✅</div><div><strong>REST APIs with JWT:</strong> Disable CSRF (<code style="font-family:'Fira Code',monospace">csrf.disable()</code>). JWT is sent in Authorization header, not cookies — evil sites can't access headers cross-origin. No CSRF risk.</div></div>
+      <div class="alert al-warn"><div class="al-ico">⚠️</div><div><strong>Web apps with sessions/cookies:</strong> Keep CSRF enabled! Spring auto-generates CSRF tokens. Thymeleaf auto-inserts them in forms. Axios/Fetch: read XSRF-TOKEN cookie and send as X-XSRF-TOKEN header.</div></div>
+      <div class="code-wrap">
+        <div class="code-label"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>CSRF config choices</div>
+        <pre><code class="language-java">// Option 1: Disable for stateless REST API (JWT)
+.csrf(csrf -> csrf.disable())
+
+// Option 2: CSRF with cookie (for SPA frontends)
+.csrf(csrf -> csrf
+    .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+    .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
+)
+
+// Option 3: Ignore specific endpoints only
+.csrf(csrf -> csrf
+    .ignoringRequestMatchers("/api/webhooks/**")
+)</code></pre>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><div class="card-ico">🌐</div><div><div class="card-name" style="color:var(--blue)">CORS — Cross-Origin Resource Sharing</div><div class="card-sub2">allowing your React/Angular frontend</div></div></div>
+      <div class="card-body"><strong>Problem:</strong> Browser blocks requests from http://localhost:3000 (React) to http://localhost:8080 (Spring) — different origins (port counts!). <strong>Solution:</strong> Configure Spring to return CORS headers that tell the browser: "this origin is allowed."</div>
+      <div class="code-wrap">
+        <div class="code-label"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>CorsConfig.java — production setup</div>
+        <pre><code class="language-java">@Bean
+public CorsConfigurationSource corsConfigurationSource() {
+    CorsConfiguration config = new CorsConfiguration();
+
+    // Allowed origins - use env var in prod!
+    config.setAllowedOrigins(List.of(
+        "http://localhost:3000",         // local dev
+        "https://app.yourcompany.com"    // production
+    ));
+
+    // Allowed HTTP methods
+    config.setAllowedMethods(List.of(
+        "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"
+    ));
+
+    // Allowed request headers
+    config.setAllowedHeaders(List.of(
+        "Authorization", "Content-Type",
+        "X-Requested-With", "Accept"
+    ));
+
+    // Allow credentials (cookies, auth headers)
+    config.setAllowCredentials(true);
+
+    // Cache preflight response for 1 hour
+    config.setMaxAge(3600L);
+
+    UrlBasedCorsConfigurationSource source =
+        new UrlBasedCorsConfigurationSource();
+    source.registerCorsConfiguration("/api/**", config);
+    return source;
+}</code></pre>
+      </div>
+      <div class="analogy">🌐 CORS = Embassy rules — US embassy in France allows French citizens to apply, but only via approved entry points and approved documents</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     S10 — METHOD SECURITY
+════════════════════════════════════════════════════ -->
+<div class="section" id="s10">
+  <div class="sec-header">
+    <div class="sec-num">10</div>
+    <div class="sec-title">Method Security — @PreAuthorize &amp; Friends</div>
+    <div class="sec-sub">secure individual methods with annotations</div>
+  </div>
+
+  <div class="alert al-info"><div class="al-ico">💡</div><div>Enable with <code style="font-family:'Fira Code',monospace">@EnableMethodSecurity</code> on your config class. Secures individual methods using AOP. More granular than URL-based rules — you can check IDs, ownership, and complex conditions.</div></div>
+
+  <div class="g2" style="margin-bottom:22px">
+    <div class="card">
+      <div class="card-head"><div class="card-ico">🔒</div><div><div class="card-name" style="color:var(--spring)">@PreAuthorize — Before Method Runs</div></div></div>
+      <div class="code-wrap">
+        <div class="code-label"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>OrderService.java</div>
+        <pre><code class="language-java">@Service
+public class OrderService {
+
+    // Only ADMIN can delete orders
+    @PreAuthorize("hasRole('ADMIN')")
+    public void deleteOrder(Long orderId) { ... }
+
+    // ADMIN or MANAGER can approve
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    public void approveOrder(Long orderId) { ... }
+
+    // User can only update their OWN orders
+    // authentication.name = logged-in username
+    @PreAuthorize("@orderRepository.findById(#orderId)" +
+                  ".get().getOwnerUsername() == authentication.name" +
+                  " or hasRole('ADMIN')")
+    public void updateOrder(Long orderId, OrderDto dto) { ... }
+
+    // Check custom bean method
+    @PreAuthorize("@securityService.canAccessOrder(#orderId)")
+    public Order getOrder(Long orderId) { ... }
+
+    // Based on method parameter
+    @PreAuthorize("#username == authentication.name or hasRole('ADMIN')")
+    public UserProfile getProfile(String username) { ... }
+}
+
+// Custom security service for complex logic
+@Service("securityService")
+public class SecurityService {
+    public boolean canAccessOrder(Long orderId) {
+        Authentication auth = SecurityContextHolder
+            .getContext().getAuthentication();
+        // your custom logic here
+        return true;
+    }
+}</code></pre>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:20px">
+        <div class="card-head"><div class="card-ico">📤</div><div><div class="card-name" style="color:var(--teal)">@PostAuthorize — After Method Returns</div></div></div>
+        <div class="card-body">Checks authorization AFTER method runs using the <strong>return value</strong>. Useful when you need to check properties of the returned object.</div>
+        <div class="code-wrap">
+          <div class="code-label"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>@PostAuthorize example</div>
+          <pre><code class="language-java">// returnObject is the returned value
+@PostAuthorize(
+    "returnObject.ownerUsername == authentication.name " +
+    "or hasRole('ADMIN')"
+)
+public Document getDocument(Long id) {
+    // Method runs first, then security checks the returned Document
+    return documentRepository.findById(id).orElseThrow();
+}</code></pre>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-ico">📋</div><div><div class="card-name" style="color:var(--purple)">@PreFilter &amp; @PostFilter</div></div></div>
+        <div class="card-body">Filter collections before/after method — remove items the user can't see.</div>
+        <div class="code-wrap">
+          <div class="code-label"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>@PostFilter example</div>
+          <pre><code class="language-java">// filterObject = each item in the list
+@PostFilter(
+    "filterObject.ownerUsername == authentication.name " +
+    "or hasRole('ADMIN')"
+)
+public List&lt;Document&gt; getAllDocuments() {
+    return documentRepository.findAll(); // Spring filters the list
+}
+
+// @PreFilter on input collection
+@PreFilter("filterObject.owner == authentication.name")
+public void processDocuments(List&lt;Document&gt; docs) {
+    // docs list is filtered before method is called
+}</code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     S11 — REAL SCENARIOS
+════════════════════════════════════════════════════ -->
+<div class="section" id="s11">
+  <div class="sec-header">
+    <div class="sec-num">11</div>
+    <div class="sec-title">Real-World Scenarios — Production Patterns</div>
+    <div class="sec-sub">complete implementations</div>
+  </div>
+
+  <!-- Scenario A -->
+  <div class="scenario">
+    <div class="sc-hdr">
+      <div style="font-size:24px">🏦</div>
+      <div>
+        <div class="sc-title">Scenario A: Banking App — Full JWT Authentication</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'Fira Code',monospace">Login → JWT → Protected Endpoints → Role-based access</div>
+      </div>
+      <span class="tag t-amber" style="margin-left:auto">Production Ready</span>
+    </div>
+    <div class="sc-body">
+      <div class="g2">
+        <div>
+          <div style="font-size:14px;font-weight:700;color:var(--spring);margin-bottom:14px">🔐 Security Setup</div>
+          <div class="code-wrap">
+            <div class="code-label"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>BankSecurityConfig.java</div>
+            <pre><code class="language-java">@Configuration @EnableWebSecurity @EnableMethodSecurity
+public class BankSecurityConfig {
+
+  @Bean
+  public SecurityFilterChain chain(HttpSecurity http,
+          JwtAuthFilter jwtFilter) throws Exception {
+    return http
+      .csrf(c -> c.disable())
+      .sessionManagement(s -> s.sessionCreationPolicy(STATELESS))
+      .authorizeHttpRequests(a -> a
+        .requestMatchers("/auth/**").permitAll()
+        .requestMatchers(GET, "/accounts/*/balance")
+            .hasAnyRole("CUSTOMER","ADMIN")
+        .requestMatchers(POST, "/accounts/*/transfer")
+            .hasRole("CUSTOMER")
+        .requestMatchers("/admin/**").hasRole("ADMIN")
+        .anyRequest().authenticated()
+      )
+      .addFilterBefore(jwtFilter,
+          UsernamePasswordAuthenticationFilter.class)
+      .build();
+  }
+}</code></pre>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:14px;font-weight:700;color:var(--spring);margin-bottom:14px">💸 Protected Controller</div>
+          <div class="code-wrap">
+            <div class="code-label"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>AccountController.java</div>
+            <pre><code class="language-java">@RestController
+@RequestMapping("/accounts")
+public class AccountController {
+
+  // CUSTOMER can only see THEIR balance
+  @GetMapping("/{accountId}/balance")
+  @PreAuthorize(
+    "@accountService.isOwner(#accountId, authentication.name)"
+    + " or hasRole('ADMIN')"
+  )
+  public BigDecimal getBalance(@PathVariable Long accountId) {
+    return accountService.getBalance(accountId);
+  }
+
+  // Get current user from SecurityContext
+  @GetMapping("/me")
+  public AccountSummary myAccount(
+      @AuthenticationPrincipal UserDetails user) {
+    return accountService.getSummary(user.getUsername());
+  }
+
+  // ADMIN only
+  @GetMapping("/all")
+  @PreAuthorize("hasRole('ADMIN')")
+  public List&lt;Account&gt; allAccounts() {
+    return accountService.findAll();
+  }
+}</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scenario B -->
+  <div class="scenario">
+    <div class="sc-hdr">
+      <div style="font-size:24px">🛒</div>
+      <div>
+        <div class="sc-title">Scenario B: E-Commerce — OAuth2 Social Login + JWT</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'Fira Code',monospace">Google/GitHub login → Create user → Issue JWT → Role-based product management</div>
+      </div>
+      <span class="tag t-blue" style="margin-left:auto">OAuth2 + JWT</span>
+    </div>
+    <div class="sc-body">
+      <div class="g2">
+        <div>
+          <div class="code-wrap">
+            <div class="code-label"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>OAuth2SuccessHandler.java — issue JWT after OAuth2 login</div>
+            <pre><code class="language-java">@Component
+@RequiredArgsConstructor
+public class OAuth2SuccessHandler
+        extends SimpleUrlAuthenticationSuccessHandler {
+
+  private final JwtService jwtService;
+  private final UserRepository userRepository;
+
+  @Override
+  public void onAuthenticationSuccess(
+      HttpServletRequest req, HttpServletResponse res,
+      Authentication authentication) throws IOException {
+
+    CustomOAuth2User oAuth2User =
+        (CustomOAuth2User) authentication.getPrincipal();
+
+    // Find or create user in our DB
+    User user = userRepository
+        .findByEmail(oAuth2User.getEmail())
+        .orElseGet(() -> createUserFromOAuth2(oAuth2User));
+
+    // Issue our own JWT
+    String token = jwtService.generateToken(user);
+
+    // Redirect frontend with token in fragment
+    // Frontend reads token and stores it
+    getRedirectStrategy().sendRedirect(req, res,
+        "http://localhost:3000/oauth-callback#token=" + token);
+  }
+}</code></pre>
+          </div>
+        </div>
+        <div>
+          <div class="code-wrap">
+            <div class="code-label"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>ProductController.java</div>
+            <pre><code class="language-java">@RestController
+@RequestMapping("/api/products")
+public class ProductController {
+
+  // Anyone can browse - even unauthenticated
+  @GetMapping
+  @PermitAll
+  public List&lt;Product&gt; listProducts() {
+    return productService.findAll();
+  }
+
+  // Only verified SELLERS can create products
+  @PostMapping
+  @PreAuthorize("hasRole('SELLER')")
+  public Product createProduct(@RequestBody ProductDto dto,
+      @AuthenticationPrincipal UserDetails user) {
+    return productService.create(dto, user.getUsername());
+  }
+
+  // Only product OWNER or ADMIN can edit
+  @PutMapping("/{id}")
+  @PreAuthorize(
+    "@productService.isOwner(#id, authentication.name) " +
+    "or hasRole('ADMIN')"
+  )
+  public Product update(@PathVariable Long id,
+      @RequestBody ProductDto dto) {
+    return productService.update(id, dto);
+  }
+}</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scenario C -->
+  <div class="scenario">
+    <div class="sc-hdr">
+      <div style="font-size:24px">🏥</div>
+      <div>
+        <div class="sc-title">Scenario C: Healthcare — Hierarchical Roles + Audit Logging</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'Fira Code',monospace">PATIENT &lt; DOCTOR &lt; ADMIN hierarchy + every access logged</div>
+      </div>
+      <span class="tag t-purple" style="margin-left:auto">Audit + Hierarchy</span>
+    </div>
+    <div class="sc-body">
+      <div class="g2">
+        <div>
+          <div class="code-wrap">
+            <div class="code-label"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>Role hierarchy config</div>
+            <pre><code class="language-java">@Bean
+public RoleHierarchy roleHierarchy() {
+    // ADMIN > DOCTOR > NURSE > PATIENT
+    // Higher roles inherit all lower-role permissions
+    return RoleHierarchyImpl.fromHierarchy("""
+        ROLE_ADMIN > ROLE_DOCTOR
+        ROLE_DOCTOR > ROLE_NURSE
+        ROLE_NURSE > ROLE_PATIENT
+        """);
+}
+// Now ADMIN automatically has DOCTOR's, NURSE's and PATIENT's access
+// DOCTOR automatically has NURSE's and PATIENT's access
+
+@Bean
+public MethodSecurityExpressionHandler methodExpressionHandler(
+        RoleHierarchy roleHierarchy) {
+    DefaultMethodSecurityExpressionHandler handler =
+        new DefaultMethodSecurityExpressionHandler();
+    handler.setRoleHierarchy(roleHierarchy);
+    return handler;
+}</code></pre>
+          </div>
+        </div>
+        <div>
+          <div class="code-wrap">
+            <div class="code-label"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>AuditAspect.java — log every record access</div>
+            <pre><code class="language-java">@Aspect @Component @RequiredArgsConstructor
+public class SecurityAuditAspect {
+
+  private final AuditLogRepository auditRepo;
+
+  @AfterReturning(
+    pointcut = "@annotation(Auditable)",
+    returning = "result"
+  )
+  public void logAccess(JoinPoint jp, Object result) {
+    Authentication auth = SecurityContextHolder
+        .getContext().getAuthentication();
+
+    AuditLog log = AuditLog.builder()
+        .username(auth.getName())
+        .action(jp.getSignature().getName())
+        .resource(result.getClass().getSimpleName())
+        .timestamp(Instant.now())
+        .ipAddress(getClientIp())
+        .build();
+
+    auditRepo.save(log); // every record access saved
+  }
+}
+
+// Usage: just add @Auditable to any method
+@GetMapping("/patients/{id}/records")
+@PreAuthorize("hasRole('DOCTOR') or " +
+    "@patientService.isOwnRecord(#id, authentication.name)")
+@Auditable  // ← triggers audit log
+public MedicalRecord getRecord(@PathVariable Long id) {
+    return recordService.findById(id);
+}</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     S12 — CHEATSHEET
+════════════════════════════════════════════════════ -->
+<div class="section" id="s12">
+  <div class="sec-header">
+    <div class="sec-num">12</div>
+    <div class="sec-title">Cheatsheet + Interview Q&amp;A</div>
+    <div class="sec-sub">everything you need to remember</div>
+  </div>
+
+  <div class="cheat-grid" style="margin-bottom:24px">
+    <div class="cheat-card">
+      <div class="cheat-title">⚡ Key Annotations</div>
+      <div class="cmd-row"><span class="cmd">@EnableWebSecurity</span><span class="cmd-d">Activates Spring Security — put on @Configuration class</span></div>
+      <div class="cmd-row"><span class="cmd">@EnableMethodSecurity</span><span class="cmd-d">Enables @PreAuthorize, @PostAuthorize, @PreFilter, @PostFilter</span></div>
+      <div class="cmd-row"><span class="cmd">@PreAuthorize("...")</span><span class="cmd-d">Security check BEFORE method runs — uses SpEL expressions</span></div>
+      <div class="cmd-row"><span class="cmd">@PostAuthorize("...")</span><span class="cmd-d">Security check AFTER — can inspect returnObject value</span></div>
+      <div class="cmd-row"><span class="cmd">@Secured("ROLE_X")</span><span class="cmd-d">Simpler annotation — no SpEL, just role names</span></div>
+      <div class="cmd-row"><span class="cmd">@AuthenticationPrincipal</span><span class="cmd-d">Inject current UserDetails into controller method parameter</span></div>
+      <div class="cmd-row"><span class="cmd">@WithMockUser</span><span class="cmd-d">Test annotation — mock a logged-in user in unit tests</span></div>
+      <div class="cmd-row"><span class="cmd">@WithUserDetails("bob")</span><span class="cmd-d">Test with real UserDetails loaded by name</span></div>
+    </div>
+    <div class="cheat-card">
+      <div class="cheat-title">🎯 SecurityContext Access</div>
+      <div class="cmd-row"><span class="cmd">getContext().getAuthentication()</span><span class="cmd-d">Get current Authentication anywhere in your code</span></div>
+      <div class="cmd-row"><span class="cmd">.getName()</span><span class="cmd-d">Get the authenticated username (principal name)</span></div>
+      <div class="cmd-row"><span class="cmd">.getAuthorities()</span><span class="cmd-d">Get list of roles/permissions granted to user</span></div>
+      <div class="cmd-row"><span class="cmd">.isAuthenticated()</span><span class="cmd-d">Check if user is authenticated (not anonymous)</span></div>
+      <div class="cmd-row"><span class="cmd">.getPrincipal()</span><span class="cmd-d">Get the UserDetails object (cast to your User type)</span></div>
+      <div class="cmd-row"><span class="cmd">clearContext()</span><span class="cmd-d">Clear authentication — use on logout</span></div>
+      <div class="cmd-row"><span class="cmd">setAuthentication(auth)</span><span class="cmd-d">Manually set authenticated user — used in JWT filter</span></div>
+      <div class="cmd-row"><span class="cmd">MODE_INHERITABLETHREADLOCAL</span><span class="cmd-d">Strategy to propagate SecurityContext to child threads</span></div>
+    </div>
+  </div>
+
+  <div class="cheat-grid">
+    <div class="cheat-card">
+      <div class="cheat-title">❓ Interview Q&amp;A — Part 1</div>
+      <div class="cmd-row">
+        <span class="cmd">Filter Chain?</span>
+        <span class="cmd-d">Ordered pipeline of security filters every request passes through. Each filter has single responsibility. Custom filters inserted at specific positions with addFilterBefore/After.</span>
+      </div>
+      <div class="cmd-row">
+        <span class="cmd">Authentication vs Authorization?</span>
+        <span class="cmd-d">Authentication = who are you (verify identity). Authorization = what can you do (check permissions). Auth always happens before Authz.</span>
+      </div>
+      <div class="cmd-row">
+        <span class="cmd">Why BCrypt?</span>
+        <span class="cmd-d">Bcrypt is slow by design (cost factor). Includes salt automatically. Resistant to rainbow table attacks. Never store plain text or MD5/SHA1 passwords.</span>
+      </div>
+      <div class="cmd-row">
+        <span class="cmd">JWT vs Session?</span>
+        <span class="cmd-d">JWT is stateless (no DB lookup per request), scalable, good for microservices. Sessions are stateful (stored server-side), easier to invalidate, good for monoliths.</span>
+      </div>
+      <div class="cmd-row">
+        <span class="cmd">CSRF vs CORS?</span>
+        <span class="cmd-d">CSRF is an attack (forged requests using your cookies). CORS is a browser policy (blocks cross-origin requests). They're unrelated — CORS doesn't prevent CSRF.</span>
+      </div>
+    </div>
+    <div class="cheat-card">
+      <div class="cheat-title">❓ Interview Q&amp;A — Part 2</div>
+      <div class="cmd-row">
+        <span class="cmd">SecurityContext scope?</span>
+        <span class="cmd-d">ThreadLocal by default — each request/thread has its own context. Cleared after each request. Use MODE_INHERITABLETHREADLOCAL for async code.</span>
+      </div>
+      <div class="cmd-row">
+        <span class="cmd">hasRole vs hasAuthority?</span>
+        <span class="cmd-d">hasRole("ADMIN") auto-prepends ROLE_ prefix. hasAuthority("ROLE_ADMIN") is exact match. Same result if you follow the ROLE_ convention.</span>
+      </div>
+      <div class="cmd-row">
+        <span class="cmd">How to test security?</span>
+        <span class="cmd-d">Use @WithMockUser for mock users, @WithUserDetails for real DB users, MockMvc with .with(user(...)) for controller tests. @WithAnonymousUser for anonymous access tests.</span>
+      </div>
+      <div class="cmd-row">
+        <span class="cmd">401 vs 403?</span>
+        <span class="cmd-d">401 Unauthorized = not authenticated (no valid credentials). 403 Forbidden = authenticated but not authorized (wrong role). ExceptionTranslationFilter handles the mapping.</span>
+      </div>
+      <div class="cmd-row">
+        <span class="cmd">How to get current user?</span>
+        <span class="cmd-d">SecurityContextHolder.getContext().getAuthentication() anywhere. @AuthenticationPrincipal UserDetails user in controller params. @CurrentSecurityContext for full context.</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:24px">
+    <div class="card">
+      <div class="card-head"><div class="card-ico">🧪</div><div><div class="card-name" style="color:var(--spring)">Testing Spring Security — Complete Example</div></div></div>
+      <div class="code-wrap">
+        <div class="code-label"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>AccountControllerTest.java</div>
+        <pre><code class="language-java">@WebMvcTest(AccountController.class)
+@Import(SecurityConfig.class)
+class AccountControllerTest {
+
+    @Autowired MockMvc mockMvc;
+
+    @Test
+    @WithAnonymousUser  // unauthenticated
+    void getBalance_unauthenticated_returns401() throws Exception {
+        mockMvc.perform(get("/accounts/1/balance"))
+            .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithMockUser(username = "alice", roles = {"CUSTOMER"})
+    void getBalance_asOwner_returns200() throws Exception {
+        // Mocked user has username "alice"
+        mockMvc.perform(get("/accounts/1/balance"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.balance").exists());
+    }
+
+    @Test
+    @WithMockUser(username = "bob", roles = {"CUSTOMER"})
+    void deleteAccount_asCustomer_returns403() throws Exception {
+        // CUSTOMER role cannot delete — ADMIN only
+        mockMvc.perform(delete("/admin/accounts/1"))
+            .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(roles = {"ADMIN"})
+    void deleteAccount_asAdmin_returns200() throws Exception {
+        mockMvc.perform(delete("/admin/accounts/1"))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void login_withValidCredentials_returnsJwt() throws Exception {
+        String body = """
+            {"username": "alice", "password": "password123"}
+            """;
+        mockMvc.perform(post("/api/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.token").isNotEmpty());
+    }
+}</code></pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end .page -->
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  hljs.configure({ ignoreUnescapedHTML: true });
+  hljs.highlightAll();
+});
+</script>
+</body>
+</html>
