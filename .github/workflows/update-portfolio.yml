@@ -3,10 +3,14 @@ name: Auto Update Portfolio Cards
 on:
   push:
     paths:
-      - "*.html"
+      - "**/*.html"
+
+permissions:
+  contents: write
 
 jobs:
   update-index:
+
     runs-on: ubuntu-latest
 
     steps:
@@ -22,6 +26,9 @@ jobs:
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "actions@github.com"
+
           git add index.html
-          git commit -m "Auto update portfolio cards" || echo "No changes"
+
+          git diff --cached --quiet || git commit -m "Auto update portfolio cards"
+
           git push
