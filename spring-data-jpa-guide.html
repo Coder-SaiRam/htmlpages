@@ -1,0 +1,2052 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spring Data JPA — Complete Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/java.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/sql.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/yaml.min.js"></script>
+<style>
+:root {
+  --bg:        #09090f;
+  --bg2:       #0e0e1a;
+  --bg3:       #131320;
+  --bg4:       #1a1a2e;
+  --border:    #1e1e35;
+  --border2:   #2a2a50;
+  --text:      #d4d4f0;
+  --muted:     #6060a0;
+  --faint:     #2a2a45;
+  --indigo:    #818cf8;
+  --indigo-bg: #07071a;
+  --teal:      #2dd4bf;
+  --teal-bg:   #021410;
+  --amber:     #fbbf24;
+  --amber-bg:  #160f00;
+  --red:       #f87171;
+  --red-bg:    #160303;
+  --blue:      #60a5fa;
+  --blue-bg:   #040c1a;
+  --purple:    #c084fc;
+  --purple-bg: #0e0618;
+  --pink:      #f472b6;
+  --pink-bg:   #160410;
+  --green:     #4ade80;
+  --green-bg:  #031408;
+  --cyan:      #22d3ee;
+  --cyan-bg:   #021216;
+  --orange:    #fb923c;
+  --orange-bg: #160800;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--text); font-family: 'Outfit', sans-serif; font-size: 15px; line-height: 1.6; }
+
+/* HERO */
+.hero {
+  padding: 56px 64px 52px; border-bottom: 1px solid var(--border);
+  background: radial-gradient(ellipse 70% 60% at 60% -10%, #818cf814 0%, transparent 65%),
+              radial-gradient(ellipse 40% 40% at 5% 90%, #2dd4bf07 0%, transparent 55%), var(--bg2);
+  position: relative; overflow: hidden;
+}
+.hero-dots { position: absolute; inset: 0; background-image: radial-gradient(var(--border) 1px, transparent 1px); background-size: 30px 30px; opacity: 0.5; pointer-events: none; }
+.hero-badge { display: inline-flex; align-items: center; gap: 8px; background: var(--indigo-bg); border: 1px solid var(--indigo); color: var(--indigo); font-family: 'Fira Code', monospace; font-size: 11px; font-weight: 600; letter-spacing: 1.5px; padding: 5px 16px; border-radius: 20px; margin-bottom: 22px; }
+.hero h1 { font-size: 52px; font-weight: 900; line-height: 1.05; margin-bottom: 16px; background: linear-gradient(110deg, #d4d4f0 0%, #818cf8 35%, #2dd4bf 65%, #4ade80 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.hero p { color: var(--muted); font-size: 17px; max-width: 720px; line-height: 1.75; }
+.hero-icon { position: absolute; right: 60px; top: 50%; transform: translateY(-50%); font-size: 160px; opacity: 0.06; pointer-events: none; }
+
+/* NAV */
+.toc { display: flex; flex-wrap: wrap; gap: 8px; padding: 16px 64px; background: var(--bg2); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
+.toc a { font-family: 'Fira Code', monospace; font-size: 11px; font-weight: 600; color: var(--muted); text-decoration: none; background: var(--bg3); border: 1px solid var(--border); padding: 5px 12px; border-radius: 6px; transition: all .2s; }
+.toc a:hover { color: var(--indigo); border-color: var(--indigo); }
+
+/* LAYOUT */
+.page { max-width: 1500px; margin: 0 auto; padding: 0 52px 100px; }
+.section { margin-top: 68px; scroll-margin-top: 68px; }
+.sec-header { display: flex; align-items: center; gap: 16px; margin-bottom: 32px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+.sec-num { font-family: 'Fira Code', monospace; font-size: 11px; font-weight: 700; background: var(--indigo); color: #000; width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.sec-title { font-size: 24px; font-weight: 800; }
+.sec-sub { font-size: 12px; color: var(--muted); margin-left: auto; font-family: 'Fira Code', monospace; }
+
+/* CARDS */
+.card { background: var(--bg2); border: 1px solid var(--border); border-radius: 14px; padding: 28px; transition: border-color .2s, transform .15s; }
+.card:hover { border-color: var(--border2); transform: translateY(-2px); }
+.card-head { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 18px; }
+.card-ico  { font-size: 30px; line-height: 1; flex-shrink: 0; margin-top: 2px; }
+.card-name { font-size: 18px; font-weight: 800; margin-bottom: 4px; }
+.card-sub2 { font-size: 12px; font-family: 'Fira Code', monospace; color: var(--muted); }
+.card-body { font-size: 13.5px; color: var(--muted); line-height: 1.8; margin-bottom: 14px; }
+
+/* TAGS */
+.tag { display: inline-flex; align-items: center; font-family: 'Fira Code', monospace; font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; margin: 2px; }
+.t-indigo { background: var(--indigo-bg); color: var(--indigo); border: 1px solid #818cf835; }
+.t-teal   { background: var(--teal-bg);   color: var(--teal);   border: 1px solid #2dd4bf35; }
+.t-amber  { background: var(--amber-bg);  color: var(--amber);  border: 1px solid #fbbf2435; }
+.t-red    { background: var(--red-bg);    color: var(--red);    border: 1px solid #f8717135; }
+.t-blue   { background: var(--blue-bg);   color: var(--blue);   border: 1px solid #60a5fa35; }
+.t-purple { background: var(--purple-bg); color: var(--purple); border: 1px solid #c084fc35; }
+.t-pink   { background: var(--pink-bg);   color: var(--pink);   border: 1px solid #f472b635; }
+.t-green  { background: var(--green-bg);  color: var(--green);  border: 1px solid #4ade8035; }
+.t-cyan   { background: var(--cyan-bg);   color: var(--cyan);   border: 1px solid #22d3ee35; }
+.t-orange { background: var(--orange-bg); color: var(--orange); border: 1px solid #fb923c35; }
+
+/* GRIDS */
+.g2  { display: grid; grid-template-columns: 1fr 1fr;         gap: 22px; }
+.g3  { display: grid; grid-template-columns: 1fr 1fr 1fr;     gap: 20px; }
+.g4  { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 18px; }
+.g23 { display: grid; grid-template-columns: 2fr 3fr;         gap: 22px; }
+.g32 { display: grid; grid-template-columns: 3fr 2fr;         gap: 22px; }
+
+/* ANALOGY */
+.analogy { background: var(--bg3); border-left: 3px solid var(--indigo); border-radius: 0 8px 8px 0; padding: 11px 16px; font-size: 13px; color: var(--indigo); font-style: italic; margin-top: 12px; }
+
+/* ALERTS */
+.alert { border-radius: 10px; padding: 14px 18px; font-size: 13px; line-height: 1.75; margin: 14px 0; display: flex; gap: 12px; align-items: flex-start; }
+.al-warn { background: var(--amber-bg); border: 1px solid #fbbf2440; color: var(--amber); }
+.al-info { background: var(--blue-bg);  border: 1px solid #60a5fa40; color: var(--blue); }
+.al-good { background: var(--green-bg); border: 1px solid #4ade8040; color: var(--green); }
+.al-bad  { background: var(--red-bg);   border: 1px solid #f8717140; color: var(--red); }
+.al-ico  { font-size: 18px; flex-shrink: 0; margin-top: 2px; }
+
+/* TABLE */
+.tbl { width: 100%; border-collapse: collapse; border-radius: 12px; overflow: hidden; }
+.tbl th { background: var(--bg4); padding: 13px 18px; font-family: 'Fira Code', monospace; font-size: 11px; color: var(--muted); text-align: left; font-weight: 600; letter-spacing: .5px; border-bottom: 1px solid var(--border2); }
+.tbl td { padding: 12px 18px; font-size: 13px; color: var(--text); border-bottom: 1px solid var(--border); vertical-align: top; line-height: 1.6; }
+.tbl tr:last-child td { border-bottom: none; }
+.tbl tr:hover td { background: var(--bg3); }
+.tbl td:first-child { font-family: 'Fira Code', monospace; font-size: 12px; color: var(--amber); font-weight: 700; }
+
+/* CODE */
+.code-wrap { border-radius: 10px; overflow: hidden; margin: 14px 0; border: 1px solid var(--border2); }
+.code-label { background: var(--bg4); padding: 8px 18px; font-family: 'Fira Code', monospace; font-size: 11px; color: var(--muted); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
+.dots { display: flex; gap: 5px; }
+.dot { width: 10px; height: 10px; border-radius: 50%; }
+.dot-r { background: #f87171; } .dot-y { background: #fbbf24; } .dot-g { background: #4ade80; }
+.code-wrap pre { margin: 0 !important; border-radius: 0 !important; }
+.code-wrap pre code { font-size: 13px !important; line-height: 1.85 !important; padding: 20px 22px !important; }
+.hljs { background: #020408 !important; }
+
+/* FLOW HORIZONTAL */
+.flow-h { display: flex; align-items: stretch; border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+.fh-step { flex: 1; padding: 22px 14px; background: var(--bg2); border-right: 1px solid var(--border); position: relative; text-align: center; }
+.fh-step:last-child { border-right: none; }
+.fh-step::after { content: '›'; position: absolute; right: -13px; top: 50%; transform: translateY(-50%); font-size: 26px; color: var(--indigo); z-index: 2; }
+.fh-step:last-child::after { display: none; }
+.fh-num { width: 30px; height: 30px; border-radius: 50%; background: var(--indigo); color: #000; font-family: 'Fira Code', monospace; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; }
+.fh-ico { font-size: 26px; margin-bottom: 10px; }
+.fh-ttl { font-size: 13px; font-weight: 800; margin-bottom: 6px; }
+.fh-dsc { font-size: 11.5px; color: var(--muted); line-height: 1.6; }
+
+/* FLOW VERTICAL */
+.flow-v { border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+.fv-step { display: flex; align-items: flex-start; gap: 18px; padding: 18px 22px; background: var(--bg2); border-bottom: 1px solid var(--border); position: relative; }
+.fv-step:last-child { border-bottom: none; }
+.fv-step::before { content: ''; position: absolute; left: 37px; top: 62px; bottom: -1px; width: 2px; background: var(--faint); }
+.fv-step:last-child::before { display: none; }
+.fv-num { width: 32px; height: 32px; border-radius: 50%; background: var(--indigo); color: #000; font-family: 'Fira Code', monospace; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+.fv-ttl { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+.fv-dsc { font-size: 13px; color: var(--muted); line-height: 1.7; }
+
+/* ARCH */
+.arch { border: 1px solid var(--border2); border-radius: 16px; padding: 34px; background: radial-gradient(ellipse 60% 40% at 50% 0%, #818cf80c 0%, transparent 65%), var(--bg2); position: relative; }
+.arch-lbl { position: absolute; top: -14px; left: 30px; background: var(--bg); padding: 0 14px; font-family: 'Fira Code', monospace; font-size: 11px; color: var(--muted); border: 1px solid var(--border); border-radius: 6px; }
+
+/* SCENARIO */
+.scenario { border: 1px solid var(--border2); border-radius: 14px; overflow: hidden; margin-bottom: 24px; }
+.sc-hdr { background: var(--bg4); padding: 14px 22px; display: flex; align-items: center; gap: 14px; border-bottom: 1px solid var(--border); }
+.sc-title { font-size: 16px; font-weight: 800; }
+.sc-body { padding: 24px; background: var(--bg2); }
+
+/* CHEATSHEET */
+.cheat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.cheat-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 24px; }
+.cheat-title { font-size: 16px; font-weight: 800; margin-bottom: 18px; color: var(--indigo); display: flex; align-items: center; gap: 10px; }
+.cmd-row { display: flex; align-items: flex-start; gap: 14px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.cmd-row:last-child { border-bottom: none; }
+.cmd { font-family: 'Fira Code', monospace; font-size: 11px; color: var(--teal); background: var(--bg4); padding: 4px 10px; border-radius: 5px; white-space: nowrap; flex-shrink: 0; }
+.cmd-d { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+/* RELATION VISUAL */
+.rel-box { border: 1px solid var(--border2); border-radius: 12px; overflow: hidden; }
+.rel-header { background: var(--bg4); padding: 12px 20px; border-bottom: 1px solid var(--border); font-weight: 700; font-size: 14px; display: flex; align-items: center; gap: 10px; }
+.rel-body { padding: 20px; background: var(--bg2); }
+.entity-box { background: var(--bg4); border: 1px solid var(--border2); border-radius: 8px; padding: 12px 16px; font-family: 'Fira Code', monospace; font-size: 12px; }
+.entity-name { font-weight: 700; margin-bottom: 8px; }
+.entity-field { color: var(--muted); margin: 3px 0; }
+.entity-field .type { color: var(--teal); }
+.entity-field .ann  { color: var(--indigo); }
+.rel-arrow { text-align: center; font-size: 22px; color: var(--amber); padding: 8px 0; }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-dots"></div>
+  <div class="hero-badge">🗄️ SPRING DATA JPA — COMPLETE GUIDE</div>
+  <h1>Spring Data JPA<br>Zero to Production</h1>
+  <p>Entities · Relationships · Repositories · JPQL · Native SQL · Pagination · Transactions · N+1 Problem · Projections · Auditing · Caching — every concept with real-world scenarios and production-ready code.</p>
+  <div class="hero-icon">🗄️</div>
+</div>
+
+<!-- TOC -->
+<nav class="toc">
+  <a href="#s1">1. JPA Overview</a>
+  <a href="#s2">2. Architecture</a>
+  <a href="#s3">3. Entities &amp; Annotations</a>
+  <a href="#s4">4. Relationships</a>
+  <a href="#s5">5. Repositories</a>
+  <a href="#s6">6. Query Methods</a>
+  <a href="#s7">7. JPQL &amp; Native SQL</a>
+  <a href="#s8">8. Pagination &amp; Sorting</a>
+  <a href="#s9">9. Transactions</a>
+  <a href="#s10">10. N+1 &amp; Fetch</a>
+  <a href="#s11">11. Projections &amp; DTOs</a>
+  <a href="#s12">12. Auditing &amp; Caching</a>
+  <a href="#s13">13. Real Scenarios</a>
+  <a href="#s14">14. Cheatsheet</a>
+</nav>
+
+<div class="page">
+
+<!-- ══════════════════════════════════════════
+     S1 — JPA OVERVIEW
+═══════════════════════════════════════════ -->
+<div class="section" id="s1">
+  <div class="sec-header">
+    <div class="sec-num">1</div>
+    <div class="sec-title">What is JPA? The Hierarchy Explained</div>
+    <div class="sec-sub">JDBC → JPA → Hibernate → Spring Data JPA</div>
+  </div>
+  <div class="g4" style="margin-bottom:22px">
+    <div class="card" style="border-color:#f8717140;background:var(--red-bg)">
+      <div class="card-head"><div class="card-ico">🔌</div><div><div class="card-name" style="color:var(--red)">JDBC</div><div class="card-sub2">raw database API</div></div></div>
+      <div class="card-body">Direct database calls. Manual SQL. Manual ResultSet mapping. No object mapping. Maximum control, maximum boilerplate. Every query = 20+ lines of code.</div>
+      <div class="analogy">🔌 Driving manual car — you control every gear shift</div>
+    </div>
+    <div class="card" style="border-color:#fbbf2440;background:var(--amber-bg)">
+      <div class="card-head"><div class="card-ico">📜</div><div><div class="card-name" style="color:var(--amber)">JPA Spec</div><div class="card-sub2">Java EE standard</div></div></div>
+      <div class="card-body">Java Persistence API — a <strong>specification</strong> (interfaces only). Defines how Java objects map to DB tables. NOT an implementation — just a contract. Providers implement it.</div>
+      <div class="analogy">📜 Car safety standards — rules that car makers must follow</div>
+    </div>
+    <div class="card" style="border-color:#c084fc40;background:var(--purple-bg)">
+      <div class="card-head"><div class="card-ico">⚙️</div><div><div class="card-name" style="color:var(--purple)">Hibernate</div><div class="card-sub2">JPA implementation</div></div></div>
+      <div class="card-body">Most popular JPA provider. Implements JPA spec + adds extras (Criteria API, L2 cache, etc). Spring Boot uses Hibernate as default. Does the actual SQL generation.</div>
+      <div class="analogy">⚙️ Toyota — implements the safety standards + adds their own features</div>
+    </div>
+    <div class="card" style="border-color:#818cf840;background:var(--indigo-bg)">
+      <div class="card-head"><div class="card-ico">🚀</div><div><div class="card-name" style="color:var(--indigo)">Spring Data JPA</div><div class="card-sub2">abstraction on top</div></div></div>
+      <div class="card-body">Spring layer on top of Hibernate/JPA. Auto-generates repositories. Derive queries from method names. Pagination, sorting, auditing built-in. <strong>This is what you mostly use.</strong></div>
+      <div class="analogy">🚀 Self-driving car — you say "go to mall", it handles everything</div>
+    </div>
+  </div>
+
+  <div class="g2">
+    <div class="card" style="border-color:#f8717140;background:var(--red-bg)">
+      <div class="card-head"><div class="card-ico">😩</div><div><div class="card-name" style="color:var(--red)">Without Spring Data JPA (Pure JDBC)</div></div></div>
+      <div class="code-wrap">
+        <div class="code-label"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>UserDaoJdbc.java — painful boilerplate</div>
+        <pre><code class="language-java">public User findByEmail(String email) {
+    String sql = "SELECT * FROM users WHERE email = ?";
+    Connection conn = null;
+    PreparedStatement ps = null;
+    ResultSet rs = null;
+    try {
+        conn = dataSource.getConnection();
+        ps = conn.prepareStatement(sql);
+        ps.setString(1, email);
+        rs = ps.executeQuery();
+        if (rs.next()) {
+            User user = new User();
+            user.setId(rs.getLong("id"));
+            user.setName(rs.getString("name"));
+            user.setEmail(rs.getString("email"));
+            // ...map every column manually
+            return user;
+        }
+        return null;
+    } catch (SQLException e) {
+        throw new RuntimeException(e);
+    } finally {
+        // close rs, ps, conn — or leak memory!
+        try { if (rs != null) rs.close(); } catch (Exception e) {}
+        try { if (ps != null) ps.close(); } catch (Exception e) {}
+        try { if (conn != null) conn.close(); } catch (Exception e) {}
+    }
+}</code></pre>
+      </div>
+    </div>
+    <div class="card" style="border-color:#4ade8040;background:var(--green-bg)">
+      <div class="card-head"><div class="card-ico">😍</div><div><div class="card-name" style="color:var(--green)">With Spring Data JPA</div></div></div>
+      <div class="code-wrap">
+        <div class="code-label"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>UserRepository.java — zero boilerplate</div>
+        <pre><code class="language-java">// That's it. Spring generates the implementation!
+public interface UserRepository extends JpaRepository&lt;User, Long&gt; {
+
+    // Spring derives SQL from method name automatically
+    Optional&lt;User&gt; findByEmail(String email);
+
+    List&lt;User&gt; findByNameContainingIgnoreCase(String name);
+
+    List&lt;User&gt; findByAgeGreaterThanAndActiveTrue(int age);
+
+    long countByDepartment(String department);
+}
+
+// Usage in service — just inject and call
+@Service
+public class UserService {
+    private final UserRepository repo;
+
+    public Optional&lt;User&gt; getByEmail(String email) {
+        return repo.findByEmail(email);  // done!
+    }
+}</code></pre>
+      </div>
+      <div class="analogy">🚀 Same result in 3 lines vs 40 lines — Spring generates the SQL and mapping automatically</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     S2 — ARCHITECTURE
+═══════════════════════════════════════════ -->
+<div class="section" id="s2">
+  <div class="sec-header">
+    <div class="sec-num">2</div>
+    <div class="sec-title">Spring Data JPA Architecture</div>
+    <div class="sec-sub">layers and components</div>
+  </div>
+  <div class="arch" style="margin-bottom:24px">
+    <div class="arch-lbl">Spring Data JPA — Full Architecture</div>
+    <div class="g2">
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--indigo);font-family:'Fira Code',monospace;margin-bottom:16px">📥 REQUEST FLOW</div>
+        <div class="flow-v">
+          <div class="fv-step"><div class="fv-num">1</div><div><div class="fv-ttl" style="color:var(--blue)">🌐 @RestController / @Service</div><div class="fv-dsc">Your business logic calls Repository methods. No SQL knowledge needed here.</div></div></div>
+          <div class="fv-step"><div class="fv-num">2</div><div><div class="fv-ttl" style="color:var(--indigo)">📋 Spring Data Repository Interface</div><div class="fv-dsc">Your interface extends <code style="font-family:'Fira Code',monospace">JpaRepository&lt;Entity, ID&gt;</code>. Spring generates implementation at startup via proxy pattern.</div></div></div>
+          <div class="fv-step"><div class="fv-num">3</div><div><div class="fv-ttl" style="color:var(--purple)">🔀 SimpleJpaRepository (generated impl)</div><div class="fv-dsc">Spring's auto-generated proxy. Translates method names to JPQL. Manages Entity lifecycle.</div></div></div>
+          <div class="fv-step"><div class="fv-num">4</div><div><div class="fv-ttl" style="color:var(--amber)">🗂️ EntityManager (JPA)</div><div class="fv-dsc">JPA's core API. Manages persistence context (1st-level cache). Tracks entity state. The gateway to Hibernate.</div></div></div>
+          <div class="fv-step"><div class="fv-num">5</div><div><div class="fv-ttl" style="color:var(--orange)">⚙️ Hibernate SessionFactory</div><div class="fv-dsc">JPA Provider. Generates actual SQL. Manages 2nd-level cache. Translates JPQL → SQL dialect.</div></div></div>
+          <div class="fv-step"><div class="fv-num">6</div><div><div class="fv-ttl" style="color:var(--teal)">🔌 JDBC + DataSource (HikariCP)</div><div class="fv-dsc">Connection pool sends SQL to actual database. HikariCP is the default fast connection pool in Spring Boot.</div></div></div>
+          <div class="fv-step"><div class="fv-num">7</div><div><div class="fv-ttl" style="color:var(--green)">🗄️ Database (MySQL / PostgreSQL / H2)</div><div class="fv-dsc">Executes SQL, returns ResultSet. Spring maps it back to your Entity object.</div></div></div>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--indigo);font-family:'Fira Code',monospace;margin-bottom:16px">🧩 KEY COMPONENTS</div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div style="background:var(--bg4);border:1px solid var(--border2);border-radius:10px;padding:16px">
+            <div style="font-size:13px;font-weight:700;color:var(--indigo);margin-bottom:8px">📦 Persistence Context</div>
+            <div style="font-size:12.5px;color:var(--muted);line-height:1.7">First-level cache. EntityManager maintains a map of all loaded entities per transaction. Identical queries within same transaction return same object from cache — no DB hit.</div>
+          </div>
+          <div style="background:var(--bg4);border:1px solid var(--border2);border-radius:10px;padding:16px">
+            <div style="font-size:13px;font-weight:700;color:var(--purple);margin-bottom:8px">🔄 Entity Lifecycle</div>
+            <div style="font-size:12.5px;color:var(--muted);line-height:1.7">
+              <strong style="color:var(--text)">Transient</strong> → new object, not in DB<br>
+              <strong style="color:var(--text)">Managed</strong> → tracked by EntityManager<br>
+              <strong style="color:var(--text)">Detached</strong> → was managed, no longer tracked<br>
+              <strong style="color:var(--text)">Removed</strong> → scheduled for DELETE
+            </div>
+          </div>
+          <div style="background:var(--bg4);border:1px solid var(--border2);border-radius:10px;padding:16px">
+            <div style="font-size:13px;font-weight:700;color:var(--amber);margin-bottom:8px">⚡ HikariCP Connection Pool</div>
+            <div style="font-size:12.5px;color:var(--muted);line-height:1.7">Pool of pre-opened DB connections. Default pool-size: 10. Reuses connections instead of opening new ones. Configure: <code style="font-family:'Fira Code',monospace">spring.datasource.hikari.maximum-pool-size=20</code></div>
+          </div>
+          <div style="background:var(--bg4);border:1px solid var(--border2);border-radius:10px;padding:16px">
+            <div style="font-size:13px;font-weight:700;color:var(--teal);margin-bottom:8px">🗺️ Dialect</div>
+            <div style="font-size:12.5px;color:var(--muted);line-height:1.7">Hibernate generates DB-specific SQL. MySQL dialect uses <code style="font-family:'Fira Code',monospace">LIMIT</code>, PostgreSQL uses <code style="font-family:'Fira Code',monospace">LIMIT/OFFSET</code>, Oracle uses <code style="font-family:'Fira Code',monospace">ROWNUM</code>. Auto-detected from driver.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><div class="card-ico">⚙️</div><div><div class="card-name" style="color:var(--indigo)">application.yml — Complete JPA Configuration</div></div></div>
+    <div class="code-wrap">
+      <div class="code-label"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>application.yml</div>
+      <pre><code class="language-yaml">spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/mydb
+    username: ${DB_USER}
+    password: ${DB_PASS}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 20      # max connections in pool
+      minimum-idle: 5            # min idle connections
+      connection-timeout: 30000  # 30s wait for connection
+      idle-timeout: 600000       # 10min idle timeout
+      max-lifetime: 1800000      # 30min max connection life
+
+  jpa:
+    hibernate:
+      ddl-auto: validate         # prod: validate | dev: create-drop | update
+    show-sql: false              # true only in dev — logs every SQL
+    properties:
+      hibernate:
+        format_sql: true         # pretty-print SQL
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        default_batch_fetch_size: 100   # fix N+1 for collections
+        jdbc:
+          batch_size: 50         # batch INSERT/UPDATE operations
+        order_inserts: true      # group batch inserts by entity type
+        order_updates: true
+        cache:
+          use_second_level_cache: true
+          region.factory_class: org.hibernate.cache.jcache.JCacheRegionFactory
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG                # show SQL in dev
+    org.hibernate.type.descriptor.sql: TRACE # show bind parameters</code></pre>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     S3 — ENTITIES & ANNOTATIONS
+═══════════════════════════════════════════ -->
+<div class="section" id="s3">
+  <div class="sec-header">
+    <div class="sec-num">3</div>
+    <div class="sec-title">Entities &amp; Annotations</div>
+    <div class="sec-sub">mapping Java classes to DB tables</div>
+  </div>
+
+  <div class="g2" style="margin-bottom:22px">
+    <div class="card">
+      <div class="card-head"><div class="card-ico">🏗️</div><div><div class="card-name" style="color:var(--indigo)">Complete Entity Example</div><div class="card-sub2">all common annotations</div></div></div>
+      <div class="code-wrap">
+        <div class="code-label"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>Product.java</div>
+        <pre><code class="language-java">@Entity                             // marks this as a JPA entity
+@Table(name = "products",           // custom table name
+    indexes = {
+        @Index(name = "idx_sku", columnList = "sku", unique = true),
+        @Index(name = "idx_category", columnList = "category_id")
+    }
+)
+@EntityListeners(AuditingEntityListener.class)  // for auditing
+@Data                               // Lombok: getters, setters, equals, hashCode
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class Product {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // auto-increment
+    private Long id;
+
+    @Column(name = "product_name",  // custom column name
+            nullable = false,
+            length = 200)
+    private String name;
+
+    @Column(unique = true, nullable = false, length = 50)
+    private String sku;             // Stock Keeping Unit
+
+    @Column(precision = 10, scale = 2)  // for BigDecimal: 10 total digits, 2 decimal
+    private BigDecimal price;
+
+    @Enumerated(EnumType.STRING)    // store enum as "ACTIVE" not 0
+    @Column(nullable = false)
+    private ProductStatus status;   // enum: ACTIVE, INACTIVE, DISCONTINUED
+
+    @Lob                            // Large Object — stores in separate LOB column
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
+    @Column(name = "image_url")
+    private String imageUrl;
+
+    @Version                        // optimistic locking — auto-incremented on update
+    private Long version;
+
+    // Auditing fields (auto-populated)
+    @CreatedDate
+    @Column(updatable = false)
+    private LocalDateTime createdAt;
+
+    @LastModifiedDate
+    private LocalDateTime updatedAt;
+
+    @CreatedBy
+    @Column(updatable = false)
+    private String createdBy;
+
+    // Relationships (see Section 4)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    private Category category;
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List&lt;ProductImage&gt; images = new ArrayList&lt;&gt;();
+
+    @ElementCollection                  // for simple value collections
+    @CollectionTable(name = "product_tags", joinColumns = @JoinColumn(name = "product_id"))
+    @Column(name = "tag")
+    private Set&lt;String&gt; tags = new HashSet&lt;&gt;();
+}</code></pre>
+      </div>
+    </div>
+
+    <div>
+      <div class="card" style="margin-bottom:20px">
+        <div class="card-head"><div class="card-ico">🔑</div><div><div class="card-name" style="color:var(--amber)">@GeneratedValue Strategies</div></div></div>
+        <table class="tbl">
+          <thead><tr><th>Strategy</th><th>How it works</th><th>Best for</th></tr></thead>
+          <tbody>
+            <tr><td>IDENTITY</td><td>DB auto-increment (MySQL, PostgreSQL serial)</td><td>MySQL, PostgreSQL</td></tr>
+            <tr><td>SEQUENCE</td><td>DB sequence object — batching possible</td><td>PostgreSQL, Oracle — preferred!</td></tr>
+            <tr><td>TABLE</td><td>Uses a special DB table for ID generation</td><td>Portable but slowest</td></tr>
+            <tr><td>UUID</td><td>java.util.UUID — no DB call needed</td><td>Distributed systems, microservices</td></tr>
+            <tr><td>AUTO</td><td>Hibernate picks based on dialect</td><td>Dev only</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-ico">📋</div><div><div class="card-name" style="color:var(--teal)">Key Column Annotations</div></div></div>
+        <table class="tbl">
+          <thead><tr><th>Annotation</th><th>Purpose</th></tr></thead>
+          <tbody>
+            <tr><td>@Column(nullable=false)</td><td>NOT NULL constraint in DB</td></tr>
+            <tr><td>@Column(unique=true)</td><td>UNIQUE constraint</td></tr>
+            <tr><td>@Column(length=200)</td><td>VARCHAR(200)</td></tr>
+            <tr><td>@Enumerated(STRING)</td><td>Store "ACTIVE" not 0</td></tr>
+            <tr><td>@Lob</td><td>TEXT/BLOB — large data</td></tr>
+            <tr><td>@Transient</td><td>Not persisted — ignored by JPA</td></tr>
+            <tr><td>@Version</td><td>Optimistic locking version field</td></tr>
+            <tr><td>@Embedded</td><td>Embed another class's fields inline</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><div class="card-ico">📦</div><div><div class="card-name" style="color:var(--purple)">@Embedded — Value Objects</div><div class="card-sub2">group related fields into a class</div></div></div>
+    <div class="g2">
+      <div class="code-wrap">
+        <div class="code-label"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>Address.java — Embeddable</div>
+        <pre><code class="language-java">@Embeddable                     // not an entity — embedded inline
+@Data @NoArgsConstructor @AllArgsConstructor
+public class Address {
+    @Column(name = "street", length = 200)
+    private String street;
+
+    @Column(name = "city", length = 100)
+    private String city;
+
+    @Column(name = "state", length = 50)
+    private String state;
+
+    @Column(name = "zip", length = 20)
+    private String zipCode;
+
+    @Column(name = "country", length = 50)
+    private String country;
+}</code></pre>
+      </div>
+      <div class="code-wrap">
+        <div class="code-label"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>Customer.java — using @Embedded</div>
+        <pre><code class="language-java">@Entity @Table(name = "customers")
+@Data @Builder @NoArgsConstructor @AllArgsConstructor
+public class Customer {
+    @Id @GeneratedValue(strategy = IDENTITY)
+    private Long id;
+
+    private String name;
+    private String email;
+
+    @Embedded                   // all Address fields stored in customers table
+    private Address shippingAddress;
+
+    @Embedded
+    @AttributeOverrides({       // rename columns to avoid conflict
+        @AttributeOverride(name = "street",  column = @Column(name = "billing_street")),
+        @AttributeOverride(name = "city",    column = @Column(name = "billing_city")),
+        @AttributeOverride(name = "zipCode", column = @Column(name = "billing_zip"))
+    })
+    private Address billingAddress;
+}</code></pre>
+      </div>
+    </div>
+    <div class="analogy">📦 Like a JSON object embedded inside another — separate class, but stored in same DB table. No extra JOIN needed.</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     S4 — RELATIONSHIPS
+═══════════════════════════════════════════ -->
+<div class="section" id="s4">
+  <div class="sec-header">
+    <div class="sec-num">4</div>
+    <div class="sec-title">Entity Relationships — All 4 Types</div>
+    <div class="sec-sub">@OneToOne · @OneToMany · @ManyToOne · @ManyToMany</div>
+  </div>
+
+  <div class="g2" style="margin-bottom:22px">
+
+    <!-- ONE TO ONE -->
+    <div class="rel-box">
+      <div class="rel-header" style="color:var(--teal)">🔗 @OneToOne — User ↔ UserProfile</div>
+      <div class="rel-body">
+        <div class="g2" style="margin-bottom:16px">
+          <div class="entity-box">
+            <div class="entity-name" style="color:var(--teal)">User</div>
+            <div class="entity-field"><span class="ann">@Id</span> <span class="type">Long</span> id</div>
+            <div class="entity-field"><span class="type">String</span> username</div>
+            <div class="entity-field"><span class="ann">@OneToOne(cascade=ALL)</span></div>
+            <div class="entity-field"><span class="ann">@JoinColumn(name="profile_id")</span></div>
+            <div class="entity-field"><span class="type">UserProfile</span> profile</div>
+          </div>
+          <div class="entity-box">
+            <div class="entity-name" style="color:var(--teal)">UserProfile</div>
+            <div class="entity-field"><span class="ann">@Id</span> <span class="type">Long</span> id</div>
+            <div class="entity-field"><span class="type">String</span> bio</div>
+            <div class="entity-field"><span class="type">String</span> avatarUrl</div>
+            <div class="entity-field"><span class="ann">@OneToOne(mappedBy="profile")</span></div>
+            <div class="entity-field"><span class="type">User</span> user</div>
+          </div>
+        </div>
+        <div class="code-wrap">
+          <div class="code-label"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>@OneToOne entities</div>
+          <pre><code class="language-java">@Entity
+public class User {
+    @Id @GeneratedValue(strategy = IDENTITY)
+    private Long id;
+    private String username;
+
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "profile_id", referencedColumnName = "id")
+    private UserProfile profile;
+}
+
+@Entity
+public class UserProfile {
+    @Id @GeneratedValue(strategy = IDENTITY)
+    private Long id;
+    private String bio;
+
+    @OneToOne(mappedBy = "profile")  // "profile" = field name in User
+    private User user;
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- MANY TO ONE -->
+    <div class="rel-box">
+      <div class="rel-header" style="color:var(--amber)">🔗 @ManyToOne / @OneToMany — Category ↔ Products</div>
+      <div class="rel-body">
+        <div class="g2" style="margin-bottom:16px">
+          <div class="entity-box">
+            <div class="entity-name" style="color:var(--amber)">Category (One)</div>
+            <div class="entity-field"><span class="ann">@Id</span> <span class="type">Long</span> id</div>
+            <div class="entity-field"><span class="type">String</span> name</div>
+            <div class="entity-field"><span class="ann">@OneToMany(mappedBy="category")</span></div>
+            <div class="entity-field"><span class="type">List&lt;Product&gt;</span> products</div>
+          </div>
+          <div class="entity-box">
+            <div class="entity-name" style="color:var(--amber)">Product (Many)</div>
+            <div class="entity-field"><span class="ann">@Id</span> <span class="type">Long</span> id</div>
+            <div class="entity-field"><span class="type">String</span> name</div>
+            <div class="entity-field"><span class="ann">@ManyToOne(fetch=LAZY)</span></div>
+            <div class="entity-field"><span class="ann">@JoinColumn(name="category_id")</span></div>
+            <div class="entity-field"><span class="type">Category</span> category</div>
+          </div>
+        </div>
+        <div class="code-wrap">
+          <div class="code-label"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>@ManyToOne — most common relationship</div>
+          <pre><code class="language-java">@Entity
+public class Category {
+    @Id @GeneratedValue(strategy = IDENTITY)
+    private Long id;
+    private String name;
+
+    // One category has many products
+    @OneToMany(mappedBy = "category",     // "category" = field in Product
+               cascade = CascadeType.ALL,
+               orphanRemoval = true)      // delete products if category removed
+    private List&lt;Product&gt; products = new ArrayList&lt;&gt;();
+}
+
+@Entity
+public class Product {
+    @Id @GeneratedValue(strategy = IDENTITY)
+    private Long id;
+    private String name;
+
+    // Many products belong to one category
+    @ManyToOne(fetch = FetchType.LAZY)    // LAZY = don't load until accessed
+    @JoinColumn(name = "category_id")     // FK column name in products table
+    private Category category;
+}</code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MANY TO MANY -->
+  <div class="rel-box" style="margin-bottom:22px">
+    <div class="rel-header" style="color:var(--purple)">🔗 @ManyToMany — Students ↔ Courses (with extra fields)</div>
+    <div class="rel-body">
+      <div class="g2">
+        <div class="code-wrap">
+          <div class="code-label"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>Simple @ManyToMany</div>
+          <pre><code class="language-java">@Entity
+public class Student {
+    @Id @GeneratedValue(strategy = IDENTITY)
+    private Long id;
+    private String name;
+
+    @ManyToMany
+    @JoinTable(name = "student_courses",          // join table name
+        joinColumns = @JoinColumn(name = "student_id"),
+        inverseJoinColumns = @JoinColumn(name = "course_id"))
+    private Set&lt;Course&gt; courses = new HashSet&lt;&gt;();
+}
+
+@Entity
+public class Course {
+    @Id @GeneratedValue(strategy = IDENTITY)
+    private Long id;
+    private String title;
+
+    @ManyToMany(mappedBy = "courses")
+    private Set&lt;Student&gt; students = new HashSet&lt;&gt;();
+}</code></pre>
+        </div>
+        <div class="code-wrap">
+          <div class="code-label"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>@ManyToMany with extra fields — use @Embeddable ID</div>
+          <pre><code class="language-java">// When join table has extra columns (grade, enrolledDate)
+// Create a separate entity for the join table!
+
+@Entity
+@Table(name = "enrollments")
+public class Enrollment {
+
+    @EmbeddedId
+    private EnrollmentId id;    // composite PK
+
+    @ManyToOne @MapsId("studentId")
+    @JoinColumn(name = "student_id")
+    private Student student;
+
+    @ManyToOne @MapsId("courseId")
+    @JoinColumn(name = "course_id")
+    private Course course;
+
+    private String grade;           // extra field!
+    private LocalDate enrolledDate; // extra field!
+}
+
+@Embeddable
+public class EnrollmentId implements Serializable {
+    private Long studentId;
+    private Long courseId;
+}</code></pre>
+        </div>
+      </div>
+      <div class="alert al-warn" style="margin-top:16px"><div class="al-ico">⚠️</div><div><strong>@ManyToMany Best Practice:</strong> Avoid simple @ManyToMany if you might need extra fields later. Create a dedicated join entity (like Enrollment). Also use <code style="font-family:'Fira Code',monospace">Set</code> not <code style="font-family:'Fira Code',monospace">List</code> — Hibernate deletes ALL rows and re-inserts with List on update (Hibernate bug).</div></div>
+    </div>
+  </div>
+
+  <!-- CASCADE & ORPHAN -->
+  <div class="card">
+    <div class="card-head"><div class="card-ico">🌊</div><div><div class="card-name" style="color:var(--cyan)">CascadeType &amp; orphanRemoval</div><div class="card-sub2">controlling child lifecycle</div></div></div>
+    <div class="g2">
+      <table class="tbl">
+        <thead><tr><th>CascadeType</th><th>What propagates to child</th><th>Use case</th></tr></thead>
+        <tbody>
+          <tr><td>PERSIST</td><td>save() on parent saves child</td><td>New entities together</td></tr>
+          <tr><td>MERGE</td><td>update on parent updates child</td><td>Updating object graphs</td></tr>
+          <tr><td>REMOVE</td><td>delete parent → deletes children</td><td>Dependent entities</td></tr>
+          <tr><td>REFRESH</td><td>reload parent → reloads children</td><td>Multi-user scenarios</td></tr>
+          <tr><td>DETACH</td><td>detach parent → detaches children</td><td>Rare</td></tr>
+          <tr><td>ALL</td><td>All of the above</td><td>Owned relationships</td></tr>
+        </tbody>
+      </table>
+      <div>
+        <div class="code-wrap">
+          <div class="code-label"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>cascade + orphanRemoval</div>
+          <pre><code class="language-java">@Entity
+public class Order {
+    @Id @GeneratedValue(strategy = IDENTITY)
+    private Long id;
+
+    // cascade ALL: save/delete order → save/delete items
+    // orphanRemoval: remove item from list → DELETE from DB
+    @OneToMany(mappedBy = "order",
+               cascade = CascadeType.ALL,
+               orphanRemoval = true)
+    private List&lt;OrderItem&gt; items = new ArrayList&lt;&gt;();
+
+    // Helper methods to maintain both sides
+    public void addItem(OrderItem item) {
+        items.add(item);
+        item.setOrder(this);        // set bidirectional link
+    }
+
+    public void removeItem(OrderItem item) {
+        items.remove(item);         // orphanRemoval deletes from DB
+        item.setOrder(null);
+    }
+}</code></pre>
+        </div>
+        <div class="analogy">🌊 cascade = when parent saves/deletes, children follow automatically. orphanRemoval = child removed from collection → deleted from DB.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     S5 — REPOSITORIES
+═══════════════════════════════════════════ -->
+<div class="section" id="s5">
+  <div class="sec-header">
+    <div class="sec-num">5</div>
+    <div class="sec-title">Repository Hierarchy</div>
+    <div class="sec-sub">CrudRepository → JpaRepository → custom</div>
+  </div>
+
+  <div class="flow-h" style="margin-bottom:24px">
+    <div class="fh-step">
+      <div class="fh-num">1</div>
+      <div class="fh-ico">📦</div>
+      <div class="fh-ttl">Repository</div>
+      <div class="fh-dsc">Marker interface only. No methods. Signals Spring to create a bean.</div>
+    </div>
+    <div class="fh-step">
+      <div class="fh-num">2</div>
+      <div class="fh-ico">🔧</div>
+      <div class="fh-ttl">CrudRepository</div>
+      <div class="fh-dsc">save, findById, findAll, delete, count, existsById — basic CRUD</div>
+    </div>
+    <div class="fh-step">
+      <div class="fh-num">3</div>
+      <div class="fh-ico">📄</div>
+      <div class="fh-ttl">PagingAndSortingRepository</div>
+      <div class="fh-dsc">Adds findAll(Pageable) and findAll(Sort) on top of CRUD</div>
+    </div>
+    <div class="fh-step">
+      <div class="fh-num">4</div>
+      <div class="fh-ico">🚀</div>
+      <div class="fh-ttl" style="color:var(--indigo)">JpaRepository</div>
+      <div class="fh-dsc">+ flush(), saveAndFlush(), deleteInBatch(), getOne() — JPA-specific</div>
+    </div>
+    <div class="fh-step">
+      <div class="fh-num">5</div>
+      <div class="fh-ico">⚙️</div>
+      <div class="fh-ttl" style="color:var(--teal)">Your Repository</div>
+      <div class="fh-dsc">extends JpaRepository + your custom derived query methods</div>
+    </div>
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="card-head"><div class="card-ico">📚</div><div><div class="card-name" style="color:var(--indigo)">JpaRepository — All Built-in Methods</div></div></div>
+      <div class="code-wrap">
+        <div class="code-label"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>Built-in JpaRepository methods</div>
+        <pre><code class="language-java">// Spring provides ALL these automatically when you extend JpaRepository:
+
+// ─── SAVE ───────────────────────────────
+S save(S entity)                        // INSERT or UPDATE
+List&lt;S&gt; saveAll(Iterable&lt;S&gt; entities)  // batch save
+S saveAndFlush(S entity)               // save + immediate flush to DB
+
+// ─── FIND ───────────────────────────────
+Optional&lt;T&gt; findById(ID id)            // find by PK
+T getReferenceById(ID id)              // lazy proxy — no DB hit until accessed
+List&lt;T&gt; findAll()                      // get ALL rows (careful on big tables!)
+List&lt;T&gt; findAllById(Iterable&lt;ID&gt; ids)  // find multiple by IDs
+List&lt;T&gt; findAll(Sort sort)             // all sorted
+Page&lt;T&gt; findAll(Pageable pageable)     // paginated
+
+// ─── EXISTS / COUNT ─────────────────────
+boolean existsById(ID id)
+long count()
+
+// ─── DELETE ─────────────────────────────
+void deleteById(ID id)
+void delete(T entity)
+void deleteAll()                        // ⚠️ loads all then deletes — slow!
+void deleteAllInBatch()                 // single DELETE statement — fast
+void deleteAllById(Iterable&lt;ID&gt; ids)
+
+// ─── FLUSH ──────────────────────────────
+void flush()                            // sync persistence context to DB</code></pre>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><div class="card-ico">🔧</div><div><div class="card-name" style="color:var(--teal)">Custom Repository Implementation</div><div class="card-sub2">when auto-derivation isn't enough</div></div></div>
+      <div class="code-wrap">
+        <div class="code-label"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>Custom implementation pattern</div>
+        <pre><code class="language-java">// 1. Define custom interface
+public interface ProductRepositoryCustom {
+    List&lt;Product&gt; searchWithFilters(ProductFilter filter);
+}
+
+// 2. Implement it
+@Repository
+@RequiredArgsConstructor
+public class ProductRepositoryCustomImpl
+        implements ProductRepositoryCustom {
+
+    private final EntityManager em;
+
+    @Override
+    public List&lt;Product&gt; searchWithFilters(ProductFilter filter) {
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+        CriteriaQuery&lt;Product&gt; query = cb.createQuery(Product.class);
+        Root&lt;Product&gt; root = query.from(Product.class);
+
+        List&lt;Predicate&gt; predicates = new ArrayList&lt;&gt;();
+        if (filter.getName() != null)
+            predicates.add(cb.like(root.get("name"), "%" + filter.getName() + "%"));
+        if (filter.getMinPrice() != null)
+            predicates.add(cb.ge(root.get("price"), filter.getMinPrice()));
+
+        query.where(predicates.toArray(new Predicate[0]));
+        return em.createQuery(query).getResultList();
+    }
+}
+
+// 3. Main repository extends both
+public interface ProductRepository
+        extends JpaRepository&lt;Product, Long&gt;,
+                ProductRepositoryCustom {
+    // both auto-derived and custom methods available!
+}</code></pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     S6 — QUERY METHODS
+═══════════════════════════════════════════ -->
+<div class="section" id="s6">
+  <div class="sec-header">
+    <div class="sec-num">6</div>
+    <div class="sec-title">Derived Query Methods — Spring's Magic</div>
+    <div class="sec-sub">SQL generated from method names</div>
+  </div>
+  <div class="alert al-info"><div class="al-ico">💡</div><div>Spring Data JPA parses your method name and generates the JPQL automatically. Method name = findBy + field + condition + And/Or + more conditions. No SQL needed!</div></div>
+
+  <div class="card" style="margin-bottom:22px">
+    <div class="card-head"><div class="card-ico">✨</div><div><div class="card-name" style="color:var(--indigo)">Complete Query Method Reference</div></div></div>
+    <div class="code-wrap">
+      <div class="code-label"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>ProductRepository.java — all keyword examples</div>
+      <pre><code class="language-java">public interface ProductRepository extends JpaRepository&lt;Product, Long&gt; {
+
+    // ─── FIND BY SINGLE FIELD ────────────────────────────────────────────
+    Optional&lt;Product&gt; findById(Long id);
+    Optional&lt;Product&gt; findBySku(String sku);             // WHERE sku = ?
+    List&lt;Product&gt; findByCategory(Category category);     // WHERE category_id = ?
+    List&lt;Product&gt; findByStatus(ProductStatus status);
+
+    // ─── COMPARISON ─────────────────────────────────────────────────────
+    List&lt;Product&gt; findByPriceGreaterThan(BigDecimal price);         // price > ?
+    List&lt;Product&gt; findByPriceLessThanEqual(BigDecimal price);       // price <= ?
+    List&lt;Product&gt; findByPriceBetween(BigDecimal min, BigDecimal max); // BETWEEN
+    List&lt;Product&gt; findByStockGreaterThanEqual(int stock);
+
+    // ─── NULL CHECKS ─────────────────────────────────────────────────────
+    List&lt;Product&gt; findByDiscountIsNull();
+    List&lt;Product&gt; findByImageUrlIsNotNull();
+
+    // ─── BOOLEAN ─────────────────────────────────────────────────────────
+    List&lt;Product&gt; findByActiveTrue();
+    List&lt;Product&gt; findByActiveFalse();
+
+    // ─── STRING MATCHING ─────────────────────────────────────────────────
+    List&lt;Product&gt; findByNameContaining(String keyword);             // LIKE %keyword%
+    List&lt;Product&gt; findByNameStartingWith(String prefix);            // LIKE prefix%
+    List&lt;Product&gt; findByNameEndingWith(String suffix);              // LIKE %suffix
+    List&lt;Product&gt; findByNameContainingIgnoreCase(String keyword);   // case-insensitive
+    List&lt;Product&gt; findByNameLike(String pattern);                   // raw LIKE
+
+    // ─── COMBINING CONDITIONS ────────────────────────────────────────────
+    List&lt;Product&gt; findByStatusAndActiveTrue(ProductStatus status);
+    List&lt;Product&gt; findByCategoryAndPriceLessThan(Category cat, BigDecimal price);
+    List&lt;Product&gt; findByNameContainingOrDescriptionContaining(String n, String d);
+
+    // ─── IN / NOT IN ─────────────────────────────────────────────────────
+    List&lt;Product&gt; findByStatusIn(List&lt;ProductStatus&gt; statuses);
+    List&lt;Product&gt; findByCategoryNotIn(List&lt;Category&gt; categories);
+
+    // ─── COUNT / EXISTS ──────────────────────────────────────────────────
+    long countByStatus(ProductStatus status);
+    boolean existsBySku(String sku);
+
+    // ─── DELETE ──────────────────────────────────────────────────────────
+    void deleteBySku(String sku);
+    long deleteByStatusAndActiveTrue(ProductStatus status); // returns count deleted
+
+    // ─── TOP / FIRST (LIMIT) ─────────────────────────────────────────────
+    Optional&lt;Product&gt; findFirstByOrderByCreatedAtDesc();    // most recent
+    List&lt;Product&gt; findTop5ByStatusOrderByPriceAsc(ProductStatus s); // top 5 cheapest
+
+    // ─── SORT ────────────────────────────────────────────────────────────
+    List&lt;Product&gt; findByCategoryOrderByPriceAsc(Category cat);
+    List&lt;Product&gt; findByActiveTrueOrderByCreatedAtDesc();
+
+    // ─── WITH PAGEABLE ────────────────────────────────────────────────────
+    Page&lt;Product&gt; findByStatus(ProductStatus status, Pageable pageable);
+    Slice&lt;Product&gt; findByCategory(Category category, Pageable pageable); // no count query
+}</code></pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><div class="card-ico">📖</div><div><div class="card-name" style="color:var(--amber)">Keyword Quick Reference</div></div></div>
+    <table class="tbl">
+      <thead><tr><th>Keyword</th><th>Sample</th><th>Generated SQL clause</th></tr></thead>
+      <tbody>
+        <tr><td>And</td><td>findByLastnameAndFirstname</td><td>WHERE lastname=? AND firstname=?</td></tr>
+        <tr><td>Or</td><td>findByLastnameOrFirstname</td><td>WHERE lastname=? OR firstname=?</td></tr>
+        <tr><td>Between</td><td>findByStartDateBetween</td><td>WHERE start BETWEEN ? AND ?</td></tr>
+        <tr><td>LessThan</td><td>findByAgeLessThan</td><td>WHERE age &lt; ?</td></tr>
+        <tr><td>GreaterThan</td><td>findByAgeGreaterThan</td><td>WHERE age &gt; ?</td></tr>
+        <tr><td>IsNull / Null</td><td>findByAgeIsNull</td><td>WHERE age IS NULL</td></tr>
+        <tr><td>Like</td><td>findByNameLike</td><td>WHERE name LIKE ?</td></tr>
+        <tr><td>Containing</td><td>findByNameContaining</td><td>WHERE name LIKE %?%</td></tr>
+        <tr><td>StartingWith</td><td>findByNameStartingWith</td><td>WHERE name LIKE ?%</td></tr>
+        <tr><td>In</td><td>findByAgeIn(Collection)</td><td>WHERE age IN (?,...)</td></tr>
+        <tr><td>NotIn</td><td>findByAgeNotIn(Collection)</td><td>WHERE age NOT IN (?,...)</td></tr>
+        <tr><td>IgnoreCase</td><td>findByNameIgnoreCase</td><td>WHERE UPPER(name)=UPPER(?)</td></tr>
+        <tr><td>OrderBy</td><td>findByAgeOrderByName</td><td>ORDER BY name ASC</td></tr>
+        <tr><td>True / False</td><td>findByActiveTrue</td><td>WHERE active = true</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     S7 — JPQL & NATIVE SQL
+═══════════════════════════════════════════ -->
+<div class="section" id="s7">
+  <div class="sec-header">
+    <div class="sec-num">7</div>
+    <div class="sec-title">JPQL &amp; Native SQL Queries</div>
+    <div class="sec-sub">@Query — full control over SQL</div>
+  </div>
+
+  <div class="g2" style="margin-bottom:22px">
+    <div class="card">
+      <div class="card-head"><div class="card-ico">📝</div><div><div class="card-name" style="color:var(--indigo)">JPQL — Object-Oriented Query Language</div><div class="card-sub2">queries on entities, not tables</div></div></div>
+      <div class="code-wrap">
+        <div class="code-label"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>JPQL @Query examples</div>
+        <pre><code class="language-java">public interface OrderRepository extends JpaRepository&lt;Order, Long&gt; {
+
+    // Basic JPQL — uses entity class name, not table name!
+    @Query("SELECT o FROM Order o WHERE o.status = :status")
+    List&lt;Order&gt; findByOrderStatus(@Param("status") OrderStatus status);
+
+    // JOIN FETCH — solves N+1 problem (loads related in 1 query)
+    @Query("SELECT o FROM Order o " +
+           "JOIN FETCH o.customer c " +
+           "JOIN FETCH o.items i " +
+           "WHERE o.id = :id")
+    Optional&lt;Order&gt; findByIdWithDetails(@Param("id") Long id);
+
+    // Aggregation
+    @Query("SELECT SUM(o.totalAmount) FROM Order o " +
+           "WHERE o.customer.id = :customerId " +
+           "AND o.status = 'COMPLETED'")
+    BigDecimal getTotalSpentByCustomer(@Param("customerId") Long customerId);
+
+    // Date comparison
+    @Query("SELECT o FROM Order o WHERE o.createdAt BETWEEN :from AND :to")
+    List&lt;Order&gt; findOrdersInDateRange(
+        @Param("from") LocalDateTime from,
+        @Param("to") LocalDateTime to);
+
+    // Subquery
+    @Query("SELECT p FROM Product p WHERE p.price = " +
+           "(SELECT MAX(p2.price) FROM Product p2 WHERE p2.category = p.category)")
+    List&lt;Product&gt; findMostExpensivePerCategory();
+
+    // UPDATE query — must use @Modifying
+    @Modifying
+    @Transactional
+    @Query("UPDATE Product p SET p.status = :status WHERE p.category.id = :catId")
+    int updateStatusByCategoryId(
+        @Param("status") ProductStatus status,
+        @Param("catId") Long categoryId);
+
+    // DELETE query
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM Product p WHERE p.status = 'DISCONTINUED' AND p.updatedAt < :date")
+    int deleteOldDiscontinued(@Param("date") LocalDateTime date);
+}</code></pre>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><div class="card-ico">🗃️</div><div><div class="card-name" style="color:var(--teal)">Native SQL Queries</div><div class="card-sub2">when JPQL isn't enough</div></div></div>
+      <div class="code-wrap">
+        <div class="code-label"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>nativeQuery = true</div>
+        <pre><code class="language-java">public interface ProductRepository extends JpaRepository&lt;Product, Long&gt; {
+
+    // Native SQL — uses actual table/column names
+    @Query(value = "SELECT * FROM products WHERE sku = :sku",
+           nativeQuery = true)
+    Optional&lt;Product&gt; findBySkuNative(@Param("sku") String sku);
+
+    // Use DB-specific features: full-text search (PostgreSQL)
+    @Query(value = "SELECT * FROM products " +
+                   "WHERE to_tsvector('english', name || ' ' || description) " +
+                   "@@ plainto_tsquery('english', :keyword)",
+           nativeQuery = true)
+    List&lt;Product&gt; fullTextSearch(@Param("keyword") String keyword);
+
+    // Window functions (PostgreSQL/MySQL 8+)
+    @Query(value = """
+        SELECT p.*, 
+               RANK() OVER (PARTITION BY p.category_id ORDER BY p.price DESC) as price_rank
+        FROM products p
+        WHERE p.active = true
+        """, nativeQuery = true)
+    List&lt;Object[]&gt; findProductsWithRank();
+
+    // Native with pagination (must specify countQuery!)
+    @Query(value = "SELECT * FROM products WHERE status = :status",
+           countQuery = "SELECT COUNT(*) FROM products WHERE status = :status",
+           nativeQuery = true)
+    Page&lt;Product&gt; findByStatusNative(
+        @Param("status") String status, Pageable pageable);
+
+    // Returning DTO projection from native query
+    @Query(value = """
+        SELECT p.id, p.name, p.price, c.name as categoryName
+        FROM products p
+        JOIN categories c ON p.category_id = c.id
+        WHERE p.active = true
+        """, nativeQuery = true)
+    List&lt;ProductSummaryView&gt; findProductSummaries();  // interface projection
+}</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><div class="card-ico">⚠️</div><div><div class="card-name" style="color:var(--amber)">@Modifying — Important Rules</div></div></div>
+    <div class="code-wrap">
+      <div class="code-label"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>@Modifying rules and clearAutomatically</div>
+      <pre><code class="language-java">// @Modifying required for UPDATE and DELETE @Query
+@Modifying
+@Transactional
+@Query("UPDATE User u SET u.lastLoginAt = :now WHERE u.id = :id")
+int updateLastLogin(@Param("id") Long id, @Param("now") LocalDateTime now);
+
+// clearAutomatically = true: clears EntityManager after update
+// Prevents stale data if you load the entity in same transaction
+@Modifying(clearAutomatically = true, flushAutomatically = true)
+@Transactional
+@Query("UPDATE Product p SET p.stock = p.stock - :qty WHERE p.id = :id AND p.stock >= :qty")
+int decrementStock(@Param("id") Long id, @Param("qty") int qty);
+
+// Returns: number of rows affected (int or long)
+// If you don't annotate with @Transactional here, 
+// the calling service method must have @Transactional</code></pre>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     S8 — PAGINATION & SORTING
+═══════════════════════════════════════════ -->
+<div class="section" id="s8">
+  <div class="sec-header">
+    <div class="sec-num">8</div>
+    <div class="sec-title">Pagination &amp; Sorting</div>
+    <div class="sec-sub">Pageable · Page · Slice · Sort</div>
+  </div>
+
+  <div class="g2" style="margin-bottom:22px">
+    <div class="card">
+      <div class="card-head"><div class="card-ico">📄</div><div><div class="card-name" style="color:var(--indigo)">Pageable — How to Use</div></div></div>
+      <div class="code-wrap">
+        <div class="code-label"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>Pagination complete example</div>
+        <pre><code class="language-java">// Repository
+public interface ProductRepository extends JpaRepository&lt;Product, Long&gt; {
+    Page&lt;Product&gt; findByStatus(ProductStatus status, Pageable pageable);
+    Page&lt;Product&gt; findByCategory(Category cat, Pageable pageable);
+}
+
+// Service
+@Service @RequiredArgsConstructor
+public class ProductService {
+    private final ProductRepository repo;
+
+    public Page&lt;Product&gt; getProducts(int page, int size, String sortBy) {
+        // page=0 means first page (0-indexed!)
+        Pageable pageable = PageRequest.of(
+            page, size,
+            Sort.by(Sort.Direction.DESC, sortBy)  // ORDER BY sortBy DESC
+        );
+        return repo.findByStatus(ProductStatus.ACTIVE, pageable);
+    }
+
+    // Multiple sort fields
+    public Page&lt;Product&gt; getProductsMultiSort(int page, int size) {
+        Sort sort = Sort.by(
+            Sort.Order.asc("category.name"),
+            Sort.Order.desc("price"),
+            Sort.Order.asc("name")
+        );
+        return repo.findAll(PageRequest.of(page, size, sort));
+    }
+}
+
+// Controller — Spring auto-binds Pageable from request params
+@GetMapping("/products")
+public Page&lt;ProductDto&gt; getProducts(
+        @PageableDefault(size = 20, sort = "createdAt",
+                         direction = Sort.Direction.DESC) Pageable pageable) {
+    // GET /products?page=0&size=20&sort=price,desc
+    return productService.getPage(pageable)
+        .map(productMapper::toDto);  // map entity to DTO
+}</code></pre>
+      </div>
+    </div>
+
+    <div>
+      <div class="card" style="margin-bottom:20px">
+        <div class="card-head"><div class="card-ico">📊</div><div><div class="card-name" style="color:var(--teal)">Page vs Slice vs List</div></div></div>
+        <table class="tbl">
+          <thead><tr><th>Type</th><th>Count query?</th><th>Use when</th></tr></thead>
+          <tbody>
+            <tr><td>Page&lt;T&gt;</td><td>YES — 2 queries: data + count</td><td>Need total pages/elements for UI pagination</td></tr>
+            <tr><td>Slice&lt;T&gt;</td><td>NO — 1 query + 1 extra row check</td><td>Infinite scroll — just need hasNext()</td></tr>
+            <tr><td>List&lt;T&gt;</td><td>NO</td><td>Just need sorted/limited data, no pagination info</td></tr>
+          </tbody>
+        </table>
+        <div class="alert al-warn" style="margin-top:12px"><div class="al-ico">⚠️</div><div>Use <code style="font-family:'Fira Code',monospace">Slice</code> for infinite scroll — avoids expensive COUNT(*) on large tables. <code style="font-family:'Fira Code',monospace">Page</code> fires 2 SQL queries per call.</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div class="card-ico">📦</div><div><div class="card-name" style="color:var(--purple)">Page Response Structure</div></div></div>
+        <div class="code-wrap">
+          <div class="code-label"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>Page&lt;T&gt; response JSON</div>
+          <pre><code class="language-java">// Page&lt;T&gt; serializes to JSON automatically:
+{
+  "content": [...],           // actual data array
+  "pageable": {
+    "pageNumber": 0,
+    "pageSize": 20,
+    "sort": { "sorted": true }
+  },
+  "totalElements": 150,       // total rows in DB
+  "totalPages": 8,            // ceil(150/20)
+  "first": true,              // is first page?
+  "last": false,              // is last page?
+  "numberOfElements": 20      // items in this page
+}</code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     S9 — TRANSACTIONS
+═══════════════════════════════════════════ -->
+<div class="section" id="s9">
+  <div class="sec-header">
+    <div class="sec-num">9</div>
+    <div class="sec-title">Transactions — @Transactional Deep Dive</div>
+    <div class="sec-sub">ACID · Propagation · Isolation</div>
+  </div>
+
+  <div class="g2" style="margin-bottom:22px">
+    <div class="card">
+      <div class="card-head"><div class="card-ico">🔒</div><div><div class="card-name" style="color:var(--indigo)">@Transactional — Core Usage</div></div></div>
+      <div class="code-wrap">
+        <div class="code-label"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>TransactionalService.java</div>
+        <pre><code class="language-java">@Service
+@RequiredArgsConstructor
+public class OrderService {
+
+    private final OrderRepository orderRepo;
+    private final InventoryRepository inventoryRepo;
+    private final PaymentService paymentService;
+
+    // ✅ @Transactional on service method — NOT on repository
+    @Transactional
+    public Order createOrder(CreateOrderRequest req) {
+        // All operations in SAME transaction
+        // If ANY fails → ALL rolled back automatically
+
+        // 1. Create order
+        Order order = Order.builder()
+            .customerId(req.getCustomerId())
+            .status(OrderStatus.PENDING)
+            .build();
+        orderRepo.save(order);  // INSERT (not committed yet)
+
+        // 2. Deduct inventory
+        inventoryRepo.decrementStock(req.getProductId(), req.getQty());
+
+        // 3. Process payment — if this throws, everything rolls back!
+        paymentService.charge(req.getCustomerId(), req.getAmount());
+
+        order.setStatus(OrderStatus.CONFIRMED);
+        return order;
+        // ← transaction commits here if no exception
+    }
+
+    // Read-only: performance optimization — no dirty checking
+    @Transactional(readOnly = true)
+    public List&lt;Order&gt; getOrderHistory(Long customerId) {
+        return orderRepo.findByCustomerId(customerId);
+    }
+
+    // Custom rollback rules
+    @Transactional(rollbackOn = {PaymentException.class, StockException.class},
+                   noRollbackOn = {NotificationException.class})
+    public void processOrderWithNotification(Long orderId) {
+        // Payment/Stock failures roll back transaction
+        // Notification failures do NOT roll back
+    }
+
+    // Timeout — roll back if takes more than 30 seconds
+    @Transactional(timeout = 30)
+    public void bulkUpdatePrices(List&lt;PriceUpdate&gt; updates) {
+        updates.forEach(u -> productRepo.updatePrice(u.getId(), u.getPrice()));
+    }
+}</code></pre>
+      </div>
+    </div>
+
+    <div>
+      <div class="card" style="margin-bottom:20px">
+        <div class="card-head"><div class="card-ico">🌊</div><div><div class="card-name" style="color:var(--amber)">Propagation Types</div></div></div>
+        <table class="tbl">
+          <thead><tr><th>Propagation</th><th>Behaviour</th></tr></thead>
+          <tbody>
+            <tr><td>REQUIRED (default)</td><td>Join existing TX. Create new if none. Most common.</td></tr>
+            <tr><td>REQUIRES_NEW</td><td>Always create new TX. Suspend existing. Good for audit logs.</td></tr>
+            <tr><td>SUPPORTS</td><td>Join if exists, proceed without TX if not.</td></tr>
+            <tr><td>NOT_SUPPORTED</td><td>Suspend TX, run without transaction.</td></tr>
+            <tr><td>MANDATORY</td><td>Must have existing TX. Throws if none.</td></tr>
+            <tr><td>NEVER</td><td>Must NOT have TX. Throws if one exists.</td></tr>
+            <tr><td>NESTED</td><td>Nested TX with savepoints. Rollback nested but not outer.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div class="card-ico">⚠️</div><div><div class="card-name" style="color:var(--red)">Common @Transactional Pitfalls</div></div></div>
+        <div class="code-wrap">
+          <div class="code-label"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>Pitfalls to avoid</div>
+          <pre><code class="language-java">// ❌ PITFALL 1: Self-invocation — proxy is bypassed!
+@Service
+public class BadService {
+    @Transactional
+    public void outer() {
+        inner();  // calls this.inner() directly — NO proxy = NO transaction!
+    }
+    @Transactional(propagation = REQUIRES_NEW)
+    public void inner() { ... }
+}
+// ✅ FIX: Inject self or move inner() to separate @Service
+
+// ❌ PITFALL 2: @Transactional on private method — AOP can't intercept
+@Transactional  // IGNORED on private!
+private void saveInternal() { ... }
+// ✅ FIX: Make it public or protected
+
+// ❌ PITFALL 3: Checked exceptions DON'T rollback by default!
+@Transactional
+public void save() throws IOException {  // IOException is checked
+    repo.save(entity);
+    throw new IOException("error");  // WON'T rollback!
+}
+// ✅ FIX:
+@Transactional(rollbackOn = IOException.class)
+public void save() throws IOException { ... }</code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     S10 — N+1 & FETCH STRATEGIES
+═══════════════════════════════════════════ -->
+<div class="section" id="s10">
+  <div class="sec-header">
+    <div class="sec-num">10</div>
+    <div class="sec-title">N+1 Problem &amp; Fetch Strategies</div>
+    <div class="sec-sub">the most common JPA performance issue</div>
+  </div>
+
+  <div class="scenario" style="margin-bottom:22px">
+    <div class="sc-hdr">
+      <div style="font-size:24px">😱</div>
+      <div><div class="sc-title">The N+1 Problem — How It Happens</div><div style="font-size:12px;color:var(--muted);font-family:'Fira Code',monospace">1 query to get N orders → N more queries to get each order's items</div></div>
+      <span class="tag t-red" style="margin-left:auto">Performance Killer</span>
+    </div>
+    <div class="sc-body">
+      <div class="g2">
+        <div>
+          <div class="code-wrap">
+            <div class="code-label"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>N+1 problem code</div>
+            <pre><code class="language-java">// Innocent-looking service code
+List&lt;Order&gt; orders = orderRepo.findAll(); // Query 1: SELECT * FROM orders (100 rows)
+
+for (Order order : orders) {
+    // Each access fires a NEW query!
+    String customerName = order.getCustomer().getName();
+    // Query 2: SELECT * FROM customers WHERE id=1
+    // Query 3: SELECT * FROM customers WHERE id=2
+    // ...
+    // Query 101: SELECT * FROM customers WHERE id=100
+}
+// TOTAL: 101 queries for what should be 1 JOIN query!
+
+// Even worse with collections:
+for (Order order : orders) {
+    int itemCount = order.getItems().size();
+    // +100 more queries for items!
+}
+// TOTAL: 201 queries 😱</code></pre>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div class="alert al-bad"><div class="al-ico">🐌</div><div>100 orders → 101 SQL queries! With 1000 orders → 1001 queries. Response time goes from milliseconds to seconds. DB connections maxed out.</div></div>
+          <div class="alert al-good"><div class="al-ico">✅</div><div>Goal: always fetch related data in the minimum number of queries — ideally 1 or 2 queries total regardless of result size.</div></div>
+          <div style="background:var(--bg4);border:1px solid var(--border2);border-radius:10px;padding:16px">
+            <div style="font-size:13px;font-weight:700;color:var(--amber);margin-bottom:10px">How to detect N+1</div>
+            <div style="font-size:12.5px;color:var(--muted)">Enable SQL logging (<code style="font-family:'Fira Code',monospace">show-sql=true</code>), then watch for many similar SELECT statements. Or use Hibernate Statistics bean. Or use p6spy or datasource-proxy library to count queries per request.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:22px">
+    <div class="card-head"><div class="card-ico">💊</div><div><div class="card-name" style="color:var(--green)">Solutions — 4 Ways to Fix N+1</div></div></div>
+    <div class="g2">
+      <div>
+        <div class="code-wrap">
+          <div class="code-label"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>Fix 1: JOIN FETCH in JPQL</div>
+          <pre><code class="language-java">// Best: load everything in 1 query
+@Query("SELECT o FROM Order o " +
+       "JOIN FETCH o.customer " +         // include customer
+       "LEFT JOIN FETCH o.items i " +     // include items (LEFT for empty orders)
+       "LEFT JOIN FETCH i.product " +     // include item's product
+       "WHERE o.status = :status")
+List&lt;Order&gt; findWithDetailsAndStatus(@Param("status") OrderStatus status);
+
+// WARNING: JOIN FETCH with multiple collections causes duplicates!
+// Use DISTINCT or separate queries for multiple collections
+@Query("SELECT DISTINCT o FROM Order o " +
+       "JOIN FETCH o.customer " +
+       "WHERE o.id IN :ids")
+List&lt;Order&gt; findWithCustomer(@Param("ids") List&lt;Long&gt; ids);</code></pre>
+        </div>
+        <div class="code-wrap">
+          <div class="code-label"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>Fix 2: @EntityGraph</div>
+          <pre><code class="language-java">// Define in Entity class
+@Entity
+@NamedEntityGraph(name = "Order.withCustomerAndItems",
+    attributeNodes = {
+        @NamedAttributeNode("customer"),
+        @NamedAttributeNode(value = "items",
+            subgraph = "items.product"),
+    },
+    subgraphs = @NamedSubgraph(name = "items.product",
+        attributeNodes = @NamedAttributeNode("product"))
+)
+public class Order { ... }
+
+// Use in Repository
+@EntityGraph("Order.withCustomerAndItems")
+List&lt;Order&gt; findByStatus(OrderStatus status);
+
+// Or inline (no need for @NamedEntityGraph)
+@EntityGraph(attributePaths = {"customer", "items", "items.product"})
+List&lt;Order&gt; findByCustomerId(Long customerId);</code></pre>
+        </div>
+      </div>
+      <div>
+        <div class="code-wrap">
+          <div class="code-label"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>Fix 3: Batch Fetching (application.yml)</div>
+          <pre><code class="language-java">// application.yml — applies globally
+spring.jpa.properties.hibernate.default_batch_fetch_size: 100
+// Now lazy loading fires: WHERE id IN (1,2,3,...100) — 1 query!
+
+// Or per-relationship
+@OneToMany(mappedBy = "order")
+@BatchSize(size = 100)          // load 100 orders' items in 1 query
+private List&lt;OrderItem&gt; items;</code></pre>
+        </div>
+        <div class="code-wrap">
+          <div class="code-label"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>Fix 4: Use Projections / DTOs</div>
+          <pre><code class="language-java">// Don't load the full entity — load only what you need
+@Query("SELECT new com.example.dto.OrderSummary(" +
+       "o.id, o.status, c.name, SIZE(o.items)) " +
+       "FROM Order o JOIN o.customer c " +
+       "WHERE o.createdAt > :from")
+List&lt;OrderSummary&gt; findOrderSummaries(@Param("from") LocalDateTime from);
+
+// OrderSummary DTO
+@Value                          // Lombok immutable DTO
+public class OrderSummary {
+    Long orderId;
+    OrderStatus status;
+    String customerName;
+    int itemCount;
+}</code></pre>
+        </div>
+        <div class="analogy">🎯 Rule of thumb: Use JOIN FETCH for single objects, Batch Size for collections, Projections when you don't need the full entity.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><div class="card-ico">🔍</div><div><div class="card-name" style="color:var(--amber)">LAZY vs EAGER — When to Use Which</div></div></div>
+    <table class="tbl">
+      <thead><tr><th>Type</th><th>Default for</th><th>Loads when</th><th>Risk</th><th>Best Practice</th></tr></thead>
+      <tbody>
+        <tr><td>LAZY</td><td>@OneToMany, @ManyToMany</td><td>First access to the field</td><td>LazyInitializationException outside session</td><td>Use for collections — always safest</td></tr>
+        <tr><td>EAGER</td><td>@ManyToOne, @OneToOne</td><td>Always when parent is loaded</td><td>N+1 problem, loads data you may not need</td><td>Change to LAZY + use JOIN FETCH when needed</td></tr>
+      </tbody>
+    </table>
+    <div class="alert al-good" style="margin-top:14px"><div class="al-ico">✅</div><div><strong>Golden Rule:</strong> Make ALL relationships <code style="font-family:'Fira Code',monospace">LAZY</code>. Then use <code style="font-family:'Fira Code',monospace">JOIN FETCH</code> or <code style="font-family:'Fira Code',monospace">@EntityGraph</code> to load what you need, when you need it. This gives you full control with zero surprise queries.</div></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     S11 — PROJECTIONS & DTOS
+═══════════════════════════════════════════ -->
+<div class="section" id="s11">
+  <div class="sec-header">
+    <div class="sec-num">11</div>
+    <div class="sec-title">Projections &amp; DTOs</div>
+    <div class="sec-sub">load only what you need</div>
+  </div>
+
+  <div class="g2" style="margin-bottom:22px">
+    <div class="card">
+      <div class="card-head"><div class="card-ico">🪟</div><div><div class="card-name" style="color:var(--indigo)">Interface Projections</div><div class="card-sub2">easiest — no class needed</div></div></div>
+      <div class="code-wrap">
+        <div class="code-label"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>Interface projection</div>
+        <pre><code class="language-java">// Just define an interface with getter methods
+// Spring generates a proxy that maps columns to methods
+public interface ProductSummary {
+    Long getId();
+    String getName();
+    BigDecimal getPrice();
+
+    // Nested projection
+    CategoryInfo getCategory();
+    interface CategoryInfo {
+        String getName();
+    }
+
+    // @Value with SpEL — computed property
+    @Value("#{target.price * 0.9}")
+    BigDecimal getDiscountedPrice();
+}
+
+// Use in repository — Spring matches field names to getter names
+public interface ProductRepository extends JpaRepository&lt;Product, Long&gt; {
+    List&lt;ProductSummary&gt; findByStatus(ProductStatus status);
+
+    // ⚠️ With @Query, column aliases must match getter names
+    @Query("SELECT p.id as id, p.name as name, p.price as price, " +
+           "c.name as categoryName FROM Product p JOIN p.category c")
+    List&lt;FlatSummary&gt; findFlat();
+}</code></pre>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><div class="card-ico">📦</div><div><div class="card-name" style="color:var(--teal)">DTO Projections (Class-based)</div><div class="card-sub2">recommended for production</div></div></div>
+      <div class="code-wrap">
+        <div class="code-label"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>DTO class projections</div>
+        <pre><code class="language-java">// Option 1: JPQL constructor expression
+@Value     // Lombok — immutable, all-args constructor
+public class ProductDto {
+    private final Long id;
+    private final String name;
+    private final BigDecimal price;
+    private final String categoryName;
+}
+
+@Query("SELECT new com.example.dto.ProductDto(p.id, p.name, p.price, c.name) " +
+       "FROM Product p JOIN p.category c WHERE p.active = true")
+List&lt;ProductDto&gt; findActiveProductDtos();
+
+// Option 2: Record (Java 16+) — cleanest!
+public record ProductResponse(
+    Long id,
+    String name,
+    BigDecimal price,
+    String categoryName,
+    int stockCount
+) {}
+
+// Map in service layer with a mapper method
+public ProductResponse toResponse(Product p) {
+    return new ProductResponse(
+        p.getId(), p.getName(), p.getPrice(),
+        p.getCategory().getName(), p.getStock()
+    );
+}
+
+// Option 3: MapStruct (auto-generates mapping code)
+@Mapper(componentModel = "spring")
+public interface ProductMapper {
+    ProductResponse toResponse(Product product);
+    List&lt;ProductResponse&gt; toResponseList(List&lt;Product&gt; products);
+}</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><div class="card-ico">🎯</div><div><div class="card-name" style="color:var(--purple)">Dynamic Projections — Return Different Types</div></div></div>
+    <div class="code-wrap">
+      <div class="code-label"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>Generic projection type</div>
+      <pre><code class="language-java">// Same repository method, different return types!
+public interface ProductRepository extends JpaRepository&lt;Product, Long&gt; {
+    &lt;T&gt; List&lt;T&gt; findByStatus(ProductStatus status, Class&lt;T&gt; type);
+    &lt;T&gt; Optional&lt;T&gt; findById(Long id, Class&lt;T&gt; type);
+}
+
+// Call with different projection types
+List&lt;ProductSummary&gt; summaries = repo.findByStatus(ACTIVE, ProductSummary.class);
+List&lt;ProductDto&gt;     dtos      = repo.findByStatus(ACTIVE, ProductDto.class);
+List&lt;Product&gt;        entities  = repo.findByStatus(ACTIVE, Product.class);  // full entity</code></pre>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     S12 — AUDITING & CACHING
+═══════════════════════════════════════════ -->
+<div class="section" id="s12">
+  <div class="sec-header">
+    <div class="sec-num">12</div>
+    <div class="sec-title">Auditing &amp; Second-Level Cache</div>
+    <div class="sec-sub">auto-tracking + performance</div>
+  </div>
+
+  <div class="g2" style="margin-bottom:22px">
+    <div class="card">
+      <div class="card-head"><div class="card-ico">🕵️</div><div><div class="card-name" style="color:var(--indigo)">JPA Auditing — Auto Track Changes</div></div></div>
+      <div class="code-wrap">
+        <div class="code-label"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>Auditing setup</div>
+        <pre><code class="language-java">// 1. Enable auditing in config
+@Configuration
+@EnableJpaAuditing(auditorAwareRef = "auditorProvider")
+public class JpaConfig {
+
+    @Bean
+    public AuditorAware&lt;String&gt; auditorProvider() {
+        // Return current logged-in username from SecurityContext
+        return () -> Optional.ofNullable(
+            SecurityContextHolder.getContext().getAuthentication()
+        ).map(Authentication::getName);
+    }
+}
+
+// 2. Create @MappedSuperclass for reuse
+@MappedSuperclass
+@EntityListeners(AuditingEntityListener.class)
+@Data
+public abstract class Auditable {
+
+    @CreatedDate
+    @Column(updatable = false)
+    private LocalDateTime createdAt;
+
+    @LastModifiedDate
+    private LocalDateTime updatedAt;
+
+    @CreatedBy
+    @Column(updatable = false)
+    private String createdBy;
+
+    @LastModifiedBy
+    private String lastModifiedBy;
+
+    @Version               // optimistic locking
+    private Long version;
+}
+
+// 3. Extend in your entities — get auditing for free!
+@Entity
+public class Product extends Auditable {
+    @Id @GeneratedValue(strategy = IDENTITY)
+    private Long id;
+    private String name;
+    // createdAt, updatedAt, createdBy, lastModifiedBy auto-populated!
+}</code></pre>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><div class="card-ico">⚡</div><div><div class="card-name" style="color:var(--amber)">Second-Level Cache (L2 Cache)</div></div></div>
+      <div class="card-body">L1 cache = EntityManager (per transaction). L2 cache = shared across sessions. Cache frequently-read, rarely-changed data (Countries, Categories, Configs). Uses Ehcache or Redis.</div>
+      <div class="code-wrap">
+        <div class="code-label"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>L2 Cache setup</div>
+        <pre><code class="language-java">// 1. pom.xml dependency
+// spring-boot-starter-cache + ehcache
+
+// 2. Entity — mark as cacheable
+@Entity
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)  // Hibernate
+@Cacheable                                           // JPA standard
+public class Category {
+    @Id @GeneratedValue(strategy = IDENTITY)
+    private Long id;
+    private String name;
+
+    @OneToMany(mappedBy = "category")
+    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+    private List&lt;Product&gt; products;
+}
+
+// 3. Spring @Cacheable on service
+@Service
+public class CategoryService {
+
+    @Cacheable(value = "categories", key = "#id")
+    public Category findById(Long id) {
+        return categoryRepo.findById(id).orElseThrow();
+    }
+
+    @CacheEvict(value = "categories", key = "#category.id")
+    public Category update(Category category) {
+        return categoryRepo.save(category);
+    }
+
+    @CacheEvict(value = "categories", allEntries = true)
+    public void evictAll() { } // call when bulk update needed
+}</code></pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     S13 — REAL SCENARIOS
+═══════════════════════════════════════════ -->
+<div class="section" id="s13">
+  <div class="sec-header">
+    <div class="sec-num">13</div>
+    <div class="sec-title">Real-World Scenarios</div>
+    <div class="sec-sub">production patterns</div>
+  </div>
+
+  <!-- Scenario A -->
+  <div class="scenario">
+    <div class="sc-hdr">
+      <div style="font-size:24px">🛒</div>
+      <div>
+        <div class="sc-title">Scenario A: E-Commerce — Order Management with Optimistic Locking</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'Fira Code',monospace">Concurrent orders → Inventory control → Optimistic locking prevents oversell</div>
+      </div>
+      <span class="tag t-amber" style="margin-left:auto">Concurrency</span>
+    </div>
+    <div class="sc-body">
+      <div class="g2">
+        <div class="code-wrap">
+          <div class="code-label"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>Inventory.java — @Version prevents oversell</div>
+          <pre><code class="language-java">@Entity
+public class Inventory {
+    @Id private Long productId;
+    private int availableStock;
+
+    @Version                    // Hibernate checks version on UPDATE
+    private Long version;       // if changed since read → throws OptimisticLockException
+}
+
+@Service
+@RequiredArgsConstructor
+public class OrderService {
+
+    private final InventoryRepository inventoryRepo;
+    private final OrderRepository orderRepo;
+
+    @Transactional
+    @Retryable(value = OptimisticLockingFailureException.class, maxAttempts = 3)
+    public Order placeOrder(PlaceOrderRequest req) {
+        // If 2 users buy last item simultaneously:
+        // User A reads: stock=1, version=5
+        // User B reads: stock=1, version=5
+        // User A updates: stock=0, version=6 ← succeeds
+        // User B tries: WHERE id=X AND version=5 → 0 rows affected
+        //               → OptimisticLockException thrown!
+        //               → @Retryable retries → re-reads stock=0 → fails with StockException
+
+        Inventory inv = inventoryRepo.findById(req.getProductId())
+            .orElseThrow(() -> new ProductNotFoundException(req.getProductId()));
+
+        if (inv.getAvailableStock() &lt; req.getQuantity()) {
+            throw new InsufficientStockException("Not enough stock");
+        }
+
+        inv.setAvailableStock(inv.getAvailableStock() - req.getQuantity());
+        inventoryRepo.save(inv);  // throws OptimisticLockException if version mismatch
+
+        Order order = Order.builder()
+            .customerId(req.getCustomerId())
+            .productId(req.getProductId())
+            .quantity(req.getQuantity())
+            .status(OrderStatus.CONFIRMED)
+            .build();
+
+        return orderRepo.save(order);
+    }
+}</code></pre>
+        </div>
+        <div class="code-wrap">
+          <div class="code-label"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>OrderRepository — efficient queries</div>
+          <pre><code class="language-java">public interface OrderRepository extends JpaRepository&lt;Order, Long&gt; {
+
+    // Load order with all details in 1 query
+    @EntityGraph(attributePaths = {"customer", "items", "items.product"})
+    Optional&lt;Order&gt; findById(Long id);
+
+    // Customer order history with pagination
+    @Query("SELECT o FROM Order o WHERE o.customerId = :cid " +
+           "ORDER BY o.createdAt DESC")
+    Page&lt;Order&gt; findCustomerOrders(@Param("cid") Long customerId, Pageable p);
+
+    // Revenue report
+    @Query("""
+        SELECT new com.example.dto.RevenueDto(
+            FUNCTION('DATE', o.createdAt),
+            COUNT(o),
+            SUM(o.totalAmount))
+        FROM Order o
+        WHERE o.status = 'COMPLETED'
+        AND o.createdAt BETWEEN :from AND :to
+        GROUP BY FUNCTION('DATE', o.createdAt)
+        ORDER BY FUNCTION('DATE', o.createdAt)
+        """)
+    List&lt;RevenueDto&gt; getDailyRevenue(
+        @Param("from") LocalDateTime from,
+        @Param("to") LocalDateTime to);
+}</code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scenario B -->
+  <div class="scenario">
+    <div class="sc-hdr">
+      <div style="font-size:24px">🏥</div>
+      <div>
+        <div class="sc-title">Scenario B: Healthcare — Complex Reporting with Specifications</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'Fira Code',monospace">Dynamic filtering with JPA Specifications — build queries at runtime</div>
+      </div>
+      <span class="tag t-purple" style="margin-left:auto">Specifications</span>
+    </div>
+    <div class="sc-body">
+      <div class="g2">
+        <div class="code-wrap">
+          <div class="code-label"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>PatientSpecification.java</div>
+          <pre><code class="language-java">// Repository extends JpaSpecificationExecutor for Specification support
+public interface PatientRepository extends JpaRepository&lt;Patient, Long&gt;,
+                                            JpaSpecificationExecutor&lt;Patient&gt; {}
+
+// Specification — reusable, composable predicates
+public class PatientSpecification {
+
+    public static Specification&lt;Patient&gt; hasDoctor(Long doctorId) {
+        return (root, query, cb) -&gt;
+            doctorId == null ? null
+                : cb.equal(root.get("doctor").get("id"), doctorId);
+    }
+
+    public static Specification&lt;Patient&gt; ageGreaterThan(Integer age) {
+        return (root, query, cb) -&gt;
+            age == null ? null : cb.greaterThan(root.get("age"), age);
+    }
+
+    public static Specification&lt;Patient&gt; diagnosedWith(String condition) {
+        return (root, query, cb) -&gt;
+            condition == null ? null
+                : cb.like(cb.lower(root.get("diagnosis")), "%" + condition.toLowerCase() + "%");
+    }
+
+    public static Specification&lt;Patient&gt; admittedBetween(
+            LocalDate from, LocalDate to) {
+        return (root, query, cb) -&gt;
+            (from == null || to == null) ? null
+                : cb.between(root.get("admissionDate"), from, to);
+    }
+}
+
+// Service — compose specifications dynamically
+@Service
+public class PatientService {
+    private final PatientRepository repo;
+
+    public Page&lt;Patient&gt; search(PatientFilter filter, Pageable pageable) {
+        Specification&lt;Patient&gt; spec = Specification
+            .where(PatientSpecification.hasDoctor(filter.getDoctorId()))
+            .and(PatientSpecification.ageGreaterThan(filter.getMinAge()))
+            .and(PatientSpecification.diagnosedWith(filter.getCondition()))
+            .and(PatientSpecification.admittedBetween(filter.getFrom(), filter.getTo()));
+
+        return repo.findAll(spec, pageable);  // Spring builds the WHERE clause!
+    }
+}</code></pre>
+        </div>
+        <div class="code-wrap">
+          <div class="code-label"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>Bulk operations — efficient updates</div>
+          <pre><code class="language-java">@Service
+@RequiredArgsConstructor
+public class BulkService {
+
+    private final EntityManager em;
+
+    // Efficient bulk update — no entity loading
+    @Transactional
+    public int dischargeAllPatients(Long wardId) {
+        return em.createQuery(
+            "UPDATE Patient p SET p.status = 'DISCHARGED', " +
+            "p.dischargeDate = :now " +
+            "WHERE p.ward.id = :wardId AND p.status = 'ADMITTED'"
+        )
+        .setParameter("now", LocalDate.now())
+        .setParameter("wardId", wardId)
+        .executeUpdate();          // returns count updated rows
+    }
+
+    // Batch INSERT — much faster than saving one by one
+    @Transactional
+    public void bulkImportPatients(List&lt;Patient&gt; patients) {
+        int batchSize = 50;
+        for (int i = 0; i &lt; patients.size(); i++) {
+            em.persist(patients.get(i));
+            if (i % batchSize == 0 &amp;&amp; i &gt; 0) {
+                em.flush();   // write batch to DB
+                em.clear();   // clear persistence context to free memory
+            }
+        }
+    }
+}</code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     S14 — CHEATSHEET
+═══════════════════════════════════════════ -->
+<div class="section" id="s14">
+  <div class="sec-header">
+    <div class="sec-num">14</div>
+    <div class="sec-title">Cheatsheet + Interview Q&amp;A</div>
+    <div class="sec-sub">everything in one place</div>
+  </div>
+
+  <div class="cheat-grid" style="margin-bottom:22px">
+    <div class="cheat-card">
+      <div class="cheat-title">⚡ Key Annotations</div>
+      <div class="cmd-row"><span class="cmd">@Entity</span><span class="cmd-d">Marks class as JPA entity — maps to DB table</span></div>
+      <div class="cmd-row"><span class="cmd">@Table(name="...")</span><span class="cmd-d">Custom table name, indexes, unique constraints</span></div>
+      <div class="cmd-row"><span class="cmd">@Id @GeneratedValue</span><span class="cmd-d">Primary key + auto-generation strategy</span></div>
+      <div class="cmd-row"><span class="cmd">@Column(nullable=false)</span><span class="cmd-d">Column constraints: name, length, nullable, unique</span></div>
+      <div class="cmd-row"><span class="cmd">@Transient</span><span class="cmd-d">Field NOT stored in DB — computed/temp values</span></div>
+      <div class="cmd-row"><span class="cmd">@Enumerated(STRING)</span><span class="cmd-d">Store enum as string "ACTIVE" not ordinal 0</span></div>
+      <div class="cmd-row"><span class="cmd">@Version</span><span class="cmd-d">Optimistic locking — prevents lost updates</span></div>
+      <div class="cmd-row"><span class="cmd">@Embedded</span><span class="cmd-d">Embed another class's fields in same table</span></div>
+      <div class="cmd-row"><span class="cmd">@MappedSuperclass</span><span class="cmd-d">Base class fields inherited by entity subclasses</span></div>
+      <div class="cmd-row"><span class="cmd">@CreatedDate</span><span class="cmd-d">Auto-set on INSERT — needs @EnableJpaAuditing</span></div>
+      <div class="cmd-row"><span class="cmd">@LastModifiedDate</span><span class="cmd-d">Auto-updated on UPDATE — JPA auditing</span></div>
+      <div class="cmd-row"><span class="cmd">@Modifying</span><span class="cmd-d">Required on @Query UPDATE and DELETE operations</span></div>
+    </div>
+    <div class="cheat-card">
+      <div class="cheat-title">🔗 Relationship Annotations</div>
+      <div class="cmd-row"><span class="cmd">@OneToOne</span><span class="cmd-d">1:1 — User ↔ UserProfile. Use cascade=ALL for owned side.</span></div>
+      <div class="cmd-row"><span class="cmd">@ManyToOne(fetch=LAZY)</span><span class="cmd-d">N:1 — Product → Category. FK stays in Product table. Always LAZY.</span></div>
+      <div class="cmd-row"><span class="cmd">@OneToMany(mappedBy=)</span><span class="cmd-d">1:N — Category → Products. mappedBy = field in child entity.</span></div>
+      <div class="cmd-row"><span class="cmd">@ManyToMany</span><span class="cmd-d">N:N — creates join table. Use Set not List to avoid Hibernate bug.</span></div>
+      <div class="cmd-row"><span class="cmd">@JoinColumn(name=)</span><span class="cmd-d">Specify FK column name in current table.</span></div>
+      <div class="cmd-row"><span class="cmd">cascade=ALL</span><span class="cmd-d">Parent save/delete propagates to children.</span></div>
+      <div class="cmd-row"><span class="cmd">orphanRemoval=true</span><span class="cmd-d">Remove child from collection → DELETE from DB.</span></div>
+      <div class="cmd-row"><span class="cmd">@EntityGraph</span><span class="cmd-d">Load relationships eagerly for specific query — fixes N+1.</span></div>
+      <div class="cmd-row"><span class="cmd">@BatchSize(size=N)</span><span class="cmd-d">Batch lazy loading — WHERE id IN (?) instead of N queries.</span></div>
+      <div class="cmd-row"><span class="cmd">JOIN FETCH</span><span class="cmd-d">In @Query — load relationship in same SQL query.</span></div>
+      <div class="cmd-row"><span class="cmd">@Cacheable</span><span class="cmd-d">Cache entity in 2nd level cache across sessions.</span></div>
+    </div>
+  </div>
+
+  <div class="cheat-grid">
+    <div class="cheat-card">
+      <div class="cheat-title">❓ Interview Q&amp;A — Core Concepts</div>
+      <div class="cmd-row">
+        <span class="cmd">JPA vs Hibernate?</span>
+        <span class="cmd-d">JPA is the specification (interfaces). Hibernate is the implementation. Spring Data JPA is a layer on top of Hibernate that auto-generates repository code.</span>
+      </div>
+      <div class="cmd-row">
+        <span class="cmd">What is N+1 problem?</span>
+        <span class="cmd-d">Loading N entities then accessing a LAZY relationship on each → N additional queries. Fix with JOIN FETCH, @EntityGraph, or @BatchSize. Detect with show-sql=true.</span>
+      </div>
+      <div class="cmd-row">
+        <span class="cmd">LAZY vs EAGER?</span>
+        <span class="cmd-d">LAZY loads relationship when first accessed. EAGER loads always. Best practice: make all relationships LAZY, use JOIN FETCH when you need the data.</span>
+      </div>
+      <div class="cmd-row">
+        <span class="cmd">Optimistic vs Pessimistic locking?</span>
+        <span class="cmd-d">Optimistic (@Version): assume no conflict, check at save time → throws on conflict. Pessimistic (SELECT FOR UPDATE): lock row immediately. Optimistic better for high-read apps.</span>
+      </div>
+      <div class="cmd-row">
+        <span class="cmd">What is Persistence Context?</span>
+        <span class="cmd-d">First-level cache managed by EntityManager. All entities loaded in a transaction are cached here. Identical lookups hit cache not DB. Cleared at transaction end.</span>
+      </div>
+    </div>
+    <div class="cheat-card">
+      <div class="cheat-title">❓ Interview Q&amp;A — Advanced</div>
+      <div class="cmd-row">
+        <span class="cmd">How does @Transactional work?</span>
+        <span class="cmd-d">Spring creates AOP proxy. Before method: open transaction. On success: commit. On RuntimeException: rollback. Self-invocation (this.method()) bypasses proxy — no transaction!</span>
+      </div>
+      <div class="cmd-row">
+        <span class="cmd">ddl-auto values?</span>
+        <span class="cmd-d">none: do nothing. validate: check schema matches. update: update schema (dev). create: create tables on start. create-drop: create then drop on close. Production: none or validate.</span>
+      </div>
+      <div class="cmd-row">
+        <span class="cmd">JPQL vs Native SQL?</span>
+        <span class="cmd-d">JPQL: DB-agnostic, uses entity names, portable. Native SQL: DB-specific, can use DB features (full-text, window functions). Use JPQL first, native only when JPQL can't do it.</span>
+      </div>
+      <div class="cmd-row">
+        <span class="cmd">Page vs Slice?</span>
+        <span class="cmd-d">Page fires 2 queries: data + COUNT(*). Returns total pages/elements. Slice fires 1 query + checks for next page. Use Slice for infinite scroll — avoids expensive count on huge tables.</span>
+      </div>
+      <div class="cmd-row">
+        <span class="cmd">How to do bulk operations?</span>
+        <span class="cmd-d">@Modifying @Query for bulk UPDATE/DELETE. EntityManager.persist() in loop with flush+clear every 50 for bulk INSERT. Set spring.jpa.properties.hibernate.jdbc.batch_size=50.</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end .page -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  hljs.configure({ ignoreUnescapedHTML: true });
+  hljs.highlightAll();
+});
+</script>
+</body>
+</html>
