@@ -28,7 +28,8 @@ body{
   padding:20px;
   overflow-x:hidden
 }
-.container{max-width:1200px;margin:0 auto}
+.container{max-width:1200px;margin:0 auto;padding:0 20px}
+@media(min-width:1280px){.container{margin-left:260px}}
 header{text-align:center;margin-bottom:50px;padding:40px 20px}
 h1{font-size:42px;margin-bottom:15px;background:linear-gradient(135deg,var(--teal),var(--sky));-webkit-background-clip:text;background-clip:text;color:transparent}
 .subtitle{font-size:18px;color:var(--txt2)}
@@ -43,6 +44,7 @@ h1{font-size:42px;margin-bottom:15px;background:linear-gradient(135deg,var(--tea
 .hero-boxes{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
 .hero-box{background:rgba(0,212,170,.03);border:1px solid rgba(0,212,170,.15);border-radius:8px;padding:16px;text-decoration:none;transition:all .3s;cursor:pointer}
 .hero-box:hover{background:rgba(0,212,170,.08);transform:translateY(-2px)}
+.hero-box.active{background:rgba(0,212,170,.12);border:2px solid var(--teal);box-shadow:0 0 20px rgba(0,212,170,.3);transform:scale(1.02)}
 .hero-box-icon{font-size:24px;margin-bottom:8px}
 .hero-box-title{color:var(--teal);font-weight:700;font-size:13px;margin-bottom:4px}
 .hero-box-desc{color:var(--txt2);font-size:12px;line-height:1.5}
@@ -268,18 +270,6 @@ code{background:rgba(0,212,170,.1);color:var(--teal);padding:2px 6px;border-radi
       </a>
     </div>
   </div>
-</div>
-
-<!-- TABS -->
-<div class="tabs">
-  <div class="tab active" onclick="tab(0, event)">Configuration</div>
-  <div class="tab" onclick="tab(1, event)">Beans & DI</div>
-  <div class="tab" onclick="tab(2, event)">Annotations</div>
-  <div class="tab" onclick="tab(3, event)">REST APIs</div>
-  <div class="tab" onclick="tab(4, event)">Data & Persistence</div>
-  <div class="tab" onclick="tab(5, event)">Architecture</div>
-  <div class="tab" onclick="tab(6, event)">Filters & Interceptors</div>
-  <div class="tab" onclick="tab(7, event)">HTTP Clients</div>
 </div>
 
 <!-- ==================== SECTION 1: CONFIGURATION ==================== -->
@@ -5626,9 +5616,14 @@ function tab(index, event) {
   // Show target section
   document.getElementById('sec-' + index).classList.add('active');
 
-  // Update tab styles
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  event.target.classList.add('active');
+  // Update hero boxes active state
+  document.querySelectorAll('.hero-box').forEach((box, idx) => {
+    if (idx === index) {
+      box.classList.add('active');
+    } else {
+      box.classList.remove('active');
+    }
+  });
 
   // Scroll to top
   window.scrollTo({top: 0, behavior: 'smooth'});
@@ -5667,19 +5662,42 @@ function updateProgressTree() {
 progressItems.forEach(item => {
   item.addEventListener('click', () => {
     const sectionId = item.getAttribute('data-section');
-    const sectionIndex = sectionId.split('-')[1];
-    const targetTab = document.querySelectorAll('.tab')[parseInt(sectionIndex)];
+    const sectionIndex = parseInt(sectionId.split('-')[1]);
 
-    if (targetTab) {
-      const event = new Event('click');
-      tab(parseInt(sectionIndex), {target: targetTab});
-      targetTab.classList.add('active');
+    // Hide all sections
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+
+    // Show target section
+    const targetSection = document.getElementById(sectionId);
+    if (targetSection) {
+      targetSection.classList.add('active');
+
+      // Update hero boxes active state
+      document.querySelectorAll('.hero-box').forEach((box, idx) => {
+        if (idx === sectionIndex) {
+          box.classList.add('active');
+        } else {
+          box.classList.remove('active');
+        }
+      });
+
+      // Scroll to top
+      window.scrollTo({top: 0, behavior: 'smooth'});
+
+      // Update progress tree
+      updateProgressTree();
     }
   });
 });
 
-// Initial call
-updateProgressTree();
+// Initial call - set first hero box as active
+document.addEventListener('DOMContentLoaded', () => {
+  const firstHeroBox = document.querySelector('.hero-box');
+  if (firstHeroBox) {
+    firstHeroBox.classList.add('active');
+  }
+  updateProgressTree();
+});
 </script>
 
 <footer>

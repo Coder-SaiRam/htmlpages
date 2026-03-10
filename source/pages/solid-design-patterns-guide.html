@@ -27,7 +27,8 @@
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
-body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--txt);font-size:15px;line-height:1.75}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--txt);font-size:15px;line-height:1.75;padding:0 20px}
+@media(min-width:1280px){body{padding-left:260px}}
 
 /* HERO */
 .hero{
@@ -70,6 +71,7 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--txt);font-
 .hero-box:hover{
   border-color:var(--border2);transform:translateY(-2px);
 }
+.hero-box.active{background:rgba(240,180,41,.12);border:2px solid var(--gold);box-shadow:0 0 20px rgba(240,180,41,.3);transform:scale(1.02)}
 .hero-box:nth-child(1){border-left-color:var(--gold)}
 .hero-box:nth-child(1)::before{background:var(--gold)}
 .hero-box:nth-child(1):hover{background:rgba(240,180,41,.06);border-color:rgba(240,180,41,.3)}
@@ -2008,18 +2010,14 @@ function tab(idx, event) {
   if (event) event.preventDefault();
   document.querySelectorAll('.sec').forEach((s, i) => s.classList.toggle('show', i === idx));
 
-  // Remove active state from all hero boxes
-  document.querySelectorAll('.hero-box').forEach(b => b.style.opacity = '1');
-
-  // Highlight active hero box with slight opacity
-  const heroBoxes = document.querySelectorAll('.hero-box');
-  if (heroBoxes[idx]) {
-    heroBoxes.forEach((b, i) => {
-      if (i === idx) {
-        b.style.opacity = '1';
-      }
-    });
-  }
+  // Update hero boxes active state
+  document.querySelectorAll('.hero-box').forEach((b, i) => {
+    if (i === idx) {
+      b.classList.add('active');
+    } else {
+      b.classList.remove('active');
+    }
+  });
 
   window.scrollTo({top: 0, behavior: 'smooth'});
   updateProgressTree();
@@ -2053,14 +2051,17 @@ function updateProgressTree() {
 // Click handler for progress items
 progressItems.forEach((item, idx) => {
   item.addEventListener('click', () => {
-    const heroBoxes = document.querySelectorAll('.hero-box');
-    if (heroBoxes[idx]) {
-      tab(idx, {preventDefault: () => {}});
-    }
+    tab(idx, {preventDefault: () => {}});
   });
 });
 
-// Initial call
+// Initial call - set first hero box as active
+document.addEventListener('DOMContentLoaded', () => {
+  const firstHeroBox = document.querySelector('.hero-box');
+  if (firstHeroBox) {
+    firstHeroBox.classList.add('active');
+  }
+});
 updateProgressTree();
 
 // Smooth scroll to pattern cards with offset

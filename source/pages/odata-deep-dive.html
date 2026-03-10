@@ -39,7 +39,8 @@ body{
   padding:20px;
   overflow-x:hidden
 }
-.container{max-width:1200px;margin:0 auto}
+.container{max-width:1200px;margin:0 auto;padding:0 20px}
+@media(min-width:1280px){.container{margin-left:260px}}
 
 /* HERO */
 .hero{background:linear-gradient(135deg,rgba(255,157,92,.05),rgba(255,180,136,.05));border:1px solid rgba(255,157,92,.15);border-radius:12px;padding:30px;margin-bottom:40px}
@@ -51,6 +52,7 @@ body{
 .hero-boxes{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
 .hero-box{background:rgba(255,157,92,.03);border:1px solid rgba(255,157,92,.15);border-radius:8px;padding:16px;text-decoration:none;transition:all .3s;cursor:pointer;display:block}
 .hero-box:hover{background:rgba(255,157,92,.08);transform:translateY(-2px);border-color:rgba(255,157,92,.3)}
+.hero-box.active{background:rgba(255,157,92,.12);border:2px solid var(--orange);box-shadow:0 0 20px rgba(255,157,92,.3);transform:scale(1.02)}
 .hero-box-icon{font-size:24px;margin-bottom:8px}
 .hero-box-title{color:var(--orange-bright);font-weight:700;font-size:13px;margin-bottom:4px}
 .hero-box-desc{color:var(--txt2);font-size:12px;line-height:1.5}
@@ -1168,6 +1170,19 @@ scrollTopBtn.addEventListener('click', () => {
 // Progress Tree - Scroll tracking and navigation
 const progressItems = document.querySelectorAll('.progress-item');
 const sections = document.querySelectorAll('.section');
+const heroBoxes = document.querySelectorAll('.hero-box');
+
+// Map section IDs to hero box indices
+const sectionToHeroBoxMap = {
+  's0': 0,   // What is OData
+  's1': 1,   // Protocol Mechanics
+  's2': 2,   // $metadata & EDM
+  's4': 3,   // Query Options
+  's7': 4,   // CRUD Operations
+  's9': 5,   // Batching
+  's10': 6,  // v2 vs v4
+  's12': 7   // Security
+};
 
 // Update active section based on scroll position
 function updateProgressTree() {
@@ -1205,6 +1220,13 @@ function updateProgressTree() {
       }
     }
   });
+
+  // Update hero boxes
+  heroBoxes.forEach(box => box.classList.remove('active'));
+  const heroBoxIndex = sectionToHeroBoxMap[currentSection];
+  if (heroBoxIndex !== undefined && heroBoxes[heroBoxIndex]) {
+    heroBoxes[heroBoxIndex].classList.add('active');
+  }
 }
 
 // Click handler for progress items - smooth scroll to section
