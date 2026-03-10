@@ -2,65 +2,65 @@
 <html lang="en">
 
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sai Portfolio</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sai Portfolio</title>
 
-<style>
+    <style>
 
-body{
-margin:0;
-font-family:Arial, Helvetica, sans-serif;
-background:linear-gradient(135deg,#1e293b,#0f172a);
-color:white;
-text-align:center;
-}
+        body{
+        margin:0;
+        font-family:Arial, Helvetica, sans-serif;
+        background:linear-gradient(135deg,#1e293b,#0f172a);
+        color:white;
+        text-align:center;
+        }
 
-h1{
-margin-top:40px;
-margin-bottom:40px;
-font-size:36px;
-}
+        h1{
+        margin-top:40px;
+        margin-bottom:40px;
+        font-size:36px;
+        }
 
-.container{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
-gap:30px;
-width:80%;
-margin:auto;
-max-width:1000px;
-}
+        .container{
+        display:grid;
+        grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+        gap:30px;
+        width:80%;
+        margin:auto;
+        max-width:1000px;
+        }
 
-.card{
-background:#1f2937;
-padding:25px;
-border-radius:12px;
-cursor:pointer;
-transition:transform 0.25s, box-shadow 0.25s;
-}
+        .card{
+        background:#1f2937;
+        padding:25px;
+        border-radius:12px;
+        cursor:pointer;
+        transition:transform 0.25s, box-shadow 0.25s;
+        }
 
-.card:hover{
-transform:translateY(-6px);
-box-shadow:0 12px 25px rgba(0,0,0,0.4);
-}
+        .card:hover{
+        transform:translateY(-6px);
+        box-shadow:0 12px 25px rgba(0,0,0,0.4);
+        }
 
-.card-icon{
-font-size:40px;
-margin-bottom:10px;
-}
+        .card-icon{
+        font-size:40px;
+        margin-bottom:10px;
+        }
 
-.card-title{
-font-size:20px;
-font-weight:bold;
-margin-bottom:10px;
-}
+        .card-title{
+        font-size:20px;
+        font-weight:bold;
+        margin-bottom:10px;
+        }
 
-.card-desc{
-font-size:14px;
-opacity:0.8;
-}
+        .card-desc{
+        font-size:14px;
+        opacity:0.8;
+        }
 
-</style>
+    </style>
 
 </head>
 
@@ -70,208 +70,98 @@ opacity:0.8;
 
 <div class="container">
 
-<!-- AUTO-CARDS-START -->
+    <!-- AUTO-CARDS-START -->
 
 
+    <div class="card" onclick="openPage('source/pages/docker-complete-guide.html')">
+        <div class="card-icon">🐳
+        </div>
+        <div class="card-title">Docker Complete Guide</div>
+        <div class="card-desc">
+            Deep dive documentation for Docker Complete Guide
+        </div>
+    </div>
 
 
-<div class="card" onclick="openPage('source/pages/docker-complete-guide.html')">
-<div class="card-icon">
-<img src="assets/docker.png" alt="Docker">
-</div>
-<div class="card-title">Docker Complete Guide</div>
-<div class="card-desc">
-Deep dive documentation for Docker Complete Guide
-</div>
-</div>
+    <div class="card" onclick="openPage('source/pages/kubernetes-architecture.html')">
+        <div class="card-icon">📄</div>
+        <div class="card-title">Kubernetes Architecture</div>
+        <div class="card-desc">
+            Deep dive documentation for Kubernetes Architecture
+        </div>
+    </div>
 
 
-<div class="card" onclick="openPage('source/pages/kubernetes-architecture.html')">
-<div class="card-icon">
-<img src="assets/kubernetes.png" alt="Kubernetes">
-</div>
-<div class="card-title">Kubernetes Architecture</div>
-<div class="card-desc">
-Deep dive documentation for Kubernetes Architecture
-</div>
-</div>
+    <div class="card" onclick="openPage('source/pages/spring-security-guide.html')">
+        <div class="card-icon">🗄️</div>
+        <div class="card-title">Spring Security Guide</div>
+        <div class="card-desc">
+            Deep dive documentation for Spring Security Guide
+        </div>
+    </div>
 
 
-<div class="card" onclick="openPage('source/pages/spring-security-guide.html')">
-<div class="card-icon">
-<img src="assets/spring-security.png" alt="Spring Security">
-</div>
-<div class="card-title">Spring Security Guide</div>
-<div class="card-desc">
-Deep dive documentation for Spring Security Guide
-</div>
-</div>
+    <div class="card" onclick="openPage('source/pages/spring-data-jpa-guide.html')">
+        <div class="card-icon">🌱</div>
+        <div class="card-title">Spring Data Jpa Guide</div>
+        <div class="card-desc">
+            Deep dive documentation for Spring Data Jpa Guide
+        </div>
+    </div>
 
 
-<div class="card" onclick="openPage('source/pages/spring-data-jpa-guide.html')">
-<div class="card-icon">
-<img src="assets/spring.png" alt="Spring Data JPA">
-</div>
-<div class="card-title">Spring Data JPA Guide</div>
-<div class="card-desc">
-Deep dive documentation for Spring Data JPA Guide
-</div>
-</div>
+    <div class="card" onclick="openPage('source/pages/java-threads-complete-guide.html')">
+        <div class="card-icon">🧵</div>
+        <div class="card-title">Java Threads Complete Guide</div>
+        <div class="card-desc">
+            Deep dive documentation for Java Threads Complete Guide
+        </div>
+    </div>
 
 
-<div class="card" onclick="openPage('source/pages/java-threads-complete-guide.html')">
-<div class="card-icon">
-<img src="assets/java.png" alt="Java Threads">
-</div>
-<div class="card-title">Java Threads Complete Guide</div>
-<div class="card-desc">
-Deep dive documentation for Java Threads Complete Guide
-</div>
-</div>
+    <div class="card" onclick="openPage('source/pages/odata-deep-dive.html')">
+        <div class="card-icon">📄</div>
+        <div class="card-title">Odata Deep Dive</div>
+        <div class="card-desc">
+            Deep dive documentation for Odata Deep Dive
+        </div>
+    </div>
 
 
-<div class="card" onclick="openPage('source/pages/odata-deep-dive.html')">
-<div class="card-icon">
-<img src="assets/odata.png" alt="OData">
-</div>
-<div class="card-title">OData Deep Dive</div>
-<div class="card-desc">
-Deep dive documentation for OData Deep Dive
-</div>
-</div>
+    <div class="card" onclick="openPage('source/pages/sql-deep-dive-v2.html')">
+        <div class="card-icon">📄</div>
+        <div class="card-title">Sql Deep Dive V2</div>
+        <div class="card-desc">
+            Deep dive documentation for Sql Deep Dive V2
+        </div>
+    </div>
 
 
-<div class="card" onclick="openPage('source/pages/sql-deep-dive.html')">
-<div class="card-icon">
-<img src="assets/sql.png" alt="SQL">
-</div>
-<div class="card-title">SQL Deep Dive</div>
-<div class="card-desc">
-Deep dive documentation for SQL Deep Dive
-</div>
-</div>
+    <div class="card" onclick="openPage('source/pages/sql-deep-dive.html')">
+        <div class="card-icon">📄</div>
+        <div class="card-title">Sql Deep Dive</div>
+        <div class="card-desc">
+            Deep dive documentation for Sql Deep Dive
+        </div>
+    </div>
 
 
-<div class="card" onclick="openPage('source/pages/sql-deep-dive-v2.html')">
-<div class="card-icon">
-<img src="assets/sql.png" alt="SQL">
-</div>
-<div class="card-title">SQL Deep Dive V2</div>
-<div class="card-desc">
-Deep dive documentation for SQL Deep Dive V2
-</div>
-</div>
+    <div class="card" onclick="openPage('source/pages/advanced-sql-deep-dive.html')">
+        <div class="card-icon">📄</div>
+        <div class="card-title">Advanced Sql Deep Dive</div>
+        <div class="card-desc">
+            Deep dive documentation for Advanced Sql Deep Dive
+        </div>
+    </div>
 
-
-<div class="card" onclick="openPage('source/pages/advanced-sql-deep-dive.html')">
-<div class="card-icon">
-<img src="assets/sql.png" alt="Advanced SQL">
-</div>
-<div class="card-title">Advanced SQL Deep Dive</div>
-<div class="card-desc">
-Deep dive documentation for Advanced SQL Deep Dive
-</div>
-</div>
-
-
-
-<div class="card" onclick="openPage('spring-security-guide.html')">
-<div class="card-icon">🔐</div>
-<div class="card-title">Spring Security Guide</div>
-<div class="card-desc">
-Deep dive documentation for Spring Security Guide
-</div>
-</div>
-
-
-<div class="card" onclick="openPage('odata-deep-dive.html')">
-<div class="card-icon">📄</div>
-<div class="card-title">Odata Deep Dive</div>
-<div class="card-desc">
-Deep dive documentation for Odata Deep Dive
-</div>
-</div>
-
-
-<div class="card" onclick="openPage('docker-complete-guide.html')">
-<div class="card-icon">🐳</div>
-<div class="card-title">Docker Complete Guide</div>
-<div class="card-desc">
-Deep dive documentation for Docker Complete Guide
-</div>
-</div>
-
-
-<div class="card" onclick="openPage('kubernetes-architecture.html')">
-<div class="card-icon">☸️</div>
-<div class="card-title">Kubernetes Architecture</div>
-<div class="card-desc">
-Deep dive documentation for Kubernetes Architecture
-</div>
-</div>
-
-
-<div class="card" onclick="openPage('sql-deep-dive-v2.html')">
-<div class="card-icon">📄</div>
-<div class="card-title">Sql Deep Dive V2</div>
-<div class="card-desc">
-Deep dive documentation for Sql Deep Dive V2
-</div>
-</div>
-
-
-<div class="card" onclick="openPage('spring-data-jpa-guide.html')">
-<div class="card-icon">🌱</div>
-<div class="card-title">Spring Data Jpa Guide</div>
-<div class="card-desc">
-Deep dive documentation for Spring Data Jpa Guide
-</div>
-</div>
-
-
-<div class="card" onclick="openPage('sql-deep-dive.html')">
-<div class="card-icon">📄</div>
-<div class="card-title">Sql Deep Dive</div>
-<div class="card-desc">
-Deep dive documentation for Sql Deep Dive
-</div>
-</div>
-
-
-<div class="card" onclick="openPage('java-threads-complete-guide.html')">
-<div class="card-icon">🧵</div>
-<div class="card-title">Java Threads Complete Guide</div>
-<div class="card-desc">
-Deep dive documentation for Java Threads Complete Guide
-</div>
-</div>
-
-
-<div class="card" onclick="openPage('Threads.html')">
-<div class="card-icon">🧵</div>
-<div class="card-title">Threads</div>
-<div class="card-desc">
-Deep dive documentation for Threads
-</div>
-</div>
-
-
-<div class="card" onclick="openPage('advanced-sql-deep-dive.html')">
-<div class="card-icon">📄</div>
-<div class="card-title">Advanced Sql Deep Dive</div>
-<div class="card-desc">
-Deep dive documentation for Advanced Sql Deep Dive
-</div>
-</div>
-
-<!-- AUTO-CARDS-END -->
+    <!-- AUTO-CARDS-END -->
 
 </div>
 
 <script>
-function openPage(url){
-window.open(url,"_blank");
-}
+    function openPage(url){
+    window.open(url,"_blank");
+    }
 </script>
 
 </body>

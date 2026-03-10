@@ -36,7 +36,7 @@ loaded_files = set(
 
 cards_to_add = []
 
-for file in os.listdir("."):
+for file in os.listdir("./source/pages"):
 
     if file.endswith(".html") and file != "index.html":
 
