@@ -16,11 +16,14 @@ icons = {
     "sql": "🗄️"
 }
 
-# Read index.html
+print("Reading index.html...")
+
 with open(INDEX_FILE, "r", encoding="utf-8") as f:
     html = f.read()
 
 cards = []
+
+print("Scanning pages directory...")
 
 for file in sorted(os.listdir(SOURCE_DIR)):
 
@@ -36,14 +39,14 @@ for file in sorted(os.listdir(SOURCE_DIR)):
             break
 
     card = f"""
-    <div class="card" onclick="openPage('source/pages/{file}')">
-        <div class="card-icon">{icon}</div>
-        <div class="card-title">{title}</div>
-        <div class="card-desc">
-            Deep dive documentation for {title}
-        </div>
+<div class="card" onclick="openPage('source/pages/{file}')">
+    <div class="card-icon">{icon}</div>
+    <div class="card-title">{title}</div>
+    <div class="card-desc">
+        Deep dive documentation for {title}
     </div>
-    """
+</div>
+"""
 
     cards.append(card)
 
@@ -57,13 +60,14 @@ new_section = f"""
 {END_MARKER}
 """
 
-# Replace ENTIRE marker block
-html = re.sub(
-    f"{START_MARKER}.*?{END_MARKER}",
-    new_section,
-    html,
-    flags=re.DOTALL
+pattern = re.compile(
+    r"<!--\s*AUTO-CARDS-START\s*-->.*?<!--\s*AUTO-CARDS-END\s*-->",
+    re.DOTALL
 )
+
+html = pattern.sub(new_section, html)
+
+print("Writing updated index.html...")
 
 with open(INDEX_FILE, "w", encoding="utf-8") as f:
     f.write(html)
