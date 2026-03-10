@@ -31,35 +31,75 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--txt);font-
 
 /* HERO */
 .hero{
-  padding:72px 32px 56px;text-align:center;
-  background:radial-gradient(ellipse 900px 400px at 50% -50px,rgba(240,180,41,.08),transparent 65%),var(--s1);
-  border-bottom:1px solid var(--border);position:relative;overflow:hidden;
+  padding:20px 32px 18px;
+  background:var(--s1);
+  border-bottom:1px solid var(--border);
 }
-.hero::before{
-  content:'';position:absolute;inset:0;
-  background:url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.015'%3E%3Cpath d='M0 40L40 0H20L0 20M40 40V20L20 40'/%3E%3C/g%3E%3C/svg%3E");
-  pointer-events:none;
+.hero-grid{
+  max-width:1400px;margin:0 auto;
+  display:flex;flex-direction:column;gap:16px;
 }
-.hero-tag{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:16px;opacity:.85}
-.hero h1{font-size:clamp(30px,6vw,62px);font-weight:800;line-height:1.1;letter-spacing:-1.5px;margin-bottom:14px}
-.hero h1 span{color:var(--gold)}
-.hero p{color:var(--txt2);max-width:560px;margin:0 auto 28px;font-size:16px;font-weight:300}
-.pills{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
-.pill{font-family:'JetBrains Mono',monospace;font-size:11px;padding:4px 13px;border-radius:20px;border:1px solid;letter-spacing:.4px}
-.p-gold{color:var(--gold);border-color:rgba(240,180,41,.3);background:rgba(240,180,41,.07)}
-.p-teal{color:var(--teal);border-color:rgba(0,212,170,.3);background:rgba(0,212,170,.07)}
-.p-sky{color:var(--sky);border-color:rgba(77,184,255,.3);background:rgba(77,184,255,.07)}
-.p-violet{color:var(--violet);border-color:rgba(157,127,243,.3);background:rgba(157,127,243,.07)}
-.p-coral{color:var(--coral);border-color:rgba(255,107,107,.3);background:rgba(255,107,107,.07)}
+.hero-top{display:flex;align-items:center;gap:20px;justify-content:space-between}
+.hero-left{flex:1}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:1.2px;
+  color:var(--gold);text-transform:uppercase;margin-bottom:6px;
+  padding:3px 10px;border-radius:20px;
+  background:rgba(240,180,41,.08);border:1px solid rgba(240,180,41,.25);
+}
+.hero h1{
+  font-size:clamp(20px,3vw,28px);font-weight:800;line-height:1.15;
+  letter-spacing:-0.8px;margin-bottom:5px;color:var(--txt);
+}
+.hero p{
+  color:var(--txt2);font-size:12px;font-weight:300;line-height:1.4;max-width:600px;
+}
+.hero-boxes{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.hero-box{
+  background:var(--s2);border:1px solid var(--border2);border-radius:5px;
+  padding:6px 12px;display:flex;align-items:center;gap:7px;
+  transition:all .2s;position:relative;overflow:hidden;
+  cursor:pointer;text-decoration:none;color:inherit;
+  white-space:nowrap;flex-shrink:0;
+}
+.hero-box::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:2px;
+  transition:width .2s;
+}
+.hero-box:hover{
+  border-color:var(--border2);transform:translateY(-2px);
+}
+.hero-box:nth-child(1){border-left-color:var(--gold)}
+.hero-box:nth-child(1)::before{background:var(--gold)}
+.hero-box:nth-child(1):hover{background:rgba(240,180,41,.06);border-color:rgba(240,180,41,.3)}
+.hero-box:nth-child(1):hover::before{width:3px}
+.hero-box:nth-child(2){border-left-color:var(--sky)}
+.hero-box:nth-child(2)::before{background:var(--sky)}
+.hero-box:nth-child(2):hover{background:rgba(77,184,255,.06);border-color:rgba(77,184,255,.3)}
+.hero-box:nth-child(2):hover::before{width:3px}
+.hero-box:nth-child(3){border-left-color:var(--teal)}
+.hero-box:nth-child(3)::before{background:var(--teal)}
+.hero-box:nth-child(3):hover{background:rgba(0,212,170,.06);border-color:rgba(0,212,170,.3)}
+.hero-box:nth-child(3):hover::before{width:3px}
+.hero-box:nth-child(4){border-left-color:var(--violet)}
+.hero-box:nth-child(4)::before{background:var(--violet)}
+.hero-box:nth-child(4):hover{background:rgba(157,127,243,.06);border-color:rgba(157,127,243,.3)}
+.hero-box:nth-child(4):hover::before{width:3px}
+.hero-box:nth-child(5){border-left-color:var(--coral)}
+.hero-box:nth-child(5)::before{background:var(--coral)}
+.hero-box:nth-child(5):hover{background:rgba(255,107,107,.06);border-color:rgba(255,107,107,.3)}
+.hero-box:nth-child(5):hover::before{width:3px}
+.hero-box-icon{font-size:16px;line-height:1;flex-shrink:0}
+.hero-box-text{flex:1}
+.hero-box-title{font-size:11px;font-weight:700;color:var(--txt)}
 
-/* NAV */
-.nav{position:sticky;top:0;z-index:100;background:rgba(9,9,15,.95);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:0 20px}
-.nav-in{max-width:1300px;margin:0 auto;display:flex;align-items:center;gap:4px;height:50px;overflow-x:auto;scrollbar-width:none}
-.nav-in::-webkit-scrollbar{display:none}
-.nav-brand{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--gold);white-space:nowrap;margin-right:12px;font-weight:500}
-.nb{font-family:'Outfit',sans-serif;font-size:13px;padding:5px 14px;border-radius:20px;border:1px solid transparent;background:transparent;color:var(--txt2);cursor:pointer;white-space:nowrap;transition:all .18s}
-.nb:hover{color:var(--txt);border-color:var(--border2)}
-.nb.on{background:rgba(240,180,41,.1);color:var(--gold);border-color:rgba(240,180,41,.3)}
+@media(max-width:900px){
+  .hero-top{flex-direction:column;align-items:flex-start;gap:12px}
+  .hero-boxes{width:100%}
+  .hero-box{flex:1;min-width:0;justify-content:center}
+  .hero{padding:16px 20px 14px}
+}
 
 /* SECTIONS */
 .sec{display:none;max-width:1200px;margin:0 auto;padding:44px 28px 64px}
@@ -71,7 +111,7 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--txt);font-
 .sec-intro{color:var(--txt2);font-size:15px;line-height:1.75;max-width:760px;padding-bottom:28px;margin-bottom:32px;border-bottom:1px solid var(--border)}
 
 /* CARD */
-.card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);margin-bottom:28px;overflow:hidden;transition:border-color .2s}
+.card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);margin-bottom:28px;overflow:hidden;transition:border-color .2s;scroll-margin-top:70px}
 .card:hover{border-color:var(--border2)}
 .card-top{padding:22px 24px 18px;border-bottom:1px solid var(--border);display:flex;gap:16px;align-items:flex-start}
 .icon{width:46px;height:46px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;margin-top:2px}
@@ -131,8 +171,8 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--txt);font-
 
 /* OVERVIEW GRID */
 .ovs{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:9px;margin-bottom:28px}
-.ov{background:var(--s1);border:1px solid var(--border);border-radius:8px;padding:14px;transition:border-color .18s,transform .15s;cursor:default}
-.ov:hover{border-color:var(--border2);transform:translateY(-2px)}
+.ov{background:var(--s1);border:1px solid var(--border);border-radius:8px;padding:14px;transition:border-color .18s,transform .15s,background .18s;cursor:pointer;text-decoration:none;color:inherit;display:block}
+.ov:hover{border-color:var(--border2);transform:translateY(-2px);background:var(--s2)}
 .ov-e{font-size:22px;margin-bottom:6px}
 .ov-n{font-weight:700;font-size:14px;margin-bottom:3px}
 .ov-d{font-size:12px;color:var(--txt2);line-height:1.5}
@@ -146,34 +186,61 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--txt);font-
 h3.sub{font-size:16.5px;font-weight:700;margin:22px 0 10px;color:var(--txt)}
 
 footer{text-align:center;padding:28px;color:var(--txt3);font-size:12.5px;border-top:1px solid var(--border);font-family:'JetBrains Mono',monospace}
-@media(max-width:660px){.cmp{grid-template-columns:1fr}.card-top{flex-direction:column;gap:10px}}
+
+/* SCROLL TO TOP BUTTON */
+.scroll-top{position:fixed;bottom:32px;right:32px;width:50px;height:50px;background:var(--gold);border:2px solid rgba(240,180,41,.4);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;cursor:pointer;opacity:0;visibility:hidden;transition:all .3s ease;z-index:999;box-shadow:0 4px 12px rgba(0,0,0,.3)}
+.scroll-top.show{opacity:1;visibility:visible}
+.scroll-top:hover{background:rgba(240,180,41,.9);transform:translateY(-3px);box-shadow:0 6px 16px rgba(0,0,0,.4)}
+.scroll-top:active{transform:translateY(-1px)}
+
+@media(max-width:660px){.cmp{grid-template-columns:1fr}.card-top{flex-direction:column;gap:10px}.scroll-top{bottom:20px;right:20px;width:45px;height:45px;font-size:20px}}
 </style>
 </head>
 <body>
 
 <div class="hero">
-  <div class="hero-tag">// Software Engineering Fundamentals</div>
-  <h1>SOLID Principles &amp;<br/><span>Design Patterns</span></h1>
-  <p>A complete guide with real-world scenarios, when-to-use guidance, side-by-side comparisons, and clean Java examples for every principle and pattern.</p>
-  <div class="pills">
-    <span class="pill p-gold">5 SOLID Principles</span>
-    <span class="pill p-sky">5 Creational Patterns</span>
-    <span class="pill p-teal">7 Structural Patterns</span>
-    <span class="pill p-violet">8 Behavioral Patterns</span>
-    <span class="pill p-coral">Real-World Scenarios</span>
+  <div class="hero-grid">
+    <div class="hero-top">
+      <div class="hero-left">
+        <div class="hero-badge">📐 SOLID PRINCIPLES & DESIGN PATTERNS</div>
+        <h1>Complete Guide for Software Engineers</h1>
+        <p>Master object-oriented design with real-world scenarios, when-to-use guidance, and production-ready Java examples.</p>
+      </div>
+    </div>
+    <div class="hero-boxes">
+      <a href="#" class="hero-box" onclick="tab(0, event); return false;">
+        <div class="hero-box-icon">📦</div>
+        <div class="hero-box-text">
+          <div class="hero-box-title">5 SOLID Principles</div>
+        </div>
+      </a>
+      <a href="#" class="hero-box" onclick="tab(1, event); return false;">
+        <div class="hero-box-icon">🏗️</div>
+        <div class="hero-box-text">
+          <div class="hero-box-title">5 Creational Patterns</div>
+        </div>
+      </a>
+      <a href="#" class="hero-box" onclick="tab(2, event); return false;">
+        <div class="hero-box-icon">🔩</div>
+        <div class="hero-box-text">
+          <div class="hero-box-title">7 Structural Patterns</div>
+        </div>
+      </a>
+      <a href="#" class="hero-box" onclick="tab(3, event); return false;">
+        <div class="hero-box-icon">🎭</div>
+        <div class="hero-box-text">
+          <div class="hero-box-title">8 Behavioral Patterns</div>
+        </div>
+      </a>
+      <a href="#" class="hero-box" onclick="tab(4, event); return false;">
+        <div class="hero-box-icon">🗺️</div>
+        <div class="hero-box-text">
+          <div class="hero-box-title">Quick Reference</div>
+        </div>
+      </a>
+    </div>
   </div>
 </div>
-
-<nav class="nav">
-  <div class="nav-in">
-    <span class="nav-brand">{ guide }</span>
-    <button class="nb on" onclick="tab(0,this)">📐 SOLID</button>
-    <button class="nb" onclick="tab(1,this)">🏗️ Creational</button>
-    <button class="nb" onclick="tab(2,this)">🔩 Structural</button>
-    <button class="nb" onclick="tab(3,this)">🎭 Behavioral</button>
-    <button class="nb" onclick="tab(4,this)">🗺️ Quick Ref</button>
-  </div>
-</nav>
 
 <!-- ═══════════ S0: SOLID ═══════════ -->
 <div class="sec show" id="s0">
@@ -417,15 +484,15 @@ footer{text-align:center;padding:28px;color:var(--txt3);font-size:12.5px;border-
 <div class="sec-intro">Creational patterns abstract the object creation process — decoupling your code from specific classes it instantiates. Use them when <code>new SomeClass()</code> is becoming a problem: too rigid, too coupled, or too complex to manage at scale.</div>
 
 <div class="ovs">
-  <div class="ov"><div class="ov-e">🏭</div><div class="ov-n">Singleton</div><div class="ov-d">One instance, global access</div></div>
-  <div class="ov"><div class="ov-e">🔨</div><div class="ov-n">Factory Method</div><div class="ov-d">Subclasses decide what to create</div></div>
-  <div class="ov"><div class="ov-e">🏗️</div><div class="ov-n">Abstract Factory</div><div class="ov-d">Families of related objects</div></div>
-  <div class="ov"><div class="ov-e">🧱</div><div class="ov-n">Builder</div><div class="ov-d">Step-by-step complex objects</div></div>
-  <div class="ov"><div class="ov-e">🐑</div><div class="ov-n">Prototype</div><div class="ov-d">Clone instead of new</div></div>
+  <a href="#pattern-singleton" class="ov"><div class="ov-e">🏭</div><div class="ov-n">Singleton</div><div class="ov-d">One instance, global access</div></a>
+  <a href="#pattern-factory-method" class="ov"><div class="ov-e">🔨</div><div class="ov-n">Factory Method</div><div class="ov-d">Subclasses decide what to create</div></a>
+  <a href="#pattern-abstract-factory" class="ov"><div class="ov-e">🏗️</div><div class="ov-n">Abstract Factory</div><div class="ov-d">Families of related objects</div></a>
+  <a href="#pattern-builder" class="ov"><div class="ov-e">🧱</div><div class="ov-n">Builder</div><div class="ov-d">Step-by-step complex objects</div></a>
+  <a href="#pattern-prototype" class="ov"><div class="ov-e">🐑</div><div class="ov-n">Prototype</div><div class="ov-d">Clone instead of new</div></a>
 </div>
 
 <!-- SINGLETON -->
-<div class="card">
+<div class="card" id="pattern-singleton">
 <div class="card-top">
   <div class="icon icon-gold">🏭</div>
   <div class="card-meta">
@@ -472,7 +539,7 @@ footer{text-align:center;padding:28px;color:var(--txt3);font-size:12.5px;border-
 </div></div>
 
 <!-- FACTORY METHOD -->
-<div class="card">
+<div class="card" id="pattern-factory-method">
 <div class="card-top">
   <div class="icon icon-teal">🔨</div>
   <div class="card-meta">
@@ -531,7 +598,7 @@ n.<span class="fn">send</span>(<span class="st">"user@example.com"</span>, <span
 </div></div>
 
 <!-- BUILDER -->
-<div class="card">
+<div class="card" id="pattern-builder">
 <div class="card-top">
   <div class="icon icon-sky">🧱</div>
   <div class="card-meta">
@@ -589,7 +656,7 @@ n.<span class="fn">send</span>(<span class="st">"user@example.com"</span>, <span
 </div></div>
 
 <!-- PROTOTYPE -->
-<div class="card">
+<div class="card" id="pattern-prototype">
 <div class="card-top">
   <div class="icon icon-violet">🐑</div>
   <div class="card-meta">
@@ -639,7 +706,7 @@ n.<span class="fn">send</span>(<span class="st">"user@example.com"</span>, <span
 </div></div>
 
 <!-- ABSTRACT FACTORY -->
-<div class="card">
+<div class="card" id="pattern-abstract-factory">
 <div class="card-top">
   <div class="icon icon-mint">🏗️</div>
   <div class="card-meta">
@@ -702,17 +769,17 @@ n.<span class="fn">send</span>(<span class="st">"user@example.com"</span>, <span
 <div class="sec-intro">Structural patterns deal with how classes and objects are <strong>composed into larger structures</strong>. They use inheritance and composition to let you reuse existing code in new ways, connect incompatible systems, and simplify complex component relationships.</div>
 
 <div class="ovs">
-  <div class="ov"><div class="ov-e">🔌</div><div class="ov-n">Adapter</div><div class="ov-d">Bridge incompatible interfaces</div></div>
-  <div class="ov"><div class="ov-e">🌲</div><div class="ov-n">Composite</div><div class="ov-d">Uniform tree structures</div></div>
-  <div class="ov"><div class="ov-e">🎀</div><div class="ov-n">Decorator</div><div class="ov-d">Add responsibilities dynamically</div></div>
-  <div class="ov"><div class="ov-e">🏠</div><div class="ov-n">Facade</div><div class="ov-d">Simplified subsystem entry point</div></div>
-  <div class="ov"><div class="ov-e">🕵️</div><div class="ov-n">Proxy</div><div class="ov-d">Controlled surrogate access</div></div>
-  <div class="ov"><div class="ov-e">🌉</div><div class="ov-n">Bridge</div><div class="ov-d">Decouple abstraction from impl</div></div>
-  <div class="ov"><div class="ov-e">⚡</div><div class="ov-n">Flyweight</div><div class="ov-d">Share objects to save memory</div></div>
+  <a href="#pattern-adapter" class="ov"><div class="ov-e">🔌</div><div class="ov-n">Adapter</div><div class="ov-d">Bridge incompatible interfaces</div></a>
+  <a href="#pattern-composite" class="ov"><div class="ov-e">🌲</div><div class="ov-n">Composite</div><div class="ov-d">Uniform tree structures</div></a>
+  <a href="#pattern-decorator" class="ov"><div class="ov-e">🎀</div><div class="ov-n">Decorator</div><div class="ov-d">Add responsibilities dynamically</div></a>
+  <a href="#pattern-facade" class="ov"><div class="ov-e">🏠</div><div class="ov-n">Facade</div><div class="ov-d">Simplified subsystem entry point</div></a>
+  <a href="#pattern-proxy" class="ov"><div class="ov-e">🕵️</div><div class="ov-n">Proxy</div><div class="ov-d">Controlled surrogate access</div></a>
+  <a href="#pattern-bridge" class="ov"><div class="ov-e">🌉</div><div class="ov-n">Bridge</div><div class="ov-d">Decouple abstraction from impl</div></a>
+  <a href="#pattern-flyweight" class="ov"><div class="ov-e">⚡</div><div class="ov-n">Flyweight</div><div class="ov-d">Share objects to save memory</div></a>
 </div>
 
 <!-- ADAPTER -->
-<div class="card">
+<div class="card" id="pattern-adapter">
 <div class="card-top">
   <div class="icon icon-teal">🔌</div>
   <div class="card-meta">
@@ -761,7 +828,7 @@ gw.<span class="fn">charge</span>(<span class="st">"cust_abc"</span>, <span clas
 </div></div>
 
 <!-- DECORATOR -->
-<div class="card">
+<div class="card" id="pattern-decorator">
 <div class="card-top">
   <div class="icon icon-gold">🎀</div>
   <div class="card-meta">
@@ -822,7 +889,7 @@ gw.<span class="fn">charge</span>(<span class="st">"cust_abc"</span>, <span clas
 </div></div>
 
 <!-- FACADE -->
-<div class="card">
+<div class="card" id="pattern-facade">
 <div class="card-top">
   <div class="icon icon-sky">🏠</div>
   <div class="card-meta">
@@ -878,7 +945,7 @@ gw.<span class="fn">charge</span>(<span class="st">"cust_abc"</span>, <span clas
 </div></div>
 
 <!-- PROXY -->
-<div class="card">
+<div class="card" id="pattern-proxy">
 <div class="card-top">
   <div class="icon icon-violet">🕵️</div>
   <div class="card-meta">
@@ -930,7 +997,7 @@ svc.<span class="fn">getUserById</span>(<span class="nm">42</span>); <span class
 </div></div>
 
 <!-- COMPOSITE -->
-<div class="card">
+<div class="card" id="pattern-composite">
 <div class="card-top">
   <div class="icon icon-coral">🌲</div>
   <div class="card-meta">
@@ -988,6 +1055,153 @@ root.<span class="fn">print</span>(<span class="st">""</span>);                 
 root.<span class="fn">getSize</span>();                <span class="cm">// → 5500 bytes</span>
 </pre></div>
 </div></div>
+
+<!-- BRIDGE -->
+<div class="card" id="pattern-bridge">
+<div class="card-top">
+  <div class="icon icon-sky">🌉</div>
+  <div class="card-meta">
+    <span class="cat cat-s">🔩 STRUCTURAL</span>
+    <div class="card-name">Bridge Pattern</div>
+    <div class="card-tag">Decouples abstraction from implementation so both can vary independently. Think of a remote control (abstraction) working with different devices (implementations) — new remotes and new devices can be added without modifying each other.</div>
+  </div>
+</div>
+<div class="card-body">
+<div class="when"><div class="when-t">⚡ Use When</div><ul>
+  <li>You want to avoid a permanent binding between abstraction and implementation</li>
+  <li>Both abstraction and implementation need to be extended by subclassing</li>
+  <li>Changes in implementation shouldn't affect clients using the abstraction</li>
+  <li>Real-world: Device drivers, database drivers (JDBC), graphics rendering APIs</li>
+</ul></div>
+<div class="scen"><div class="scen-t">🏢 Scenario — Remote Control + Devices</div><p>You have different RemoteControls (Basic, Advanced) and different Devices (TV, Radio, SmartSpeaker). Without Bridge, you'd need BasicTVRemote, BasicRadioRemote, AdvancedTVRemote, AdvancedRadioRemote — class explosion! With Bridge: Remote holds a Device reference. Add any remote, any device — zero combinations needed.</p></div>
+<div class="code"><div class="code-head"><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div><div class="code-file">RemoteBridge.java</div><div class="code-lang">Java</div></div><pre>
+<span class="cm">// Implementation interface — devices</span>
+<span class="kw">interface</span> <span class="tp">Device</span> {
+    <span class="kw">void</span> <span class="fn">powerOn</span>();
+    <span class="kw">void</span> <span class="fn">powerOff</span>();
+    <span class="kw">void</span> <span class="fn">setVolume</span>(<span class="kw">int</span> vol);
+}
+
+<span class="cm">// Concrete implementations</span>
+<span class="kw">class</span> <span class="tp">TV</span> <span class="kw">implements</span> <span class="tp">Device</span> {
+    <span class="kw">public void</span> <span class="fn">powerOn</span>()           { <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"📺 TV ON"</span>); }
+    <span class="kw">public void</span> <span class="fn">powerOff</span>()          { <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"📺 TV OFF"</span>); }
+    <span class="kw">public void</span> <span class="fn">setVolume</span>(<span class="kw">int</span> v)  { <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"📺 Volume: "</span> + v); }
+}
+<span class="kw">class</span> <span class="tp">Radio</span> <span class="kw">implements</span> <span class="tp">Device</span> {
+    <span class="kw">public void</span> <span class="fn">powerOn</span>()           { <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"📻 Radio ON"</span>); }
+    <span class="kw">public void</span> <span class="fn">powerOff</span>()          { <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"📻 Radio OFF"</span>); }
+    <span class="kw">public void</span> <span class="fn">setVolume</span>(<span class="kw">int</span> v)  { <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"📻 Volume: "</span> + v); }
+}
+
+<span class="cm">// Abstraction — remote control (holds device reference)</span>
+<span class="kw">abstract class</span> <span class="tp">RemoteControl</span> {
+    <span class="kw">protected</span> <span class="tp">Device</span> device; <span class="cm">// Bridge to implementation</span>
+    <span class="tp">RemoteControl</span>(<span class="tp">Device</span> d) { <span class="kw">this</span>.device = d; }
+    <span class="kw">abstract void</span> <span class="fn">togglePower</span>();
+}
+
+<span class="cm">// Refined abstractions</span>
+<span class="kw">class</span> <span class="tp">BasicRemote</span> <span class="kw">extends</span> <span class="tp">RemoteControl</span> {
+    <span class="kw">private boolean</span> on = <span class="kw">false</span>;
+    <span class="tp">BasicRemote</span>(<span class="tp">Device</span> d) { <span class="kw">super</span>(d); }
+    <span class="kw">void</span> <span class="fn">togglePower</span>() {
+        on = !on;
+        <span class="kw">if</span> (on) device.<span class="fn">powerOn</span>(); <span class="kw">else</span> device.<span class="fn">powerOff</span>();
+    }
+}
+<span class="kw">class</span> <span class="tp">AdvancedRemote</span> <span class="kw">extends</span> <span class="tp">RemoteControl</span> {
+    <span class="tp">AdvancedRemote</span>(<span class="tp">Device</span> d) { <span class="kw">super</span>(d); }
+    <span class="kw">void</span> <span class="fn">togglePower</span>() { device.<span class="fn">powerOn</span>(); }
+    <span class="kw">void</span> <span class="fn">mute</span>()        { device.<span class="fn">setVolume</span>(<span class="nm">0</span>); }
+}
+
+<span class="cm">// Mix and match — no class explosion! ✓</span>
+<span class="tp">RemoteControl</span> tvRemote    = <span class="kw">new</span> <span class="tp">BasicRemote</span>(<span class="kw">new</span> <span class="tp">TV</span>());
+<span class="tp">RemoteControl</span> radioRemote = <span class="kw">new</span> <span class="tp">AdvancedRemote</span>(<span class="kw">new</span> <span class="tp">Radio</span>());
+tvRemote.<span class="fn">togglePower</span>();    <span class="cm">// 📺 TV ON</span>
+radioRemote.<span class="fn">togglePower</span>(); <span class="cm">// 📻 Radio ON</span>
+</pre></div>
+</div></div>
+
+<!-- FLYWEIGHT -->
+<div class="card" id="pattern-flyweight">
+<div class="card-top">
+  <div class="icon icon-mint">⚡</div>
+  <div class="card-meta">
+    <span class="cat cat-s">🔩 STRUCTURAL</span>
+    <div class="card-name">Flyweight Pattern</div>
+    <div class="card-tag">Shares common state (intrinsic) among many fine-grained objects to minimize memory usage. Instead of each object storing everything, shared parts are stored once. Like fonts in a text editor — one 'A' glyph shared by millions of 'A' characters.</div>
+  </div>
+</div>
+<div class="card-body">
+<div class="when"><div class="when-t">⚡ Use When</div><ul>
+  <li>Your app creates millions of similar objects consuming huge memory</li>
+  <li>Most object state can be made extrinsic (passed in, not stored)</li>
+  <li>Identity doesn't matter — objects are interchangeable if state is the same</li>
+  <li>Real-world: Text editors (character glyphs), game engines (particle systems), map tiles</li>
+</ul></div>
+<div class="warn"><b>⚠️ Trade-off:</b> Reduces memory at the cost of CPU cycles computing extrinsic state. Use when memory savings > computational overhead.</div>
+<div class="scen"><div class="scen-t">🏢 Scenario — Forest Rendering (1M Trees)</div><p>A game renders 1 million trees. Each tree stores: type (oak/pine), texture, mesh (10MB each) + position, scale. That's 10TB! Flyweight: extract shared state (type, texture, mesh) into a few TreeType objects. Each tree instance stores only position + reference to shared TreeType — 10MB total instead of 10TB!</p></div>
+<div class="code"><div class="code-head"><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div><div class="code-file">TreeFlyweight.java</div><div class="code-lang">Java</div></div><pre>
+<span class="cm">// Flyweight — shared intrinsic state (immutable)</span>
+<span class="kw">class</span> <span class="tp">TreeType</span> {
+    <span class="kw">private final</span> <span class="tp">String</span> name;
+    <span class="kw">private final</span> <span class="tp">String</span> color;
+    <span class="kw">private final</span> <span class="tp">String</span> texture; <span class="cm">// imagine 10MB texture bitmap</span>
+
+    <span class="tp">TreeType</span>(<span class="tp">String</span> name, <span class="tp">String</span> color, <span class="tp">String</span> texture) {
+        <span class="kw">this</span>.name=name; <span class="kw">this</span>.color=color; <span class="kw">this</span>.texture=texture;
+        <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"🌳 Loading "</span> + name + <span class="st">" tree type (heavy!)"</span>);
+    }
+
+    <span class="kw">void</span> <span class="fn">render</span>(<span class="kw">int</span> x, <span class="kw">int</span> y) {
+        <span class="tp">System</span>.out.<span class="fn">printf</span>(<span class="st">"%s tree at (%d,%d)%n"</span>, name, x, y);
+    }
+}
+
+<span class="cm">// Flyweight Factory — ensures sharing</span>
+<span class="kw">class</span> <span class="tp">TreeFactory</span> {
+    <span class="kw">private static final</span> <span class="tp">Map</span>&lt;<span class="tp">String</span>,<span class="tp">TreeType</span>&gt; types = <span class="kw">new</span> <span class="tp">HashMap</span>&lt;&gt;();
+
+    <span class="kw">static</span> <span class="tp">TreeType</span> <span class="fn">getTreeType</span>(<span class="tp">String</span> name, <span class="tp">String</span> color, <span class="tp">String</span> tex) {
+        <span class="tp">String</span> key = name + color;
+        <span class="kw">return</span> types.<span class="fn">computeIfAbsent</span>(key, k ->
+            <span class="kw">new</span> <span class="tp">TreeType</span>(name, color, tex)); <span class="cm">// create once, reuse forever</span>
+    }
+}
+
+<span class="cm">// Tree — stores only extrinsic state (unique per tree) + reference</span>
+<span class="kw">class</span> <span class="tp">Tree</span> {
+    <span class="kw">private final int</span> x, y;       <span class="cm">// unique position</span>
+    <span class="kw">private final</span> <span class="tp">TreeType</span> type; <span class="cm">// shared reference!</span>
+
+    <span class="tp">Tree</span>(<span class="kw">int</span> x, <span class="kw">int</span> y, <span class="tp">TreeType</span> type) {
+        <span class="kw">this</span>.x=x; <span class="kw">this</span>.y=y; <span class="kw">this</span>.type=type;
+    }
+    <span class="kw">void</span> <span class="fn">render</span>() { type.<span class="fn">render</span>(x, y); }
+}
+
+<span class="cm">// Forest — 1M trees, only 2 TreeType objects in memory!</span>
+<span class="kw">class</span> <span class="tp">Forest</span> {
+    <span class="kw">private final</span> <span class="tp">List</span>&lt;<span class="tp">Tree</span>&gt; trees = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;();
+
+    <span class="kw">void</span> <span class="fn">plantTree</span>(<span class="kw">int</span> x, <span class="kw">int</span> y, <span class="tp">String</span> name, <span class="tp">String</span> color, <span class="tp">String</span> tex) {
+        <span class="tp">TreeType</span> type = <span class="tp">TreeFactory</span>.<span class="fn">getTreeType</span>(name, color, tex);
+        trees.<span class="fn">add</span>(<span class="kw">new</span> <span class="tp">Tree</span>(x, y, type));
+    }
+    <span class="kw">void</span> <span class="fn">render</span>() { trees.<span class="fn">forEach</span>(<span class="tp">Tree</span>::render); }
+}
+
+<span class="cm">// Plant 1 million trees — only 2 TreeType objects loaded!</span>
+<span class="tp">Forest</span> forest = <span class="kw">new</span> <span class="tp">Forest</span>();
+<span class="kw">for</span> (<span class="kw">int</span> i=<span class="nm">0</span>; i&lt;<span class="nm">500_000</span>; i++) {
+    forest.<span class="fn">plantTree</span>(i, i, <span class="st">"Oak"</span>,  <span class="st">"Green"</span>, <span class="st">"oak.png"</span>);
+    forest.<span class="fn">plantTree</span>(i, i, <span class="st">"Pine"</span>, <span class="st">"Dark"</span>,  <span class="st">"pine.png"</span>);
+}
+<span class="cm">// Output: "Loading Oak tree type" + "Loading Pine tree type" — only 2 times!</span>
+</pre></div>
+</div></div>
 </div>
 
 <!-- ═══════════ S3: BEHAVIORAL ═══════════ -->
@@ -997,18 +1211,18 @@ root.<span class="fn">getSize</span>();                <span class="cm">// → 5
 <div class="sec-intro">Behavioral patterns define <strong>how objects communicate and collaborate</strong>. They focus on algorithms, responsibility assignment, and communication flows — making complex object interactions manageable and extensible.</div>
 
 <div class="ovs">
-  <div class="ov"><div class="ov-e">⚖️</div><div class="ov-n">Strategy</div><div class="ov-d">Swap algorithms at runtime</div></div>
-  <div class="ov"><div class="ov-e">👁️</div><div class="ov-n">Observer</div><div class="ov-d">Event subscription & notify</div></div>
-  <div class="ov"><div class="ov-e">📜</div><div class="ov-n">Command</div><div class="ov-d">Requests as objects, undo/redo</div></div>
-  <div class="ov"><div class="ov-e">🔗</div><div class="ov-n">Chain of Resp.</div><div class="ov-d">Pass request along handlers</div></div>
-  <div class="ov"><div class="ov-e">📐</div><div class="ov-n">Template Method</div><div class="ov-d">Algorithm skeleton, fill steps</div></div>
-  <div class="ov"><div class="ov-e">🎫</div><div class="ov-n">State</div><div class="ov-d">Behaviour changes with state</div></div>
-  <div class="ov"><div class="ov-e">🧑‍💼</div><div class="ov-n">Mediator</div><div class="ov-d">Centralize communication</div></div>
-  <div class="ov"><div class="ov-e">🚶</div><div class="ov-n">Iterator</div><div class="ov-d">Sequential access, no internals</div></div>
+  <a href="#pattern-strategy" class="ov"><div class="ov-e">⚖️</div><div class="ov-n">Strategy</div><div class="ov-d">Swap algorithms at runtime</div></a>
+  <a href="#pattern-observer" class="ov"><div class="ov-e">👁️</div><div class="ov-n">Observer</div><div class="ov-d">Event subscription & notify</div></a>
+  <a href="#pattern-command" class="ov"><div class="ov-e">📜</div><div class="ov-n">Command</div><div class="ov-d">Requests as objects, undo/redo</div></a>
+  <a href="#pattern-chain-of-responsibility" class="ov"><div class="ov-e">🔗</div><div class="ov-n">Chain of Resp.</div><div class="ov-d">Pass request along handlers</div></a>
+  <a href="#pattern-template-method" class="ov"><div class="ov-e">📐</div><div class="ov-n">Template Method</div><div class="ov-d">Algorithm skeleton, fill steps</div></a>
+  <a href="#pattern-state" class="ov"><div class="ov-e">🎫</div><div class="ov-n">State</div><div class="ov-d">Behaviour changes with state</div></a>
+  <a href="#pattern-mediator" class="ov"><div class="ov-e">🧑‍💼</div><div class="ov-n">Mediator</div><div class="ov-d">Centralize communication</div></a>
+  <a href="#pattern-iterator" class="ov"><div class="ov-e">🚶</div><div class="ov-n">Iterator</div><div class="ov-d">Sequential access, no internals</div></a>
 </div>
 
 <!-- STRATEGY -->
-<div class="card">
+<div class="card" id="pattern-strategy">
 <div class="card-top">
   <div class="icon icon-gold">⚖️</div>
   <div class="card-meta">
@@ -1073,7 +1287,7 @@ cart.<span class="fn">setStrategy</span>(<span class="kw">new</span> <span class
 </div></div>
 
 <!-- OBSERVER -->
-<div class="card">
+<div class="card" id="pattern-observer">
 <div class="card-top">
   <div class="icon icon-teal">👁️</div>
   <div class="card-meta">
@@ -1139,7 +1353,7 @@ order.<span class="fn">updateStatus</span>(<span class="st">"SHIPPED"</span>); <
 </div></div>
 
 <!-- COMMAND -->
-<div class="card">
+<div class="card" id="pattern-command">
 <div class="card-top">
   <div class="icon icon-sky">📜</div>
   <div class="card-meta">
@@ -1199,7 +1413,7 @@ editor.<span class="fn">redo</span>();   <span class="cm">// "Hello World"</span
 </div></div>
 
 <!-- CHAIN OF RESPONSIBILITY -->
-<div class="card">
+<div class="card" id="pattern-chain-of-responsibility">
 <div class="card-top">
   <div class="icon icon-coral">🔗</div>
   <div class="card-meta">
@@ -1247,7 +1461,7 @@ lead.<span class="fn">approve</span>(<span class="nm">50_000</span>); <span clas
 </div></div>
 
 <!-- STATE -->
-<div class="card">
+<div class="card" id="pattern-state">
 <div class="card-top">
   <div class="icon icon-violet">🎫</div>
   <div class="card-meta">
@@ -1305,7 +1519,7 @@ order.<span class="fn">cancel</span>();   <span class="cm">// ❌ Cannot cancel 
 </div></div>
 
 <!-- TEMPLATE METHOD -->
-<div class="card">
+<div class="card" id="pattern-template-method">
 <div class="card-top">
   <div class="icon icon-mint">📐</div>
   <div class="card-meta">
@@ -1361,6 +1575,165 @@ order.<span class="fn">cancel</span>();   <span class="cm">// ❌ Cannot cancel 
 <span class="cm">// Same export() call — different formats ✓</span>
 <span class="kw">new</span> <span class="tp">CsvExporter</span>().<span class="fn">export</span>(<span class="st">"users.csv"</span>);
 <span class="kw">new</span> <span class="tp">JsonExporter</span>().<span class="fn">export</span>(<span class="st">"users.json"</span>);
+</pre></div>
+</div></div>
+
+<!-- MEDIATOR -->
+<div class="card" id="pattern-mediator">
+<div class="card-top">
+  <div class="icon icon-coral">🧑‍💼</div>
+  <div class="card-meta">
+    <span class="cat cat-b">🎭 BEHAVIORAL</span>
+    <div class="card-name">Mediator Pattern</div>
+    <div class="card-tag">Centralizes complex communications and control logic between objects. Instead of objects referring to each other directly (many-to-many chaos), they communicate through a mediator (star topology). Reduces coupling and simplifies maintenance.</div>
+  </div>
+</div>
+<div class="card-body">
+<div class="when"><div class="when-t">⚡ Use When</div><ul>
+  <li>Components are tightly coupled through complex communication paths</li>
+  <li>It's hard to reuse a component because it depends on too many other components</li>
+  <li>Behaviour distributed among several classes should be customizable without subclassing</li>
+  <li>Real-world: Chat rooms, air traffic control, UI dialog coordinators, MVC controllers</li>
+</ul></div>
+<div class="scen"><div class="scen-t">🏢 Scenario — Chat Room</div><p>Users send messages to each other. Without Mediator: each User stores references to all other Users — adding/removing users breaks everything. With Mediator: ChatRoom coordinates. Users send to ChatRoom, ChatRoom broadcasts. Users never know about each other directly.</p></div>
+<div class="code"><div class="code-head"><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div><div class="code-file">ChatMediator.java</div><div class="code-lang">Java</div></div><pre>
+<span class="cm">// Mediator interface</span>
+<span class="kw">interface</span> <span class="tp">ChatMediator</span> {
+    <span class="kw">void</span> <span class="fn">sendMessage</span>(<span class="tp">String</span> msg, <span class="tp">User</span> sender);
+    <span class="kw">void</span> <span class="fn">addUser</span>(<span class="tp">User</span> user);
+}
+
+<span class="cm">// Concrete Mediator</span>
+<span class="kw">class</span> <span class="tp">ChatRoom</span> <span class="kw">implements</span> <span class="tp">ChatMediator</span> {
+    <span class="kw">private final</span> <span class="tp">List</span>&lt;<span class="tp">User</span>&gt; users = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;();
+
+    <span class="kw">public void</span> <span class="fn">addUser</span>(<span class="tp">User</span> u) {
+        users.<span class="fn">add</span>(u);
+        <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"➕ "</span> + u.name + <span class="st">" joined the chat"</span>);
+    }
+
+    <span class="kw">public void</span> <span class="fn">sendMessage</span>(<span class="tp">String</span> msg, <span class="tp">User</span> sender) {
+        <span class="cm">// Broadcast to everyone except sender</span>
+        users.<span class="fn">stream</span>()
+             .<span class="fn">filter</span>(u -> u != sender)
+             .<span class="fn">forEach</span>(u -> u.<span class="fn">receive</span>(msg, sender.name));
+    }
+}
+
+<span class="cm">// Colleague — knows about mediator, not other users</span>
+<span class="kw">class</span> <span class="tp">User</span> {
+    <span class="kw">final</span> <span class="tp">String</span> name;
+    <span class="kw">private final</span> <span class="tp">ChatMediator</span> mediator;
+
+    <span class="tp">User</span>(<span class="tp">String</span> name, <span class="tp">ChatMediator</span> med) {
+        <span class="kw">this</span>.name = name;
+        <span class="kw">this</span>.mediator = med;
+        mediator.<span class="fn">addUser</span>(<span class="kw">this</span>);
+    }
+
+    <span class="kw">void</span> <span class="fn">send</span>(<span class="tp">String</span> msg) {
+        <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"💬 "</span> + name + <span class="st">": "</span> + msg);
+        mediator.<span class="fn">sendMessage</span>(msg, <span class="kw">this</span>);
+    }
+
+    <span class="kw">void</span> <span class="fn">receive</span>(<span class="tp">String</span> msg, <span class="tp">String</span> from) {
+        <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"📩 "</span> + name + <span class="st">" received from "</span> + from + <span class="st">": "</span> + msg);
+    }
+}
+
+<span class="cm">// Users communicate through mediator — never directly!</span>
+<span class="tp">ChatMediator</span> chatRoom = <span class="kw">new</span> <span class="tp">ChatRoom</span>();
+<span class="tp">User</span> alice = <span class="kw">new</span> <span class="tp">User</span>(<span class="st">"Alice"</span>, chatRoom);
+<span class="tp">User</span> bob   = <span class="kw">new</span> <span class="tp">User</span>(<span class="st">"Bob"</span>,   chatRoom);
+<span class="tp">User</span> carol = <span class="kw">new</span> <span class="tp">User</span>(<span class="st">"Carol"</span>, chatRoom);
+
+alice.<span class="fn">send</span>(<span class="st">"Hey everyone!"</span>);
+<span class="cm">// Output:
+// 💬 Alice: Hey everyone!
+// 📩 Bob received from Alice: Hey everyone!
+// 📩 Carol received from Alice: Hey everyone!</span>
+</pre></div>
+</div></div>
+
+<!-- ITERATOR -->
+<div class="card" id="pattern-iterator">
+<div class="card-top">
+  <div class="icon icon-violet">🚶</div>
+  <div class="card-meta">
+    <span class="cat cat-b">🎭 BEHAVIORAL</span>
+    <div class="card-name">Iterator Pattern</div>
+    <div class="card-tag">Provides a way to access elements of a collection sequentially without exposing its underlying representation (array, tree, graph). The collection hides its structure; the iterator lets you traverse it uniformly.</div>
+  </div>
+</div>
+<div class="card-body">
+<div class="when"><div class="when-t">⚡ Use When</div><ul>
+  <li>You need to traverse a collection without exposing its internal structure</li>
+  <li>Support multiple simultaneous traversals of the same collection</li>
+  <li>Provide a uniform interface for traversing different collection types</li>
+  <li>Real-world: Java's <code>Iterator</code>, for-each loops, database cursors, tree/graph traversal</li>
+</ul></div>
+<div class="note"><b>📌 Note:</b> Most modern languages have built-in iterator support (Java's <code>Iterable</code>, Python's <code>__iter__</code>). Use this pattern when building custom collections or needing specialized traversal logic.</div>
+<div class="scen"><div class="scen-t">🏢 Scenario — Social Network Friend Iterator</div><p>A social network stores friends in a complex graph structure. Clients shouldn't know if it's an adjacency list, matrix, or database. A FriendIterator provides a simple <code>hasNext()</code>/<code>next()</code> interface. Tomorrow you change the underlying storage — iterator stays the same, client code unchanged.</p></div>
+<div class="code"><div class="code-head"><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div><div class="code-file">SocialIterator.java</div><div class="code-lang">Java</div></div><pre>
+<span class="cm">// Iterator interface</span>
+<span class="kw">interface</span> <span class="tp">Iterator</span>&lt;<span class="tp">T</span>&gt; {
+    <span class="kw">boolean</span> <span class="fn">hasNext</span>();
+    <span class="tp">T</span> <span class="fn">next</span>();
+}
+
+<span class="cm">// Aggregate interface</span>
+<span class="kw">interface</span> <span class="tp">SocialNetwork</span> {
+    <span class="tp">Iterator</span>&lt;<span class="tp">String</span>&gt; <span class="fn">createFriendsIterator</span>(<span class="tp">String</span> userId);
+}
+
+<span class="cm">// Concrete Iterator</span>
+<span class="kw">class</span> <span class="tp">FacebookIterator</span> <span class="kw">implements</span> <span class="tp">Iterator</span>&lt;<span class="tp">String</span>&gt; {
+    <span class="kw">private final</span> <span class="tp">List</span>&lt;<span class="tp">String</span>&gt; friends;
+    <span class="kw">private int</span> position = <span class="nm">0</span>;
+
+    <span class="tp">FacebookIterator</span>(<span class="tp">List</span>&lt;<span class="tp">String</span>&gt; friends) {
+        <span class="kw">this</span>.friends = friends;
+    }
+
+    <span class="kw">public boolean</span> <span class="fn">hasNext</span>() {
+        <span class="kw">return</span> position &lt; friends.<span class="fn">size</span>();
+    }
+
+    <span class="kw">public</span> <span class="tp">String</span> <span class="fn">next</span>() {
+        <span class="kw">if</span> (!<span class="fn">hasNext</span>())
+            <span class="kw">throw new</span> <span class="tp">NoSuchElementException</span>();
+        <span class="kw">return</span> friends.<span class="fn">get</span>(position++);
+    }
+}
+
+<span class="cm">// Concrete Aggregate — hides internal storage</span>
+<span class="kw">class</span> <span class="tp">Facebook</span> <span class="kw">implements</span> <span class="tp">SocialNetwork</span> {
+    <span class="kw">private final</span> <span class="tp">Map</span>&lt;<span class="tp">String</span>, <span class="tp">List</span>&lt;<span class="tp">String</span>&gt;&gt; friendsMap = <span class="kw">new</span> <span class="tp">HashMap</span>&lt;&gt;();
+
+    <span class="kw">void</span> <span class="fn">addFriend</span>(<span class="tp">String</span> userId, <span class="tp">String</span> friendId) {
+        friendsMap.<span class="fn">computeIfAbsent</span>(userId, k -> <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;()).<span class="fn">add</span>(friendId);
+    }
+
+    <span class="kw">public</span> <span class="tp">Iterator</span>&lt;<span class="tp">String</span>&gt; <span class="fn">createFriendsIterator</span>(<span class="tp">String</span> userId) {
+        <span class="tp">List</span>&lt;<span class="tp">String</span>&gt; friends = friendsMap.<span class="fn">getOrDefault</span>(userId, <span class="tp">List</span>.<span class="fn">of</span>());
+        <span class="kw">return new</span> <span class="tp">FacebookIterator</span>(friends);
+    }
+}
+
+<span class="cm">// Client — clean traversal, zero knowledge of storage!</span>
+<span class="tp">Facebook</span> fb = <span class="kw">new</span> <span class="tp">Facebook</span>();
+fb.<span class="fn">addFriend</span>(<span class="st">"alice"</span>, <span class="st">"bob"</span>);
+fb.<span class="fn">addFriend</span>(<span class="st">"alice"</span>, <span class="st">"carol"</span>);
+fb.<span class="fn">addFriend</span>(<span class="st">"alice"</span>, <span class="st">"dave"</span>);
+
+<span class="tp">Iterator</span>&lt;<span class="tp">String</span>&gt; it = fb.<span class="fn">createFriendsIterator</span>(<span class="st">"alice"</span>);
+<span class="tp">System</span>.out.<span class="fn">print</span>(<span class="st">"Alice's friends: "</span>);
+<span class="kw">while</span> (it.<span class="fn">hasNext</span>()) {
+    <span class="tp">System</span>.out.<span class="fn">print</span>(it.<span class="fn">next</span>() + <span class="st">" "</span>);
+}
+<span class="cm">// Output: Alice's friends: bob carol dave</span>
+
+<span class="cm">// Tomorrow: switch from List to Graph → iterator stays the same ✓</span>
 </pre></div>
 </div></div>
 </div>
@@ -1459,15 +1832,69 @@ order.<span class="fn">cancel</span>();   <span class="cm">// ❌ Cannot cancel 
 </div>
 </div>
 
+<!-- SCROLL TO TOP BUTTON -->
+<div class="scroll-top" id="scrollTopBtn" title="Back to top">↑</div>
+
 <footer>// SOLID &amp; Design Patterns Guide · Built with care · Java Examples Throughout</footer>
 
 <script>
-function tab(idx, btn) {
+function tab(idx, event) {
+  if (event) event.preventDefault();
   document.querySelectorAll('.sec').forEach((s, i) => s.classList.toggle('show', i === idx));
-  document.querySelectorAll('.nb').forEach(b => b.classList.remove('on'));
-  btn.classList.add('on');
+
+  // Remove active state from all hero boxes
+  document.querySelectorAll('.hero-box').forEach(b => b.style.opacity = '1');
+
+  // Highlight active hero box with slight opacity
+  const heroBoxes = document.querySelectorAll('.hero-box');
+  if (heroBoxes[idx]) {
+    heroBoxes.forEach((b, i) => {
+      if (i === idx) {
+        b.style.opacity = '1';
+      }
+    });
+  }
+
   window.scrollTo({top: 0, behavior: 'smooth'});
 }
+
+// Smooth scroll to pattern cards with offset
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('a[href^="#pattern-"]').forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      const targetId = link.getAttribute('href').substring(1);
+      const targetElement = document.getElementById(targetId);
+      if (targetElement) {
+        const targetPosition = targetElement.getBoundingClientRect().top + window.pageYOffset - 20;
+        window.scrollTo({
+          top: targetPosition,
+          behavior: 'smooth'
+        });
+      }
+    });
+  });
+
+  // Scroll to top button functionality
+  const scrollTopBtn = document.getElementById('scrollTopBtn');
+
+  // Show/hide button based on scroll position
+  window.addEventListener('scroll', () => {
+    if (window.pageYOffset > 300) {
+      scrollTopBtn.classList.add('show');
+    } else {
+      scrollTopBtn.classList.remove('show');
+    }
+  });
+
+  // Scroll to top when clicked
+  scrollTopBtn.addEventListener('click', () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  });
+});
 </script>
 </body>
 </html>
