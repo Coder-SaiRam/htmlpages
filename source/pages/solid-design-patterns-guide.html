@@ -134,14 +134,19 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--txt);font-
 .when ul li{font-size:13.5px;color:var(--txt2);padding:2px 0 2px 18px;position:relative}
 .when ul li::before{content:'›';position:absolute;left:0;color:var(--gold)}
 
-.scen{background:rgba(0,212,170,.04);border:1px solid rgba(0,212,170,.18);border-radius:8px;padding:13px 17px;margin-bottom:14px}
-.scen-t{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:var(--teal);margin-bottom:6px}
-.scen p{font-size:13.5px;color:var(--txt2);line-height:1.65}
+.scen{background:rgba(0,212,170,.04);border:1px solid rgba(0,212,170,.18);border-radius:8px;padding:14px 18px;margin-bottom:14px}
+.scen-t{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:var(--teal);margin-bottom:7px}
+.scen ul{list-style:none}
+.scen ul li{font-size:13.5px;color:var(--txt2);padding:2px 0 2px 18px;position:relative}
+.scen ul li::before{content:'›';position:absolute;left:0;color:var(--teal)}
 
 .warn{background:rgba(255,107,107,.04);border-left:3px solid var(--coral);border-radius:0 7px 7px 0;padding:10px 14px;margin:12px 0;font-size:13.5px;color:var(--txt2)}
 .warn b{color:var(--coral)}
-.note{background:rgba(157,127,243,.04);border-left:3px solid var(--violet);border-radius:0 7px 7px 0;padding:10px 14px;margin:12px 0;font-size:13.5px;color:var(--txt2)}
-.note b{color:var(--violet)}
+.note{background:rgba(157,127,243,.04);border:1px solid rgba(157,127,243,.18);border-radius:8px;padding:14px 18px;margin-bottom:14px}
+.note b{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:var(--violet);display:block;margin-bottom:7px}
+.note ul{list-style:none}
+.note ul li{font-size:13.5px;color:var(--txt2);padding:2px 0 2px 18px;position:relative}
+.note ul li::before{content:'›';position:absolute;left:0;color:var(--violet)}
 
 /* CAT BADGE */
 .cat{display:inline-flex;align-items:center;gap:5px;font-family:'JetBrains Mono',monospace;font-size:10px;padding:3px 10px;border-radius:4px;margin-bottom:12px;letter-spacing:.5px}
@@ -265,7 +270,11 @@ footer{text-align:center;padding:28px;color:var(--txt3);font-size:12.5px;border-
   <li>Unit testing requires too many unrelated mocks to set up</li>
   <li>A "small change" to one feature keeps breaking another</li>
 </ul></div>
-<div class="scen"><div class="scen-t">🏢 Real Scenario — E-commerce Order</div><p>An <code>Order</code> class calculates totals, saves to MySQL, sends emails, and generates PDF invoices. When the email team changes the template, they risk breaking order calculation. Fix: split into <code>OrderCalculator</code>, <code>OrderRepository</code>, <code>OrderNotifier</code>, <code>InvoiceService</code>.</p></div>
+<div class="scen"><div class="scen-t">🏢 Real Scenario — E-commerce Order</div><ul>
+  <li>An <code>Order</code> class calculates totals, saves to MySQL, sends emails, and generates PDF invoices.</li>
+  <li>When the email team changes the template, they risk breaking order calculation.</li>
+  <li>Fix: split into <code>OrderCalculator</code>, <code>OrderRepository</code>, <code>OrderNotifier</code>, <code>InvoiceService</code></li>
+</ul></div>
 <div class="cmp">
 <div class="cb cb-bad"><div class="cb-t">❌ Violates SRP — 4 reasons to change</div>
 <div class="code"><pre><span class="kw">class</span> <span class="tp">UserService</span> {
@@ -307,7 +316,13 @@ footer{text-align:center;padding:28px;color:var(--txt3);font-size:12.5px;border-
   <li>A class is heavily tested and you want zero regression risk</li>
   <li>Building a framework — let users plug in extensions without touching your source</li>
 </ul></div>
-<div class="scen"><div class="scen-t">🏢 Real Scenario — Payment Gateway</div><p>A system supports CreditCard and PayPal. Adding Crypto means opening <code>PaymentProcessor</code> and adding another <code>else if</code> — risking breakage. OCP fix: define a <code>PaymentMethod</code> interface. Adding Crypto = one new class. <code>PaymentProcessor</code> never changes again.</p></div>
+<div class="scen"><div class="scen-t">🏢 Real Scenario — Payment Gateway</div><ul>
+  <li>A system supports CreditCard and PayPal.</li>
+  <li>Adding Crypto means opening <code>PaymentProcessor</code> and adding another <code>else if</code> — risking breakage.</li>
+  <li>OCP fix: define a <code>PaymentMethod</code> interface.</li>
+  <li>Adding Crypto = one new class.</li>
+  <li><code>PaymentProcessor</code> never changes again</li>
+</ul></div>
 <div class="cmp">
 <div class="cb cb-bad"><div class="cb-t">❌ Edit core class every time</div>
 <div class="code"><pre><span class="kw">class</span> <span class="tp">PaymentProcessor</span> {
@@ -352,7 +367,12 @@ footer{text-align:center;padding:28px;color:var(--txt3);font-size:12.5px;border-
   <li>Overridden method does nothing, or silently ignores a parameter</li>
   <li>Replacing parent with child object breaks existing unit tests</li>
 </ul></div>
-<div class="scen"><div class="scen-t">🏢 Classic Trap — Square extends Rectangle</div><p>Intuitively Square IS-A Rectangle. But Rectangle's contract says: setting width doesn't change height. A Square must break this rule. Fix: both extend a <code>Shape</code> base class — they're siblings, not parent/child.</p></div>
+<div class="scen"><div class="scen-t">🏢 Classic Trap — Square extends Rectangle</div><ul>
+  <li>Intuitively Square IS-A Rectangle.</li>
+  <li>But Rectangle's contract says: setting width doesn't change height.</li>
+  <li>A Square must break this rule.</li>
+  <li>Fix: both extend a <code>Shape</code> base class — they're siblings, not parent/child</li>
+</ul></div>
 <div class="cmp">
 <div class="cb cb-bad"><div class="cb-t">❌ Violates LSP — breaks parent contract</div>
 <div class="code"><pre><span class="kw">class</span> <span class="tp">Rectangle</span> {
@@ -400,7 +420,12 @@ footer{text-align:center;padding:28px;color:var(--txt3);font-size:12.5px;border-
   <li>Some implementers only use 2 of 10 methods — the rest are dead weight</li>
   <li>"Why does a <code>Printer</code> need a <code>scan()</code> method?"</li>
 </ul></div>
-<div class="scen"><div class="scen-t">🏢 Real Scenario — Robot Workers</div><p>A <code>Worker</code> interface has <code>work()</code>, <code>eat()</code>, <code>sleep()</code>. A <code>Robot</code> implementation throws exceptions for eat and sleep. Fix: split into <code>Workable</code>, <code>Eatable</code>, <code>Sleepable</code>. Robot only implements <code>Workable</code>.</p></div>
+<div class="scen"><div class="scen-t">🏢 Real Scenario — Robot Workers</div><ul>
+  <li>A <code>Worker</code> interface has <code>work()</code>, <code>eat()</code>, <code>sleep()</code>.</li>
+  <li>A <code>Robot</code> implementation throws exceptions for eat and sleep.</li>
+  <li>Fix: split into <code>Workable</code>, <code>Eatable</code>, <code>Sleepable</code>.</li>
+  <li>Robot only implements <code>Workable</code></li>
+</ul></div>
 <div class="cmp">
 <div class="cb cb-bad"><div class="cb-t">❌ Fat interface forces stubs</div>
 <div class="code"><pre><span class="kw">interface</span> <span class="tp">Worker</span> {
@@ -448,7 +473,12 @@ footer{text-align:center;padding:28px;color:var(--txt3);font-size:12.5px;border-
   <li>Switching from MySQL to PostgreSQL forces editing business logic files</li>
   <li>High-level class imports low-level framework class names</li>
 </ul></div>
-<div class="scen"><div class="scen-t">🏢 Real Scenario — OrderService + Database</div><p>An <code>OrderService</code> creates <code>new MySQLOrderRepository()</code> inside itself. To write a unit test you need MySQL running. Fix: <code>OrderService</code> depends on an <code>OrderRepository</code> interface. Inject <code>MySQLRepo</code> in production, <code>MockRepo</code> in tests — zero changes to business logic.</p></div>
+<div class="scen"><div class="scen-t">🏢 Real Scenario — OrderService + Database</div><ul>
+  <li>An <code>OrderService</code> creates <code>new MySQLOrderRepository()</code> inside itself.</li>
+  <li>To write a unit test you need MySQL running.</li>
+  <li>Fix: <code>OrderService</code> depends on an <code>OrderRepository</code> interface.</li>
+  <li>Inject <code>MySQLRepo</code> in production, <code>MockRepo</code> in tests — zero changes to business logic</li>
+</ul></div>
 <div class="cmp">
 <div class="cb cb-bad"><div class="cb-t">❌ Hard-coded — untestable</div>
 <div class="code"><pre><span class="kw">class</span> <span class="tp">OrderService</span> {
@@ -508,7 +538,11 @@ footer{text-align:center;padding:28px;color:var(--txt3);font-size:12.5px;border-
   <li>Object creation is expensive — load config file once, reuse everywhere</li>
 </ul></div>
 <div class="warn"><b>⚠️ Avoid when:</b> You need it purely as a global variable substitute. Overuse makes unit testing hard — you can't inject a mock. Prefer dependency injection in most cases.</div>
-<div class="scen"><div class="scen-t">🏢 Scenario — Application Logger</div><p>Your app needs ONE Logger writing to one log file. If every class creates its own Logger instance, you get file locking conflicts and interleaved messy logs. A Singleton Logger ensures all components write through the exact same instance.</p></div>
+<div class="scen"><div class="scen-t">🏢 Scenario — Application Logger</div><ul>
+  <li>Your app needs ONE Logger writing to one log file.</li>
+  <li>If every class creates its own Logger instance, you get file locking conflicts and interleaved messy logs.</li>
+  <li>A Singleton Logger ensures all components write through the exact same instance</li>
+</ul></div>
 <div class="code"><div class="code-head"><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div><div class="code-file">Logger.java</div><div class="code-lang">Java</div></div><pre>
 <span class="kw">public class</span> <span class="tp">Logger</span> {
     <span class="cm">// volatile ensures correct visibility across threads</span>
@@ -555,7 +589,13 @@ footer{text-align:center;padding:28px;color:var(--txt3);font-size:12.5px;border-
   <li>You want creation logic isolated in one place (pairs beautifully with OCP)</li>
   <li>Framework design — let users register custom implementations</li>
 </ul></div>
-<div class="scen"><div class="scen-t">🏢 Scenario — Multi-Channel Notifications</div><p>Your app sends notifications via Email, SMS, and Push. Each has different setup. A <code>NotificationFactory</code> creates the right type. When WhatsApp is added, you add ONE new class — zero edits to existing code. The factory grows, nothing breaks.</p></div>
+<div class="scen"><div class="scen-t">🏢 Scenario — Multi-Channel Notifications</div><ul>
+  <li>Your app sends notifications via Email, SMS, and Push.</li>
+  <li>Each has different setup.</li>
+  <li>A <code>NotificationFactory</code> creates the right type.</li>
+  <li>When WhatsApp is added, you add ONE new class — zero edits to existing code.</li>
+  <li>The factory grows, nothing breaks</li>
+</ul></div>
 <div class="code"><div class="code-head"><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div><div class="code-file">NotificationFactory.java</div><div class="code-lang">Java</div></div><pre>
 <span class="cm">// Product interface</span>
 <span class="kw">interface</span> <span class="tp">Notification</span> {
@@ -614,7 +654,10 @@ n.<span class="fn">send</span>(<span class="st">"user@example.com"</span>, <span
   <li>Different "configurations" of the same object are needed</li>
   <li>Real-world: Lombok's <code>@Builder</code>, OkHttp's <code>Request.Builder</code>, Java's <code>StringBuilder</code></li>
 </ul></div>
-<div class="scen"><div class="scen-t">🏢 Scenario — HTTP Request Builder</div><p>Building an HTTP request needs a URL (required), but headers, timeout, auth token, body, retry policy are optional. A Builder chains only what you need — making construction readable and impossible to misuse with wrong parameter order.</p></div>
+<div class="scen"><div class="scen-t">🏢 Scenario — HTTP Request Builder</div><ul>
+  <li>Building an HTTP request needs a URL (required), but headers, timeout, auth token, body, retry policy are optional.</li>
+  <li>A Builder chains only what you need — making construction readable and impossible to misuse with wrong parameter order</li>
+</ul></div>
 <div class="code"><div class="code-head"><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div><div class="code-file">HttpRequest.java</div><div class="code-lang">Java</div></div><pre>
 <span class="kw">class</span> <span class="tp">HttpRequest</span> {
     <span class="kw">private final</span> <span class="tp">String</span>  url;           <span class="cm">// required</span>
@@ -672,7 +715,11 @@ n.<span class="fn">send</span>(<span class="st">"user@example.com"</span>, <span
   <li>Document templates: clone base document, fill in variable parts</li>
   <li>Configuration objects: clone base config and override specific keys</li>
 </ul></div>
-<div class="scen"><div class="scen-t">🏢 Scenario — Game Enemy Spawning</div><p>An <code>Orc</code> enemy loads sprites, sounds, and AI config from disk — takes 200ms. Spawning 500 Orcs the normal way: 100 seconds! With Prototype: create ONE template Orc (200ms), clone it 499 times (microseconds each). Total: ~200ms.</p></div>
+<div class="scen"><div class="scen-t">🏢 Scenario — Game Enemy Spawning</div><ul>
+  <li>An <code>Orc</code> enemy loads sprites, sounds, and AI config from disk — takes 200ms.</li>
+  <li>Spawning 500 Orcs the normal way: 100 seconds! With Prototype: create ONE template Orc (200ms), clone it 499 times (microseconds each).</li>
+  <li>Total: ~200ms</li>
+</ul></div>
 <div class="code"><div class="code-head"><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div><div class="code-file">EnemyPrototype.java</div><div class="code-lang">Java</div></div><pre>
 <span class="kw">abstract class</span> <span class="tp">Enemy</span> <span class="kw">implements</span> <span class="tp">Cloneable</span> {
     <span class="kw">protected</span> <span class="tp">String</span> type, spriteSheet, aiConfig;
@@ -722,7 +769,12 @@ n.<span class="fn">send</span>(<span class="st">"user@example.com"</span>, <span
   <li>Cross-platform toolkits: Windows controls vs Mac controls vs Web controls</li>
   <li>Database drivers: MySQL factory creates MySQLConnection + MySQLCommand together</li>
 </ul></div>
-<div class="scen"><div class="scen-t">🏢 Scenario — Cross-Platform UI Toolkit</div><p>A GUI framework renders Buttons and Checkboxes for Windows and Mac. An <code>UIFactory</code> interface creates matched components. App code calls <code>factory.createButton()</code> — it doesn't know if it's Windows or Mac. Switching OS = swapping one factory object.</p></div>
+<div class="scen"><div class="scen-t">🏢 Scenario — Cross-Platform UI Toolkit</div><ul>
+  <li>A GUI framework renders Buttons and Checkboxes for Windows and Mac.</li>
+  <li>An <code>UIFactory</code> interface creates matched components.</li>
+  <li>App code calls <code>factory.createButton()</code> — it doesn't know if it's Windows or Mac.</li>
+  <li>Switching OS = swapping one factory object</li>
+</ul></div>
 <div class="code"><div class="code-head"><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div><div class="code-file">UIAbstractFactory.java</div><div class="code-lang">Java</div></div><pre>
 <span class="cm">// Product interfaces</span>
 <span class="kw">interface</span> <span class="tp">Button</span>   { <span class="kw">void</span> <span class="fn">render</span>(); }
@@ -794,7 +846,13 @@ n.<span class="fn">send</span>(<span class="st">"user@example.com"</span>, <span
   <li>Reusing legacy code in a new system without touching the legacy code</li>
   <li>Your app expects one interface, external code provides another</li>
 </ul></div>
-<div class="scen"><div class="scen-t">🏢 Scenario — Stripe Payment Integration</div><p>Your app uses <code>PaymentGateway.charge(customerId, amount)</code>. Stripe's SDK has <code>createCharge(stripeId, amountInCents)</code>. You can't change either. A <code>StripeAdapter</code> wraps Stripe and exposes your expected interface. Tomorrow swap to PayPal? New adapter, zero client changes.</p></div>
+<div class="scen"><div class="scen-t">🏢 Scenario — Stripe Payment Integration</div><ul>
+  <li>Your app uses <code>PaymentGateway.charge(customerId, amount)</code>.</li>
+  <li>Stripe's SDK has <code>createCharge(stripeId, amountInCents)</code>.</li>
+  <li>You can't change either.</li>
+  <li>A <code>StripeAdapter</code> wraps Stripe and exposes your expected interface.</li>
+  <li>Tomorrow swap to PayPal? New adapter, zero client changes</li>
+</ul></div>
 <div class="code"><div class="code-head"><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div><div class="code-file">StripeAdapter.java</div><div class="code-lang">Java</div></div><pre>
 <span class="cm">// Your app's expected interface (Target)</span>
 <span class="kw">interface</span> <span class="tp">PaymentGateway</span> {
@@ -844,7 +902,12 @@ gw.<span class="fn">charge</span>(<span class="st">"cust_abc"</span>, <span clas
   <li>Features need to be added/removed at runtime (feature flags, permission levels)</li>
   <li>Real-world: Java I/O streams, HTTP middleware, Spring Security filter chains</li>
 </ul></div>
-<div class="scen"><div class="scen-t">🏢 Scenario — Coffee Shop Customization</div><p>A coffee shop has base <code>SimpleCoffee</code>. Customers mix: Milk, Sugar, Vanilla, Caramel, Extra Shot. With 5 toppings = 2⁵=32 subclasses! With Decorator: each topping wraps any coffee, adds cost/description. Stack in any order, any combination — 5 classes total.</p></div>
+<div class="scen"><div class="scen-t">🏢 Scenario — Coffee Shop Customization</div><ul>
+  <li>A coffee shop has base <code>SimpleCoffee</code>.</li>
+  <li>Customers mix: Milk, Sugar, Vanilla, Caramel, Extra Shot.</li>
+  <li>With 5 toppings = 2⁵=32 subclasses! With Decorator: each topping wraps any coffee, adds cost/description.</li>
+  <li>Stack in any order, any combination — 5 classes total</li>
+</ul></div>
 <div class="code"><div class="code-head"><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div><div class="code-file">CoffeeDecorator.java</div><div class="code-lang">Java</div></div><pre>
 <span class="kw">interface</span> <span class="tp">Coffee</span> {
     <span class="tp">String</span> <span class="fn">getDescription</span>();
@@ -905,7 +968,11 @@ gw.<span class="fn">charge</span>(<span class="st">"cust_abc"</span>, <span clas
   <li>Building a library: expose a clean API, hide messy internals</li>
   <li>Real-world: Spring's <code>JdbcTemplate</code>, REST controllers orchestrating services</li>
 </ul></div>
-<div class="scen"><div class="scen-t">🏢 Scenario — Order Placement Flow</div><p>Placing an order requires: check inventory → charge payment → save to DB → send email. The controller shouldn't orchestrate all 4 services manually. An <code>OrderFacade.placeOrder()</code> handles everything behind one clean method call.</p></div>
+<div class="scen"><div class="scen-t">🏢 Scenario — Order Placement Flow</div><ul>
+  <li>Placing an order requires: check inventory → charge payment → save to DB → send email.</li>
+  <li>The controller shouldn't orchestrate all 4 services manually.</li>
+  <li>An <code>OrderFacade.placeOrder()</code> handles everything behind one clean method call</li>
+</ul></div>
 <div class="code"><div class="code-head"><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div><div class="code-file">OrderFacade.java</div><div class="code-lang">Java</div></div><pre>
 <span class="cm">// Complex subsystems — don't expose to clients directly</span>
 <span class="kw">class</span> <span class="tp">InventoryService</span> {
@@ -961,7 +1028,11 @@ gw.<span class="fn">charge</span>(<span class="st">"cust_abc"</span>, <span clas
   <li><strong>Protection proxy:</strong> Check permissions before allowing access</li>
   <li><strong>Logging proxy:</strong> Log all calls without touching the original class</li>
 </ul></div>
-<div class="scen"><div class="scen-t">🏢 Scenario — Caching Database Proxy</div><p>Every call to <code>getUserById()</code> hits the DB — 50ms each. With a caching proxy, the first call fetches from DB, subsequent calls with the same ID return instantly from cache. Client code is identical — zero changes required.</p></div>
+<div class="scen"><div class="scen-t">🏢 Scenario — Caching Database Proxy</div><ul>
+  <li>Every call to <code>getUserById()</code> hits the DB — 50ms each.</li>
+  <li>With a caching proxy, the first call fetches from DB, subsequent calls with the same ID return instantly from cache.</li>
+  <li>Client code is identical — zero changes required</li>
+</ul></div>
 <div class="code"><div class="code-head"><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div><div class="code-file">CachingProxy.java</div><div class="code-lang">Java</div></div><pre>
 <span class="kw">interface</span> <span class="tp">UserService</span> {
     <span class="tp">User</span> <span class="fn">getUserById</span>(<span class="kw">int</span> id);
@@ -1073,7 +1144,11 @@ root.<span class="fn">getSize</span>();                <span class="cm">// → 5
   <li>Changes in implementation shouldn't affect clients using the abstraction</li>
   <li>Real-world: Device drivers, database drivers (JDBC), graphics rendering APIs</li>
 </ul></div>
-<div class="scen"><div class="scen-t">🏢 Scenario — Remote Control + Devices</div><p>You have different RemoteControls (Basic, Advanced) and different Devices (TV, Radio, SmartSpeaker). Without Bridge, you'd need BasicTVRemote, BasicRadioRemote, AdvancedTVRemote, AdvancedRadioRemote — class explosion! With Bridge: Remote holds a Device reference. Add any remote, any device — zero combinations needed.</p></div>
+<div class="scen"><div class="scen-t">🏢 Scenario — Remote Control + Devices</div><ul>
+  <li>You have different RemoteControls (Basic, Advanced) and different Devices (TV, Radio, SmartSpeaker).</li>
+  <li>Without Bridge, you'd need BasicTVRemote, BasicRadioRemote, AdvancedTVRemote, AdvancedRadioRemote — class explosion! With Bridge: Remote holds a Device reference.</li>
+  <li>Add any remote, any device — zero combinations needed</li>
+</ul></div>
 <div class="code"><div class="code-head"><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div><div class="code-file">RemoteBridge.java</div><div class="code-lang">Java</div></div><pre>
 <span class="cm">// Implementation interface — devices</span>
 <span class="kw">interface</span> <span class="tp">Device</span> {
@@ -1142,7 +1217,12 @@ radioRemote.<span class="fn">togglePower</span>(); <span class="cm">// 📻 Radi
   <li>Real-world: Text editors (character glyphs), game engines (particle systems), map tiles</li>
 </ul></div>
 <div class="warn"><b>⚠️ Trade-off:</b> Reduces memory at the cost of CPU cycles computing extrinsic state. Use when memory savings > computational overhead.</div>
-<div class="scen"><div class="scen-t">🏢 Scenario — Forest Rendering (1M Trees)</div><p>A game renders 1 million trees. Each tree stores: type (oak/pine), texture, mesh (10MB each) + position, scale. That's 10TB! Flyweight: extract shared state (type, texture, mesh) into a few TreeType objects. Each tree instance stores only position + reference to shared TreeType — 10MB total instead of 10TB!</p></div>
+<div class="scen"><div class="scen-t">🏢 Scenario — Forest Rendering (1M Trees)</div><ul>
+  <li>A game renders 1 million trees.</li>
+  <li>Each tree stores: type (oak/pine), texture, mesh (10MB each) + position, scale.</li>
+  <li>That's 10TB! Flyweight: extract shared state (type, texture, mesh) into a few TreeType objects.</li>
+  <li>Each tree instance stores only position + reference to shared TreeType — 10MB total instead of 10TB!</li>
+</ul></div>
 <div class="code"><div class="code-head"><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div><div class="code-file">TreeFlyweight.java</div><div class="code-lang">Java</div></div><pre>
 <span class="cm">// Flyweight — shared intrinsic state (immutable)</span>
 <span class="kw">class</span> <span class="tp">TreeType</span> {
@@ -1238,7 +1318,11 @@ radioRemote.<span class="fn">togglePower</span>(); <span class="cm">// 📻 Radi
   <li>Sorting strategies, discount engines, routing algorithms, compression methods</li>
   <li>You want to test each algorithm in complete isolation</li>
 </ul></div>
-<div class="scen"><div class="scen-t">🏢 Scenario — E-commerce Discount Engine</div><p>Checkout applies different discount strategies: percentage off, flat amount, BOGO, seasonal. Instead of one huge conditional, each strategy is a class. Swap at runtime based on customer tier, cart value, or active promotions.</p></div>
+<div class="scen"><div class="scen-t">🏢 Scenario — E-commerce Discount Engine</div><ul>
+  <li>Checkout applies different discount strategies: percentage off, flat amount, BOGO, seasonal.</li>
+  <li>Instead of one huge conditional, each strategy is a class.</li>
+  <li>Swap at runtime based on customer tier, cart value, or active promotions</li>
+</ul></div>
 <div class="code"><div class="code-head"><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div><div class="code-file">DiscountStrategy.java</div><div class="code-lang">Java</div></div><pre>
 <span class="cm">// Strategy interface</span>
 <span class="kw">interface</span> <span class="tp">DiscountStrategy</span> {
@@ -1303,7 +1387,11 @@ cart.<span class="fn">setStrategy</span>(<span class="kw">new</span> <span class
   <li>Real-world: UI event listeners, stock price feeds, domain events in microservices</li>
   <li>MVC pattern: Model notifies Views when data changes</li>
 </ul></div>
-<div class="scen"><div class="scen-t">🏢 Scenario — Order Status Events</div><p>When order status changes to "SHIPPED", multiple systems react: send email, update inventory, notify analytics, trigger billing. Instead of Order calling all systems directly, it fires an event. Each system subscribes independently — completely decoupled.</p></div>
+<div class="scen"><div class="scen-t">🏢 Scenario — Order Status Events</div><ul>
+  <li>When order status changes to "SHIPPED", multiple systems react: send email, update inventory, notify analytics, trigger billing.</li>
+  <li>Instead of Order calling all systems directly, it fires an event.</li>
+  <li>Each system subscribes independently — completely decoupled</li>
+</ul></div>
 <div class="code"><div class="code-head"><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div><div class="code-file">OrderObserver.java</div><div class="code-lang">Java</div></div><pre>
 <span class="cm">// Observer interface</span>
 <span class="kw">interface</span> <span class="tp">OrderObserver</span> {
@@ -1369,7 +1457,13 @@ order.<span class="fn">updateStatus</span>(<span class="st">"SHIPPED"</span>); <
   <li>Macro recording: capture a sequence of commands and replay them</li>
   <li>Transaction logs: persist commands and replay on system failure</li>
 </ul></div>
-<div class="scen"><div class="scen-t">🏢 Scenario — Text Editor Undo/Redo</div><p>Every user action (type, delete, bold, insert) is a Command with <code>execute()</code> and <code>undo()</code>. The editor maintains a history stack. Ctrl+Z pops and calls <code>undo()</code>. Ctrl+Y re-executes. Adding "paste" functionality = adding one new Command class.</p></div>
+<div class="scen"><div class="scen-t">🏢 Scenario — Text Editor Undo/Redo</div><ul>
+  <li>Every user action (type, delete, bold, insert) is a Command with <code>execute()</code> and <code>undo()</code>.</li>
+  <li>The editor maintains a history stack.</li>
+  <li>Ctrl+Z pops and calls <code>undo()</code>.</li>
+  <li>Ctrl+Y re-executes.</li>
+  <li>Adding "paste" functionality = adding one new Command class</li>
+</ul></div>
 <div class="code"><div class="code-head"><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div><div class="code-file">TextEditorCommand.java</div><div class="code-lang">Java</div></div><pre>
 <span class="kw">interface</span> <span class="tp">Command</span> { <span class="kw">void</span> <span class="fn">execute</span>(); <span class="kw">void</span> <span class="fn">undo</span>(); }
 
@@ -1477,7 +1571,11 @@ lead.<span class="fn">approve</span>(<span class="nm">50_000</span>); <span clas
   <li>State transitions need to be explicit and have rules (PENDING → SHIPPED, not SHIPPED → PENDING)</li>
   <li>Vending machines, order workflows, TCP connections, traffic lights</li>
 </ul></div>
-<div class="scen"><div class="scen-t">🏢 Scenario — Order State Machine</div><p>Order states: PENDING → CONFIRMED → SHIPPED → DELIVERED (or CANCELLED). Each state allows different actions: PENDING can be cancelled, SHIPPED cannot. State classes enforce these rules without any <code>if/else</code> in client code.</p></div>
+<div class="scen"><div class="scen-t">🏢 Scenario — Order State Machine</div><ul>
+  <li>Order states: PENDING → CONFIRMED → SHIPPED → DELIVERED (or CANCELLED).</li>
+  <li>Each state allows different actions: PENDING can be cancelled, SHIPPED cannot.</li>
+  <li>State classes enforce these rules without any <code>if/else</code> in client code</li>
+</ul></div>
 <div class="code"><div class="code-head"><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div><div class="code-file">OrderStateMachine.java</div><div class="code-lang">Java</div></div><pre>
 <span class="kw">interface</span> <span class="tp">OrderState</span> {
     <span class="kw">void</span> <span class="fn">confirm</span>(<span class="tp">OrderCtx</span> ctx);
@@ -1535,7 +1633,11 @@ order.<span class="fn">cancel</span>();   <span class="cm">// ❌ Cannot cancel 
   <li>Framework design: control the flow, let subclasses provide custom steps</li>
   <li>Real-world: JUnit test lifecycle, Spring's <code>JdbcTemplate</code>, data processing pipelines</li>
 </ul></div>
-<div class="scen"><div class="scen-t">🏢 Scenario — Data Export Pipeline</div><p>Exporting CSV and JSON follows: fetch data → format records → write to file → notify complete. Same steps, only "format records" differs. Template Method defines the fixed skeleton; subclasses provide just the format-specific logic.</p></div>
+<div class="scen"><div class="scen-t">🏢 Scenario — Data Export Pipeline</div><ul>
+  <li>Exporting CSV and JSON follows: fetch data → format records → write to file → notify complete.</li>
+  <li>Same steps, only "format records" differs.</li>
+  <li>Template Method defines the fixed skeleton; subclasses provide just the format-specific logic</li>
+</ul></div>
 <div class="code"><div class="code-head"><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div><div class="code-file">DataExporter.java</div><div class="code-lang">Java</div></div><pre>
 <span class="kw">abstract class</span> <span class="tp">DataExporter</span> {
 
@@ -1595,7 +1697,13 @@ order.<span class="fn">cancel</span>();   <span class="cm">// ❌ Cannot cancel 
   <li>Behaviour distributed among several classes should be customizable without subclassing</li>
   <li>Real-world: Chat rooms, air traffic control, UI dialog coordinators, MVC controllers</li>
 </ul></div>
-<div class="scen"><div class="scen-t">🏢 Scenario — Chat Room</div><p>Users send messages to each other. Without Mediator: each User stores references to all other Users — adding/removing users breaks everything. With Mediator: ChatRoom coordinates. Users send to ChatRoom, ChatRoom broadcasts. Users never know about each other directly.</p></div>
+<div class="scen"><div class="scen-t">🏢 Scenario — Chat Room</div><ul>
+  <li>Users send messages to each other.</li>
+  <li>Without Mediator: each User stores references to all other Users — adding/removing users breaks everything.</li>
+  <li>With Mediator: ChatRoom coordinates.</li>
+  <li>Users send to ChatRoom, ChatRoom broadcasts.</li>
+  <li>Users never know about each other directly</li>
+</ul></div>
 <div class="code"><div class="code-head"><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div><div class="code-file">ChatMediator.java</div><div class="code-lang">Java</div></div><pre>
 <span class="cm">// Mediator interface</span>
 <span class="kw">interface</span> <span class="tp">ChatMediator</span> {
@@ -1672,8 +1780,16 @@ alice.<span class="fn">send</span>(<span class="st">"Hey everyone!"</span>);
   <li>Provide a uniform interface for traversing different collection types</li>
   <li>Real-world: Java's <code>Iterator</code>, for-each loops, database cursors, tree/graph traversal</li>
 </ul></div>
-<div class="note"><b>📌 Note:</b> Most modern languages have built-in iterator support (Java's <code>Iterable</code>, Python's <code>__iter__</code>). Use this pattern when building custom collections or needing specialized traversal logic.</div>
-<div class="scen"><div class="scen-t">🏢 Scenario — Social Network Friend Iterator</div><p>A social network stores friends in a complex graph structure. Clients shouldn't know if it's an adjacency list, matrix, or database. A FriendIterator provides a simple <code>hasNext()</code>/<code>next()</code> interface. Tomorrow you change the underlying storage — iterator stays the same, client code unchanged.</p></div>
+<div class="note"><b>📌 Note:</b> <ul>
+  <li>Most modern languages have built-in iterator support (Java's <code>Iterable</code>, Python's <code>__iter__</code>).</li>
+  <li>Use this pattern when building custom collections or needing specialized traversal logic</li>
+</ul></div>
+<div class="scen"><div class="scen-t">🏢 Scenario — Social Network Friend Iterator</div><ul>
+  <li>A social network stores friends in a complex graph structure.</li>
+  <li>Clients shouldn't know if it's an adjacency list, matrix, or database.</li>
+  <li>A FriendIterator provides a simple <code>hasNext()</code>/<code>next()</code> interface.</li>
+  <li>Tomorrow you change the underlying storage — iterator stays the same, client code unchanged</li>
+</ul></div>
 <div class="code"><div class="code-head"><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div><div class="code-file">SocialIterator.java</div><div class="code-lang">Java</div></div><pre>
 <span class="cm">// Iterator interface</span>
 <span class="kw">interface</span> <span class="tp">Iterator</span>&lt;<span class="tp">T</span>&gt; {
