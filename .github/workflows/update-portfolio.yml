@@ -5,11 +5,14 @@ on:
     paths:
       - "source/pages/**/*.html"
 
+  workflow_dispatch:
+
 permissions:
   contents: write
 
 jobs:
   update-index:
+
     runs-on: ubuntu-latest
 
     steps:
