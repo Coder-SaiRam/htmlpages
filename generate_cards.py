@@ -13,7 +13,7 @@ icons = {
     "thread": "🧶",
     "spring": "🌱",
     "security": "🔐",
-    "sql": "🗄️"
+    "sql": "🗄️",
     "solid": "🏗️"
 }
 
