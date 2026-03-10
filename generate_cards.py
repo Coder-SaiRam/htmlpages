@@ -10,10 +10,11 @@ END_MARKER = "<!-- AUTO-CARDS-END -->"
 icons = {
     "docker": "🐳",
     "kubernetes": "☸️",
-    "thread": "🧵",
+    "thread": "🧶",
     "spring": "🌱",
     "security": "🔐",
     "sql": "🗄️"
+    "solid": "🏗️"
 }
 
 print("Reading index.html...")
@@ -32,7 +33,7 @@ for file in sorted(os.listdir(SOURCE_DIR)):
 
     title = file.replace(".html", "").replace("-", " ").title()
 
-    icon = "📄"
+    icon = "🪟"
     for key in icons:
         if key in file.lower():
             icon = icons[key]

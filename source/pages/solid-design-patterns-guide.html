@@ -1,0 +1,1473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>SOLID & Design Patterns — Complete Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg: #09090f;
+  --s1: #0f0f1a;
+  --s2: #141422;
+  --s3: #1a1a2e;
+  --border: #1f1f35;
+  --border2: #2a2a45;
+  --txt: #e8e8f0;
+  --txt2: #8888aa;
+  --txt3: #44445a;
+  --gold: #f0b429;
+  --teal: #00d4aa;
+  --coral: #ff6b6b;
+  --sky: #4db8ff;
+  --violet: #9d7ff3;
+  --mint: #00e599;
+  --r: 10px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--txt);font-size:15px;line-height:1.75}
+
+/* HERO */
+.hero{
+  padding:72px 32px 56px;text-align:center;
+  background:radial-gradient(ellipse 900px 400px at 50% -50px,rgba(240,180,41,.08),transparent 65%),var(--s1);
+  border-bottom:1px solid var(--border);position:relative;overflow:hidden;
+}
+.hero::before{
+  content:'';position:absolute;inset:0;
+  background:url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.015'%3E%3Cpath d='M0 40L40 0H20L0 20M40 40V20L20 40'/%3E%3C/g%3E%3C/svg%3E");
+  pointer-events:none;
+}
+.hero-tag{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:16px;opacity:.85}
+.hero h1{font-size:clamp(30px,6vw,62px);font-weight:800;line-height:1.1;letter-spacing:-1.5px;margin-bottom:14px}
+.hero h1 span{color:var(--gold)}
+.hero p{color:var(--txt2);max-width:560px;margin:0 auto 28px;font-size:16px;font-weight:300}
+.pills{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.pill{font-family:'JetBrains Mono',monospace;font-size:11px;padding:4px 13px;border-radius:20px;border:1px solid;letter-spacing:.4px}
+.p-gold{color:var(--gold);border-color:rgba(240,180,41,.3);background:rgba(240,180,41,.07)}
+.p-teal{color:var(--teal);border-color:rgba(0,212,170,.3);background:rgba(0,212,170,.07)}
+.p-sky{color:var(--sky);border-color:rgba(77,184,255,.3);background:rgba(77,184,255,.07)}
+.p-violet{color:var(--violet);border-color:rgba(157,127,243,.3);background:rgba(157,127,243,.07)}
+.p-coral{color:var(--coral);border-color:rgba(255,107,107,.3);background:rgba(255,107,107,.07)}
+
+/* NAV */
+.nav{position:sticky;top:0;z-index:100;background:rgba(9,9,15,.95);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:0 20px}
+.nav-in{max-width:1300px;margin:0 auto;display:flex;align-items:center;gap:4px;height:50px;overflow-x:auto;scrollbar-width:none}
+.nav-in::-webkit-scrollbar{display:none}
+.nav-brand{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--gold);white-space:nowrap;margin-right:12px;font-weight:500}
+.nb{font-family:'Outfit',sans-serif;font-size:13px;padding:5px 14px;border-radius:20px;border:1px solid transparent;background:transparent;color:var(--txt2);cursor:pointer;white-space:nowrap;transition:all .18s}
+.nb:hover{color:var(--txt);border-color:var(--border2)}
+.nb.on{background:rgba(240,180,41,.1);color:var(--gold);border-color:rgba(240,180,41,.3)}
+
+/* SECTIONS */
+.sec{display:none;max-width:1200px;margin:0 auto;padding:44px 28px 64px}
+.sec.show{display:block}
+
+/* SEC HEADER */
+.sec-tag{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2.5px;color:var(--gold);text-transform:uppercase;margin-bottom:8px;opacity:.75}
+.sec-h{font-size:clamp(22px,4vw,38px);font-weight:800;letter-spacing:-1px;margin-bottom:10px}
+.sec-intro{color:var(--txt2);font-size:15px;line-height:1.75;max-width:760px;padding-bottom:28px;margin-bottom:32px;border-bottom:1px solid var(--border)}
+
+/* CARD */
+.card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);margin-bottom:28px;overflow:hidden;transition:border-color .2s}
+.card:hover{border-color:var(--border2)}
+.card-top{padding:22px 24px 18px;border-bottom:1px solid var(--border);display:flex;gap:16px;align-items:flex-start}
+.icon{width:46px;height:46px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;margin-top:2px}
+.icon-gold{background:rgba(240,180,41,.1);border:1px solid rgba(240,180,41,.25)}
+.icon-teal{background:rgba(0,212,170,.1);border:1px solid rgba(0,212,170,.25)}
+.icon-coral{background:rgba(255,107,107,.1);border:1px solid rgba(255,107,107,.25)}
+.icon-sky{background:rgba(77,184,255,.1);border:1px solid rgba(77,184,255,.25)}
+.icon-violet{background:rgba(157,127,243,.1);border:1px solid rgba(157,127,243,.25)}
+.icon-mint{background:rgba(0,229,153,.1);border:1px solid rgba(0,229,153,.25)}
+.card-meta{}
+.card-label{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;opacity:.7}
+.card-name{font-size:19px;font-weight:700;margin-bottom:5px}
+.card-tag{font-size:14px;color:var(--txt2);line-height:1.6}
+.card-body{padding:22px 24px}
+
+/* CALLOUTS */
+.when{background:rgba(240,180,41,.04);border:1px solid rgba(240,180,41,.18);border-radius:8px;padding:14px 18px;margin-bottom:14px}
+.when-t{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:7px}
+.when ul{list-style:none}
+.when ul li{font-size:13.5px;color:var(--txt2);padding:2px 0 2px 18px;position:relative}
+.when ul li::before{content:'›';position:absolute;left:0;color:var(--gold)}
+
+.scen{background:rgba(0,212,170,.04);border:1px solid rgba(0,212,170,.18);border-radius:8px;padding:13px 17px;margin-bottom:14px}
+.scen-t{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:var(--teal);margin-bottom:6px}
+.scen p{font-size:13.5px;color:var(--txt2);line-height:1.65}
+
+.warn{background:rgba(255,107,107,.04);border-left:3px solid var(--coral);border-radius:0 7px 7px 0;padding:10px 14px;margin:12px 0;font-size:13.5px;color:var(--txt2)}
+.warn b{color:var(--coral)}
+.note{background:rgba(157,127,243,.04);border-left:3px solid var(--violet);border-radius:0 7px 7px 0;padding:10px 14px;margin:12px 0;font-size:13.5px;color:var(--txt2)}
+.note b{color:var(--violet)}
+
+/* CAT BADGE */
+.cat{display:inline-flex;align-items:center;gap:5px;font-family:'JetBrains Mono',monospace;font-size:10px;padding:3px 10px;border-radius:4px;margin-bottom:12px;letter-spacing:.5px}
+.cat-c{color:var(--sky);background:rgba(77,184,255,.08);border:1px solid rgba(77,184,255,.2)}
+.cat-s{color:var(--mint);background:rgba(0,229,153,.08);border:1px solid rgba(0,229,153,.2)}
+.cat-b{color:var(--violet);background:rgba(157,127,243,.08);border:1px solid rgba(157,127,243,.2)}
+
+/* CODE */
+.code{background:#06060e;border:1px solid var(--border);border-radius:8px;overflow:hidden;margin:12px 0}
+.code-head{background:var(--s2);padding:7px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border)}
+.dots{display:flex;gap:5px}
+.dot{width:10px;height:10px;border-radius:50%}
+.dot.r{background:#ff5f57}.dot.y{background:#febc2e}.dot.g{background:#28c840}
+.code-file{flex:1;text-align:center;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--txt3)}
+.code-lang{font-family:'JetBrains Mono',monospace;font-size:10px;padding:2px 8px;border-radius:4px;background:rgba(240,180,41,.1);color:var(--gold)}
+.code pre{padding:18px 20px;overflow-x:auto;font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.85;color:#cdd6f4;white-space:pre}
+/* syntax highlighting */
+.kw{color:#c792ea}.tp{color:#82aaff}.fn{color:#82cfff}.st{color:#c3e88d}.cm{color:#546e7a;font-style:italic}.nm{color:#f78c6c}.dc{color:#ff5370}
+
+/* COMPARE GRID */
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
+.cb{border-radius:8px;padding:13px}
+.cb-bad{background:rgba(255,107,107,.05);border:1px solid rgba(255,107,107,.2)}
+.cb-good{background:rgba(0,229,153,.05);border:1px solid rgba(0,229,153,.2)}
+.cb-t{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;font-weight:500;margin-bottom:7px}
+.cb-bad .cb-t{color:var(--coral)}.cb-good .cb-t{color:var(--mint)}
+
+/* OVERVIEW GRID */
+.ovs{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:9px;margin-bottom:28px}
+.ov{background:var(--s1);border:1px solid var(--border);border-radius:8px;padding:14px;transition:border-color .18s,transform .15s;cursor:default}
+.ov:hover{border-color:var(--border2);transform:translateY(-2px)}
+.ov-e{font-size:22px;margin-bottom:6px}
+.ov-n{font-weight:700;font-size:14px;margin-bottom:3px}
+.ov-d{font-size:12px;color:var(--txt2);line-height:1.5}
+
+/* CHEAT TABLE */
+.tbl{width:100%;border-collapse:collapse;font-size:13.5px}
+.tbl th{background:var(--s2);padding:10px 14px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:1px;text-transform:uppercase;color:var(--txt2);border-bottom:1px solid var(--border)}
+.tbl td{padding:10px 14px;border-bottom:1px solid var(--border);vertical-align:top}
+.tbl tr:hover td{background:var(--s2)}
+.tbl code{font-family:'JetBrains Mono',monospace;font-size:11.5px;background:var(--s3);padding:2px 7px;border-radius:4px;color:var(--sky)}
+h3.sub{font-size:16.5px;font-weight:700;margin:22px 0 10px;color:var(--txt)}
+
+footer{text-align:center;padding:28px;color:var(--txt3);font-size:12.5px;border-top:1px solid var(--border);font-family:'JetBrains Mono',monospace}
+@media(max-width:660px){.cmp{grid-template-columns:1fr}.card-top{flex-direction:column;gap:10px}}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-tag">// Software Engineering Fundamentals</div>
+  <h1>SOLID Principles &amp;<br/><span>Design Patterns</span></h1>
+  <p>A complete guide with real-world scenarios, when-to-use guidance, side-by-side comparisons, and clean Java examples for every principle and pattern.</p>
+  <div class="pills">
+    <span class="pill p-gold">5 SOLID Principles</span>
+    <span class="pill p-sky">5 Creational Patterns</span>
+    <span class="pill p-teal">7 Structural Patterns</span>
+    <span class="pill p-violet">8 Behavioral Patterns</span>
+    <span class="pill p-coral">Real-World Scenarios</span>
+  </div>
+</div>
+
+<nav class="nav">
+  <div class="nav-in">
+    <span class="nav-brand">{ guide }</span>
+    <button class="nb on" onclick="tab(0,this)">📐 SOLID</button>
+    <button class="nb" onclick="tab(1,this)">🏗️ Creational</button>
+    <button class="nb" onclick="tab(2,this)">🔩 Structural</button>
+    <button class="nb" onclick="tab(3,this)">🎭 Behavioral</button>
+    <button class="nb" onclick="tab(4,this)">🗺️ Quick Ref</button>
+  </div>
+</nav>
+
+<!-- ═══════════ S0: SOLID ═══════════ -->
+<div class="sec show" id="s0">
+<div class="sec-tag">// Section 0 · Foundations</div>
+<div class="sec-h">SOLID Principles</div>
+<div class="sec-intro">Five object-oriented design principles by Robert C. Martin ("Uncle Bob"). They make code maintainable, testable, and extendable. Think of them as guiding forces — not rigid laws. Applying them well separates good code from great architecture.</div>
+
+<!-- SRP -->
+<div class="card">
+<div class="card-top">
+  <div class="icon icon-gold">📦</div>
+  <div class="card-meta">
+    <div class="card-label" style="color:var(--gold)">S — Single Responsibility Principle</div>
+    <div class="card-name">One Class, One Reason to Change</div>
+    <div class="card-tag">A class should have only one job. If it handles auth, sends emails, and generates PDFs — three different teams have reasons to touch it. A bug in email logic can silently break auth.</div>
+  </div>
+</div>
+<div class="card-body">
+<div class="when"><div class="when-t">⚡ When to Apply</div><ul>
+  <li>A class mixes concerns: auth + email + DB + reporting in one place</li>
+  <li>Multiple teams need to modify the same class for unrelated features</li>
+  <li>Unit testing requires too many unrelated mocks to set up</li>
+  <li>A "small change" to one feature keeps breaking another</li>
+</ul></div>
+<div class="scen"><div class="scen-t">🏢 Real Scenario — E-commerce Order</div><p>An <code>Order</code> class calculates totals, saves to MySQL, sends emails, and generates PDF invoices. When the email team changes the template, they risk breaking order calculation. Fix: split into <code>OrderCalculator</code>, <code>OrderRepository</code>, <code>OrderNotifier</code>, <code>InvoiceService</code>.</p></div>
+<div class="cmp">
+<div class="cb cb-bad"><div class="cb-t">❌ Violates SRP — 4 reasons to change</div>
+<div class="code"><pre><span class="kw">class</span> <span class="tp">UserService</span> {
+  <span class="cm">// Concern 1: Auth</span>
+  <span class="kw">public</span> <span class="tp">User</span> <span class="fn">login</span>(<span class="tp">String</span> u, <span class="tp">String</span> p) {…}
+  <span class="cm">// Concern 2: Email</span>
+  <span class="kw">public void</span> <span class="fn">sendWelcomeEmail</span>(<span class="tp">User</span> u) {…}
+  <span class="cm">// Concern 3: PDF</span>
+  <span class="kw">public</span> <span class="tp">PDF</span> <span class="fn">generateReport</span>(<span class="tp">User</span> u) {…}
+  <span class="cm">// Concern 4: DB</span>
+  <span class="kw">public void</span> <span class="fn">save</span>(<span class="tp">User</span> u) {…}
+}</pre></div></div>
+<div class="cb cb-good"><div class="cb-t">✅ Follows SRP — 1 reason each</div>
+<div class="code"><pre><span class="kw">class</span> <span class="tp">AuthService</span>   { <span class="tp">User</span> <span class="fn">login</span>(…) {…} }
+<span class="kw">class</span> <span class="tp">EmailService</span>  { <span class="kw">void</span> <span class="fn">sendWelcome</span>(…){…} }
+<span class="kw">class</span> <span class="tp">ReportService</span> { <span class="tp">PDF</span>  <span class="fn">generate</span>(…) {…} }
+<span class="kw">class</span> <span class="tp">UserRepository</span>{ <span class="kw">void</span> <span class="fn">save</span>(…)      {…} }
+
+<span class="cm">// Each class: 1 reason to change ✓
+// Teams work independently ✓
+// Easy to unit test ✓</span></pre></div></div>
+</div>
+</div></div>
+
+<!-- OCP -->
+<div class="card">
+<div class="card-top">
+  <div class="icon icon-teal">🔓</div>
+  <div class="card-meta">
+    <div class="card-label" style="color:var(--teal)">O — Open/Closed Principle</div>
+    <div class="card-name">Open for Extension, Closed for Modification</div>
+    <div class="card-tag">Once a tested class works, don't edit its internals to add new features. Extend it via interfaces or inheritance. This protects existing code from regression bugs when new features are added.</div>
+  </div>
+</div>
+<div class="card-body">
+<div class="when"><div class="when-t">⚡ When to Apply</div><ul>
+  <li>You have a growing <code>if/else</code> or <code>switch</code> that gains a new branch every sprint</li>
+  <li>Adding a new payment method or notification channel forces editing core logic</li>
+  <li>A class is heavily tested and you want zero regression risk</li>
+  <li>Building a framework — let users plug in extensions without touching your source</li>
+</ul></div>
+<div class="scen"><div class="scen-t">🏢 Real Scenario — Payment Gateway</div><p>A system supports CreditCard and PayPal. Adding Crypto means opening <code>PaymentProcessor</code> and adding another <code>else if</code> — risking breakage. OCP fix: define a <code>PaymentMethod</code> interface. Adding Crypto = one new class. <code>PaymentProcessor</code> never changes again.</p></div>
+<div class="cmp">
+<div class="cb cb-bad"><div class="cb-t">❌ Edit core class every time</div>
+<div class="code"><pre><span class="kw">class</span> <span class="tp">PaymentProcessor</span> {
+  <span class="kw">public void</span> <span class="fn">pay</span>(<span class="tp">String</span> type, <span class="kw">double</span> amt) {
+    <span class="kw">if</span> (type.equals(<span class="st">"credit"</span>)) { … }
+    <span class="kw">else if</span> (type.equals(<span class="st">"paypal"</span>)) { … }
+    <span class="kw">else if</span> (type.equals(<span class="st">"crypto"</span>)) {
+      <span class="cm">// Must edit this class again! ❌</span>
+    }
+  }
+}</pre></div></div>
+<div class="cb cb-good"><div class="cb-t">✅ Add a new class, nothing changes</div>
+<div class="code"><pre><span class="kw">interface</span> <span class="tp">PaymentMethod</span> {
+  <span class="kw">void</span> <span class="fn">pay</span>(<span class="kw">double</span> amount);
+}
+<span class="kw">class</span> <span class="tp">CreditCard</span> <span class="kw">implements</span> <span class="tp">PaymentMethod</span> {…}
+<span class="kw">class</span> <span class="tp">Crypto</span>     <span class="kw">implements</span> <span class="tp">PaymentMethod</span> {…}
+
+<span class="cm">// This class NEVER changes again ✓</span>
+<span class="kw">class</span> <span class="tp">PaymentProcessor</span> {
+  <span class="kw">void</span> <span class="fn">process</span>(<span class="tp">PaymentMethod</span> m, <span class="kw">double</span> amt) {
+    m.<span class="fn">pay</span>(amt);
+  }
+}</pre></div></div>
+</div>
+</div></div>
+
+<!-- LSP -->
+<div class="card">
+<div class="card-top">
+  <div class="icon icon-coral">🔄</div>
+  <div class="card-meta">
+    <div class="card-label" style="color:var(--coral)">L — Liskov Substitution Principle</div>
+    <div class="card-name">Subtypes Must Be Substitutable for Their Bases</div>
+    <div class="card-tag">If S is a subtype of T, replacing T with S must not break the program. Child classes must honour ALL contracts of their parent — never weaken, never break them.</div>
+  </div>
+</div>
+<div class="card-body">
+<div class="when"><div class="when-t">⚡ Warning Signs (LSP Violation)</div><ul>
+  <li>Subclass throws <code>UnsupportedOperationException</code> for a parent method</li>
+  <li>You see <code>instanceof</code> checks to handle specific subclasses differently</li>
+  <li>Overridden method does nothing, or silently ignores a parameter</li>
+  <li>Replacing parent with child object breaks existing unit tests</li>
+</ul></div>
+<div class="scen"><div class="scen-t">🏢 Classic Trap — Square extends Rectangle</div><p>Intuitively Square IS-A Rectangle. But Rectangle's contract says: setting width doesn't change height. A Square must break this rule. Fix: both extend a <code>Shape</code> base class — they're siblings, not parent/child.</p></div>
+<div class="cmp">
+<div class="cb cb-bad"><div class="cb-t">❌ Violates LSP — breaks parent contract</div>
+<div class="code"><pre><span class="kw">class</span> <span class="tp">Rectangle</span> {
+  <span class="kw">protected int</span> w, h;
+  <span class="kw">void</span> <span class="fn">setWidth</span>(<span class="kw">int</span> w)  { <span class="kw">this</span>.w = w; }
+  <span class="kw">void</span> <span class="fn">setHeight</span>(<span class="kw">int</span> h) { <span class="kw">this</span>.h = h; }
+  <span class="kw">int</span>  <span class="fn">area</span>() { <span class="kw">return</span> w * h; }
+}
+<span class="kw">class</span> <span class="tp">Square</span> <span class="kw">extends</span> <span class="tp">Rectangle</span> {
+  <span class="kw">void</span> <span class="fn">setWidth</span>(<span class="kw">int</span> w) {
+    <span class="kw">this</span>.w = <span class="kw">this</span>.h = w; <span class="cm">// ← breaks contract!</span>
+  }
+}
+<span class="cm">// setWidth(5);setHeight(4); → 25 not 20 ❌</span></pre></div></div>
+<div class="cb cb-good"><div class="cb-t">✅ Siblings under shared abstraction</div>
+<div class="code"><pre><span class="kw">abstract class</span> <span class="tp">Shape</span> {
+  <span class="kw">abstract int</span> <span class="fn">area</span>();
+}
+<span class="kw">class</span> <span class="tp">Rectangle</span> <span class="kw">extends</span> <span class="tp">Shape</span> {
+  <span class="kw">int</span> w, h;
+  <span class="kw">int</span> <span class="fn">area</span>() { <span class="kw">return</span> w * h; }
+}
+<span class="kw">class</span> <span class="tp">Square</span> <span class="kw">extends</span> <span class="tp">Shape</span> {
+  <span class="kw">int</span> side;
+  <span class="kw">int</span> <span class="fn">area</span>() { <span class="kw">return</span> side * side; }
+}
+<span class="cm">// Both safely substitute Shape ✓</span></pre></div></div>
+</div>
+</div></div>
+
+<!-- ISP -->
+<div class="card">
+<div class="card-top">
+  <div class="icon icon-sky">🎯</div>
+  <div class="card-meta">
+    <div class="card-label" style="color:var(--sky)">I — Interface Segregation Principle</div>
+    <div class="card-name">No Class Should Implement Methods It Doesn't Need</div>
+    <div class="card-tag">Fat interfaces force implementers to stub out irrelevant methods. Prefer many small, focused interfaces. Clients depend only on what they actually use.</div>
+  </div>
+</div>
+<div class="card-body">
+<div class="when"><div class="when-t">⚡ When to Apply</div><ul>
+  <li>You see empty method bodies or <code>throw new UnsupportedOperationException()</code></li>
+  <li>An interface keeps growing, forcing all implementers to update</li>
+  <li>Some implementers only use 2 of 10 methods — the rest are dead weight</li>
+  <li>"Why does a <code>Printer</code> need a <code>scan()</code> method?"</li>
+</ul></div>
+<div class="scen"><div class="scen-t">🏢 Real Scenario — Robot Workers</div><p>A <code>Worker</code> interface has <code>work()</code>, <code>eat()</code>, <code>sleep()</code>. A <code>Robot</code> implementation throws exceptions for eat and sleep. Fix: split into <code>Workable</code>, <code>Eatable</code>, <code>Sleepable</code>. Robot only implements <code>Workable</code>.</p></div>
+<div class="cmp">
+<div class="cb cb-bad"><div class="cb-t">❌ Fat interface forces stubs</div>
+<div class="code"><pre><span class="kw">interface</span> <span class="tp">Worker</span> {
+  <span class="kw">void</span> <span class="fn">work</span>();
+  <span class="kw">void</span> <span class="fn">eat</span>();
+  <span class="kw">void</span> <span class="fn">sleep</span>();
+}
+<span class="kw">class</span> <span class="tp">Robot</span> <span class="kw">implements</span> <span class="tp">Worker</span> {
+  <span class="kw">public void</span> <span class="fn">work</span>()  { <span class="cm">/* ok */</span> }
+  <span class="kw">public void</span> <span class="fn">eat</span>()   {
+    <span class="kw">throw new</span> <span class="tp">UnsupportedOperationException</span>();
+  }
+  <span class="kw">public void</span> <span class="fn">sleep</span>() {
+    <span class="kw">throw new</span> <span class="tp">UnsupportedOperationException</span>();
+  }
+}</pre></div></div>
+<div class="cb cb-good"><div class="cb-t">✅ Small interfaces — take what you need</div>
+<div class="code"><pre><span class="kw">interface</span> <span class="tp">Workable</span>  { <span class="kw">void</span> <span class="fn">work</span>(); }
+<span class="kw">interface</span> <span class="tp">Eatable</span>   { <span class="kw">void</span> <span class="fn">eat</span>(); }
+<span class="kw">interface</span> <span class="tp">Sleepable</span> { <span class="kw">void</span> <span class="fn">sleep</span>(); }
+
+<span class="kw">class</span> <span class="tp">Robot</span> <span class="kw">implements</span> <span class="tp">Workable</span> {
+  <span class="kw">public void</span> <span class="fn">work</span>() { <span class="cm">/* ok */</span> }
+}
+<span class="kw">class</span> <span class="tp">Human</span> <span class="kw">implements</span> <span class="tp">Workable</span>,
+    <span class="tp">Eatable</span>, <span class="tp">Sleepable</span> { … }
+<span class="cm">// Each implements only what it needs ✓</span></pre></div></div>
+</div>
+</div></div>
+
+<!-- DIP -->
+<div class="card">
+<div class="card-top">
+  <div class="icon icon-violet">🔌</div>
+  <div class="card-meta">
+    <div class="card-label" style="color:var(--violet)">D — Dependency Inversion Principle</div>
+    <div class="card-name">Depend on Abstractions, Not Concretions</div>
+    <div class="card-tag">High-level business logic must not depend on low-level details (DB, HTTP, filesystem). Both depend on interfaces. This makes business logic testable, portable, and immune to infrastructure changes.</div>
+  </div>
+</div>
+<div class="card-body">
+<div class="when"><div class="when-t">⚡ When to Apply</div><ul>
+  <li>Business logic creates <code>new MySQLRepo()</code> or <code>new HttpClient()</code> directly inside itself</li>
+  <li>Unit tests need a running database, real HTTP server, or real filesystem</li>
+  <li>Switching from MySQL to PostgreSQL forces editing business logic files</li>
+  <li>High-level class imports low-level framework class names</li>
+</ul></div>
+<div class="scen"><div class="scen-t">🏢 Real Scenario — OrderService + Database</div><p>An <code>OrderService</code> creates <code>new MySQLOrderRepository()</code> inside itself. To write a unit test you need MySQL running. Fix: <code>OrderService</code> depends on an <code>OrderRepository</code> interface. Inject <code>MySQLRepo</code> in production, <code>MockRepo</code> in tests — zero changes to business logic.</p></div>
+<div class="cmp">
+<div class="cb cb-bad"><div class="cb-t">❌ Hard-coded — untestable</div>
+<div class="code"><pre><span class="kw">class</span> <span class="tp">OrderService</span> {
+  <span class="cm">// Directly creates concrete class!</span>
+  <span class="kw">private</span> <span class="tp">MySQLOrderRepo</span> repo =
+      <span class="kw">new</span> <span class="tp">MySQLOrderRepo</span>();
+
+  <span class="kw">void</span> <span class="fn">placeOrder</span>(<span class="tp">Order</span> o) { repo.<span class="fn">save</span>(o); }
+}
+<span class="cm">// Need real MySQL to test this ❌
+// Can't swap to PostgreSQL easily ❌</span></pre></div></div>
+<div class="cb cb-good"><div class="cb-t">✅ Injected interface — fully testable</div>
+<div class="code"><pre><span class="kw">interface</span> <span class="tp">OrderRepository</span> {
+  <span class="kw">void</span> <span class="fn">save</span>(<span class="tp">Order</span> order);
+}
+<span class="kw">class</span> <span class="tp">OrderService</span> {
+  <span class="kw">private final</span> <span class="tp">OrderRepository</span> repo;
+  <span class="cm">// Constructor injection — no concretion</span>
+  <span class="tp">OrderService</span>(<span class="tp">OrderRepository</span> r) {
+    <span class="kw">this</span>.repo = r;
+  }
+  <span class="kw">void</span> <span class="fn">placeOrder</span>(<span class="tp">Order</span> o) { repo.<span class="fn">save</span>(o); }
+}
+<span class="cm">// Test: pass MockRepo → no DB needed ✓</span></pre></div></div>
+</div>
+</div></div>
+</div>
+
+<!-- ═══════════ S1: CREATIONAL ═══════════ -->
+<div class="sec" id="s1">
+<div class="sec-tag">// Section 1 · GoF Patterns</div>
+<div class="sec-h">Creational Patterns</div>
+<div class="sec-intro">Creational patterns abstract the object creation process — decoupling your code from specific classes it instantiates. Use them when <code>new SomeClass()</code> is becoming a problem: too rigid, too coupled, or too complex to manage at scale.</div>
+
+<div class="ovs">
+  <div class="ov"><div class="ov-e">🏭</div><div class="ov-n">Singleton</div><div class="ov-d">One instance, global access</div></div>
+  <div class="ov"><div class="ov-e">🔨</div><div class="ov-n">Factory Method</div><div class="ov-d">Subclasses decide what to create</div></div>
+  <div class="ov"><div class="ov-e">🏗️</div><div class="ov-n">Abstract Factory</div><div class="ov-d">Families of related objects</div></div>
+  <div class="ov"><div class="ov-e">🧱</div><div class="ov-n">Builder</div><div class="ov-d">Step-by-step complex objects</div></div>
+  <div class="ov"><div class="ov-e">🐑</div><div class="ov-n">Prototype</div><div class="ov-d">Clone instead of new</div></div>
+</div>
+
+<!-- SINGLETON -->
+<div class="card">
+<div class="card-top">
+  <div class="icon icon-gold">🏭</div>
+  <div class="card-meta">
+    <span class="cat cat-c">🏗️ CREATIONAL</span>
+    <div class="card-name">Singleton Pattern</div>
+    <div class="card-tag">Ensures a class has exactly ONE instance with a global access point. Like a single database connection pool — you want one shared managed pool, not hundreds of separate ones competing for resources.</div>
+  </div>
+</div>
+<div class="card-body">
+<div class="when"><div class="when-t">⚡ Use When</div><ul>
+  <li>Exactly ONE instance is needed: Logger, Config manager, Thread pool, DB connection pool</li>
+  <li>Shared state must be globally consistent (e.g., app configuration loaded once)</li>
+  <li>Object creation is expensive — load config file once, reuse everywhere</li>
+</ul></div>
+<div class="warn"><b>⚠️ Avoid when:</b> You need it purely as a global variable substitute. Overuse makes unit testing hard — you can't inject a mock. Prefer dependency injection in most cases.</div>
+<div class="scen"><div class="scen-t">🏢 Scenario — Application Logger</div><p>Your app needs ONE Logger writing to one log file. If every class creates its own Logger instance, you get file locking conflicts and interleaved messy logs. A Singleton Logger ensures all components write through the exact same instance.</p></div>
+<div class="code"><div class="code-head"><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div><div class="code-file">Logger.java</div><div class="code-lang">Java</div></div><pre>
+<span class="kw">public class</span> <span class="tp">Logger</span> {
+    <span class="cm">// volatile ensures correct visibility across threads</span>
+    <span class="kw">private static volatile</span> <span class="tp">Logger</span> instance;
+
+    <span class="kw">private</span> <span class="tp">Logger</span>() {} <span class="cm">// private — no external instantiation</span>
+
+    <span class="cm">// Double-checked locking: thread-safe lazy init</span>
+    <span class="kw">public static</span> <span class="tp">Logger</span> <span class="fn">getInstance</span>() {
+        <span class="kw">if</span> (instance == <span class="kw">null</span>) {
+            <span class="kw">synchronized</span> (<span class="tp">Logger</span>.<span class="kw">class</span>) {
+                <span class="kw">if</span> (instance == <span class="kw">null</span>)
+                    instance = <span class="kw">new</span> <span class="tp">Logger</span>();
+            }
+        }
+        <span class="kw">return</span> instance;
+    }
+
+    <span class="kw">public void</span> <span class="fn">log</span>(<span class="tp">String</span> level, <span class="tp">String</span> msg) {
+        <span class="tp">System</span>.out.<span class="fn">printf</span>(<span class="st">"[%s] %s%n"</span>, level, msg);
+    }
+}
+
+<span class="cm">// Same instance everywhere in the app ✓</span>
+<span class="tp">Logger</span>.<span class="fn">getInstance</span>().<span class="fn">log</span>(<span class="st">"INFO"</span>, <span class="st">"Order placed"</span>);
+<span class="tp">Logger</span>.<span class="fn">getInstance</span>().<span class="fn">log</span>(<span class="st">"INFO"</span>, <span class="st">"Payment processed"</span>);
+</pre></div>
+</div></div>
+
+<!-- FACTORY METHOD -->
+<div class="card">
+<div class="card-top">
+  <div class="icon icon-teal">🔨</div>
+  <div class="card-meta">
+    <span class="cat cat-c">🏗️ CREATIONAL</span>
+    <div class="card-name">Factory Method Pattern</div>
+    <div class="card-tag">Defines an interface for creating objects but lets subclasses (or a factory class) decide which concrete class to instantiate. The client only knows the interface — it never hard-codes which class it gets.</div>
+  </div>
+</div>
+<div class="card-body">
+<div class="when"><div class="when-t">⚡ Use When</div><ul>
+  <li>You have a growing <code>if/switch</code> block deciding which class to instantiate</li>
+  <li>A class can't anticipate what type of objects to create at compile time</li>
+  <li>You want creation logic isolated in one place (pairs beautifully with OCP)</li>
+  <li>Framework design — let users register custom implementations</li>
+</ul></div>
+<div class="scen"><div class="scen-t">🏢 Scenario — Multi-Channel Notifications</div><p>Your app sends notifications via Email, SMS, and Push. Each has different setup. A <code>NotificationFactory</code> creates the right type. When WhatsApp is added, you add ONE new class — zero edits to existing code. The factory grows, nothing breaks.</p></div>
+<div class="code"><div class="code-head"><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div><div class="code-file">NotificationFactory.java</div><div class="code-lang">Java</div></div><pre>
+<span class="cm">// Product interface</span>
+<span class="kw">interface</span> <span class="tp">Notification</span> {
+    <span class="kw">void</span> <span class="fn">send</span>(<span class="tp">String</span> recipient, <span class="tp">String</span> message);
+}
+
+<span class="cm">// Concrete products</span>
+<span class="kw">class</span> <span class="tp">EmailNotification</span> <span class="kw">implements</span> <span class="tp">Notification</span> {
+    <span class="kw">public void</span> <span class="fn">send</span>(<span class="tp">String</span> to, <span class="tp">String</span> msg) {
+        <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"📧 Email → "</span> + to + <span class="st">": "</span> + msg);
+    }
+}
+<span class="kw">class</span> <span class="tp">SMSNotification</span> <span class="kw">implements</span> <span class="tp">Notification</span> {
+    <span class="kw">public void</span> <span class="fn">send</span>(<span class="tp">String</span> to, <span class="tp">String</span> msg) {
+        <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"📱 SMS → "</span> + to + <span class="st">": "</span> + msg);
+    }
+}
+<span class="kw">class</span> <span class="tp">PushNotification</span> <span class="kw">implements</span> <span class="tp">Notification</span> {
+    <span class="kw">public void</span> <span class="fn">send</span>(<span class="tp">String</span> to, <span class="tp">String</span> msg) {
+        <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"🔔 Push → "</span> + to + <span class="st">": "</span> + msg);
+    }
+}
+
+<span class="cm">// Factory — central creation point</span>
+<span class="kw">class</span> <span class="tp">NotificationFactory</span> {
+    <span class="kw">public static</span> <span class="tp">Notification</span> <span class="fn">create</span>(<span class="tp">String</span> channel) {
+        <span class="kw">return switch</span> (channel.<span class="fn">toLowerCase</span>()) {
+            <span class="kw">case</span> <span class="st">"email"</span> -> <span class="kw">new</span> <span class="tp">EmailNotification</span>();
+            <span class="kw">case</span> <span class="st">"sms"</span>   -> <span class="kw">new</span> <span class="tp">SMSNotification</span>();
+            <span class="kw">case</span> <span class="st">"push"</span>  -> <span class="kw">new</span> <span class="tp">PushNotification</span>();
+            <span class="kw">default</span> -> <span class="kw">throw new</span> <span class="tp">IllegalArgumentException</span>(<span class="st">"Unknown: "</span> + channel);
+        };
+    }
+}
+
+<span class="cm">// Client — never knows which concrete class it got</span>
+<span class="tp">Notification</span> n = <span class="tp">NotificationFactory</span>.<span class="fn">create</span>(<span class="st">"email"</span>);
+n.<span class="fn">send</span>(<span class="st">"user@example.com"</span>, <span class="st">"Your order has shipped!"</span>);
+</pre></div>
+</div></div>
+
+<!-- BUILDER -->
+<div class="card">
+<div class="card-top">
+  <div class="icon icon-sky">🧱</div>
+  <div class="card-meta">
+    <span class="cat cat-c">🏗️ CREATIONAL</span>
+    <div class="card-name">Builder Pattern</div>
+    <div class="card-tag">Constructs complex objects step-by-step. Eliminates telescoping constructors with 8+ parameters. Each step is optional with sensible defaults. The fluent chain is readable and self-documenting.</div>
+  </div>
+</div>
+<div class="card-body">
+<div class="when"><div class="when-t">⚡ Use When</div><ul>
+  <li>Object has many optional fields (5+) making constructors unreadable</li>
+  <li>You want self-documenting, fluent construction code</li>
+  <li>Different "configurations" of the same object are needed</li>
+  <li>Real-world: Lombok's <code>@Builder</code>, OkHttp's <code>Request.Builder</code>, Java's <code>StringBuilder</code></li>
+</ul></div>
+<div class="scen"><div class="scen-t">🏢 Scenario — HTTP Request Builder</div><p>Building an HTTP request needs a URL (required), but headers, timeout, auth token, body, retry policy are optional. A Builder chains only what you need — making construction readable and impossible to misuse with wrong parameter order.</p></div>
+<div class="code"><div class="code-head"><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div><div class="code-file">HttpRequest.java</div><div class="code-lang">Java</div></div><pre>
+<span class="kw">class</span> <span class="tp">HttpRequest</span> {
+    <span class="kw">private final</span> <span class="tp">String</span>  url;           <span class="cm">// required</span>
+    <span class="kw">private final</span> <span class="tp">String</span>  method;        <span class="cm">// default GET</span>
+    <span class="kw">private final</span> <span class="tp">String</span>  body, authToken;
+    <span class="kw">private final</span> <span class="kw">int</span>     timeoutMs;
+    <span class="kw">private final</span> <span class="kw">boolean</span> followRedirects;
+
+    <span class="kw">private</span> <span class="tp">HttpRequest</span>(<span class="tp">Builder</span> b) {
+        url=b.url; method=b.method; body=b.body;
+        authToken=b.authToken; timeoutMs=b.timeoutMs;
+        followRedirects=b.followRedirects;
+    }
+
+    <span class="kw">public static class</span> <span class="tp">Builder</span> {
+        <span class="kw">private final</span> <span class="tp">String</span>  url;
+        <span class="kw">private</span> <span class="tp">String</span>  method="GET", body, authToken;
+        <span class="kw">private</span> <span class="kw">int</span>     timeoutMs=5000;
+        <span class="kw">private</span> <span class="kw">boolean</span> followRedirects=<span class="kw">true</span>;
+
+        <span class="kw">public</span> <span class="tp">Builder</span>(<span class="tp">String</span> url)       { <span class="kw">this</span>.url=url; }
+        <span class="kw">public</span> <span class="tp">Builder</span> <span class="fn">method</span>(<span class="tp">String</span> m)  { method=m; <span class="kw">return this</span>; }
+        <span class="kw">public</span> <span class="tp">Builder</span> <span class="fn">body</span>(<span class="tp">String</span> b)    { body=b; <span class="kw">return this</span>; }
+        <span class="kw">public</span> <span class="tp">Builder</span> <span class="fn">auth</span>(<span class="tp">String</span> t)    { authToken=t; <span class="kw">return this</span>; }
+        <span class="kw">public</span> <span class="tp">Builder</span> <span class="fn">timeout</span>(<span class="kw">int</span> ms)   { timeoutMs=ms; <span class="kw">return this</span>; }
+        <span class="kw">public</span> <span class="tp">Builder</span> <span class="fn">noRedirects</span>()     { followRedirects=<span class="kw">false</span>; <span class="kw">return this</span>; }
+        <span class="kw">public</span> <span class="tp">HttpRequest</span> <span class="fn">build</span>()        { <span class="kw">return new</span> <span class="tp">HttpRequest</span>(<span class="kw">this</span>); }
+    }
+}
+
+<span class="cm">// Usage — readable, fluent, impossible to pass args in wrong order</span>
+<span class="tp">HttpRequest</span> req = <span class="kw">new</span> <span class="tp">HttpRequest</span>.<span class="tp">Builder</span>(<span class="st">"https://api.example.com/orders"</span>)
+    .<span class="fn">method</span>(<span class="st">"POST"</span>)
+    .<span class="fn">body</span>(<span class="st">"{\"item\":\"laptop\"}"</span>)
+    .<span class="fn">auth</span>(<span class="st">"Bearer eyJhbGci..."</span>)
+    .<span class="fn">timeout</span>(<span class="nm">10000</span>)
+    .<span class="fn">build</span>();
+</pre></div>
+</div></div>
+
+<!-- PROTOTYPE -->
+<div class="card">
+<div class="card-top">
+  <div class="icon icon-violet">🐑</div>
+  <div class="card-meta">
+    <span class="cat cat-c">🏗️ CREATIONAL</span>
+    <div class="card-name">Prototype Pattern</div>
+    <div class="card-tag">Creates new objects by cloning existing ones. When object creation is expensive (DB lookups, asset loading, heavy computation), copying and tweaking an existing object is orders of magnitude faster than re-initializing.</div>
+  </div>
+</div>
+<div class="card-body">
+<div class="when"><div class="when-t">⚡ Use When</div><ul>
+  <li>Object initialization is expensive and you need many similar objects</li>
+  <li>Game dev: clone enemy templates to spawn hundreds efficiently</li>
+  <li>Document templates: clone base document, fill in variable parts</li>
+  <li>Configuration objects: clone base config and override specific keys</li>
+</ul></div>
+<div class="scen"><div class="scen-t">🏢 Scenario — Game Enemy Spawning</div><p>An <code>Orc</code> enemy loads sprites, sounds, and AI config from disk — takes 200ms. Spawning 500 Orcs the normal way: 100 seconds! With Prototype: create ONE template Orc (200ms), clone it 499 times (microseconds each). Total: ~200ms.</p></div>
+<div class="code"><div class="code-head"><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div><div class="code-file">EnemyPrototype.java</div><div class="code-lang">Java</div></div><pre>
+<span class="kw">abstract class</span> <span class="tp">Enemy</span> <span class="kw">implements</span> <span class="tp">Cloneable</span> {
+    <span class="kw">protected</span> <span class="tp">String</span> type, spriteSheet, aiConfig;
+    <span class="kw">protected</span> <span class="kw">int</span>    health, damage, speed;
+
+    <span class="kw">public</span> <span class="tp">Enemy</span> <span class="fn">clone</span>() {
+        <span class="kw">try</span> { <span class="kw">return</span> (<span class="tp">Enemy</span>) <span class="kw">super</span>.<span class="fn">clone</span>(); }
+        <span class="kw">catch</span> (<span class="tp">CloneNotSupportedException</span> e) { <span class="kw">throw new</span> <span class="tp">RuntimeException</span>(e); }
+    }
+}
+
+<span class="kw">class</span> <span class="tp">Orc</span> <span class="kw">extends</span> <span class="tp">Enemy</span> {
+    <span class="kw">public</span> <span class="tp">Orc</span>() {
+        type = <span class="st">"Orc"</span>; health = <span class="nm">100</span>; damage = <span class="nm">20</span>;
+        <span class="cm">// Expensive operations — load once</span>
+        spriteSheet = <span class="fn">loadSprite</span>(<span class="st">"orc.png"</span>);  <span class="cm">// 100ms</span>
+        aiConfig    = <span class="fn">loadConfig</span>(<span class="st">"orc_ai.json"</span>); <span class="cm">// 100ms</span>
+    }
+}
+
+<span class="cm">// Create template ONCE, clone MANY times</span>
+<span class="tp">Enemy</span> orcTemplate = <span class="kw">new</span> <span class="tp">Orc</span>();  <span class="cm">// 200ms</span>
+
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="nm">0</span>; i < <span class="nm">500</span>; i++) {
+    <span class="tp">Enemy</span> orc = orcTemplate.<span class="fn">clone</span>();      <span class="cm">// microseconds!</span>
+    orc.health = <span class="nm">80</span> + (<span class="kw">int</span>)(<span class="tp">Math</span>.<span class="fn">random</span>() * <span class="nm">40</span>);
+    <span class="fn">spawnAt</span>(orc, <span class="fn">randomPosition</span>());
+}
+<span class="cm">// Total: ~200ms instead of 100 seconds ✓</span>
+</pre></div>
+</div></div>
+
+<!-- ABSTRACT FACTORY -->
+<div class="card">
+<div class="card-top">
+  <div class="icon icon-mint">🏗️</div>
+  <div class="card-meta">
+    <span class="cat cat-c">🏗️ CREATIONAL</span>
+    <div class="card-name">Abstract Factory Pattern</div>
+    <div class="card-tag">Creates families of related objects without specifying their concrete classes. Like a furniture store — when you choose "Victorian", ALL pieces (chair, table, sofa) come in Victorian style. Consistency is enforced by design.</div>
+  </div>
+</div>
+<div class="card-body">
+<div class="when"><div class="when-t">⚡ Use When</div><ul>
+  <li>Your system works with multiple families of related products that must be used together</li>
+  <li>Enforce consistency — if "Dark Theme", ALL UI components must be dark</li>
+  <li>Cross-platform toolkits: Windows controls vs Mac controls vs Web controls</li>
+  <li>Database drivers: MySQL factory creates MySQLConnection + MySQLCommand together</li>
+</ul></div>
+<div class="scen"><div class="scen-t">🏢 Scenario — Cross-Platform UI Toolkit</div><p>A GUI framework renders Buttons and Checkboxes for Windows and Mac. An <code>UIFactory</code> interface creates matched components. App code calls <code>factory.createButton()</code> — it doesn't know if it's Windows or Mac. Switching OS = swapping one factory object.</p></div>
+<div class="code"><div class="code-head"><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div><div class="code-file">UIAbstractFactory.java</div><div class="code-lang">Java</div></div><pre>
+<span class="cm">// Product interfaces</span>
+<span class="kw">interface</span> <span class="tp">Button</span>   { <span class="kw">void</span> <span class="fn">render</span>(); }
+<span class="kw">interface</span> <span class="tp">Checkbox</span> { <span class="kw">void</span> <span class="fn">render</span>(); }
+
+<span class="cm">// Windows family</span>
+<span class="kw">class</span> <span class="tp">WinButton</span>   <span class="kw">implements</span> <span class="tp">Button</span>   { <span class="kw">public void</span> <span class="fn">render</span>() { <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"[Win Button]"</span>);   } }
+<span class="kw">class</span> <span class="tp">WinCheckbox</span> <span class="kw">implements</span> <span class="tp">Checkbox</span> { <span class="kw">public void</span> <span class="fn">render</span>() { <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"[Win Checkbox]"</span>); } }
+
+<span class="cm">// Mac family</span>
+<span class="kw">class</span> <span class="tp">MacButton</span>   <span class="kw">implements</span> <span class="tp">Button</span>   { <span class="kw">public void</span> <span class="fn">render</span>() { <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"[Mac Button]"</span>);   } }
+<span class="kw">class</span> <span class="tp">MacCheckbox</span> <span class="kw">implements</span> <span class="tp">Checkbox</span> { <span class="kw">public void</span> <span class="fn">render</span>() { <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"[Mac Checkbox]"</span>); } }
+
+<span class="cm">// Abstract Factory interface</span>
+<span class="kw">interface</span> <span class="tp">UIFactory</span> {
+    <span class="tp">Button</span>   <span class="fn">createButton</span>();
+    <span class="tp">Checkbox</span> <span class="fn">createCheckbox</span>();
+}
+<span class="kw">class</span> <span class="tp">WinFactory</span> <span class="kw">implements</span> <span class="tp">UIFactory</span> {
+    <span class="kw">public</span> <span class="tp">Button</span>   <span class="fn">createButton</span>()   { <span class="kw">return new</span> <span class="tp">WinButton</span>(); }
+    <span class="kw">public</span> <span class="tp">Checkbox</span> <span class="fn">createCheckbox</span>() { <span class="kw">return new</span> <span class="tp">WinCheckbox</span>(); }
+}
+<span class="kw">class</span> <span class="tp">MacFactory</span> <span class="kw">implements</span> <span class="tp">UIFactory</span> {
+    <span class="kw">public</span> <span class="tp">Button</span>   <span class="fn">createButton</span>()   { <span class="kw">return new</span> <span class="tp">MacButton</span>(); }
+    <span class="kw">public</span> <span class="tp">Checkbox</span> <span class="fn">createCheckbox</span>() { <span class="kw">return new</span> <span class="tp">MacCheckbox</span>(); }
+}
+
+<span class="cm">// Client — consistent family guaranteed, never mixed!</span>
+<span class="kw">class</span> <span class="tp">App</span> {
+    <span class="kw">void</span> <span class="fn">buildUI</span>(<span class="tp">UIFactory</span> factory) {
+        factory.<span class="fn">createButton</span>().<span class="fn">render</span>();   <span class="cm">// always matched ✓</span>
+        factory.<span class="fn">createCheckbox</span>().<span class="fn">render</span>(); <span class="cm">// always matched ✓</span>
+    }
+}
+<span class="kw">new</span> <span class="tp">App</span>().<span class="fn">buildUI</span>(<span class="kw">new</span> <span class="tp">WinFactory</span>()); <span class="cm">// switch to MacFactory — one line change</span>
+</pre></div>
+</div></div>
+</div>
+
+<!-- ═══════════ S2: STRUCTURAL ═══════════ -->
+<div class="sec" id="s2">
+<div class="sec-tag">// Section 2 · GoF Patterns</div>
+<div class="sec-h">Structural Patterns</div>
+<div class="sec-intro">Structural patterns deal with how classes and objects are <strong>composed into larger structures</strong>. They use inheritance and composition to let you reuse existing code in new ways, connect incompatible systems, and simplify complex component relationships.</div>
+
+<div class="ovs">
+  <div class="ov"><div class="ov-e">🔌</div><div class="ov-n">Adapter</div><div class="ov-d">Bridge incompatible interfaces</div></div>
+  <div class="ov"><div class="ov-e">🌲</div><div class="ov-n">Composite</div><div class="ov-d">Uniform tree structures</div></div>
+  <div class="ov"><div class="ov-e">🎀</div><div class="ov-n">Decorator</div><div class="ov-d">Add responsibilities dynamically</div></div>
+  <div class="ov"><div class="ov-e">🏠</div><div class="ov-n">Facade</div><div class="ov-d">Simplified subsystem entry point</div></div>
+  <div class="ov"><div class="ov-e">🕵️</div><div class="ov-n">Proxy</div><div class="ov-d">Controlled surrogate access</div></div>
+  <div class="ov"><div class="ov-e">🌉</div><div class="ov-n">Bridge</div><div class="ov-d">Decouple abstraction from impl</div></div>
+  <div class="ov"><div class="ov-e">⚡</div><div class="ov-n">Flyweight</div><div class="ov-d">Share objects to save memory</div></div>
+</div>
+
+<!-- ADAPTER -->
+<div class="card">
+<div class="card-top">
+  <div class="icon icon-teal">🔌</div>
+  <div class="card-meta">
+    <span class="cat cat-s">🔩 STRUCTURAL</span>
+    <div class="card-name">Adapter Pattern</div>
+    <div class="card-tag">Converts one interface into another that clients expect. Like a power plug adapter letting a UK plug work in a US socket. Perfect for integrating third-party libraries or legacy code without modifying either side.</div>
+  </div>
+</div>
+<div class="card-body">
+<div class="when"><div class="when-t">⚡ Use When</div><ul>
+  <li>Integrating a third-party library with an incompatible interface (Stripe, Twilio, AWS SDKs)</li>
+  <li>Reusing legacy code in a new system without touching the legacy code</li>
+  <li>Your app expects one interface, external code provides another</li>
+</ul></div>
+<div class="scen"><div class="scen-t">🏢 Scenario — Stripe Payment Integration</div><p>Your app uses <code>PaymentGateway.charge(customerId, amount)</code>. Stripe's SDK has <code>createCharge(stripeId, amountInCents)</code>. You can't change either. A <code>StripeAdapter</code> wraps Stripe and exposes your expected interface. Tomorrow swap to PayPal? New adapter, zero client changes.</p></div>
+<div class="code"><div class="code-head"><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div><div class="code-file">StripeAdapter.java</div><div class="code-lang">Java</div></div><pre>
+<span class="cm">// Your app's expected interface (Target)</span>
+<span class="kw">interface</span> <span class="tp">PaymentGateway</span> {
+    <span class="kw">boolean</span> <span class="fn">charge</span>(<span class="tp">String</span> customerId, <span class="kw">double</span> dollars);
+}
+
+<span class="cm">// Third-party Stripe SDK — cannot modify!</span>
+<span class="kw">class</span> <span class="tp">StripeSDK</span> {
+    <span class="kw">public boolean</span> <span class="fn">createCharge</span>(<span class="tp">String</span> stripeId, <span class="kw">long</span> cents) {
+        <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"Stripe: charged "</span> + cents + <span class="st">" cents"</span>);
+        <span class="kw">return true</span>;
+    }
+}
+
+<span class="cm">// Adapter — wraps Stripe, exposes your interface</span>
+<span class="kw">class</span> <span class="tp">StripeAdapter</span> <span class="kw">implements</span> <span class="tp">PaymentGateway</span> {
+    <span class="kw">private final</span> <span class="tp">StripeSDK</span> stripe;
+    <span class="kw">public</span> <span class="tp">StripeAdapter</span>(<span class="tp">StripeSDK</span> s) { <span class="kw">this</span>.stripe = s; }
+
+    <span class="dc">@Override</span>
+    <span class="kw">public boolean</span> <span class="fn">charge</span>(<span class="tp">String</span> customerId, <span class="kw">double</span> dollars) {
+        <span class="kw">long</span> cents = (<span class="kw">long</span>)(dollars * <span class="nm">100</span>); <span class="cm">// translate units</span>
+        <span class="kw">return</span> stripe.<span class="fn">createCharge</span>(customerId, cents);
+    }
+}
+
+<span class="cm">// Client — clean, consistent API. Never knows about Stripe!</span>
+<span class="tp">PaymentGateway</span> gw = <span class="kw">new</span> <span class="tp">StripeAdapter</span>(<span class="kw">new</span> <span class="tp">StripeSDK</span>());
+gw.<span class="fn">charge</span>(<span class="st">"cust_abc"</span>, <span class="nm">49.99</span>);
+</pre></div>
+</div></div>
+
+<!-- DECORATOR -->
+<div class="card">
+<div class="card-top">
+  <div class="icon icon-gold">🎀</div>
+  <div class="card-meta">
+    <span class="cat cat-s">🔩 STRUCTURAL</span>
+    <div class="card-name">Decorator Pattern</div>
+    <div class="card-tag">Dynamically adds responsibilities to objects without subclassing. Stack decorators like pizza toppings — each wraps the previous result, adding its own behaviour. Avoids class explosion when you need many feature combinations.</div>
+  </div>
+</div>
+<div class="card-body">
+<div class="when"><div class="when-t">⚡ Use When</div><ul>
+  <li>Add behaviour to individual objects without affecting others of the same class</li>
+  <li>Subclassing leads to class explosion (CoffeeWithMilkAndSugarAndVanilla?)</li>
+  <li>Features need to be added/removed at runtime (feature flags, permission levels)</li>
+  <li>Real-world: Java I/O streams, HTTP middleware, Spring Security filter chains</li>
+</ul></div>
+<div class="scen"><div class="scen-t">🏢 Scenario — Coffee Shop Customization</div><p>A coffee shop has base <code>SimpleCoffee</code>. Customers mix: Milk, Sugar, Vanilla, Caramel, Extra Shot. With 5 toppings = 2⁵=32 subclasses! With Decorator: each topping wraps any coffee, adds cost/description. Stack in any order, any combination — 5 classes total.</p></div>
+<div class="code"><div class="code-head"><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div><div class="code-file">CoffeeDecorator.java</div><div class="code-lang">Java</div></div><pre>
+<span class="kw">interface</span> <span class="tp">Coffee</span> {
+    <span class="tp">String</span> <span class="fn">getDescription</span>();
+    <span class="kw">double</span> <span class="fn">getCost</span>();
+}
+
+<span class="kw">class</span> <span class="tp">SimpleCoffee</span> <span class="kw">implements</span> <span class="tp">Coffee</span> {
+    <span class="kw">public</span> <span class="tp">String</span> <span class="fn">getDescription</span>() { <span class="kw">return</span> <span class="st">"Coffee"</span>; }
+    <span class="kw">public</span> <span class="kw">double</span> <span class="fn">getCost</span>()        { <span class="kw">return</span> <span class="nm">1.00</span>; }
+}
+
+<span class="cm">// Abstract decorator — wraps any Coffee</span>
+<span class="kw">abstract class</span> <span class="tp">CoffeeDecorator</span> <span class="kw">implements</span> <span class="tp">Coffee</span> {
+    <span class="kw">protected final</span> <span class="tp">Coffee</span> wrapped;
+    <span class="tp">CoffeeDecorator</span>(<span class="tp">Coffee</span> c) { <span class="kw">this</span>.wrapped = c; }
+}
+
+<span class="cm">// Concrete decorators — each adds its own touch</span>
+<span class="kw">class</span> <span class="tp">MilkDecorator</span> <span class="kw">extends</span> <span class="tp">CoffeeDecorator</span> {
+    <span class="tp">MilkDecorator</span>(<span class="tp">Coffee</span> c) { <span class="kw">super</span>(c); }
+    <span class="kw">public</span> <span class="tp">String</span> <span class="fn">getDescription</span>() { <span class="kw">return</span> wrapped.<span class="fn">getDescription</span>() + <span class="st">", Milk"</span>; }
+    <span class="kw">public</span> <span class="kw">double</span> <span class="fn">getCost</span>()        { <span class="kw">return</span> wrapped.<span class="fn">getCost</span>() + <span class="nm">0.25</span>; }
+}
+<span class="kw">class</span> <span class="tp">VanillaDecorator</span> <span class="kw">extends</span> <span class="tp">CoffeeDecorator</span> {
+    <span class="tp">VanillaDecorator</span>(<span class="tp">Coffee</span> c) { <span class="kw">super</span>(c); }
+    <span class="kw">public</span> <span class="tp">String</span> <span class="fn">getDescription</span>() { <span class="kw">return</span> wrapped.<span class="fn">getDescription</span>() + <span class="st">", Vanilla"</span>; }
+    <span class="kw">public</span> <span class="kw">double</span> <span class="fn">getCost</span>()        { <span class="kw">return</span> wrapped.<span class="fn">getCost</span>() + <span class="nm">0.50</span>; }
+}
+<span class="kw">class</span> <span class="tp">ExtraShotDecorator</span> <span class="kw">extends</span> <span class="tp">CoffeeDecorator</span> {
+    <span class="tp">ExtraShotDecorator</span>(<span class="tp">Coffee</span> c) { <span class="kw">super</span>(c); }
+    <span class="kw">public</span> <span class="tp">String</span> <span class="fn">getDescription</span>() { <span class="kw">return</span> wrapped.<span class="fn">getDescription</span>() + <span class="st">", Extra Shot"</span>; }
+    <span class="kw">public</span> <span class="kw">double</span> <span class="fn">getCost</span>()        { <span class="kw">return</span> wrapped.<span class="fn">getCost</span>() + <span class="nm">0.75</span>; }
+}
+
+<span class="cm">// Stack decorators like toppings!</span>
+<span class="tp">Coffee</span> order = <span class="kw">new</span> <span class="tp">ExtraShotDecorator</span>(
+                 <span class="kw">new</span> <span class="tp">VanillaDecorator</span>(
+                   <span class="kw">new</span> <span class="tp">MilkDecorator</span>(
+                     <span class="kw">new</span> <span class="tp">SimpleCoffee</span>())));
+<span class="cm">// "Coffee, Milk, Vanilla, Extra Shot" → $2.50 ✓</span>
+</pre></div>
+</div></div>
+
+<!-- FACADE -->
+<div class="card">
+<div class="card-top">
+  <div class="icon icon-sky">🏠</div>
+  <div class="card-meta">
+    <span class="cat cat-s">🔩 STRUCTURAL</span>
+    <div class="card-name">Facade Pattern</div>
+    <div class="card-tag">Provides a simplified, unified interface to a complex subsystem. Like a hotel concierge — one person coordinates taxi, laundry, and restaurant reservations so you don't call each department separately.</div>
+  </div>
+</div>
+<div class="card-body">
+<div class="when"><div class="when-t">⚡ Use When</div><ul>
+  <li>A subsystem has many interdependent classes; clients need a simple entry point</li>
+  <li>Layering your app — controllers call only the service facade, not repositories directly</li>
+  <li>Building a library: expose a clean API, hide messy internals</li>
+  <li>Real-world: Spring's <code>JdbcTemplate</code>, REST controllers orchestrating services</li>
+</ul></div>
+<div class="scen"><div class="scen-t">🏢 Scenario — Order Placement Flow</div><p>Placing an order requires: check inventory → charge payment → save to DB → send email. The controller shouldn't orchestrate all 4 services manually. An <code>OrderFacade.placeOrder()</code> handles everything behind one clean method call.</p></div>
+<div class="code"><div class="code-head"><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div><div class="code-file">OrderFacade.java</div><div class="code-lang">Java</div></div><pre>
+<span class="cm">// Complex subsystems — don't expose to clients directly</span>
+<span class="kw">class</span> <span class="tp">InventoryService</span> {
+    <span class="kw">boolean</span> <span class="fn">checkStock</span>(<span class="tp">String</span> id, <span class="kw">int</span> qty) { <span class="kw">return true</span>; }
+    <span class="kw">void</span>    <span class="fn">reserve</span>(<span class="tp">String</span> id, <span class="kw">int</span> qty)    { }
+}
+<span class="kw">class</span> <span class="tp">PaymentService</span> {
+    <span class="kw">boolean</span> <span class="fn">charge</span>(<span class="tp">String</span> customerId, <span class="kw">double</span> amt) { <span class="kw">return true</span>; }
+}
+<span class="kw">class</span> <span class="tp">EmailService</span> {
+    <span class="kw">void</span> <span class="fn">sendConfirmation</span>(<span class="tp">String</span> email, <span class="tp">String</span> orderId) { }
+}
+<span class="kw">class</span> <span class="tp">OrderRepository</span> {
+    <span class="tp">String</span> <span class="fn">save</span>(<span class="tp">Order</span> o) { <span class="kw">return</span> <span class="st">"ORD-001"</span>; }
+}
+
+<span class="cm">// FACADE — one clean method hides all the complexity</span>
+<span class="kw">class</span> <span class="tp">OrderFacade</span> {
+    <span class="kw">private final</span> <span class="tp">InventoryService</span> inv   = <span class="kw">new</span> <span class="tp">InventoryService</span>();
+    <span class="kw">private final</span> <span class="tp">PaymentService</span>   pay   = <span class="kw">new</span> <span class="tp">PaymentService</span>();
+    <span class="kw">private final</span> <span class="tp">EmailService</span>     email = <span class="kw">new</span> <span class="tp">EmailService</span>();
+    <span class="kw">private final</span> <span class="tp">OrderRepository</span>  repo  = <span class="kw">new</span> <span class="tp">OrderRepository</span>();
+
+    <span class="kw">public</span> <span class="tp">String</span> <span class="fn">placeOrder</span>(<span class="tp">OrderRequest</span> req) {
+        <span class="kw">if</span> (!inv.<span class="fn">checkStock</span>(req.productId, req.qty))   <span class="kw">return</span> <span class="st">"OUT_OF_STOCK"</span>;
+        <span class="kw">if</span> (!pay.<span class="fn">charge</span>(req.customerId, req.amount))   <span class="kw">return</span> <span class="st">"PAYMENT_FAILED"</span>;
+        inv.<span class="fn">reserve</span>(req.productId, req.qty);
+        <span class="tp">String</span> id = repo.<span class="fn">save</span>(<span class="kw">new</span> <span class="tp">Order</span>(req));
+        email.<span class="fn">sendConfirmation</span>(req.email, id);
+        <span class="kw">return</span> id; <span class="cm">// "ORD-001"</span>
+    }
+}
+
+<span class="cm">// Controller — beautifully simple ✓</span>
+<span class="tp">String</span> orderId = <span class="kw">new</span> <span class="tp">OrderFacade</span>().<span class="fn">placeOrder</span>(request);
+</pre></div>
+</div></div>
+
+<!-- PROXY -->
+<div class="card">
+<div class="card-top">
+  <div class="icon icon-violet">🕵️</div>
+  <div class="card-meta">
+    <span class="cat cat-s">🔩 STRUCTURAL</span>
+    <div class="card-name">Proxy Pattern</div>
+    <div class="card-tag">A surrogate that controls access to another object — transparently adding caching, access control, lazy loading, or logging. The client calls the same interface, never knowing there's a proxy in between.</div>
+  </div>
+</div>
+<div class="card-body">
+<div class="when"><div class="when-t">⚡ Four Types of Proxy</div><ul>
+  <li><strong>Virtual proxy:</strong> Delay expensive creation until first use (lazy-loading images/objects)</li>
+  <li><strong>Caching proxy:</strong> Cache results of expensive DB queries or API calls</li>
+  <li><strong>Protection proxy:</strong> Check permissions before allowing access</li>
+  <li><strong>Logging proxy:</strong> Log all calls without touching the original class</li>
+</ul></div>
+<div class="scen"><div class="scen-t">🏢 Scenario — Caching Database Proxy</div><p>Every call to <code>getUserById()</code> hits the DB — 50ms each. With a caching proxy, the first call fetches from DB, subsequent calls with the same ID return instantly from cache. Client code is identical — zero changes required.</p></div>
+<div class="code"><div class="code-head"><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div><div class="code-file">CachingProxy.java</div><div class="code-lang">Java</div></div><pre>
+<span class="kw">interface</span> <span class="tp">UserService</span> {
+    <span class="tp">User</span> <span class="fn">getUserById</span>(<span class="kw">int</span> id);
+}
+
+<span class="cm">// Real service — hits the database</span>
+<span class="kw">class</span> <span class="tp">DatabaseUserService</span> <span class="kw">implements</span> <span class="tp">UserService</span> {
+    <span class="kw">public</span> <span class="tp">User</span> <span class="fn">getUserById</span>(<span class="kw">int</span> id) {
+        <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"🗄️  DB query for id="</span> + id);
+        <span class="kw">return new</span> <span class="tp">User</span>(id, <span class="st">"Alice"</span>); <span class="cm">// 50ms</span>
+    }
+}
+
+<span class="cm">// Caching Proxy — same interface, adds cache transparently</span>
+<span class="kw">class</span> <span class="tp">CachingUserService</span> <span class="kw">implements</span> <span class="tp">UserService</span> {
+    <span class="kw">private final</span> <span class="tp">UserService</span>             real  = <span class="kw">new</span> <span class="tp">DatabaseUserService</span>();
+    <span class="kw">private final</span> <span class="tp">Map</span>&lt;<span class="kw">Integer</span>,<span class="tp">User</span>&gt;       cache = <span class="kw">new</span> <span class="tp">HashMap</span>&lt;&gt;();
+
+    <span class="kw">public</span> <span class="tp">User</span> <span class="fn">getUserById</span>(<span class="kw">int</span> id) {
+        <span class="kw">return</span> cache.<span class="fn">computeIfAbsent</span>(id, k -> {
+            <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"⚡ Cache miss — fetching from DB"</span>);
+            <span class="kw">return</span> real.<span class="fn">getUserById</span>(k);
+        });
+    }
+}
+
+<span class="cm">// Client — identical code, dramatic performance difference!</span>
+<span class="tp">UserService</span> svc = <span class="kw">new</span> <span class="tp">CachingUserService</span>();
+svc.<span class="fn">getUserById</span>(<span class="nm">42</span>); <span class="cm">// 🗄️  DB hit — 50ms</span>
+svc.<span class="fn">getUserById</span>(<span class="nm">42</span>); <span class="cm">// ⚡ Cache hit — 0.1ms!</span>
+svc.<span class="fn">getUserById</span>(<span class="nm">42</span>); <span class="cm">// ⚡ Cache hit — 0.1ms!</span>
+</pre></div>
+</div></div>
+
+<!-- COMPOSITE -->
+<div class="card">
+<div class="card-top">
+  <div class="icon icon-coral">🌲</div>
+  <div class="card-meta">
+    <span class="cat cat-s">🔩 STRUCTURAL</span>
+    <div class="card-name">Composite Pattern</div>
+    <div class="card-tag">Treats individual objects and groups of objects uniformly via the same interface. A folder's <code>getSize()</code> recursively sums files inside it — the same method works on a single file or a folder containing 10,000 files.</div>
+  </div>
+</div>
+<div class="card-body">
+<div class="when"><div class="when-t">⚡ Use When</div><ul>
+  <li>You have hierarchical tree structures: file systems, org charts, DOM trees, menus</li>
+  <li>Client code should treat leaves and containers (groups) identically</li>
+  <li>Recursive operations: sum totals, render whole UI tree, calculate total org salary</li>
+</ul></div>
+<div class="code"><div class="code-head"><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div><div class="code-file">FileSystem.java</div><div class="code-lang">Java</div></div><pre>
+<span class="kw">interface</span> <span class="tp">FileSystemItem</span> {
+    <span class="tp">String</span> <span class="fn">getName</span>();
+    <span class="kw">long</span>   <span class="fn">getSize</span>();  <span class="cm">// works on File AND Folder!</span>
+    <span class="kw">void</span>   <span class="fn">print</span>(<span class="tp">String</span> indent);
+}
+
+<span class="cm">// Leaf — no children</span>
+<span class="kw">class</span> <span class="tp">File</span> <span class="kw">implements</span> <span class="tp">FileSystemItem</span> {
+    <span class="kw">private final</span> <span class="tp">String</span> name; <span class="kw">private final</span> <span class="kw">long</span> size;
+    <span class="tp">File</span>(<span class="tp">String</span> n, <span class="kw">long</span> s) { name=n; size=s; }
+    <span class="kw">public</span> <span class="tp">String</span> <span class="fn">getName</span>() { <span class="kw">return</span> name; }
+    <span class="kw">public</span> <span class="kw">long</span>   <span class="fn">getSize</span>() { <span class="kw">return</span> size; }
+    <span class="kw">public void</span>   <span class="fn">print</span>(<span class="tp">String</span> i) { <span class="tp">System</span>.out.<span class="fn">println</span>(i+<span class="st">"📄 "</span>+name+<span class="st">" ("</span>+size+<span class="st">"b)"</span>); }
+}
+
+<span class="cm">// Composite — has children</span>
+<span class="kw">class</span> <span class="tp">Folder</span> <span class="kw">implements</span> <span class="tp">FileSystemItem</span> {
+    <span class="kw">private final</span> <span class="tp">String</span> name;
+    <span class="kw">private final</span> <span class="tp">List</span>&lt;<span class="tp">FileSystemItem</span>&gt; children = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;();
+    <span class="tp">Folder</span>(<span class="tp">String</span> n) { name=n; }
+    <span class="kw">void</span> <span class="fn">add</span>(<span class="tp">FileSystemItem</span> i) { children.<span class="fn">add</span>(i); }
+    <span class="kw">public</span> <span class="tp">String</span> <span class="fn">getName</span>() { <span class="kw">return</span> name; }
+    <span class="kw">public</span> <span class="kw">long</span>   <span class="fn">getSize</span>() {
+        <span class="kw">return</span> children.<span class="fn">stream</span>().<span class="fn">mapToLong</span>(<span class="tp">FileSystemItem</span>::getSize).<span class="fn">sum</span>();
+    }
+    <span class="kw">public void</span> <span class="fn">print</span>(<span class="tp">String</span> i) {
+        <span class="tp">System</span>.out.<span class="fn">println</span>(i+<span class="st">"📁 "</span>+name);
+        children.<span class="fn">forEach</span>(c -> c.<span class="fn">print</span>(i+<span class="st">"   "</span>));
+    }
+}
+
+<span class="cm">// Build tree and use uniformly</span>
+<span class="tp">Folder</span> root = <span class="kw">new</span> <span class="tp">Folder</span>(<span class="st">"project"</span>);
+<span class="tp">Folder</span> src  = <span class="kw">new</span> <span class="tp">Folder</span>(<span class="st">"src"</span>);
+src.<span class="fn">add</span>(<span class="kw">new</span> <span class="tp">File</span>(<span class="st">"Main.java"</span>,  <span class="nm">3500</span>));
+src.<span class="fn">add</span>(<span class="kw">new</span> <span class="tp">File</span>(<span class="st">"Utils.java"</span>, <span class="nm">1200</span>));
+root.<span class="fn">add</span>(src);
+root.<span class="fn">add</span>(<span class="kw">new</span> <span class="tp">File</span>(<span class="st">"README.md"</span>, <span class="nm">800</span>));
+root.<span class="fn">print</span>(<span class="st">""</span>);                 <span class="cm">// recursive print</span>
+root.<span class="fn">getSize</span>();                <span class="cm">// → 5500 bytes</span>
+</pre></div>
+</div></div>
+</div>
+
+<!-- ═══════════ S3: BEHAVIORAL ═══════════ -->
+<div class="sec" id="s3">
+<div class="sec-tag">// Section 3 · GoF Patterns</div>
+<div class="sec-h">Behavioral Patterns</div>
+<div class="sec-intro">Behavioral patterns define <strong>how objects communicate and collaborate</strong>. They focus on algorithms, responsibility assignment, and communication flows — making complex object interactions manageable and extensible.</div>
+
+<div class="ovs">
+  <div class="ov"><div class="ov-e">⚖️</div><div class="ov-n">Strategy</div><div class="ov-d">Swap algorithms at runtime</div></div>
+  <div class="ov"><div class="ov-e">👁️</div><div class="ov-n">Observer</div><div class="ov-d">Event subscription & notify</div></div>
+  <div class="ov"><div class="ov-e">📜</div><div class="ov-n">Command</div><div class="ov-d">Requests as objects, undo/redo</div></div>
+  <div class="ov"><div class="ov-e">🔗</div><div class="ov-n">Chain of Resp.</div><div class="ov-d">Pass request along handlers</div></div>
+  <div class="ov"><div class="ov-e">📐</div><div class="ov-n">Template Method</div><div class="ov-d">Algorithm skeleton, fill steps</div></div>
+  <div class="ov"><div class="ov-e">🎫</div><div class="ov-n">State</div><div class="ov-d">Behaviour changes with state</div></div>
+  <div class="ov"><div class="ov-e">🧑‍💼</div><div class="ov-n">Mediator</div><div class="ov-d">Centralize communication</div></div>
+  <div class="ov"><div class="ov-e">🚶</div><div class="ov-n">Iterator</div><div class="ov-d">Sequential access, no internals</div></div>
+</div>
+
+<!-- STRATEGY -->
+<div class="card">
+<div class="card-top">
+  <div class="icon icon-gold">⚖️</div>
+  <div class="card-meta">
+    <span class="cat cat-b">🎭 BEHAVIORAL</span>
+    <div class="card-name">Strategy Pattern</div>
+    <div class="card-tag">Defines a family of algorithms, encapsulates each, and makes them interchangeable at runtime. Eliminates massive <code>if/else</code> selecting different algorithm branches. This is OCP applied to algorithms.</div>
+  </div>
+</div>
+<div class="card-body">
+<div class="when"><div class="when-t">⚡ Use When</div><ul>
+  <li>Multiple variants of an algorithm exist and you need to switch between them at runtime</li>
+  <li>A class is bloated with <code>if/else</code> selecting different algorithm branches</li>
+  <li>Sorting strategies, discount engines, routing algorithms, compression methods</li>
+  <li>You want to test each algorithm in complete isolation</li>
+</ul></div>
+<div class="scen"><div class="scen-t">🏢 Scenario — E-commerce Discount Engine</div><p>Checkout applies different discount strategies: percentage off, flat amount, BOGO, seasonal. Instead of one huge conditional, each strategy is a class. Swap at runtime based on customer tier, cart value, or active promotions.</p></div>
+<div class="code"><div class="code-head"><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div><div class="code-file">DiscountStrategy.java</div><div class="code-lang">Java</div></div><pre>
+<span class="cm">// Strategy interface</span>
+<span class="kw">interface</span> <span class="tp">DiscountStrategy</span> {
+    <span class="kw">double</span> <span class="fn">apply</span>(<span class="kw">double</span> price);
+    <span class="tp">String</span> <span class="fn">getDescription</span>();
+}
+
+<span class="cm">// Concrete strategies</span>
+<span class="kw">class</span> <span class="tp">PercentageDiscount</span> <span class="kw">implements</span> <span class="tp">DiscountStrategy</span> {
+    <span class="kw">private final</span> <span class="kw">double</span> pct;
+    <span class="tp">PercentageDiscount</span>(<span class="kw">double</span> pct) { <span class="kw">this</span>.pct = pct; }
+    <span class="kw">public</span> <span class="kw">double</span> <span class="fn">apply</span>(<span class="kw">double</span> p)  { <span class="kw">return</span> p * (<span class="nm">1</span> - pct/<span class="nm">100</span>); }
+    <span class="kw">public</span> <span class="tp">String</span> <span class="fn">getDescription</span>() { <span class="kw">return</span> pct + <span class="st">"% off"</span>; }
+}
+<span class="kw">class</span> <span class="tp">FlatDiscount</span> <span class="kw">implements</span> <span class="tp">DiscountStrategy</span> {
+    <span class="kw">private final</span> <span class="kw">double</span> amt;
+    <span class="tp">FlatDiscount</span>(<span class="kw">double</span> amt) { <span class="kw">this</span>.amt = amt; }
+    <span class="kw">public</span> <span class="kw">double</span> <span class="fn">apply</span>(<span class="kw">double</span> p)  { <span class="kw">return</span> <span class="tp">Math</span>.<span class="fn">max</span>(<span class="nm">0</span>, p - amt); }
+    <span class="kw">public</span> <span class="tp">String</span> <span class="fn">getDescription</span>() { <span class="kw">return</span> <span class="st">"$"</span> + amt + <span class="st">" off"</span>; }
+}
+<span class="kw">class</span> <span class="tp">NoDiscount</span> <span class="kw">implements</span> <span class="tp">DiscountStrategy</span> {
+    <span class="kw">public</span> <span class="kw">double</span> <span class="fn">apply</span>(<span class="kw">double</span> p)  { <span class="kw">return</span> p; }
+    <span class="kw">public</span> <span class="tp">String</span> <span class="fn">getDescription</span>() { <span class="kw">return</span> <span class="st">"No discount"</span>; }
+}
+
+<span class="cm">// Context — uses whatever strategy is currently set</span>
+<span class="kw">class</span> <span class="tp">ShoppingCart</span> {
+    <span class="kw">private</span> <span class="tp">DiscountStrategy</span> strategy = <span class="kw">new</span> <span class="tp">NoDiscount</span>();
+    <span class="kw">private</span> <span class="kw">double</span> subtotal = <span class="nm">100.00</span>;
+
+    <span class="kw">void</span> <span class="fn">setStrategy</span>(<span class="tp">DiscountStrategy</span> s) { strategy = s; }
+
+    <span class="kw">double</span> <span class="fn">checkout</span>() {
+        <span class="kw">double</span> final_ = strategy.<span class="fn">apply</span>(subtotal);
+        <span class="tp">System</span>.out.<span class="fn">printf</span>(<span class="st">"%s: $%.2f → $%.2f%n"</span>,
+            strategy.<span class="fn">getDescription</span>(), subtotal, final_);
+        <span class="kw">return</span> final_;
+    }
+}
+
+<span class="cm">// Swap strategy at runtime ✓</span>
+<span class="tp">ShoppingCart</span> cart = <span class="kw">new</span> <span class="tp">ShoppingCart</span>();
+cart.<span class="fn">setStrategy</span>(<span class="kw">new</span> <span class="tp">PercentageDiscount</span>(<span class="nm">20</span>)); cart.<span class="fn">checkout</span>(); <span class="cm">// $80.00</span>
+cart.<span class="fn">setStrategy</span>(<span class="kw">new</span> <span class="tp">FlatDiscount</span>(<span class="nm">15</span>));      cart.<span class="fn">checkout</span>(); <span class="cm">// $85.00</span>
+</pre></div>
+</div></div>
+
+<!-- OBSERVER -->
+<div class="card">
+<div class="card-top">
+  <div class="icon icon-teal">👁️</div>
+  <div class="card-meta">
+    <span class="cat cat-b">🎭 BEHAVIORAL</span>
+    <div class="card-name">Observer Pattern</div>
+    <div class="card-tag">Defines a one-to-many dependency: when one object changes state, all dependents are notified automatically. The backbone of event-driven systems, reactive programming, and pub/sub architecture.</div>
+  </div>
+</div>
+<div class="card-body">
+<div class="when"><div class="when-t">⚡ Use When</div><ul>
+  <li>Change in one object requires notifying others — and you don't know how many at compile time</li>
+  <li>You want loosely coupled, event-driven architecture</li>
+  <li>Real-world: UI event listeners, stock price feeds, domain events in microservices</li>
+  <li>MVC pattern: Model notifies Views when data changes</li>
+</ul></div>
+<div class="scen"><div class="scen-t">🏢 Scenario — Order Status Events</div><p>When order status changes to "SHIPPED", multiple systems react: send email, update inventory, notify analytics, trigger billing. Instead of Order calling all systems directly, it fires an event. Each system subscribes independently — completely decoupled.</p></div>
+<div class="code"><div class="code-head"><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div><div class="code-file">OrderObserver.java</div><div class="code-lang">Java</div></div><pre>
+<span class="cm">// Observer interface</span>
+<span class="kw">interface</span> <span class="tp">OrderObserver</span> {
+    <span class="kw">void</span> <span class="fn">onStatusChanged</span>(<span class="kw">int</span> orderId, <span class="tp">String</span> status);
+}
+
+<span class="cm">// Concrete observers — each reacts independently</span>
+<span class="kw">class</span> <span class="tp">EmailNotifier</span> <span class="kw">implements</span> <span class="tp">OrderObserver</span> {
+    <span class="kw">public void</span> <span class="fn">onStatusChanged</span>(<span class="kw">int</span> id, <span class="tp">String</span> s) {
+        <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"📧 Email: Order "</span> + id + <span class="st">" is "</span> + s);
+    }
+}
+<span class="kw">class</span> <span class="tp">InventoryUpdater</span> <span class="kw">implements</span> <span class="tp">OrderObserver</span> {
+    <span class="kw">public void</span> <span class="fn">onStatusChanged</span>(<span class="kw">int</span> id, <span class="tp">String</span> s) {
+        <span class="kw">if</span>(<span class="st">"SHIPPED"</span>.<span class="fn">equals</span>(s)) <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"📦 Deducting stock for order "</span>+id);
+    }
+}
+<span class="kw">class</span> <span class="tp">AnalyticsTracker</span> <span class="kw">implements</span> <span class="tp">OrderObserver</span> {
+    <span class="kw">public void</span> <span class="fn">onStatusChanged</span>(<span class="kw">int</span> id, <span class="tp">String</span> s) {
+        <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"📊 Tracked: order "</span>+id+<span class="st">" → "</span>+s);
+    }
+}
+
+<span class="cm">// Subject — manages observers and fires events</span>
+<span class="kw">class</span> <span class="tp">Order</span> {
+    <span class="kw">private final</span> <span class="kw">int</span> id;
+    <span class="kw">private</span> <span class="tp">String</span> status = <span class="st">"PENDING"</span>;
+    <span class="kw">private final</span> <span class="tp">List</span>&lt;<span class="tp">OrderObserver</span>&gt; observers = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;();
+
+    <span class="tp">Order</span>(<span class="kw">int</span> id) { <span class="kw">this</span>.id = id; }
+    <span class="kw">void</span> <span class="fn">subscribe</span>(<span class="tp">OrderObserver</span> o)   { observers.<span class="fn">add</span>(o); }
+    <span class="kw">void</span> <span class="fn">unsubscribe</span>(<span class="tp">OrderObserver</span> o) { observers.<span class="fn">remove</span>(o); }
+
+    <span class="kw">void</span> <span class="fn">updateStatus</span>(<span class="tp">String</span> newStatus) {
+        status = newStatus;
+        observers.<span class="fn">forEach</span>(o -> o.<span class="fn">onStatusChanged</span>(id, status));
+    }
+}
+
+<span class="cm">// Usage — fully decoupled ✓</span>
+<span class="tp">Order</span> order = <span class="kw">new</span> <span class="tp">Order</span>(<span class="nm">1001</span>);
+order.<span class="fn">subscribe</span>(<span class="kw">new</span> <span class="tp">EmailNotifier</span>());
+order.<span class="fn">subscribe</span>(<span class="kw">new</span> <span class="tp">InventoryUpdater</span>());
+order.<span class="fn">subscribe</span>(<span class="kw">new</span> <span class="tp">AnalyticsTracker</span>());
+order.<span class="fn">updateStatus</span>(<span class="st">"SHIPPED"</span>); <span class="cm">// All three observers fire!</span>
+</pre></div>
+</div></div>
+
+<!-- COMMAND -->
+<div class="card">
+<div class="card-top">
+  <div class="icon icon-sky">📜</div>
+  <div class="card-meta">
+    <span class="cat cat-b">🎭 BEHAVIORAL</span>
+    <div class="card-name">Command Pattern</div>
+    <div class="card-tag">Encapsulates a request as an object — enabling undo/redo, queuing, logging, and transaction rollback. Like a restaurant order ticket: the waiter doesn't cook, they pass the ticket. The kitchen processes it independently.</div>
+  </div>
+</div>
+<div class="card-body">
+<div class="when"><div class="when-t">⚡ Use When</div><ul>
+  <li>You need undo/redo functionality (text editors, Photoshop, IDE actions)</li>
+  <li>Operations need to be queued or scheduled for later execution</li>
+  <li>Macro recording: capture a sequence of commands and replay them</li>
+  <li>Transaction logs: persist commands and replay on system failure</li>
+</ul></div>
+<div class="scen"><div class="scen-t">🏢 Scenario — Text Editor Undo/Redo</div><p>Every user action (type, delete, bold, insert) is a Command with <code>execute()</code> and <code>undo()</code>. The editor maintains a history stack. Ctrl+Z pops and calls <code>undo()</code>. Ctrl+Y re-executes. Adding "paste" functionality = adding one new Command class.</p></div>
+<div class="code"><div class="code-head"><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div><div class="code-file">TextEditorCommand.java</div><div class="code-lang">Java</div></div><pre>
+<span class="kw">interface</span> <span class="tp">Command</span> { <span class="kw">void</span> <span class="fn">execute</span>(); <span class="kw">void</span> <span class="fn">undo</span>(); }
+
+<span class="cm">// Receiver — the object being operated on</span>
+<span class="kw">class</span> <span class="tp">TextDocument</span> {
+    <span class="kw">private</span> <span class="tp">StringBuilder</span> content = <span class="kw">new</span> <span class="tp">StringBuilder</span>();
+    <span class="kw">void</span> <span class="fn">insert</span>(<span class="kw">int</span> pos, <span class="tp">String</span> text) { content.<span class="fn">insert</span>(pos, text); }
+    <span class="kw">void</span> <span class="fn">delete</span>(<span class="kw">int</span> pos, <span class="kw">int</span> len)   { content.<span class="fn">delete</span>(pos, pos+len); }
+    <span class="tp">String</span> <span class="fn">getText</span>()                  { <span class="kw">return</span> content.<span class="fn">toString</span>(); }
+}
+
+<span class="cm">// Command knows how to execute AND undo itself</span>
+<span class="kw">class</span> <span class="tp">InsertCommand</span> <span class="kw">implements</span> <span class="tp">Command</span> {
+    <span class="kw">private final</span> <span class="tp">TextDocument</span> doc; <span class="kw">private final</span> <span class="kw">int</span> pos; <span class="kw">private final</span> <span class="tp">String</span> text;
+    <span class="tp">InsertCommand</span>(<span class="tp">TextDocument</span> d, <span class="kw">int</span> p, <span class="tp">String</span> t) { doc=d; pos=p; text=t; }
+    <span class="kw">public void</span> <span class="fn">execute</span>() { doc.<span class="fn">insert</span>(pos, text); }
+    <span class="kw">public void</span> <span class="fn">undo</span>()    { doc.<span class="fn">delete</span>(pos, text.<span class="fn">length</span>()); }
+}
+
+<span class="cm">// Invoker — manages history for undo/redo</span>
+<span class="kw">class</span> <span class="tp">TextEditor</span> {
+    <span class="kw">private final</span> <span class="tp">Deque</span>&lt;<span class="tp">Command</span>&gt; history   = <span class="kw">new</span> <span class="tp">ArrayDeque</span>&lt;&gt;();
+    <span class="kw">private final</span> <span class="tp">Deque</span>&lt;<span class="tp">Command</span>&gt; redoStack = <span class="kw">new</span> <span class="tp">ArrayDeque</span>&lt;&gt;();
+
+    <span class="kw">void</span> <span class="fn">execute</span>(<span class="tp">Command</span> c) { c.<span class="fn">execute</span>(); history.<span class="fn">push</span>(c); redoStack.<span class="fn">clear</span>(); }
+    <span class="kw">void</span> <span class="fn">undo</span>() {
+        <span class="kw">if</span>(!history.<span class="fn">isEmpty</span>()) { <span class="tp">Command</span> c=history.<span class="fn">pop</span>(); c.<span class="fn">undo</span>(); redoStack.<span class="fn">push</span>(c); }
+    }
+    <span class="kw">void</span> <span class="fn">redo</span>() {
+        <span class="kw">if</span>(!redoStack.<span class="fn">isEmpty</span>()) { <span class="tp">Command</span> c=redoStack.<span class="fn">pop</span>(); c.<span class="fn">execute</span>(); history.<span class="fn">push</span>(c); }
+    }
+}
+
+<span class="tp">TextDocument</span> doc    = <span class="kw">new</span> <span class="tp">TextDocument</span>();
+<span class="tp">TextEditor</span>   editor = <span class="kw">new</span> <span class="tp">TextEditor</span>();
+editor.<span class="fn">execute</span>(<span class="kw">new</span> <span class="tp">InsertCommand</span>(doc, <span class="nm">0</span>, <span class="st">"Hello"</span>));
+editor.<span class="fn">execute</span>(<span class="kw">new</span> <span class="tp">InsertCommand</span>(doc, <span class="nm">5</span>, <span class="st">" World"</span>)); <span class="cm">// "Hello World"</span>
+editor.<span class="fn">undo</span>();   <span class="cm">// "Hello"</span>
+editor.<span class="fn">redo</span>();   <span class="cm">// "Hello World"</span>
+</pre></div>
+</div></div>
+
+<!-- CHAIN OF RESPONSIBILITY -->
+<div class="card">
+<div class="card-top">
+  <div class="icon icon-coral">🔗</div>
+  <div class="card-meta">
+    <span class="cat cat-b">🎭 BEHAVIORAL</span>
+    <div class="card-name">Chain of Responsibility</div>
+    <div class="card-tag">Passes a request along a chain of handlers until one handles it. The sender doesn't know which handler will process it. Like escalating a support ticket up tiers until someone with enough authority resolves it.</div>
+  </div>
+</div>
+<div class="card-body">
+<div class="when"><div class="when-t">⚡ Use When</div><ul>
+  <li>More than one handler may process a request; the handler isn't known at compile time</li>
+  <li>HTTP middleware pipelines (auth → logging → rate limiting → handler)</li>
+  <li>Approval workflows with escalation thresholds (Team Lead → Manager → Director)</li>
+  <li>Adding a new handler = adding one class, zero edits to existing code</li>
+</ul></div>
+<div class="code"><div class="code-head"><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div><div class="code-file">ApprovalChain.java</div><div class="code-lang">Java</div></div><pre>
+<span class="kw">abstract class</span> <span class="tp">Approver</span> {
+    <span class="kw">protected</span> <span class="tp">Approver</span> next;
+    <span class="kw">protected final</span> <span class="tp">String</span> name;
+    <span class="kw">protected final</span> <span class="kw">double</span> limit;
+
+    <span class="tp">Approver</span>(<span class="tp">String</span> n, <span class="kw">double</span> l) { name=n; limit=l; }
+
+    <span class="cm">// Fluent chaining: lead.setNext(mgr).setNext(dir)</span>
+    <span class="tp">Approver</span> <span class="fn">setNext</span>(<span class="tp">Approver</span> a) { next=a; <span class="kw">return</span> a; }
+
+    <span class="kw">void</span> <span class="fn">approve</span>(<span class="kw">double</span> amount) {
+        <span class="kw">if</span>(amount <= limit)    <span class="tp">System</span>.out.<span class="fn">printf</span>(<span class="st">"✅ %s approved $%.0f%n"</span>, name, amount);
+        <span class="kw">else if</span>(next != <span class="kw">null</span>) { <span class="tp">System</span>.out.<span class="fn">printf</span>(<span class="st">"↑  %s escalated $%.0f%n"</span>,  name, amount); next.<span class="fn">approve</span>(amount); }
+        <span class="kw">else</span>                   <span class="tp">System</span>.out.<span class="fn">printf</span>(<span class="st">"❌ $%.0f exceeds all limits%n"</span>, amount);
+    }
+}
+
+<span class="kw">class</span> <span class="tp">TeamLead</span> <span class="kw">extends</span> <span class="tp">Approver</span> { <span class="tp">TeamLead</span>() { <span class="kw">super</span>(<span class="st">"Team Lead"</span>, <span class="nm">1_000</span>); } }
+<span class="kw">class</span> <span class="tp">Manager</span>  <span class="kw">extends</span> <span class="tp">Approver</span> { <span class="tp">Manager</span>()  { <span class="kw">super</span>(<span class="st">"Manager"</span>,   <span class="nm">10_000</span>); } }
+<span class="kw">class</span> <span class="tp">Director</span> <span class="kw">extends</span> <span class="tp">Approver</span> { <span class="tp">Director</span>() { <span class="kw">super</span>(<span class="st">"Director"</span>,  <span class="nm">100_000</span>); } }
+
+<span class="cm">// Build chain, then submit any amount</span>
+<span class="tp">Approver</span> lead = <span class="kw">new</span> <span class="tp">TeamLead</span>();
+lead.<span class="fn">setNext</span>(<span class="kw">new</span> <span class="tp">Manager</span>()).<span class="fn">setNext</span>(<span class="kw">new</span> <span class="tp">Director</span>());
+lead.<span class="fn">approve</span>(<span class="nm">500</span>);    <span class="cm">// ✅ Team Lead approved</span>
+lead.<span class="fn">approve</span>(<span class="nm">5_000</span>);  <span class="cm">// ↑ escalated → ✅ Manager approved</span>
+lead.<span class="fn">approve</span>(<span class="nm">50_000</span>); <span class="cm">// ↑ → ↑ → ✅ Director approved</span>
+</pre></div>
+</div></div>
+
+<!-- STATE -->
+<div class="card">
+<div class="card-top">
+  <div class="icon icon-violet">🎫</div>
+  <div class="card-meta">
+    <span class="cat cat-b">🎭 BEHAVIORAL</span>
+    <div class="card-name">State Pattern</div>
+    <div class="card-tag">Allows an object to change behaviour when its internal state changes. Instead of massive <code>if/switch</code> checking a status field, delegate to the current State object — it handles behaviour for that exact state and manages transitions.</div>
+  </div>
+</div>
+<div class="card-body">
+<div class="when"><div class="when-t">⚡ Use When</div><ul>
+  <li>Object behaviour changes dramatically based on its current state</li>
+  <li>You have large <code>if/switch</code> on a <code>status</code> or <code>state</code> field scattered everywhere</li>
+  <li>State transitions need to be explicit and have rules (PENDING → SHIPPED, not SHIPPED → PENDING)</li>
+  <li>Vending machines, order workflows, TCP connections, traffic lights</li>
+</ul></div>
+<div class="scen"><div class="scen-t">🏢 Scenario — Order State Machine</div><p>Order states: PENDING → CONFIRMED → SHIPPED → DELIVERED (or CANCELLED). Each state allows different actions: PENDING can be cancelled, SHIPPED cannot. State classes enforce these rules without any <code>if/else</code> in client code.</p></div>
+<div class="code"><div class="code-head"><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div><div class="code-file">OrderStateMachine.java</div><div class="code-lang">Java</div></div><pre>
+<span class="kw">interface</span> <span class="tp">OrderState</span> {
+    <span class="kw">void</span> <span class="fn">confirm</span>(<span class="tp">OrderCtx</span> ctx);
+    <span class="kw">void</span> <span class="fn">ship</span>(<span class="tp">OrderCtx</span> ctx);
+    <span class="kw">void</span> <span class="fn">cancel</span>(<span class="tp">OrderCtx</span> ctx);
+}
+
+<span class="kw">class</span> <span class="tp">PendingState</span> <span class="kw">implements</span> <span class="tp">OrderState</span> {
+    <span class="kw">public void</span> <span class="fn">confirm</span>(<span class="tp">OrderCtx</span> c) { c.<span class="fn">setState</span>(<span class="kw">new</span> <span class="tp">ConfirmedState</span>()); }
+    <span class="kw">public void</span> <span class="fn">ship</span>(<span class="tp">OrderCtx</span> c)    { <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"❌ Must confirm first"</span>); }
+    <span class="kw">public void</span> <span class="fn">cancel</span>(<span class="tp">OrderCtx</span> c)  { c.<span class="fn">setState</span>(<span class="kw">new</span> <span class="tp">CancelledState</span>()); }
+}
+<span class="kw">class</span> <span class="tp">ConfirmedState</span> <span class="kw">implements</span> <span class="tp">OrderState</span> {
+    <span class="kw">public void</span> <span class="fn">confirm</span>(<span class="tp">OrderCtx</span> c) { <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"Already confirmed"</span>); }
+    <span class="kw">public void</span> <span class="fn">ship</span>(<span class="tp">OrderCtx</span> c)    { c.<span class="fn">setState</span>(<span class="kw">new</span> <span class="tp">ShippedState</span>()); }
+    <span class="kw">public void</span> <span class="fn">cancel</span>(<span class="tp">OrderCtx</span> c)  { c.<span class="fn">setState</span>(<span class="kw">new</span> <span class="tp">CancelledState</span>()); }
+}
+<span class="kw">class</span> <span class="tp">ShippedState</span> <span class="kw">implements</span> <span class="tp">OrderState</span> {
+    <span class="kw">public void</span> <span class="fn">confirm</span>(<span class="tp">OrderCtx</span> c) { <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"Already shipped"</span>); }
+    <span class="kw">public void</span> <span class="fn">ship</span>(<span class="tp">OrderCtx</span> c)    { <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"Already shipped"</span>); }
+    <span class="kw">public void</span> <span class="fn">cancel</span>(<span class="tp">OrderCtx</span> c)  { <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"❌ Cannot cancel shipped order"</span>); }
+}
+
+<span class="cm">// Context — delegates to current state</span>
+<span class="kw">class</span> <span class="tp">OrderCtx</span> {
+    <span class="kw">private</span> <span class="tp">OrderState</span> state = <span class="kw">new</span> <span class="tp">PendingState</span>();
+    <span class="kw">void</span> <span class="fn">setState</span>(<span class="tp">OrderState</span> s) { state=s; <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"→ "</span>+s.<span class="fn">getClass</span>().<span class="fn">getSimpleName</span>()); }
+    <span class="kw">void</span> <span class="fn">confirm</span>() { state.<span class="fn">confirm</span>(<span class="kw">this</span>); }
+    <span class="kw">void</span> <span class="fn">ship</span>()    { state.<span class="fn">ship</span>(<span class="kw">this</span>); }
+    <span class="kw">void</span> <span class="fn">cancel</span>()  { state.<span class="fn">cancel</span>(<span class="kw">this</span>); }
+}
+
+<span class="tp">OrderCtx</span> order = <span class="kw">new</span> <span class="tp">OrderCtx</span>();
+order.<span class="fn">ship</span>();     <span class="cm">// ❌ Must confirm first</span>
+order.<span class="fn">confirm</span>(); <span class="cm">// → ConfirmedState</span>
+order.<span class="fn">ship</span>();     <span class="cm">// → ShippedState</span>
+order.<span class="fn">cancel</span>();   <span class="cm">// ❌ Cannot cancel shipped order</span>
+</pre></div>
+</div></div>
+
+<!-- TEMPLATE METHOD -->
+<div class="card">
+<div class="card-top">
+  <div class="icon icon-mint">📐</div>
+  <div class="card-meta">
+    <span class="cat cat-b">🎭 BEHAVIORAL</span>
+    <div class="card-name">Template Method Pattern</div>
+    <div class="card-tag">Defines an algorithm's skeleton in a base class; subclasses override specific steps without changing the structure. The "Hollywood Principle": don't call us, we'll call you. The framework controls the flow; subclasses fill the hooks.</div>
+  </div>
+</div>
+<div class="card-body">
+<div class="when"><div class="when-t">⚡ Use When</div><ul>
+  <li>Multiple classes share the same algorithm structure but differ in specific steps</li>
+  <li>Avoid code duplication in similar algorithms (CSV export vs JSON export)</li>
+  <li>Framework design: control the flow, let subclasses provide custom steps</li>
+  <li>Real-world: JUnit test lifecycle, Spring's <code>JdbcTemplate</code>, data processing pipelines</li>
+</ul></div>
+<div class="scen"><div class="scen-t">🏢 Scenario — Data Export Pipeline</div><p>Exporting CSV and JSON follows: fetch data → format records → write to file → notify complete. Same steps, only "format records" differs. Template Method defines the fixed skeleton; subclasses provide just the format-specific logic.</p></div>
+<div class="code"><div class="code-head"><div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div><div class="code-file">DataExporter.java</div><div class="code-lang">Java</div></div><pre>
+<span class="kw">abstract class</span> <span class="tp">DataExporter</span> {
+
+    <span class="cm">// Template method — the FIXED skeleton (final, no override)</span>
+    <span class="kw">public final void</span> <span class="fn">export</span>(<span class="tp">String</span> dest) {
+        <span class="tp">List</span>&lt;<span class="tp">Record</span>&gt; data = <span class="fn">fetchData</span>();     <span class="cm">// step 1 — shared</span>
+        <span class="tp">String</span> formatted  = <span class="fn">formatData</span>(data); <span class="cm">// step 2 — abstract</span>
+        <span class="fn">writeTo</span>(dest, formatted);             <span class="cm">// step 3 — shared</span>
+        <span class="fn">onComplete</span>(dest);                     <span class="cm">// step 4 — hook (optional)</span>
+    }
+
+    <span class="kw">private</span> <span class="tp">List</span>&lt;<span class="tp">Record</span>&gt; <span class="fn">fetchData</span>() {
+        <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"📥 Fetching data..."</span>);
+        <span class="kw">return</span> <span class="tp">List</span>.<span class="fn">of</span>(<span class="kw">new</span> <span class="tp">Record</span>(<span class="st">"Alice"</span>,<span class="nm">30</span>), <span class="kw">new</span> <span class="tp">Record</span>(<span class="st">"Bob"</span>,<span class="nm">25</span>));
+    }
+    <span class="kw">protected abstract</span> <span class="tp">String</span> <span class="fn">formatData</span>(<span class="tp">List</span>&lt;<span class="tp">Record</span>&gt; data); <span class="cm">// Must implement</span>
+    <span class="kw">private void</span> <span class="fn">writeTo</span>(<span class="tp">String</span> d, <span class="tp">String</span> c) { <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"💾 Writing → "</span> + d); }
+    <span class="kw">protected void</span> <span class="fn">onComplete</span>(<span class="tp">String</span> d) { <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"✅ Done: "</span> + d); } <span class="cm">// Hook</span>
+}
+
+<span class="kw">class</span> <span class="tp">CsvExporter</span> <span class="kw">extends</span> <span class="tp">DataExporter</span> {
+    <span class="dc">@Override</span>
+    <span class="kw">protected</span> <span class="tp">String</span> <span class="fn">formatData</span>(<span class="tp">List</span>&lt;<span class="tp">Record</span>&gt; data) {
+        <span class="tp">StringBuilder</span> sb = <span class="kw">new</span> <span class="tp">StringBuilder</span>(<span class="st">"name,age\n"</span>);
+        data.<span class="fn">forEach</span>(r -> sb.<span class="fn">append</span>(r.name).<span class="fn">append</span>(<span class="st">","</span>).<span class="fn">append</span>(r.age).<span class="fn">append</span>(<span class="st">"\n"</span>));
+        <span class="kw">return</span> sb.<span class="fn">toString</span>();
+    }
+}
+<span class="kw">class</span> <span class="tp">JsonExporter</span> <span class="kw">extends</span> <span class="tp">DataExporter</span> {
+    <span class="dc">@Override</span>
+    <span class="kw">protected</span> <span class="tp">String</span> <span class="fn">formatData</span>(<span class="tp">List</span>&lt;<span class="tp">Record</span>&gt; data) {
+        <span class="kw">return</span> <span class="st">"[{"</span> + data.<span class="fn">stream</span>().<span class="fn">map</span>(r ->
+            <span class="st">"\"name\":\""</span>+r.name+<span class="st">"\",\"age\":"</span>+r.age).<span class="fn">collect</span>(<span class="fn">joining</span>(<span class="st">"},{"</span>))+<span class="st">"}]"</span>;
+    }
+}
+
+<span class="cm">// Same export() call — different formats ✓</span>
+<span class="kw">new</span> <span class="tp">CsvExporter</span>().<span class="fn">export</span>(<span class="st">"users.csv"</span>);
+<span class="kw">new</span> <span class="tp">JsonExporter</span>().<span class="fn">export</span>(<span class="st">"users.json"</span>);
+</pre></div>
+</div></div>
+</div>
+
+<!-- ═══════════ S4: QUICK REFERENCE ═══════════ -->
+<div class="sec" id="s4">
+<div class="sec-tag">// Section 4 · Reference</div>
+<div class="sec-h">Quick Reference</div>
+<div class="sec-intro">The essential one-page reference for all patterns. Use this to quickly recall what each pattern does, when to use it, and what real-world problem it solves. Bookmark this section for code reviews and design discussions.</div>
+
+<h3 class="sub" style="color:var(--gold);margin-top:0">📐 SOLID Principles</h3>
+<div style="overflow-x:auto;margin-bottom:32px">
+<table class="tbl">
+<tr><th>Principle</th><th>Core Rule</th><th>Warning Sign (Violation)</th><th>Fix It By</th></tr>
+<tr><td><strong>S</strong> — Single Responsibility</td><td>One class = one reason to change</td><td>Class has methods from totally unrelated concerns</td><td>Split into focused, single-purpose classes</td></tr>
+<tr><td><strong>O</strong> — Open/Closed</td><td>Extend behaviour, don't edit working code</td><td>Adding a feature forces editing existing tested class</td><td>Use interfaces + new implementations</td></tr>
+<tr><td><strong>L</strong> — Liskov Substitution</td><td>Subtype must not break parent's contracts</td><td><code>UnsupportedOperationException</code> in subclass</td><td>Prefer composition, or rethink inheritance hierarchy</td></tr>
+<tr><td><strong>I</strong> — Interface Segregation</td><td>No class implements unused methods</td><td>Empty method bodies or <code>throw</code> stubs</td><td>Split fat interfaces into focused ones</td></tr>
+<tr><td><strong>D</strong> — Dependency Inversion</td><td>Depend on abstractions, not concretions</td><td><code>new ConcreteClass()</code> inside business logic</td><td>Constructor injection with interfaces</td></tr>
+</table>
+</div>
+
+<h3 class="sub" style="color:var(--sky)">🏗️ Creational Patterns</h3>
+<div style="overflow-x:auto;margin-bottom:32px">
+<table class="tbl">
+<tr><th>Pattern</th><th>Intent</th><th>Use When</th><th>Real-World Example</th></tr>
+<tr><td>🏭 <strong>Singleton</strong></td><td>One instance, global access</td><td>Logger, Config, DB pool — truly ONE needed</td><td>Java's <code>Runtime.getRuntime()</code></td></tr>
+<tr><td>🔨 <strong>Factory Method</strong></td><td>Subclasses decide what to instantiate</td><td>If/switch on type to create object</td><td>Notification factory (Email/SMS/Push)</td></tr>
+<tr><td>🏗️ <strong>Abstract Factory</strong></td><td>Families of related objects, consistently</td><td>Cross-platform UI, themed component sets</td><td>Windows vs Mac UI toolkit</td></tr>
+<tr><td>🧱 <strong>Builder</strong></td><td>Complex objects step-by-step</td><td>5+ optional constructor params</td><td>OkHttp Request.Builder, Lombok @Builder</td></tr>
+<tr><td>🐑 <strong>Prototype</strong></td><td>Clone existing object</td><td>Expensive init, need many similar objects</td><td>Game enemy spawning, document templates</td></tr>
+</table>
+</div>
+
+<h3 class="sub" style="color:var(--mint)">🔩 Structural Patterns</h3>
+<div style="overflow-x:auto;margin-bottom:32px">
+<table class="tbl">
+<tr><th>Pattern</th><th>Intent</th><th>Use When</th><th>Real-World Example</th></tr>
+<tr><td>🔌 <strong>Adapter</strong></td><td>Bridge incompatible interfaces</td><td>Integrating 3rd-party or legacy code</td><td>StripeAdapter, LegacySystemAdapter</td></tr>
+<tr><td>🎀 <strong>Decorator</strong></td><td>Add features dynamically</td><td>Many feature combinations, avoid class explosion</td><td>Java I/O streams, HTTP middleware</td></tr>
+<tr><td>🏠 <strong>Facade</strong></td><td>Simplified subsystem interface</td><td>Complex subsystem needs a clean entry point</td><td>OrderFacade, Spring JdbcTemplate</td></tr>
+<tr><td>🕵️ <strong>Proxy</strong></td><td>Controlled surrogate access</td><td>Caching, lazy load, access control, logging</td><td>Spring AOP proxies, Hibernate lazy-load</td></tr>
+<tr><td>🌲 <strong>Composite</strong></td><td>Uniform tree structures</td><td>Hierarchies where leaf = container in usage</td><td>File systems, org charts, DOM trees</td></tr>
+<tr><td>🌉 <strong>Bridge</strong></td><td>Decouple abstraction from impl</td><td>Both abstraction and impl vary independently</td><td>JDBC (same API, different DB drivers)</td></tr>
+<tr><td>⚡ <strong>Flyweight</strong></td><td>Share fine-grained objects</td><td>Millions of similar objects, memory is a concern</td><td>Character objects in text editors</td></tr>
+</table>
+</div>
+
+<h3 class="sub" style="color:var(--violet)">🎭 Behavioral Patterns</h3>
+<div style="overflow-x:auto;margin-bottom:32px">
+<table class="tbl">
+<tr><th>Pattern</th><th>Intent</th><th>Use When</th><th>Real-World Example</th></tr>
+<tr><td>⚖️ <strong>Strategy</strong></td><td>Interchangeable algorithms at runtime</td><td>Algorithm varies; large if/else on type</td><td>Discount engine, sort strategies</td></tr>
+<tr><td>👁️ <strong>Observer</strong></td><td>One-to-many event notification</td><td>State change needs to notify unknown listeners</td><td>Event listeners, domain events, MVC</td></tr>
+<tr><td>📜 <strong>Command</strong></td><td>Requests as objects with undo/redo</td><td>Undo/redo, operation queuing, macros</td><td>Text editor actions, transaction log</td></tr>
+<tr><td>🔗 <strong>Chain of Resp.</strong></td><td>Pass request along handler chain</td><td>Multiple handlers, handler unknown upfront</td><td>Middleware pipeline, support escalation</td></tr>
+<tr><td>📐 <strong>Template Method</strong></td><td>Skeleton algorithm, subclass fills steps</td><td>Same algorithm structure, different implementations</td><td>JUnit lifecycle, data export pipelines</td></tr>
+<tr><td>🎫 <strong>State</strong></td><td>Behaviour changes with state</td><td>Massive switch on status field</td><td>Order state machine, vending machine</td></tr>
+<tr><td>🧑‍💼 <strong>Mediator</strong></td><td>Centralize component communication</td><td>Many components communicate in complex ways</td><td>Chat room, air traffic control, UI event bus</td></tr>
+<tr><td>🚶 <strong>Iterator</strong></td><td>Sequential access without internals</td><td>Traverse collection without exposing structure</td><td>Java's Iterator, for-each loops</td></tr>
+</table>
+</div>
+
+<h3 class="sub">💡 Pattern Selection Guide</h3>
+<div class="cmp" style="grid-template-columns: 1fr 1fr 1fr;">
+<div style="background:rgba(77,184,255,.05);border:1px solid rgba(77,184,255,.2);border-radius:8px;padding:16px">
+  <div style="color:var(--sky);font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px">🔨 Object Creation Problem?</div>
+  <ul style="list-style:none;font-size:13.5px;color:var(--txt2)">
+    <li style="padding:3px 0">Need ONE instance → <strong style="color:var(--txt)">Singleton</strong></li>
+    <li style="padding:3px 0">Need to choose a type → <strong style="color:var(--txt)">Factory Method</strong></li>
+    <li style="padding:3px 0">Need matching family → <strong style="color:var(--txt)">Abstract Factory</strong></li>
+    <li style="padding:3px 0">Too many parameters → <strong style="color:var(--txt)">Builder</strong></li>
+    <li style="padding:3px 0">Expensive init → <strong style="color:var(--txt)">Prototype</strong></li>
+  </ul>
+</div>
+<div style="background:rgba(0,229,153,.05);border:1px solid rgba(0,229,153,.2);border-radius:8px;padding:16px">
+  <div style="color:var(--mint);font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px">🔩 Structure Problem?</div>
+  <ul style="list-style:none;font-size:13.5px;color:var(--txt2)">
+    <li style="padding:3px 0">Incompatible interface → <strong style="color:var(--txt)">Adapter</strong></li>
+    <li style="padding:3px 0">Add features without class explosion → <strong style="color:var(--txt)">Decorator</strong></li>
+    <li style="padding:3px 0">Hide complex subsystem → <strong style="color:var(--txt)">Facade</strong></li>
+    <li style="padding:3px 0">Control access / caching → <strong style="color:var(--txt)">Proxy</strong></li>
+    <li style="padding:3px 0">Hierarchical tree → <strong style="color:var(--txt)">Composite</strong></li>
+  </ul>
+</div>
+<div style="background:rgba(157,127,243,.05);border:1px solid rgba(157,127,243,.2);border-radius:8px;padding:16px">
+  <div style="color:var(--violet);font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px">🎭 Behaviour Problem?</div>
+  <ul style="list-style:none;font-size:13.5px;color:var(--txt2)">
+    <li style="padding:3px 0">Switch algorithm at runtime → <strong style="color:var(--txt)">Strategy</strong></li>
+    <li style="padding:3px 0">React to state changes → <strong style="color:var(--txt)">Observer</strong></li>
+    <li style="padding:3px 0">Need undo/redo → <strong style="color:var(--txt)">Command</strong></li>
+    <li style="padding:3px 0">Object grows with state → <strong style="color:var(--txt)">State</strong></li>
+    <li style="padding:3px 0">Multiple handlers → <strong style="color:var(--txt)">Chain of Resp.</strong></li>
+  </ul>
+</div>
+</div>
+</div>
+
+<footer>// SOLID &amp; Design Patterns Guide · Built with care · Java Examples Throughout</footer>
+
+<script>
+function tab(idx, btn) {
+  document.querySelectorAll('.sec').forEach((s, i) => s.classList.toggle('show', i === idx));
+  document.querySelectorAll('.nb').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+</script>
+</body>
+</html>
