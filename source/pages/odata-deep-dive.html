@@ -7,42 +7,67 @@
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#05080d;--bg2:#090e17;--bg3:#0d1520;--bg4:#121c2b;--bg5:#172030;
+  --bg:#0a0e14;
+  --card:#141920;
+  --txt:#d4d7dd;
+  --txt2:#9ca3af;
+  --gold:#f0b429;
+  --teal:#00d4aa;
+  --sky:#4db8ff;
+  --mint:#00e599;
+  --violet:#9d7ff3;
+  --coral:#ff6b6b;
+  --orange:#ff9d5c;
+  --orange-light:#ffb088;
+  --orange-bright:#ffa666;
+  --pink:#ff6ec7;
+  --accent:#ff9d5c;
+  --primary:#ff9d5c;
+  --green:#26d98a;
+  --purple:#9b72f5;--red:#e8534a;--yellow:#e8b83a;--cyan:#18ccd4;
+  --bg2:#090e17;--bg3:#0d1520;--bg4:#121c2b;--bg5:#172030;
   --border:#192538;--border2:#1e2e44;
   --text:#c8d8ee;--text2:#5f7d9e;--text3:#334d66;
-  --accent:#2f8bff;--green:#26d98a;--orange:#f5943a;
-  --purple:#9b72f5;--red:#e8534a;--yellow:#e8b83a;--cyan:#18ccd4;--pink:#e854a0;--teal:#1dc8b8;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--text);font-family:Inter,sans-serif;font-size:14px;line-height:1.65}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,Cantarell,sans-serif;
+  background:var(--bg);
+  color:var(--txt);
+  line-height:1.6;
+  padding:20px;
+  overflow-x:hidden
+}
+.container{max-width:1200px;margin:0 auto}
 
 /* HERO */
-.hero{background:linear-gradient(155deg,#05080d 0%,#07111e 45%,#091525 100%);border-bottom:1px solid var(--border);padding:80px 32px 64px;text-align:center;position:relative;overflow:hidden}
-.hero::before{content:"";position:absolute;inset:0;background:
-  radial-gradient(ellipse 800px 350px at 50% -60px,rgba(47,139,255,.07),transparent 70%),
-  radial-gradient(ellipse 500px 400px at 10% 100%,rgba(38,217,138,.03),transparent 70%),
-  radial-gradient(ellipse 500px 400px at 90% 50%,rgba(155,114,245,.03),transparent 70%);pointer-events:none}
-.eyebrow{display:inline-flex;align-items:center;gap:8px;background:rgba(47,139,255,.08);border:1px solid rgba(47,139,255,.2);color:var(--accent);font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:5px 16px;border-radius:100px;margin-bottom:22px;font-family:"JetBrains Mono",monospace}
-.hero h1{font-family:Syne,sans-serif;font-size:clamp(2.6rem,7vw,4.8rem);font-weight:800;letter-spacing:-2px;line-height:1.0;margin-bottom:14px;background:linear-gradient(140deg,#c8d8ee 10%,#2f8bff 50%,#9b72f5 90%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.hero h1 span{display:block}
-.hero-sub{color:var(--text2);font-size:15px;max-width:740px;margin:0 auto 28px;line-height:1.75}
-.chips{display:flex;flex-wrap:wrap;justify-content:center;gap:7px}
-.chip{background:var(--bg3);border:1px solid var(--border);color:var(--text2);font-size:11.5px;padding:4px 12px;border-radius:100px;font-family:"JetBrains Mono",monospace}
+.hero{background:linear-gradient(135deg,rgba(255,157,92,.05),rgba(255,180,136,.05));border:1px solid rgba(255,157,92,.15);border-radius:12px;padding:30px;margin-bottom:40px}
+.hero-grid{display:grid;gap:20px}
+.hero-top{margin-bottom:20px}
+.hero-badge{display:inline-block;background:rgba(255,157,92,.1);color:var(--orange);padding:6px 14px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:1.5px;margin-bottom:15px}
+.hero h1{font-size:36px;margin-bottom:10px;background:linear-gradient(135deg,var(--orange),var(--orange-light));-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:800;letter-spacing:-0.5px}
+.hero p{color:var(--txt2);font-size:15px;line-height:1.7}
+.hero-boxes{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.hero-box{background:rgba(255,157,92,.03);border:1px solid rgba(255,157,92,.15);border-radius:8px;padding:16px;text-decoration:none;transition:all .3s;cursor:pointer;display:block}
+.hero-box:hover{background:rgba(255,157,92,.08);transform:translateY(-2px);border-color:rgba(255,157,92,.3)}
+.hero-box-icon{font-size:24px;margin-bottom:8px}
+.hero-box-title{color:var(--orange-bright);font-weight:700;font-size:13px;margin-bottom:4px}
+.hero-box-desc{color:var(--txt2);font-size:12px;line-height:1.5}
 
-/* NAV */
-.nav{position:sticky;top:0;z-index:99;background:rgba(5,8,13,.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 20px;display:flex;overflow-x:auto;scrollbar-width:none}
-.nav::-webkit-scrollbar{display:none}
-.nav a{color:var(--text3);text-decoration:none;font-size:11.5px;font-weight:500;padding:11px 10px;white-space:nowrap;border-bottom:2px solid transparent;transition:all .18s}
-.nav a:hover{color:var(--accent);border-bottom-color:var(--accent)}
+/* TABS - Sticky Navigation */
+.tabs{display:flex;gap:10px;margin-bottom:30px;flex-wrap:wrap;position:sticky;top:20px;background:var(--bg);padding:10px 0;z-index:100;border-bottom:2px solid rgba(0,212,170,.1);overflow-x:auto}
+.tab{background:var(--card);color:var(--txt2);border:1px solid rgba(255,255,255,.05);padding:10px 20px;border-radius:6px;cursor:pointer;font-size:14px;font-weight:600;transition:all .3s;text-decoration:none;display:inline-block;white-space:nowrap}
+.tab:hover{background:rgba(0,212,170,.1);color:var(--teal)}
+.tab.active{background:linear-gradient(135deg,rgba(0,212,170,.15),rgba(77,184,255,.15));color:var(--teal);border-color:var(--teal)}
 
 /* LAYOUT */
 .wrap{max-width:1100px;margin:0 auto;padding:0 20px 120px}
 .section{margin-top:60px}
-.sec-hd{display:flex;align-items:center;gap:14px;margin-bottom:4px}
-.sec-n{background:linear-gradient(135deg,var(--accent),#1a5fcc);color:#fff;font-weight:700;font-size:11px;min-width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:"JetBrains Mono",monospace;flex-shrink:0}
-.sec-title{font-family:Syne,sans-serif;font-size:1.35rem;font-weight:800;letter-spacing:-.3px}
-.sec-sub{color:var(--text2);font-size:13px;margin-bottom:22px;padding-left:42px;line-height:1.6}
+.sec-hd{display:flex;align-items:center;gap:14px;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid rgba(255,157,92,.15)}
+.sec-n{background:linear-gradient(135deg,var(--orange),var(--orange-bright));color:#fff;font-weight:700;font-size:12px;min-width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:"JetBrains Mono",monospace;flex-shrink:0;box-shadow:0 2px 8px rgba(255,157,92,.3)}
+.sec-title{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;font-size:1.5rem;font-weight:700;letter-spacing:-0.5px;color:var(--orange-bright);text-shadow:0 1px 2px rgba(0,0,0,.1)}
+.sec-sub{color:var(--text2);font-size:13px;margin-bottom:22px;padding-left:46px;line-height:1.6}
 
 /* LESSON */
 .lesson{background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:16px}
@@ -197,37 +222,73 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0}
 .two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:12px 0}
 @media(max-width:680px){.two-col{grid-template-columns:1fr}}
 footer{text-align:center;margin-top:60px;padding:30px;color:var(--txt2);font-size:14px;border-top:1px solid rgba(255,255,255,.05)}
-footer a{color:var(--teal);text-decoration:none}
-footer a:hover{text-decoration:underline}
+footer a{color:var(--orange-bright);text-decoration:none}
+footer a:hover{text-decoration:underline;color:var(--orange-light)}
 .inline-code{font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--orange);background:var(--bg4);padding:1px 6px;border-radius:4px}
+
+/* SCROLL TO TOP BUTTON */
+.scroll-top{position:fixed;bottom:32px;right:32px;width:50px;height:50px;background:linear-gradient(135deg,var(--orange),var(--orange-bright));border:2px solid rgba(255,157,92,.4);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;cursor:pointer;opacity:0;visibility:hidden;transition:all .3s ease;z-index:999;box-shadow:0 4px 12px rgba(255,157,92,.3);color:#fff;font-weight:700}
+.scroll-top.show{opacity:1;visibility:visible}
+.scroll-top:hover{background:linear-gradient(135deg,var(--orange-bright),var(--orange-light));transform:translateY(-3px);box-shadow:0 6px 20px rgba(255,157,92,.5)}
+.scroll-top:active{transform:translateY(-1px)}
+
+@media(max-width:660px){.scroll-top{bottom:20px;right:20px;width:45px;height:45px;font-size:20px}}
 </style></head><body>
-<div class="hero"><div style="position:relative;z-index:1">
-<div class="eyebrow">&#x1f310; Protocol Guide</div>
-<h1><span>OData</span><span style="font-size:.65em;opacity:.7">Deep Dive</span></h1>
-<p class="hero-sub">From first principles to production. What OData is, how the protocol works under the hood, every query option with real examples, $metadata, versioning, CRUD, batching, functions, and when to use it vs REST vs GraphQL.</p>
-<div class="chips">
-<span class="chip">What is OData</span><span class="chip">Protocol Mechanics</span><span class="chip">$metadata &amp; EDM</span>
-<span class="chip">Query Options</span><span class="chip">CRUD Operations</span><span class="chip">$filter deep dive</span>
-<span class="chip">$expand &amp; nav props</span><span class="chip">Functions &amp; Actions</span><span class="chip">Batching</span>
-<span class="chip">v2 vs v4</span><span class="chip">Security</span><span class="chip">Real-world patterns</span>
-</div></div></div>
-<nav class="nav">
-<a href="#s0">&#x1f4d6; What is OData</a>
-<a href="#s1">How it Works</a>
-<a href="#s2">$metadata &amp; EDM</a>
-<a href="#s3">Service Document</a>
-<a href="#s4">Query Options</a>
-<a href="#s5">$filter Deep Dive</a>
-<a href="#s6">$expand &amp; NavProps</a>
-<a href="#s7">CRUD</a>
-<a href="#s8">Functions &amp; Actions</a>
-<a href="#s9">Batching</a>
-<a href="#s10">v2 vs v4</a>
-<a href="#s11">Error Handling</a>
-<a href="#s12">Security</a>
-<a href="#s13">Real Patterns</a>
-<a href="#s14">Cheatsheet</a>
-</nav>
+<div class="container">
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-grid">
+    <div class="hero-top">
+      <div class="hero-badge">🌐 ODATA PROTOCOL GUIDE</div>
+      <h1>OData Deep Dive — Complete Guide</h1>
+      <p>From first principles to production. Master the OData protocol, query options, $metadata, CRUD operations, batching, versioning (v2 vs v4), and real-world patterns with SAP & Microsoft ecosystems.</p>
+    </div>
+    <div class="hero-boxes">
+      <a href="#s0" class="hero-box">
+        <div class="hero-box-icon">📚</div>
+        <div class="hero-box-title">What is OData</div>
+        <div class="hero-box-desc">Protocol basics, history, use cases</div>
+      </a>
+      <a href="#s1" class="hero-box">
+        <div class="hero-box-icon">🔧</div>
+        <div class="hero-box-title">Protocol Mechanics</div>
+        <div class="hero-box-desc">URL structure, HTTP verbs, formats</div>
+      </a>
+      <a href="#s2" class="hero-box">
+        <div class="hero-box-icon">🗂️</div>
+        <div class="hero-box-title">$metadata & EDM</div>
+        <div class="hero-box-desc">Entity Data Model, schemas</div>
+      </a>
+      <a href="#s4" class="hero-box">
+        <div class="hero-box-icon">🔎</div>
+        <div class="hero-box-title">Query Options</div>
+        <div class="hero-box-desc">$filter, $select, $expand, $orderby</div>
+      </a>
+      <a href="#s7" class="hero-box">
+        <div class="hero-box-icon">✍️</div>
+        <div class="hero-box-title">CRUD Operations</div>
+        <div class="hero-box-desc">Create, read, update, delete</div>
+      </a>
+      <a href="#s9" class="hero-box">
+        <div class="hero-box-icon">📦</div>
+        <div class="hero-box-title">Batching</div>
+        <div class="hero-box-desc">Multiple operations in one request</div>
+      </a>
+      <a href="#s10" class="hero-box">
+        <div class="hero-box-icon">🔄</div>
+        <div class="hero-box-title">v2 vs v4</div>
+        <div class="hero-box-desc">Version differences, migration</div>
+      </a>
+      <a href="#s12" class="hero-box">
+        <div class="hero-box-icon">🔐</div>
+        <div class="hero-box-title">Security</div>
+        <div class="hero-box-desc">Auth, CSRF tokens, best practices</div>
+      </a>
+    </div>
+  </div>
+</div>
+
 <div class="wrap">
 <div class="section" id="s0"><div class="sec-hd"><div class="sec-n">0</div><div class="sec-title">What is OData?</div></div>
 <div class="lesson"><div class="lesson-hd"><span class="lesson-ico">&#x1f4d6;</span><div><div class="lesson-title">The Plain-English Explanation</div><div class="lesson-desc">Before the protocol — the problem it solves and why it exists.</div></div></div><div class="lesson-body">
@@ -990,9 +1051,32 @@ const safe = odataString(userInput);
 </div>
 </div>
 
+<!-- SCROLL TO TOP BUTTON -->
+<div class="scroll-top" id="scrollTopBtn" title="Back to top">↑</div>
+
 <footer>
   <p>Created with 🍃 for Sai | <a href="../../index.html">← Back to Portfolio</a></p>
 </footer>
+
+<script>
+// Scroll to top button functionality
+const scrollTopBtn = document.getElementById('scrollTopBtn');
+
+window.addEventListener('scroll', () => {
+  if (window.pageYOffset > 300) {
+    scrollTopBtn.classList.add('show');
+  } else {
+    scrollTopBtn.classList.remove('show');
+  }
+});
+
+scrollTopBtn.addEventListener('click', () => {
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  });
+});
+</script>
 
 </body>
 </html>
