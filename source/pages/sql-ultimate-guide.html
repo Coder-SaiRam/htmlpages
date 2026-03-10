@@ -76,6 +76,29 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
 .result-table tbody td.highlight{color:var(--yellow);font-weight:600;}
 .result-table tbody td.neg{color:var(--pink);}
 .result-table tbody td.pos{color:var(--green);}
+/* TABLE REFERENCE TOGGLE */
+.table-ref-toggle{background:rgba(88,166,255,.08);border-top:1px solid rgba(88,166,255,.2);padding:8px 14px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all .25s ease;position:relative;}
+.table-ref-toggle:hover{background:rgba(88,166,255,.12);}
+@keyframes pulseGlow{0%,100%{box-shadow:0 0 0 0 rgba(88,166,255,.4);}50%{box-shadow:0 0 0 4px rgba(88,166,255,0);}}
+.table-ref-toggle:not(.expanded){animation:pulseGlow 2s ease-in-out infinite;animation-delay:1s;}
+.table-ref-toggle-icon{font-size:12px;color:var(--blue);transition:transform .3s ease;}
+.table-ref-toggle.expanded .table-ref-toggle-icon{transform:rotate(90deg);}
+.table-ref-toggle-text{font-size:11px;font-weight:600;color:var(--blue);text-transform:uppercase;letter-spacing:.8px;font-family:'JetBrains Mono',monospace;}
+.table-ref-badge{font-size:10px;padding:2px 7px;border-radius:10px;background:rgba(88,166,255,.15);color:var(--blue);font-weight:600;}
+.table-ref-content{max-height:0;overflow:hidden;transition:max-height .4s ease,opacity .3s ease;opacity:0;background:rgba(13,17,23,.5);}
+.table-ref-content.expanded{max-height:2000px;opacity:1;}
+.table-ref-inner{padding:14px;border-top:1px solid var(--border);}
+.table-ref-title{font-size:11px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.table-ref-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;}
+.table-ref-card{background:var(--surface2);border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+.table-ref-card-header{background:var(--surface3);padding:8px 12px;font-size:11px;font-weight:600;color:var(--text);border-bottom:1px solid var(--border);font-family:'JetBrains Mono',monospace;}
+.table-ref-card-body{padding:10px;max-height:400px;overflow-y:auto;font-size:11.5px;}
+.table-ref-card-body table{width:100%;border-collapse:collapse;}
+.table-ref-card-body th{text-align:left;padding:5px 8px;font-size:10px;color:var(--text2);border-bottom:1px solid var(--border);font-weight:600;}
+.table-ref-card-body td{padding:5px 8px;color:var(--text);font-size:11px;border-bottom:1px solid rgba(48,54,61,.3);font-family:'JetBrains Mono',monospace;}
+.table-ref-card-body tr:last-child td{border-bottom:none;}
+.table-ref-card-body .null{color:var(--text3);font-style:italic;}
+.table-ref-card-body .highlight{background:rgba(88,166,255,.1);color:var(--blue);font-weight:600;}
 /* GENERIC TABLE */
 .tbl-wrap{overflow-x:auto;margin:10px 0;border:1px solid var(--border);border-radius:var(--radius);}
 table{width:100%;border-collapse:collapse;font-size:13px;}
@@ -1727,6 +1750,199 @@ Execution Time: 0.02ms ← 2.5x faster!</pre>
 </footer>
 
 <script>
+// Database schema data - single source of truth
+const DB_SCHEMA = {
+  employees: {
+    name: 'employees',
+    rows: [
+      {emp_id:1,name:'Alice',dept_id:10,salary:'90,000',manager_id:null,joined:'2019-03-01'},
+      {emp_id:2,name:'Bob',dept_id:10,salary:'72,000',manager_id:1,joined:'2020-07-15'},
+      {emp_id:3,name:'Carol',dept_id:10,salary:'68,000',manager_id:1,joined:'2021-02-20'},
+      {emp_id:4,name:'Dave',dept_id:20,salary:'95,000',manager_id:null,joined:'2018-11-10'},
+      {emp_id:5,name:'Eve',dept_id:20,salary:'88,000',manager_id:4,joined:'2020-04-05'},
+      {emp_id:6,name:'Frank',dept_id:20,salary:'76,000',manager_id:4,joined:'2022-08-30'},
+      {emp_id:7,name:'Grace',dept_id:30,salary:'110,000',manager_id:null,joined:'2017-06-15'},
+      {emp_id:8,name:'Hank',dept_id:30,salary:'82,000',manager_id:7,joined:'2021-09-10'},
+      {emp_id:9,name:'Ivy',dept_id:null,salary:'61,000',manager_id:null,joined:'2023-01-20'}
+    ]
+  },
+  departments: {
+    name: 'departments',
+    rows: [
+      {dept_id:10,dept_name:'Engineering',budget:'5,00,000'},
+      {dept_id:20,dept_name:'Marketing',budget:'3,00,000'},
+      {dept_id:30,dept_name:'Finance',budget:'4,00,000'},
+      {dept_id:40,dept_name:'HR',budget:'2,00,000'}
+    ]
+  },
+  customers: {
+    name: 'customers',
+    rows: [
+      {cust_id:1,name:'Aditya Kumar',city:'Mumbai',joined:'2022-01-10'},
+      {cust_id:2,name:'Priya Singh',city:'Delhi',joined:'2022-03-05'},
+      {cust_id:3,name:'Vikram Joshi',city:'Bangalore',joined:'2022-06-20'},
+      {cust_id:4,name:'Sneha Patel',city:'Ahmedabad',joined:'2022-09-15'},
+      {cust_id:5,name:'Rahul Mehta',city:'Pune',joined:'2023-01-08'},
+      {cust_id:6,name:'Ananya Rao',city:'Hyderabad',joined:'2023-04-12'},
+      {cust_id:7,name:'Kiran Nair',city:'Chennai',joined:'2023-07-22'},
+      {cust_id:8,name:'Meera Das',city:'Kolkata',joined:'2023-11-30'}
+    ]
+  },
+  orders: {
+    name: 'orders',
+    rows: [
+      {order_id:1001,cust_id:1,order_date:'2024-01-15',status:'delivered',total_amt:'79,999'},
+      {order_id:1002,cust_id:2,order_date:'2024-01-20',status:'delivered',total_amt:'93,997'},
+      {order_id:1003,cust_id:3,order_date:'2024-02-05',status:'delivered',total_amt:'99,999'},
+      {order_id:1004,cust_id:1,order_date:'2024-02-18',status:'delivered',total_amt:'1,14,999'},
+      {order_id:1005,cust_id:4,order_date:'2024-03-01',status:'shipped',total_amt:'26,498'},
+      {order_id:1006,cust_id:3,order_date:'2024-03-10',status:'delivered',total_amt:'94,999'},
+      {order_id:1007,cust_id:5,order_date:'2024-03-22',status:'pending',total_amt:'5,998'},
+      {order_id:1008,cust_id:6,order_date:'2024-04-05',status:'cancelled',total_amt:'1,499'},
+      {order_id:1009,cust_id:7,order_date:'2024-04-18',status:'shipped',total_amt:'4,999'},
+      {order_id:1010,cust_id:2,order_date:'2024-05-02',status:'pending',total_amt:'799'}
+    ]
+  },
+  products: {
+    name: 'products',
+    rows: [
+      {prod_id:101,name:'iPhone 15',category:'Electronics',price:'79,999',stock:50},
+      {prod_id:102,name:'MacBook Air',category:'Electronics',price:'99,999',stock:30},
+      {prod_id:103,name:'Python Book',category:'Books',price:'999',stock:200},
+      {prod_id:104,name:'SQL Book',category:'Books',price:'799',stock:150},
+      {prod_id:105,name:'Desk Lamp',category:'Home',price:'1,499',stock:100},
+      {prod_id:106,name:'Mechanical KB',category:'Electronics',price:'4,999',stock:75},
+      {prod_id:107,name:'Monitor 27"',category:'Electronics',price:'24,999',stock:40},
+      {prod_id:108,name:'Coffee Mug',category:'Home',price:'499',stock:300}
+    ]
+  },
+  order_items: {
+    name: 'order_items',
+    rows: [
+      {item_id:1,order_id:1001,prod_id:101,qty:1,unit_price:'79,999'},
+      {item_id:2,order_id:1002,prod_id:103,qty:3,unit_price:'999'},
+      {item_id:3,order_id:1002,prod_id:102,qty:1,unit_price:'99,999'}
+    ]
+  }
+};
+
+// Parse SQL query to extract table names
+function extractTablesFromSQL(sqlText) {
+  const tables = new Set();
+  const patterns = [
+    /FROM\s+(\w+)/gi,
+    /JOIN\s+(\w+)/gi,
+    /INTO\s+(\w+)/gi,
+    /UPDATE\s+(\w+)/gi
+  ];
+
+  patterns.forEach(pattern => {
+    let match;
+    while ((match = pattern.exec(sqlText)) !== null) {
+      const tableName = match[1].toLowerCase();
+      if (DB_SCHEMA[tableName]) {
+        tables.add(tableName);
+      }
+    }
+  });
+
+  return Array.from(tables);
+}
+
+// Generate table reference HTML
+function generateTableRefHTML(tables) {
+  if (!tables || tables.length === 0) return '';
+
+  const cards = tables.map(tableName => {
+    const schema = DB_SCHEMA[tableName];
+    if (!schema) return '';
+
+    const cols = Object.keys(schema.rows[0]);
+    const allRows = schema.rows; // Show ALL rows, no truncation
+
+    return `
+      <div class="table-ref-card">
+        <div class="table-ref-card-header">📊 ${schema.name} <span style="color:var(--text3);font-weight:normal;margin-left:8px;">(${allRows.length} rows)</span></div>
+        <div class="table-ref-card-body">
+          <table>
+            <thead>
+              <tr>${cols.map(c => `<th>${c}</th>`).join('')}</tr>
+            </thead>
+            <tbody>
+              ${allRows.map(row => `
+                <tr>${cols.map(c => {
+                  const val = row[c];
+                  const cls = val === null ? 'null' : '';
+                  return `<td class="${cls}">${val === null ? 'NULL' : val}</td>`;
+                }).join('')}</tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  return `
+    <div class="table-ref-toggle" onclick="toggleTableRef(this)">
+      <span class="table-ref-toggle-icon">▶</span>
+      <span class="table-ref-toggle-text">View Source Tables</span>
+      <span class="table-ref-badge">${tables.length} table${tables.length > 1 ? 's' : ''}</span>
+    </div>
+    <div class="table-ref-content">
+      <div class="table-ref-inner">
+        <div class="table-ref-title">
+          <span>🗄️</span>
+          <span>Tables Referenced: ${tables.map(t => `<code>${t}</code>`).join(', ')}</span>
+        </div>
+        <div class="table-ref-grid">${cards}</div>
+      </div>
+    </div>
+  `;
+}
+
+// Toggle table reference section
+function toggleTableRef(el) {
+  const content = el.nextElementSibling;
+  const isExpanded = el.classList.contains('expanded');
+
+  if (isExpanded) {
+    el.classList.remove('expanded');
+    content.classList.remove('expanded');
+  } else {
+    el.classList.add('expanded');
+    content.classList.add('expanded');
+  }
+}
+
+// Initialize table references for all result blocks
+function initTableReferences() {
+  document.querySelectorAll('.result-block').forEach(block => {
+    // Skip if already initialized
+    if (block.querySelector('.table-ref-toggle')) return;
+
+    // Find the SQL code block before this result
+    let codeBlock = block.previousElementSibling;
+    while (codeBlock && !codeBlock.classList.contains('code-wrap')) {
+      codeBlock = codeBlock.previousElementSibling;
+    }
+
+    if (codeBlock) {
+      const sqlText = codeBlock.querySelector('.code-body pre')?.textContent || '';
+      const tables = extractTablesFromSQL(sqlText);
+
+      if (tables.length > 0) {
+        const refHTML = generateTableRefHTML(tables);
+        const wrapper = block.querySelector('.result-table-wrap');
+        if (wrapper) {
+          wrapper.insertAdjacentHTML('afterend', refHTML);
+        }
+      }
+    }
+  });
+}
+
+// Tab navigation
 function showTab(idx, btn) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('visible'));
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -1734,9 +1950,17 @@ function showTab(idx, btn) {
   btn.classList.add('active');
   window.scrollTo({top:0, behavior:'smooth'});
 }
+
+// Q&A toggle
 function toggleQA(el) {
   el.closest('.qa-item').classList.toggle('open');
 }
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+  initTableReferences();
+  console.log('✅ Table references initialized for', document.querySelectorAll('.result-block').length, 'result blocks');
+});
 </script>
 </body>
 </html>
