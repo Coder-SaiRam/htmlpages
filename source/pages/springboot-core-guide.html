@@ -152,10 +152,68 @@ footer a:hover{text-decoration:underline}
 /* CODE INLINE */
 code{background:rgba(0,212,170,.1);color:var(--teal);padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:12.5px}
 .code code,.cb code{background:transparent;padding:0}
+
+/* PROGRESS TREE - Left Side Navigation */
+.progress-tree{position:fixed;left:20px;top:50%;transform:translateY(-50%);width:220px;z-index:100;background:rgba(20,25,32,.8);backdrop-filter:blur(10px);border:1px solid rgba(0,212,170,.15);border-radius:12px;padding:20px 16px;max-height:80vh;overflow-y:auto;scrollbar-width:thin}
+.progress-tree::-webkit-scrollbar{width:4px}
+.progress-tree::-webkit-scrollbar-track{background:rgba(255,255,255,.05)}
+.progress-tree::-webkit-scrollbar-thumb{background:var(--teal);border-radius:2px}
+.progress-tree-title{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--teal);margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid rgba(0,212,170,.2)}
+.progress-item{position:relative;padding-left:24px;margin-bottom:12px;cursor:pointer;transition:all .2s}
+.progress-item::before{content:'';position:absolute;left:6px;top:0;bottom:-12px;width:2px;background:rgba(0,212,170,.15);transition:all .3s}
+.progress-item:last-child::before{display:none}
+.progress-item::after{content:'';position:absolute;left:2px;top:6px;width:10px;height:10px;border-radius:50%;background:var(--card);border:2px solid rgba(0,212,170,.3);transition:all .3s;z-index:1}
+.progress-item.active::after{background:linear-gradient(135deg,var(--teal),var(--mint));border-color:var(--teal);box-shadow:0 0 12px rgba(0,212,170,.6);transform:scale(1.2)}
+.progress-item.active::before{background:linear-gradient(180deg,var(--teal),rgba(0,212,170,.15))}
+.progress-item.completed::after{background:var(--teal);border-color:var(--teal)}
+.progress-item.completed::before{background:var(--teal)}
+.progress-number{font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--txt2);margin-right:6px;font-weight:600}
+.progress-label{font-size:12px;color:var(--txt2);transition:all .2s;line-height:1.3}
+.progress-item.active .progress-label{color:var(--teal);font-weight:600}
+.progress-item.active .progress-number{color:var(--teal)}
+.progress-item:hover .progress-label{color:var(--txt)}
+@media(max-width:1024px){.progress-tree{display:none}}
 </style>
 </head>
 <body>
 <div class="container">
+
+<!-- PROGRESS TREE - Left Side -->
+<div class="progress-tree" id="progressTree">
+  <div class="progress-tree-title">📍 Progress</div>
+  <div class="progress-item" data-section="sec-0">
+    <span class="progress-number">0</span>
+    <span class="progress-label">Configuration</span>
+  </div>
+  <div class="progress-item" data-section="sec-1">
+    <span class="progress-number">1</span>
+    <span class="progress-label">Beans & DI</span>
+  </div>
+  <div class="progress-item" data-section="sec-2">
+    <span class="progress-number">2</span>
+    <span class="progress-label">Annotations</span>
+  </div>
+  <div class="progress-item" data-section="sec-3">
+    <span class="progress-number">3</span>
+    <span class="progress-label">REST APIs</span>
+  </div>
+  <div class="progress-item" data-section="sec-4">
+    <span class="progress-number">4</span>
+    <span class="progress-label">Data & Persistence</span>
+  </div>
+  <div class="progress-item" data-section="sec-5">
+    <span class="progress-number">5</span>
+    <span class="progress-label">Architecture</span>
+  </div>
+  <div class="progress-item" data-section="sec-6">
+    <span class="progress-number">6</span>
+    <span class="progress-label">Filters & Interceptors</span>
+  </div>
+  <div class="progress-item" data-section="sec-7">
+    <span class="progress-number">7</span>
+    <span class="progress-label">HTTP Clients</span>
+  </div>
+</div>
 
 <!-- HERO -->
 <div class="hero">
@@ -5574,7 +5632,54 @@ function tab(index, event) {
 
   // Scroll to top
   window.scrollTo({top: 0, behavior: 'smooth'});
+
+  // Update progress tree
+  updateProgressTree();
 }
+
+// Progress Tree - Scroll tracking and navigation
+const progressItems = document.querySelectorAll('.progress-item');
+const sections = document.querySelectorAll('.section');
+
+function updateProgressTree() {
+  const activeSection = document.querySelector('.section.active');
+  if (!activeSection) return;
+
+  const activeSectionId = activeSection.id;
+
+  progressItems.forEach(item => {
+    const sectionId = item.getAttribute('data-section');
+    item.classList.remove('active', 'completed');
+
+    if (sectionId === activeSectionId) {
+      item.classList.add('active');
+    } else {
+      const itemIndex = parseInt(sectionId.split('-')[1]);
+      const activeIndex = parseInt(activeSectionId.split('-')[1]);
+      if (itemIndex < activeIndex) {
+        item.classList.add('completed');
+      }
+    }
+  });
+}
+
+// Click handler for progress items
+progressItems.forEach(item => {
+  item.addEventListener('click', () => {
+    const sectionId = item.getAttribute('data-section');
+    const sectionIndex = sectionId.split('-')[1];
+    const targetTab = document.querySelectorAll('.tab')[parseInt(sectionIndex)];
+
+    if (targetTab) {
+      const event = new Event('click');
+      tab(parseInt(sectionIndex), {target: targetTab});
+      targetTab.classList.add('active');
+    }
+  });
+});
+
+// Initial call
+updateProgressTree();
 </script>
 
 <footer>
