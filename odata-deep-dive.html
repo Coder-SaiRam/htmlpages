@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OData Deep Dive — Complete Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#05080d;--bg2:#090e17;--bg3:#0d1520;--bg4:#121c2b;--bg5:#172030;
+  --border:#192538;--border2:#1e2e44;
+  --text:#c8d8ee;--text2:#5f7d9e;--text3:#334d66;
+  --accent:#2f8bff;--green:#26d98a;--orange:#f5943a;
+  --purple:#9b72f5;--red:#e8534a;--yellow:#e8b83a;--cyan:#18ccd4;--pink:#e854a0;--teal:#1dc8b8;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:Inter,sans-serif;font-size:14px;line-height:1.65}
+
+/* HERO */
+.hero{background:linear-gradient(155deg,#05080d 0%,#07111e 45%,#091525 100%);border-bottom:1px solid var(--border);padding:80px 32px 64px;text-align:center;position:relative;overflow:hidden}
+.hero::before{content:"";position:absolute;inset:0;background:
+  radial-gradient(ellipse 800px 350px at 50% -60px,rgba(47,139,255,.07),transparent 70%),
+  radial-gradient(ellipse 500px 400px at 10% 100%,rgba(38,217,138,.03),transparent 70%),
+  radial-gradient(ellipse 500px 400px at 90% 50%,rgba(155,114,245,.03),transparent 70%);pointer-events:none}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;background:rgba(47,139,255,.08);border:1px solid rgba(47,139,255,.2);color:var(--accent);font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:5px 16px;border-radius:100px;margin-bottom:22px;font-family:"JetBrains Mono",monospace}
+.hero h1{font-family:Syne,sans-serif;font-size:clamp(2.6rem,7vw,4.8rem);font-weight:800;letter-spacing:-2px;line-height:1.0;margin-bottom:14px;background:linear-gradient(140deg,#c8d8ee 10%,#2f8bff 50%,#9b72f5 90%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero h1 span{display:block}
+.hero-sub{color:var(--text2);font-size:15px;max-width:740px;margin:0 auto 28px;line-height:1.75}
+.chips{display:flex;flex-wrap:wrap;justify-content:center;gap:7px}
+.chip{background:var(--bg3);border:1px solid var(--border);color:var(--text2);font-size:11.5px;padding:4px 12px;border-radius:100px;font-family:"JetBrains Mono",monospace}
+
+/* NAV */
+.nav{position:sticky;top:0;z-index:99;background:rgba(5,8,13,.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 20px;display:flex;overflow-x:auto;scrollbar-width:none}
+.nav::-webkit-scrollbar{display:none}
+.nav a{color:var(--text3);text-decoration:none;font-size:11.5px;font-weight:500;padding:11px 10px;white-space:nowrap;border-bottom:2px solid transparent;transition:all .18s}
+.nav a:hover{color:var(--accent);border-bottom-color:var(--accent)}
+
+/* LAYOUT */
+.wrap{max-width:1100px;margin:0 auto;padding:0 20px 120px}
+.section{margin-top:60px}
+.sec-hd{display:flex;align-items:center;gap:14px;margin-bottom:4px}
+.sec-n{background:linear-gradient(135deg,var(--accent),#1a5fcc);color:#fff;font-weight:700;font-size:11px;min-width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:"JetBrains Mono",monospace;flex-shrink:0}
+.sec-title{font-family:Syne,sans-serif;font-size:1.35rem;font-weight:800;letter-spacing:-.3px}
+.sec-sub{color:var(--text2);font-size:13px;margin-bottom:22px;padding-left:42px;line-height:1.6}
+
+/* LESSON */
+.lesson{background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:16px}
+.lesson-hd{background:var(--bg3);border-bottom:1px solid var(--border);padding:14px 20px;display:flex;align-items:flex-start;gap:12px}
+.lesson-ico{font-size:1.3rem;flex-shrink:0;margin-top:2px}
+.lesson-title{font-weight:700;font-size:14px;margin-bottom:3px;color:var(--text)}
+.lesson-desc{color:var(--text2);font-size:12.5px;line-height:1.5}
+.lesson-body{padding:20px}
+
+/* CODE */
+.cb{background:#030609;border:1px solid var(--border);border-radius:10px 10px 0 0;overflow:hidden}
+.cb-bar{background:var(--bg4);border-bottom:1px solid var(--border);padding:7px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.cb-file{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--text2)}
+.cb-dots{display:flex;gap:5px}
+.cb-dot{width:10px;height:10px;border-radius:50%}
+.cb-tag{font-family:"JetBrains Mono",monospace;font-size:10px;padding:2px 8px;border-radius:4px;border:1px solid}
+.cb-tag.http{background:rgba(38,217,138,.1);color:var(--green);border-color:rgba(38,217,138,.2)}
+.cb-tag.json{background:rgba(245,148,58,.1);color:var(--orange);border-color:rgba(245,148,58,.2)}
+.cb-tag.xml{background:rgba(47,139,255,.1);color:var(--accent);border-color:rgba(47,139,255,.2)}
+.cb-tag.url{background:rgba(155,114,245,.1);color:var(--purple);border-color:rgba(155,114,245,.2)}
+.cb pre{padding:14px 16px;overflow-x:auto;font-family:"JetBrains Mono",monospace;font-size:12.5px;line-height:1.8;color:#a8c0d8}
+/* syntax tokens */
+.kw{color:#e8534a}.fn{color:#c084fc}.st{color:#7dcfff}.nm{color:#f5943a}.cm{color:#2a4060;font-style:italic}.op{color:#5bb3ff}.tp{color:#26d98a}.hl{color:#e8b83a}.pk{color:#18ccd4}.mt{color:#e854a0}
+
+/* RESULT / RESPONSE */
+.rb{border:1px solid var(--border);border-top:none;border-radius:0 0 10px 10px;overflow:hidden;margin-bottom:14px}
+.rb-bar{display:flex;align-items:center;gap:8px;padding:7px 14px;border-bottom:1px solid rgba(38,217,138,.12)}
+.rb-bar.ok{background:linear-gradient(90deg,rgba(38,217,138,.07),rgba(38,217,138,.02))}
+.rb-bar.err{background:linear-gradient(90deg,rgba(232,83,74,.07),rgba(232,83,74,.02));border-bottom-color:rgba(232,83,74,.12)}
+.rb-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.rb-lbl{font-size:11px;font-weight:600;font-family:"JetBrains Mono",monospace}
+.rb-note{font-size:11px;color:var(--text3);margin-left:auto;font-family:"JetBrains Mono",monospace}
+.rb-body{overflow-x:auto;background:var(--bg2)}
+.rb-body pre{padding:14px 16px;font-family:"JetBrains Mono",monospace;font-size:12.5px;line-height:1.8;color:#a8c0d8;overflow-x:auto}
+
+/* TABLE */
+.rt-wrap{overflow-x:auto;background:var(--bg2)}
+.rt{width:100%;border-collapse:collapse;min-width:300px}
+.rt th{background:var(--bg3);color:var(--text2);font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:7px 12px;text-align:left;border-bottom:1px solid var(--border);font-family:"JetBrains Mono",monospace;white-space:nowrap}
+.rt td{padding:7px 12px;border-bottom:1px solid rgba(25,37,56,.7);white-space:nowrap;font-family:"JetBrains Mono",monospace;font-size:12px}
+.rt tr:last-child td{border-bottom:none}
+.rt tr:hover td{background:rgba(47,139,255,.02)}
+.hi{background:rgba(47,139,255,.12);color:var(--accent);border-radius:4px;padding:1px 6px}
+.hi2{background:rgba(38,217,138,.1);color:var(--green);border-radius:4px;padding:1px 6px}
+.warn{background:rgba(232,184,58,.1);color:var(--yellow);border-radius:4px;padding:1px 6px}
+.bad{background:rgba(232,83,74,.1);color:var(--red);border-radius:4px;padding:1px 6px}
+
+/* CALLOUT */
+.callout{border-radius:8px;padding:11px 14px;margin:10px 0;font-size:13px;display:flex;gap:10px;align-items:flex-start;line-height:1.6}
+.callout.tip{background:rgba(38,217,138,.05);border:1px solid rgba(38,217,138,.2);color:var(--green)}
+.callout.info{background:rgba(47,139,255,.05);border:1px solid rgba(47,139,255,.2);color:var(--accent)}
+.callout.warn{background:rgba(232,184,58,.05);border:1px solid rgba(232,184,58,.2);color:var(--yellow)}
+.callout.danger{background:rgba(232,83,74,.05);border:1px solid rgba(232,83,74,.2);color:var(--red)}
+.callout strong{font-weight:700;color:inherit}
+
+/* ARCHITECTURE DIAGRAM */
+.arch{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:24px;margin:14px 0}
+.arch-title{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:1.5px;font-weight:600;margin-bottom:18px}
+.arch-flow{display:flex;align-items:center;gap:0;flex-wrap:wrap;justify-content:center;gap:6px}
+.arch-box{background:var(--bg4);border:1px solid var(--border2);border-radius:10px;padding:14px 18px;text-align:center;min-width:120px}
+.arch-box-title{font-weight:700;font-size:13px;margin-bottom:4px;font-family:Syne,sans-serif}
+.arch-box-sub{font-size:11px;color:var(--text2);line-height:1.4}
+.arch-arrow{color:var(--text3);font-size:18px;flex-shrink:0}
+.arch-box.client{border-color:rgba(47,139,255,.3);background:rgba(47,139,255,.05)}
+.arch-box.odata{border-color:rgba(155,114,245,.35);background:rgba(155,114,245,.06)}
+.arch-box.service{border-color:rgba(38,217,138,.3);background:rgba(38,217,138,.05)}
+.arch-box.db{border-color:rgba(245,148,58,.3);background:rgba(245,148,58,.05)}
+
+/* PROTOCOL STACK */
+.stack{display:flex;flex-direction:column;gap:3px;margin:14px 0}
+.stack-layer{border-radius:8px;padding:11px 16px;display:flex;align-items:center;gap:12px}
+.stack-n{font-family:"JetBrains Mono",monospace;font-size:10px;color:var(--text3);min-width:20px;text-align:right}
+.stack-name{font-weight:700;font-size:13px;min-width:160px}
+.stack-desc{color:var(--text2);font-size:12.5px}
+.layer-1{background:rgba(47,139,255,.06);border:1px solid rgba(47,139,255,.15)}
+.layer-2{background:rgba(155,114,245,.05);border:1px solid rgba(155,114,245,.12)}
+.layer-3{background:rgba(38,217,138,.05);border:1px solid rgba(38,217,138,.12)}
+.layer-4{background:rgba(245,148,58,.05);border:1px solid rgba(245,148,58,.12)}
+.layer-5{background:rgba(232,84,160,.05);border:1px solid rgba(232,84,160,.12)}
+.layer-6{background:rgba(24,204,212,.05);border:1px solid rgba(24,204,212,.12)}
+
+/* QUERY BUILDER */
+.qbuilder{background:var(--bg3);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin:12px 0}
+.qb-header{background:var(--bg4);border-bottom:1px solid var(--border);padding:8px 14px;display:flex;align-items:center;gap:10px}
+.qb-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text2)}
+.qb-body{padding:14px}
+.qb-row{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px}
+.qb-row:last-child{margin-bottom:0}
+.qb-part{font-family:"JetBrains Mono",monospace;font-size:12px;padding:3px 8px;border-radius:5px;font-weight:700;flex-shrink:0;margin-top:2px}
+.qb-base{background:rgba(47,139,255,.12);color:var(--accent);border:1px solid rgba(47,139,255,.2)}
+.qb-opt{background:rgba(155,114,245,.1);color:var(--purple);border:1px solid rgba(155,114,245,.2)}
+.qb-val{background:rgba(245,148,58,.1);color:var(--orange);border:1px solid rgba(245,148,58,.2)}
+.qb-desc{color:var(--text2);font-size:12.5px;line-height:1.5}
+.qb-url{font-family:"JetBrains Mono",monospace;font-size:12.5px;background:#030609;border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin-top:10px;color:#a8c0d8;overflow-x:auto;line-height:1.8}
+
+/* REF TABLE */
+.ref-wrap{border:1px solid var(--border);border-radius:8px;overflow:hidden;margin:12px 0}
+.ref-tbl{width:100%;border-collapse:collapse}
+.ref-tbl th{background:var(--bg4);color:var(--text2);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:8px 12px;border-bottom:1px solid var(--border)}
+.ref-tbl td{padding:8px 12px;font-size:13px;border-bottom:1px solid rgba(25,37,56,.6);line-height:1.5;vertical-align:top}
+.ref-tbl tr:last-child td{border-bottom:none}
+.ref-tbl tr:hover td{background:rgba(255,255,255,.006)}
+.ref-tbl code{background:var(--bg4);color:var(--orange);font-family:"JetBrains Mono",monospace;font-size:11px;padding:1px 6px;border-radius:4px}
+
+/* COMPARE */
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border-radius:10px;overflow:hidden;margin:10px 0}
+@media(max-width:660px){.cmp{grid-template-columns:1fr}}
+.cmp-side{background:var(--bg2)}
+.cmp-lbl{padding:8px 13px;font-size:11.5px;font-weight:700;border-bottom:1px solid var(--border)}
+.cmp-lbl.bad{background:rgba(232,83,74,.06);color:var(--red)}
+.cmp-lbl.good{background:rgba(38,217,138,.06);color:var(--green)}
+.cmp-lbl.v2{background:rgba(47,139,255,.06);color:var(--accent)}
+.cmp-lbl.v4{background:rgba(155,114,245,.06);color:var(--purple)}
+.cmp-side .cb{border:none;border-radius:0}
+
+/* CHEAT */
+.cheat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
+.cheat{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:13px 14px}
+.cheat-kw{font-family:"JetBrains Mono",monospace;font-size:12.5px;color:var(--accent);font-weight:700;margin-bottom:4px}
+.cheat-desc{color:var(--text2);font-size:12.5px;line-height:1.5}
+.cheat-ex{font-family:"JetBrains Mono",monospace;font-size:11.5px;color:var(--orange);background:var(--bg4);padding:6px 9px;border-radius:5px;margin-top:6px;line-height:1.6}
+
+/* STEPS */
+.steps{display:flex;flex-direction:column;gap:4px;margin:10px 0}
+.step{display:flex;align-items:flex-start;gap:10px;background:var(--bg4);border:1px solid var(--border);border-radius:8px;padding:10px 12px}
+.step-n{background:var(--accent);color:#fff;font-weight:700;font-size:10px;min-width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:"JetBrains Mono",monospace}
+.step-body{flex:1}.step-name{font-weight:600;font-size:13px;color:var(--text)}.step-detail{color:var(--text2);font-size:12.5px;margin-top:1px}
+.step-arr{text-align:center;color:var(--text3);font-size:10px}
+
+/* QA */
+.qa{display:flex;flex-direction:column;gap:10px}
+.qa-item{background:var(--bg3);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.qa-q{padding:10px 13px;font-weight:600;font-size:13.5px;color:var(--accent);background:rgba(47,139,255,.04);border-bottom:1px solid var(--border)}
+.qa-q::before{content:"Q  ";font-family:"JetBrains Mono",monospace;font-size:10px;color:var(--text3)}
+.qa-a{padding:10px 13px;font-size:13px;color:var(--text2);line-height:1.75}
+.qa-a code{background:var(--bg4);color:var(--orange);font-family:"JetBrains Mono",monospace;font-size:11px;padding:1px 6px;border-radius:4px}
+
+/* VERSION BADGE */
+.vbadge{display:inline-block;font-size:10px;font-weight:700;font-family:"JetBrains Mono",monospace;padding:2px 7px;border-radius:4px;margin-right:4px;border:1px solid}
+.v2{background:rgba(47,139,255,.1);color:var(--accent);border-color:rgba(47,139,255,.25)}
+.v4{background:rgba(155,114,245,.1);color:var(--purple);border-color:rgba(155,114,245,.25)}
+.vnew{background:rgba(38,217,138,.1);color:var(--green);border-color:rgba(38,217,138,.25)}
+.vdep{background:rgba(232,83,74,.1);color:var(--red);border-color:rgba(232,83,74,.25)}
+
+/* MISC */
+p{color:var(--text2);font-size:13.5px;line-height:1.7;margin-bottom:10px}
+p:last-child{margin-bottom:0}
+strong{color:var(--text);font-weight:600}
+h3{font-size:14.5px;font-weight:700;margin:18px 0 10px;font-family:Syne,sans-serif;color:var(--text)}
+h3:first-child{margin-top:0}
+hr{border:none;border-top:1px solid var(--border);margin:20px 0}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:12px 0}
+@media(max-width:680px){.two-col{grid-template-columns:1fr}}
+.footer{text-align:center;color:var(--text3);font-size:12.5px;padding:48px 20px;border-top:1px solid var(--border);margin-top:80px}
+.inline-code{font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--orange);background:var(--bg4);padding:1px 6px;border-radius:4px}
+</style></head><body>
+<div class="hero"><div style="position:relative;z-index:1">
+<div class="eyebrow">&#x1f310; Protocol Guide</div>
+<h1><span>OData</span><span style="font-size:.65em;opacity:.7">Deep Dive</span></h1>
+<p class="hero-sub">From first principles to production. What OData is, how the protocol works under the hood, every query option with real examples, $metadata, versioning, CRUD, batching, functions, and when to use it vs REST vs GraphQL.</p>
+<div class="chips">
+<span class="chip">What is OData</span><span class="chip">Protocol Mechanics</span><span class="chip">$metadata &amp; EDM</span>
+<span class="chip">Query Options</span><span class="chip">CRUD Operations</span><span class="chip">$filter deep dive</span>
+<span class="chip">$expand &amp; nav props</span><span class="chip">Functions &amp; Actions</span><span class="chip">Batching</span>
+<span class="chip">v2 vs v4</span><span class="chip">Security</span><span class="chip">Real-world patterns</span>
+</div></div></div>
+<nav class="nav">
+<a href="#s0">&#x1f4d6; What is OData</a>
+<a href="#s1">How it Works</a>
+<a href="#s2">$metadata &amp; EDM</a>
+<a href="#s3">Service Document</a>
+<a href="#s4">Query Options</a>
+<a href="#s5">$filter Deep Dive</a>
+<a href="#s6">$expand &amp; NavProps</a>
+<a href="#s7">CRUD</a>
+<a href="#s8">Functions &amp; Actions</a>
+<a href="#s9">Batching</a>
+<a href="#s10">v2 vs v4</a>
+<a href="#s11">Error Handling</a>
+<a href="#s12">Security</a>
+<a href="#s13">Real Patterns</a>
+<a href="#s14">Cheatsheet</a>
+</nav>
+<div class="wrap">
+<div class="section" id="s0"><div class="sec-hd"><div class="sec-n">0</div><div class="sec-title">What is OData?</div></div>
+<div class="lesson"><div class="lesson-hd"><span class="lesson-ico">&#x1f4d6;</span><div><div class="lesson-title">The Plain-English Explanation</div><div class="lesson-desc">Before the protocol — the problem it solves and why it exists.</div></div></div><div class="lesson-body">
+<p>Imagine you have a database of products and customers. You want to expose this data over HTTP so apps, Excel, Power BI, and mobile apps can all consume it. You could build a REST API — but then you have to write logic for filtering, sorting, pagination, field selection, and relationship traversal for every endpoint.</p>
+<p><strong>OData (Open Data Protocol)</strong> is a standardised way to expose data over HTTP so that <em>the client decides</em> what to query, how to filter, sort, page, and which related data to include — without the server needing custom endpoints for each combination.</p>
+<p>Think of it as <strong>&ldquo;SQL over HTTP&rdquo;</strong>. You query a URL almost like writing a SQL SELECT, and the server returns JSON (or XML). The protocol defines the grammar of those queries so every OData server speaks the same language.</p>
+<div class="arch">
+<div class="arch-title">How OData fits into your stack</div>
+<div class="arch-flow">
+  <div class="arch-box client"><div class="arch-box-title">Client</div><div class="arch-box-sub">Browser, Excel,<br>Power BI, Mobile,<br>SAP Fiori</div></div>
+  <div class="arch-arrow">&#x2192;</div>
+  <div class="arch-box odata"><div class="arch-box-title">OData Service</div><div class="arch-box-sub">HTTP + OData Protocol<br>$filter $select $expand<br>$orderby $top $skip</div></div>
+  <div class="arch-arrow">&#x2192;</div>
+  <div class="arch-box service"><div class="arch-box-title">Backend Logic</div><div class="arch-box-sub">ASP.NET OData<br>SAP CAP / ABAP<br>Node.js, Java</div></div>
+  <div class="arch-arrow">&#x2192;</div>
+  <div class="arch-box db"><div class="arch-box-title">Data Source</div><div class="arch-box-sub">SQL DB, SAP HANA<br>SharePoint, CRM<br>Azure Table Storage</div></div>
+</div></div>
+<div class="callout info"><span>&#x1f4a1;</span><div><strong>Real-world adopters:</strong> SAP uses OData as the primary API standard for all Fiori apps and S/4HANA services. Microsoft uses it for SharePoint, Dynamics 365, Power Platform, and Azure DevOps. Salesforce and many ERP systems expose OData feeds.</div></div>
+</div></div>
+<div class="lesson"><div class="lesson-hd"><span class="lesson-ico">&#x1f4dc;</span><div><div class="lesson-title">History &amp; Versions</div><div class="lesson-desc">OData was created by Microsoft in 2007, became an OASIS standard in 2014.</div></div></div><div class="lesson-body">
+<div class="ref-wrap"><table class="ref-tbl"><tr><th>Version</th><th>Year</th><th>Status</th><th>Key changes</th></tr><tr><td>OData v1</td><td>2007</td><td><span class='bad'>Obsolete</span></td><td>Original Microsoft internal standard</td></tr><tr><td>OData v2</td><td>2010</td><td><span class='warn'>Legacy (still common in SAP)</span></td><td>AtomPub XML + JSON; inline count; $format</td></tr><tr><td>OData v3</td><td>2012</td><td><span class='warn'>Deprecated</span></td><td>JSON Light format, improved metadata</td></tr><tr><td>OData v4</td><td>2014</td><td><span class='hi2'>OASIS Standard ✓ Current</span></td><td>Full rewrite. JSON-first. Functions, Actions, Singletons, Async</td></tr><tr><td>OData v4.01</td><td>2020</td><td><span class='hi2'>Latest</span></td><td>Set operations, deep inserts, improvements</td></tr></table></div>
+<div class="callout warn"><span>&#x26a0;&#xfe0f;</span><div><strong>SAP note:</strong> SAP NetWeaver Gateway &amp; older Fiori apps use <strong>OData v2</strong>. SAP CAP and S/4HANA Cloud use <strong>OData v4</strong>. You will encounter both in production — this guide covers both clearly.</div></div>
+</div></div>
+<div class="lesson"><div class="lesson-hd"><span class="lesson-ico">&#x2696;&#xfe0f;</span><div><div class="lesson-title">OData vs REST vs GraphQL</div><div class="lesson-desc">When to use which.</div></div></div><div class="lesson-body">
+<div class="ref-wrap"><table class="ref-tbl"><tr><th>Criteria</th><th>Plain REST</th><th>OData</th><th>GraphQL</th></tr><tr><td>Query flexibility</td><td>Fixed endpoints only</td><td>Client drives query via URL params</td><td>Client sends typed query document</td></tr><tr><td>Learning curve</td><td>Low</td><td>Medium (URL grammar)</td><td>Higher (schema + query language)</td></tr><tr><td>Tooling</td><td>Universal</td><td>Microsoft/SAP ecosystem strong</td><td>Meta/open-source ecosystem</td></tr><tr><td>Self-describing</td><td>No (need OpenAPI)</td><td>Yes ($metadata)</td><td>Yes (introspection)</td></tr><tr><td>Filtering</td><td>Custom per endpoint</td><td>Standardised $filter</td><td>In query body</td></tr><tr><td>Relationships</td><td>Manual (multiple calls)</td><td>$expand (single call)</td><td>Nested fields</td></tr><tr><td>Batching</td><td>Bespoke</td><td>$batch (standard)</td><td>Multiple ops in one request</td></tr><tr><td>Best for</td><td>Public APIs, microservices</td><td>Enterprise/ERP, BI tools, SAP</td><td>Complex apps, mobile</td></tr></table></div>
+</div></div>
+</div>
+<div class="section" id="s1"><div class="sec-hd"><div class="sec-n">1</div><div class="sec-title">How OData Works — Protocol Mechanics</div></div>
+<div class="sec-sub">HTTP verbs, URL structure, request/response format, content negotiation</div>
+<div class="lesson"><div class="lesson-hd"><span class="lesson-ico">&#x1f9f1;</span><div><div class="lesson-title">The Protocol Stack</div><div class="lesson-desc">OData is built on layers. Understanding each layer explains the &ldquo;why&rdquo; behind every design decision.</div></div></div><div class="lesson-body">
+<div class="stack">
+<div class="stack-layer layer-1"><div class="stack-n">7</div><div class="stack-name" style="color:var(--accent)">OData Protocol</div><div class="stack-desc">Query options ($filter, $select…), $metadata, Entity Data Model, CRUD conventions, batching, functions/actions</div></div>
+<div class="stack-layer layer-2"><div class="stack-n">6</div><div class="stack-name" style="color:var(--purple)">Payload Format</div><div class="stack-desc">JSON (OData JSON Format v4) or XML (AtomPub, v2 only). Response includes @odata.context, @odata.count, value: []</div></div>
+<div class="stack-layer layer-3"><div class="stack-n">5</div><div class="stack-name" style="color:var(--green)">Content Negotiation</div><div class="stack-desc">Accept: application/json;odata.metadata=minimal|full|none. $format=json|xml URL param override</div></div>
+<div class="stack-layer layer-4"><div class="stack-n">4</div><div class="stack-name" style="color:var(--orange)">HTTP/1.1 or HTTP/2</div><div class="stack-desc">GET (read), POST (create), PATCH (update), PUT (replace), DELETE. Standard HTTP status codes (200,201,204,400,404…)</div></div>
+<div class="stack-layer layer-5"><div class="stack-n">3</div><div class="stack-name" style="color:var(--pink)">TLS/SSL</div><div class="stack-desc">Always HTTPS in production. OData carries credentials and data — never plain HTTP</div></div>
+<div class="stack-layer layer-6"><div class="stack-n">2</div><div class="stack-name" style="color:var(--teal)">TCP / Network</div><div class="stack-desc">Standard internet transport. OData services typically on port 443 (HTTPS)</div></div>
+</div>
+</div></div>
+<div class="lesson"><div class="lesson-hd"><span class="lesson-ico">&#x1f4cd;</span><div><div class="lesson-title">Anatomy of an OData URL</div><div class="lesson-desc">Every OData URL has exactly the same structure. Learn this once, read any OData URL forever.</div></div></div><div class="lesson-body">
+<div class="qbuilder">
+<div class="qb-header"><span class="qb-label">URL Anatomy</span></div>
+<div class="qb-body">
+<div class="qb-row"><span class="qb-part qb-base">Base URL</span><div class="qb-desc">The root of your OData service.<br><span style="font-family:JetBrains Mono,monospace;color:var(--accent);font-size:12px">https://api.example.com/odata/v4/</span></div></div>
+<div class="qb-row"><span class="qb-part qb-base">Resource Path</span><div class="qb-desc">Entity set name, key, or navigation property.<br><span style="font-family:JetBrains Mono,monospace;color:var(--cyan);font-size:12px">Products</span> &nbsp;or&nbsp; <span style="font-family:JetBrains Mono,monospace;color:var(--cyan);font-size:12px">Products(42)</span> &nbsp;or&nbsp; <span style="font-family:JetBrains Mono,monospace;color:var(--cyan);font-size:12px">Products(42)/Supplier</span></div></div>
+<div class="qb-row"><span class="qb-part qb-opt">?</span><div class="qb-desc">Start of query string</div></div>
+<div class="qb-row"><span class="qb-part qb-opt">$select</span><div class="qb-desc">Comma-separated list of properties to return. Like SQL SELECT columns.</div></div>
+<div class="qb-row"><span class="qb-part qb-opt">$filter</span><div class="qb-desc">Boolean expression to filter rows. Like SQL WHERE clause.</div></div>
+<div class="qb-row"><span class="qb-part qb-opt">$orderby</span><div class="qb-desc">Sort expression. <span style="font-family:JetBrains Mono,monospace;font-size:12px">Name asc, Price desc</span></div></div>
+<div class="qb-row"><span class="qb-part qb-opt">$top / $skip</span><div class="qb-desc">Pagination: return top N, skip first N. Always use $orderby with $skip.</div></div>
+<div class="qb-row"><span class="qb-part qb-opt">$expand</span><div class="qb-desc">Include related entities inline (eliminates extra round-trips).</div></div>
+<div class="qb-row"><span class="qb-part qb-opt">$count</span><div class="qb-desc"><span style="font-family:JetBrains Mono,monospace;font-size:12px">$count=true</span> adds <span style="font-family:JetBrains Mono,monospace;font-size:12px">@odata.count</span> to response with total matching rows.</div></div>
+<div class="qb-row"><span class="qb-part qb-opt">$search</span><div class="qb-desc">Free-text search across searchable properties. Server decides what &ldquo;searchable&rdquo; means.</div></div>
+<div class="qb-row"><span class="qb-part qb-opt">$format</span><div class="qb-desc">Override Accept header: <span style="font-family:JetBrains Mono,monospace;font-size:12px">$format=json</span> or <span style="font-family:JetBrains Mono,monospace;font-size:12px">$format=xml</span></div></div>
+<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
+<div class="qb-label" style="margin-bottom:8px;display:block">Full Example URL</div>
+<div class="qb-url"><span style="color:var(--accent)">https://api.example.com/odata/v4/</span><span style="color:var(--cyan)">Products</span><span style="color:var(--text2)">?</span><span style="color:var(--purple)">$select</span>=Id,Name,Price&amp;<span style="color:var(--purple)">$filter</span>=Price gt 100 and Category eq 'Electronics'&amp;<span style="color:var(--purple)">$orderby</span>=Price desc&amp;<span style="color:var(--purple)">$top</span>=10&amp;<span style="color:var(--purple)">$skip</span>=20&amp;<span style="color:var(--purple)">$count</span>=true&amp;<span style="color:var(--purple)">$expand</span>=Supplier</div>
+</div>
+</div></div>
+</div></div>
+<div class="lesson"><div class="lesson-hd"><span class="lesson-ico">&#x1f4e8;</span><div><div class="lesson-title">A Real OData Request &amp; Response</div><div class="lesson-desc">Every field in the response explained.</div></div></div><div class="lesson-body">
+<div class="cb"><div class="cb-bar"><span class="cb-file">request.http</span><span class="cb-tag http">HTTP</span></div><pre><span class="kw">GET</span> /odata/v4/Products?$select=Id,Name,Price&amp;$filter=Price gt 500&amp;$top=3&amp;$count=true <span class="op">HTTP/1.1</span>
+<span class="tp">Host:</span> <span class="st">api.example.com</span>
+<span class="tp">Accept:</span> <span class="st">application/json;odata.metadata=minimal</span>
+<span class="tp">OData-Version:</span> <span class="st">4.0</span>
+<span class="tp">Authorization:</span> <span class="st">Bearer eyJhbGci...</span></pre></div>
+<div class="rb"><div class="rb-bar ok"><div class="rb-dot" style="background:var(--green)"></div><span class="rb-lbl" style="color:var(--green)">200 OK</span><span class="rb-note">application/json — 3 entities returned</span></div><div class="rb-body"><pre>{
+  <span class="pk">"@odata.context"</span>: <span class="st">"https://api.example.com/odata/v4/$metadata#Products(Id,Name,Price)"</span>,
+  <span class="pk">"@odata.count"</span>: <span class="nm">47</span>,         <span class="cm">// total matching rows (not just this page)</span>
+  <span class="pk">"value"</span>: [
+    {
+      <span class="pk">"@odata.etag"</span>: <span class="st">"W/\"MjAyNC0wMS0xNQ==\""</span>,   <span class="cm">// optimistic concurrency token</span>
+      <span class="pk">"Id"</span>: <span class="nm">101</span>,
+      <span class="pk">"Name"</span>: <span class="st">"iPhone 15"</span>,
+      <span class="pk">"Price"</span>: <span class="nm">79999</span>
+    },
+    {
+      <span class="pk">"@odata.etag"</span>: <span class="st">"W/\"MjAyNC0wMi0yMA==\""</span>,
+      <span class="pk">"Id"</span>: <span class="nm">102</span>,
+      <span class="pk">"Name"</span>: <span class="st">"MacBook Air"</span>,
+      <span class="pk">"Price"</span>: <span class="nm">114999</span>
+    },
+    {
+      <span class="pk">"@odata.etag"</span>: <span class="st">"W/\"MjAyNC0wMy0xMA==\""</span>,
+      <span class="pk">"Id"</span>: <span class="nm">103</span>,
+      <span class="pk">"Name"</span>: <span class="st">"Nike Shoes"</span>,
+      <span class="pk">"Price"</span>: <span class="nm">8999</span>
+    }
+  ],
+  <span class="pk">"@odata.nextLink"</span>: <span class="st">"https://api.example.com/odata/v4/Products?$skip=3&amp;$top=3&amp;$filter=Price gt 500"</span>
+  <span class="cm">// nextLink present because more pages exist</span>
+}</pre></div></div>
+<div class="ref-wrap"><table class="ref-tbl"><tr><th>Response field</th><th>Meaning</th><th>When present</th></tr><tr><td><code>@odata.context</code></td><td>URL pointing to $metadata definition of this response</td><td>Always</td></tr><tr><td><code>@odata.count</code></td><td>Total matching entity count (ignoring $top/$skip)</td><td>Only when <code>$count=true</code> in request</td></tr><tr><td><code>@odata.etag</code></td><td>Concurrency token for optimistic locking</td><td>When entity has ETag defined</td></tr><tr><td><code>value</code></td><td>Array of entities</td><td>Collection responses</td></tr><tr><td><code>@odata.nextLink</code></td><td>URL for next page of results</td><td>When more pages exist (server-driven paging)</td></tr><tr><td><code>@odata.deltaLink</code></td><td>URL to get changes since last sync</td><td>Delta query / change tracking</td></tr></table></div>
+</div></div>
+</div>
+<div class="section" id="s2"><div class="sec-hd"><div class="sec-n">2</div><div class="sec-title">$metadata &amp; the Entity Data Model</div></div>
+<div class="sec-sub">The self-describing contract of your OData service — what it is, how to read it</div>
+<div class="lesson"><div class="lesson-hd"><span class="lesson-ico">&#x1f4c4;</span><div><div class="lesson-title">What is $metadata?</div><div class="lesson-desc">Hit /$metadata on any OData service to get a machine-readable description of all entities, their types, relationships, and capabilities.</div></div></div><div class="lesson-body">
+<p>Every OData service exposes a special endpoint: <span class="inline-code">GET /odata/v4/$metadata</span>. It returns an XML document (CSDL — Common Schema Definition Language) that describes:</p>
+<ul style="color:var(--text2);font-size:13.5px;line-height:2;padding-left:20px;margin:10px 0"><li>All <strong>Entity Types</strong> (like tables) with their properties and data types</li><li>All <strong>Navigation Properties</strong> (foreign key relationships)</li><li>All <strong>Entity Sets</strong> (the URL-addressable collections)</li><li>All <strong>Functions and Actions</strong> exposed by the service</li><li>All <strong>Annotations</strong> (UI hints, capability declarations, validation rules)</li></ul>
+<div class="cb"><div class="cb-bar"><span class="cb-file">metadata_request.http</span><span class="cb-tag http">HTTP</span></div><pre><span class="kw">GET</span> /odata/v4/$metadata <span class="op">HTTP/1.1</span>
+<span class="tp">Host:</span> <span class="st">api.example.com</span>
+<span class="tp">Accept:</span> <span class="st">application/xml</span></pre></div>
+<div class="rb"><div class="rb-bar ok"><div class="rb-dot" style="background:var(--green)"></div><span class="rb-lbl" style="color:var(--green)">200 OK</span><span class="rb-note">CSDL XML — machine-readable service contract</span></div><div class="rb-body"><pre><span class="op">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span>
+<span class="kw">&lt;edmx:Edmx</span> Version=<span class="st">"4.0"</span> xmlns:edmx=<span class="st">"http://docs.oasis-open.org/odata/ns/edmx"</span><span class="kw">&gt;</span>
+  <span class="kw">&lt;edmx:DataServices&gt;</span>
+    <span class="kw">&lt;Schema</span> Namespace=<span class="st">"MyService"</span> xmlns=<span class="st">"http://docs.oasis-open.org/odata/ns/edm"</span><span class="kw">&gt;</span>
+
+      <span class="cm">&lt;!-- Entity Type = a table definition --&gt;</span>
+      <span class="kw">&lt;EntityType</span> Name=<span class="st">"Product"</span><span class="kw">&gt;</span>
+        <span class="kw">&lt;Key&gt;&lt;PropertyRef</span> Name=<span class="st">"Id"</span><span class="kw">/&gt;&lt;/Key&gt;</span>
+        <span class="kw">&lt;Property</span> Name=<span class="st">"Id"</span>       Type=<span class="st">"Edm.Int32"</span>    Nullable=<span class="st">"false"</span><span class="kw">/&gt;</span>
+        <span class="kw">&lt;Property</span> Name=<span class="st">"Name"</span>     Type=<span class="st">"Edm.String"</span>   Nullable=<span class="st">"false"</span><span class="kw">/&gt;</span>
+        <span class="kw">&lt;Property</span> Name=<span class="st">"Price"</span>    Type=<span class="st">"Edm.Decimal"</span>  Scale=<span class="st">"2"</span><span class="kw">/&gt;</span>
+        <span class="kw">&lt;Property</span> Name=<span class="st">"Category"</span> Type=<span class="st">"Edm.String"</span><span class="kw">/&gt;</span>
+        <span class="kw">&lt;Property</span> Name=<span class="st">"InStock"</span>  Type=<span class="st">"Edm.Boolean"</span><span class="kw">/&gt;</span>
+        <span class="kw">&lt;Property</span> Name=<span class="st">"CreatedAt"</span> Type=<span class="st">"Edm.DateTimeOffset"</span><span class="kw">/&gt;</span>
+        <span class="cm">&lt;!-- Navigation Property = foreign key relationship --&gt;</span>
+        <span class="kw">&lt;NavigationProperty</span> Name=<span class="st">"Supplier"</span>
+          Type=<span class="st">"MyService.Supplier"</span> Nullable=<span class="st">"false"</span><span class="kw">/&gt;</span>
+        <span class="kw">&lt;NavigationProperty</span> Name=<span class="st">"OrderItems"</span>
+          Type=<span class="st">"Collection(MyService.OrderItem)"</span><span class="kw">/&gt;</span>
+      <span class="kw">&lt;/EntityType&gt;</span>
+
+      <span class="cm">&lt;!-- EntityContainer = the URL-addressable collections --&gt;</span>
+      <span class="kw">&lt;EntityContainer</span> Name=<span class="st">"DefaultContainer"</span><span class="kw">&gt;</span>
+        <span class="kw">&lt;EntitySet</span> Name=<span class="st">"Products"</span>  EntityType=<span class="st">"MyService.Product"</span><span class="kw">/&gt;</span>
+        <span class="kw">&lt;EntitySet</span> Name=<span class="st">"Suppliers"</span> EntityType=<span class="st">"MyService.Supplier"</span><span class="kw">/&gt;</span>
+        <span class="kw">&lt;EntitySet</span> Name=<span class="st">"Orders"</span>    EntityType=<span class="st">"MyService.Order"</span><span class="kw">/&gt;</span>
+      <span class="kw">&lt;/EntityContainer&gt;</span>
+    <span class="kw">&lt;/Schema&gt;</span>
+  <span class="kw">&lt;/edmx:DataServices&gt;</span>
+<span class="kw">&lt;/edmx:Edmx&gt;</span></pre></div></div>
+<div class="ref-wrap"><table class="ref-tbl"><tr><th>EDM type</th><th>Maps to</th><th>Example value</th></tr><tr><td><code>Edm.Int32</code></td><td>32-bit integer</td><td><code>42</code></td></tr><tr><td><code>Edm.Int64</code></td><td>64-bit integer</td><td><code>9999999999</code></td></tr><tr><td><code>Edm.String</code></td><td>Unicode string</td><td><code>"iPhone 15"</code></td></tr><tr><td><code>Edm.Decimal</code></td><td>Fixed-precision number (money)</td><td><code>79999.99</code></td></tr><tr><td><code>Edm.Double</code></td><td>IEEE 754 double</td><td><code>3.14</code></td></tr><tr><td><code>Edm.Boolean</code></td><td>true/false</td><td><code>true</code></td></tr><tr><td><code>Edm.DateTimeOffset</code></td><td>Date+time with timezone</td><td><code>"2024-03-15T10:30:00Z"</code></td></tr><tr><td><code>Edm.Date</code></td><td>Date only (v4)</td><td><code>"2024-03-15"</code></td></tr><tr><td><code>Edm.TimeOfDay</code></td><td>Time only (v4)</td><td><code>"10:30:00"</code></td></tr><tr><td><code>Edm.Duration</code></td><td>ISO 8601 duration</td><td><code>"P1DT2H"</code></td></tr><tr><td><code>Edm.Guid</code></td><td>UUID</td><td><code>"6ba7b810-9dad-11d1-80b4-00c04fd430c8"</code></td></tr><tr><td><code>Edm.Binary</code></td><td>Base64-encoded bytes</td><td><code>"T2RhdGE="</code></td></tr><tr><td><code>Edm.GeographyPoint</code></td><td>Spatial point (v4)</td><td><code>geography'SRID=4326;Point(77.59 12.97)'</code></td></tr></table></div>
+</div></div>
+</div>
+<div class="section" id="s3"><div class="sec-hd"><div class="sec-n">3</div><div class="sec-title">Service Document</div></div>
+<div class="sec-sub">The root endpoint — discover what entity sets are available</div>
+<div class="lesson"><div class="lesson-hd"><span class="lesson-ico">&#x1f5c2;&#xfe0f;</span><div><div class="lesson-title">GET / — The Service Root</div><div class="lesson-desc">Hitting the base URL returns a JSON listing of all available entity sets (like a table of contents).</div></div></div><div class="lesson-body">
+<div class="cb"><div class="cb-bar"><span class="cb-file">service_root.http</span><span class="cb-tag http">HTTP</span></div><pre><span class="kw">GET</span> /odata/v4/ <span class="op">HTTP/1.1</span>
+<span class="tp">Accept:</span> <span class="st">application/json</span></pre></div>
+<div class="rb"><div class="rb-bar ok"><div class="rb-dot" style="background:var(--green)"></div><span class="rb-lbl" style="color:var(--green)">200 OK</span><span class="rb-note">Service document — entity set discovery</span></div><div class="rb-body"><pre>{
+  <span class="pk">"@odata.context"</span>: <span class="st">"https://api.example.com/odata/v4/$metadata"</span>,
+  <span class="pk">"value"</span>: [
+    { <span class="pk">"name"</span>: <span class="st">"Products"</span>,  <span class="pk">"url"</span>: <span class="st">"Products"</span>  },
+    { <span class="pk">"name"</span>: <span class="st">"Orders"</span>,    <span class="pk">"url"</span>: <span class="st">"Orders"</span>    },
+    { <span class="pk">"name"</span>: <span class="st">"Customers"</span>, <span class="pk">"url"</span>: <span class="st">"Customers"</span> },
+    { <span class="pk">"name"</span>: <span class="st">"Suppliers"</span>, <span class="pk">"url"</span>: <span class="st">"Suppliers"</span> }
+  ]
+}</pre></div></div>
+</div></div>
+</div>
+<div class="section" id="s4"><div class="sec-hd"><div class="sec-n">4</div><div class="sec-title">System Query Options</div></div>
+<div class="sec-sub">Every $option explained with real URLs and responses</div>
+<div class="lesson"><div class="lesson-hd"><span class="lesson-ico">&#x1f52c;</span><div><div class="lesson-title">$select — choose your columns</div><div class="lesson-desc">Like SQL SELECT. Reduces payload size. Essential for performance.</div></div></div><div class="lesson-body">
+<div class="cb"><div class="cb-bar"><span class="cb-file">select.url</span><span class="cb-tag url">URL</span></div><pre><span class="cm"># Return only Id, Name, Price — not the whole entity</span>
+<span class="st">GET /odata/v4/Products?$select=Id,Name,Price</span>
+
+<span class="cm"># Select from expanded navigation property</span>
+<span class="st">GET /odata/v4/Products?$expand=Supplier($select=Name,Country)</span>
+
+<span class="cm"># Wildcard (v4.01) — all declared properties</span>
+<span class="st">GET /odata/v4/Products?$select=*</span></pre></div>
+<div class="rb"><div class="rb-bar ok"><div class="rb-dot" style="background:var(--green)"></div><span class="rb-lbl" style="color:var(--green)">200 OK</span><span class="rb-note">Only selected fields returned</span></div><div class="rb-body"><pre>{
+  <span class="pk">"@odata.context"</span>: <span class="st">".../$metadata#Products(Id,Name,Price)"</span>,
+  <span class="pk">"value"</span>: [
+    { <span class="pk">"Id"</span>: <span class="nm">101</span>, <span class="pk">"Name"</span>: <span class="st">"iPhone 15"</span>,  <span class="pk">"Price"</span>: <span class="nm">79999</span> },
+    { <span class="pk">"Id"</span>: <span class="nm">102</span>, <span class="pk">"Name"</span>: <span class="st">"MacBook Air"</span>, <span class="pk">"Price"</span>: <span class="nm">114999</span> }
+  ]
+}</pre></div></div>
+</div></div>
+<div class="lesson"><div class="lesson-hd"><span class="lesson-ico">&#x1f4c4;</span><div><div class="lesson-title">$top, $skip, $count — pagination</div><div class="lesson-desc">Server-side pagination. Always combine $skip with $orderby for stable results.</div></div></div><div class="lesson-body">
+<div class="cb"><div class="cb-bar"><span class="cb-file">pagination.url</span><span class="cb-tag url">URL</span></div><pre><span class="cm"># Page 1: first 5 products</span>
+<span class="st">GET /odata/v4/Products?$top=5&amp;$orderby=Id asc</span>
+
+<span class="cm"># Page 2: skip first 5, get next 5</span>
+<span class="st">GET /odata/v4/Products?$top=5&amp;$skip=5&amp;$orderby=Id asc</span>
+
+<span class="cm"># Include total count in response (separate DB query)</span>
+<span class="st">GET /odata/v4/Products?$top=5&amp;$count=true&amp;$orderby=Price desc</span>
+
+<span class="cm"># Count only — just the number, no data</span>
+<span class="st">GET /odata/v4/Products/$count</span></pre></div>
+<div class="rb"><div class="rb-bar ok"><div class="rb-dot" style="background:var(--green)"></div><span class="rb-lbl" style="color:var(--green)">200 OK</span><span class="rb-note">$count=true adds @odata.count</span></div><div class="rb-body"><pre>{
+  <span class="pk">"@odata.count"</span>: <span class="nm">47</span>,   <span class="cm">// total matching, ignores $top/$skip</span>
+  <span class="pk">"value"</span>: [ <span class="cm">/* 5 products */</span> ],
+  <span class="pk">"@odata.nextLink"</span>: <span class="st">"...?$top=5&amp;$skip=5&amp;$orderby=Price desc&amp;$count=true"</span>
+}</pre></div></div>
+<div class="callout warn"><span>&#x26a0;&#xfe0f;</span><div><strong>Server-driven paging:</strong> Servers can ignore your $top and return fewer results with a <code>@odata.nextLink</code>. Always follow nextLink for complete results — never assume page size.</div></div>
+</div></div>
+<div class="lesson"><div class="lesson-hd"><span class="lesson-ico">&#x1f504;</span><div><div class="lesson-title">$orderby — sorting</div><div class="lesson-desc">Multi-column sort, ascending/descending, sort on navigation property.</div></div></div><div class="lesson-body">
+<div class="cb"><div class="cb-bar"><span class="cb-file">orderby.url</span><span class="cb-tag url">URL</span></div><pre><span class="cm"># Single column ascending (default)</span>
+<span class="st">GET /odata/v4/Products?$orderby=Name</span>
+
+<span class="cm"># Descending</span>
+<span class="st">GET /odata/v4/Products?$orderby=Price desc</span>
+
+<span class="cm"># Multi-column sort</span>
+<span class="st">GET /odata/v4/Products?$orderby=Category asc,Price desc</span>
+
+<span class="cm"># Sort by navigation property (v4)</span>
+<span class="st">GET /odata/v4/Products?$orderby=Supplier/Country asc,Name asc</span>
+
+<span class="cm"># Null handling (v4.01)</span>
+<span class="st">GET /odata/v4/Products?$orderby=Price desc nulls last</span></pre></div>
+</div></div>
+<div class="lesson"><div class="lesson-hd"><span class="lesson-ico">&#x1f50e;</span><div><div class="lesson-title">$search — free-text search</div><div class="lesson-desc">Broad full-text search across all searchable properties. Server defines what &ldquo;searchable&rdquo; means.</div></div></div><div class="lesson-body">
+<div class="cb"><div class="cb-bar"><span class="cb-file">search.url</span><span class="cb-tag url">URL</span></div><pre><span class="cm"># Simple term search</span>
+<span class="st">GET /odata/v4/Products?$search=iPhone</span>
+
+<span class="cm"># Phrase search (quoted)</span>
+<span class="st">GET /odata/v4/Products?$search="MacBook Air"</span>
+
+<span class="cm"># Boolean search expressions</span>
+<span class="st">GET /odata/v4/Products?$search=iPhone OR MacBook</span>
+<span class="st">GET /odata/v4/Products?$search=Apple NOT refurbished</span>
+
+<span class="cm"># Combine with $filter</span>
+<span class="st">GET /odata/v4/Products?$search=iPhone&amp;$filter=Price lt 80000</span></pre></div>
+<div class="callout info"><span>&#x1f4a1;</span><div><strong>$search vs $filter:</strong> <code>$search</code> is semantic / relevance-based. <code>$filter</code> is exact/logical matching. Use $search when the user types a search box term. Use $filter for programmatic filtering with exact values.</div></div>
+</div></div>
+</div>
+<div class="section" id="s5"><div class="sec-hd"><div class="sec-n">5</div><div class="sec-title">$filter Deep Dive</div></div>
+<div class="sec-sub">Every operator, function, and pattern — the most important query option</div>
+<div class="lesson"><div class="lesson-hd"><span class="lesson-ico">&#x2699;&#xfe0f;</span><div><div class="lesson-title">Comparison &amp; Logical Operators</div><div class="lesson-desc">The foundation of every $filter expression.</div></div></div><div class="lesson-body">
+<div class="ref-wrap"><table class="ref-tbl"><tr><th>Operator</th><th>Meaning</th><th>Example</th></tr><tr><td><code>eq</code></td><td>Equal to</td><td><code>$filter=Category eq 'Electronics'</code></td></tr><tr><td><code>ne</code></td><td>Not equal to</td><td><code>$filter=Status ne 'cancelled'</code></td></tr><tr><td><code>gt</code></td><td>Greater than</td><td><code>$filter=Price gt 1000</code></td></tr><tr><td><code>ge</code></td><td>Greater than or equal</td><td><code>$filter=Price ge 1000</code></td></tr><tr><td><code>lt</code></td><td>Less than</td><td><code>$filter=Stock lt 10</code></td></tr><tr><td><code>le</code></td><td>Less than or equal</td><td><code>$filter=Discount le 50</code></td></tr><tr><td><code>and</code></td><td>Both conditions true</td><td><code>$filter=Price gt 100 and InStock eq true</code></td></tr><tr><td><code>or</code></td><td>Either condition true</td><td><code>$filter=Category eq 'Books' or Category eq 'Grocery'</code></td></tr><tr><td><code>not</code></td><td>Negate condition</td><td><code>$filter=not (Status eq 'pending')</code></td></tr><tr><td><code>in</code></td><td>Value in set (v4.01)</td><td><code>$filter=Category in ('Electronics','Apparel')</code></td></tr><tr><td><code>has</code></td><td>Enum flag check</td><td><code>$filter=Colors has Sales.Color'Red'</code></td></tr></table></div>
+</div></div>
+<div class="lesson"><div class="lesson-hd"><span class="lesson-ico">&#x1f9f5;</span><div><div class="lesson-title">String Functions</div><div class="lesson-desc">Pattern matching, substring, case operations.</div></div></div><div class="lesson-body">
+<div class="cb"><div class="cb-bar"><span class="cb-file">string_filters.url</span><span class="cb-tag url">URL</span></div><pre><span class="cm"># Starts with</span>
+<span class="st">GET /odata/v4/Products?$filter=startswith(Name, 'Mac')</span>
+
+<span class="cm"># Ends with</span>
+<span class="st">GET /odata/v4/Products?$filter=endswith(Name, 'Pro')</span>
+
+<span class="cm"># Contains (case-sensitive on most servers)</span>
+<span class="st">GET /odata/v4/Products?$filter=contains(Name, 'Book')</span>
+
+<span class="cm"># Case-insensitive: tolower() trick</span>
+<span class="st">GET /odata/v4/Products?$filter=tolower(Name) eq 'iphone 15'</span>
+
+<span class="cm"># String length</span>
+<span class="st">GET /odata/v4/Products?$filter=length(Name) gt 10</span>
+
+<span class="cm"># Substring match (indexOf)</span>
+<span class="st">GET /odata/v4/Products?$filter=indexof(Description, 'wireless') gt -1</span>
+
+<span class="cm"># Concatenation</span>
+<span class="st">GET /odata/v4/Products?$filter=concat(Category, Name) eq 'ElectronicsiPhone 15'</span></pre></div>
+<div class="ref-wrap"><table class="ref-tbl"><tr><th>String function</th><th>Returns</th><th>Description</th></tr><tr><td><code>contains(s, sub)</code></td><td>Boolean</td><td>True if s contains sub</td></tr><tr><td><code>startswith(s, prefix)</code></td><td>Boolean</td><td>True if s starts with prefix</td></tr><tr><td><code>endswith(s, suffix)</code></td><td>Boolean</td><td>True if s ends with suffix</td></tr><tr><td><code>length(s)</code></td><td>Int</td><td>Character count</td></tr><tr><td><code>indexof(s, sub)</code></td><td>Int</td><td>0-based position, -1 if not found</td></tr><tr><td><code>substring(s, start)</code></td><td>String</td><td>From position start to end</td></tr><tr><td><code>substring(s, start, len)</code></td><td>String</td><td>From start, length chars</td></tr><tr><td><code>tolower(s)</code></td><td>String</td><td>Convert to lowercase</td></tr><tr><td><code>toupper(s)</code></td><td>String</td><td>Convert to uppercase</td></tr><tr><td><code>trim(s)</code></td><td>String</td><td>Remove leading/trailing whitespace</td></tr><tr><td><code>concat(s1, s2)</code></td><td>String</td><td>Concatenate strings</td></tr></table></div>
+</div></div>
+<div class="lesson"><div class="lesson-hd"><span class="lesson-ico">&#x1f4c5;</span><div><div class="lesson-title">Date &amp; Time Functions</div><div class="lesson-desc">Filter by date ranges, extract year/month, relative dates.</div></div></div><div class="lesson-body">
+<div class="cb"><div class="cb-bar"><span class="cb-file">date_filters.url</span><span class="cb-tag url">URL</span></div><pre><span class="cm"># Exact date (use DateTimeOffset format)</span>
+<span class="st">GET /odata/v4/Orders?$filter=OrderDate eq 2024-03-15T00:00:00Z</span>
+
+<span class="cm"># Date range (orders in 2023)</span>
+<span class="st">GET /odata/v4/Orders?$filter=OrderDate ge 2023-01-01T00:00:00Z
+  and OrderDate lt 2024-01-01T00:00:00Z</span>
+
+<span class="cm"># Extract year</span>
+<span class="st">GET /odata/v4/Orders?$filter=year(OrderDate) eq 2023</span>
+
+<span class="cm"># Extract month</span>
+<span class="st">GET /odata/v4/Orders?$filter=month(OrderDate) eq 12</span>
+
+<span class="cm"># Current date/time (now())</span>
+<span class="st">GET /odata/v4/Orders?$filter=OrderDate ge now()</span>
+
+<span class="cm"># Date only comparison (v4 Edm.Date)</span>
+<span class="st">GET /odata/v4/Orders?$filter=DeliveryDate eq 2024-03-15</span></pre></div>
+<div class="ref-wrap"><table class="ref-tbl"><tr><th>Date function</th><th>Returns</th><th>Example</th></tr><tr><td><code>year(dt)</code></td><td>Int</td><td><code>year(OrderDate) eq 2024</code></td></tr><tr><td><code>month(dt)</code></td><td>Int (1-12)</td><td><code>month(OrderDate) eq 3</code></td></tr><tr><td><code>day(dt)</code></td><td>Int (1-31)</td><td><code>day(OrderDate) eq 15</code></td></tr><tr><td><code>hour(dt)</code></td><td>Int (0-23)</td><td><code>hour(CreatedAt) lt 12</code></td></tr><tr><td><code>minute(dt)</code></td><td>Int (0-59)</td><td><code>minute(CreatedAt) eq 0</code></td></tr><tr><td><code>second(dt)</code></td><td>Int (0-59)</td><td><code>second(dt)</code></td></tr><tr><td><code>now()</code></td><td>DateTimeOffset</td><td><code>OrderDate ge now()</code></td></tr><tr><td><code>date(dt)</code></td><td>Edm.Date</td><td><code>date(OrderDate) eq 2024-03-15</code></td></tr><tr><td><code>time(dt)</code></td><td>Edm.TimeOfDay</td><td><code>time(CreatedAt) ge 09:00:00</code></td></tr><tr><td><code>fractionalseconds(dt)</code></td><td>Decimal</td><td>Millisecond component</td></tr></table></div>
+</div></div>
+<div class="lesson"><div class="lesson-hd"><span class="lesson-ico">&#x1f9ee;</span><div><div class="lesson-title">Math &amp; Arithmetic Functions in $filter</div><div class="lesson-desc">Compute values inside the filter.</div></div></div><div class="lesson-body">
+<div class="cb"><div class="cb-bar"><span class="cb-file">math_filters.url</span><span class="cb-tag url">URL</span></div><pre><span class="cm"># Filter on calculated value</span>
+<span class="st">GET /odata/v4/Products?$filter=round(Price) eq 80000</span>
+
+<span class="cm"># Floor and ceiling</span>
+<span class="st">GET /odata/v4/Products?$filter=floor(Price div 1000) eq 79</span>
+
+<span class="cm"># Arithmetic in filter (Price with 10% tax &lt; 90000)</span>
+<span class="st">GET /odata/v4/Products?$filter=(Price mul 1.1) lt 90000</span>
+
+<span class="cm"># Modulo</span>
+<span class="st">GET /odata/v4/Products?$filter=(Id mod 2) eq 0  &lt;!-- even IDs --&gt;</span></pre></div>
+</div></div>
+<div class="lesson"><div class="lesson-hd"><span class="lesson-ico">&#x1f49f;</span><div><div class="lesson-title">Lambda Operators &mdash; any() and all()</div><div class="lesson-desc">Filter collections based on related entity conditions. Most powerful $filter feature.</div></div></div><div class="lesson-body">
+<div class="callout info"><span>&#x1f4a1;</span><div><strong>Lambda operators</strong> let you filter an entity based on whether ANY or ALL of its related collection entities match a condition. Essential for filtering orders by their line items, products by their tags, etc.</div></div>
+<div class="cb"><div class="cb-bar"><span class="cb-file">lambda.url</span><span class="cb-tag url">URL</span></div><pre><span class="cm"># any(): orders that have AT LEAST ONE item with price &gt; 10000</span>
+<span class="st">GET /odata/v4/Orders?$filter=Items/any(i: i/UnitPrice gt 10000)</span>
+
+<span class="cm"># all(): orders where ALL items are in stock</span>
+<span class="st">GET /odata/v4/Orders?$filter=Items/all(i: i/Product/InStock eq true)</span>
+
+<span class="cm"># any() with nested navigation</span>
+<span class="st">GET /odata/v4/Customers?$filter=Orders/any(o: o/Items/any(i: i/Product/Category eq 'Electronics'))</span>
+
+<span class="cm"># any() with no predicate = collection is non-empty</span>
+<span class="st">GET /odata/v4/Customers?$filter=Orders/any()</span>
+
+<span class="cm"># Negate: customers with NO orders</span>
+<span class="st">GET /odata/v4/Customers?$filter=not Orders/any()</span></pre></div>
+<div class="rb"><div class="rb-bar ok"><div class="rb-dot" style="background:var(--green)"></div><span class="rb-lbl" style="color:var(--green)">200 OK</span><span class="rb-note">Customers who placed at least one Electronics order</span></div><div class="rb-body"><pre>{
+  <span class="pk">"value"</span>: [
+    { <span class="pk">"Id"</span>: <span class="nm">1</span>, <span class="pk">"Name"</span>: <span class="st">"Aditya Kumar"</span>, <span class="pk">"Segment"</span>: <span class="st">"Premium"</span> },
+    { <span class="pk">"Id"</span>: <span class="nm">5</span>, <span class="pk">"Name"</span>: <span class="st">"Vikram Joshi"</span>, <span class="pk">"Segment"</span>: <span class="st">"Premium"</span> }
+  ]
+}</pre></div></div>
+</div></div>
+</div>
+<div class="section" id="s6"><div class="sec-hd"><div class="sec-n">6</div><div class="sec-title">$expand &amp; Navigation Properties</div></div>
+<div class="sec-sub">Fetch related data in one request — eliminates N+1 round trips</div>
+<div class="lesson"><div class="lesson-hd"><span class="lesson-ico">&#x1f517;</span><div><div class="lesson-title">What are Navigation Properties?</div><div class="lesson-desc">Typed relationships between entities, defined in $metadata, traversable in URLs.</div></div></div><div class="lesson-body">
+<div class="callout info"><span>&#x1f4a1;</span><div>Navigation Properties are the OData equivalent of SQL JOINs. Defined in $metadata, they let you traverse from one entity to related entities via URL paths or $expand. They replace multiple HTTP round-trips with a single request.</div></div>
+<div class="cb"><div class="cb-bar"><span class="cb-file">navprop.url</span><span class="cb-tag url">URL</span></div><pre><span class="cm"># Traverse navigation property as URL path</span>
+<span class="st">GET /odata/v4/Products(101)/Supplier</span>         <span class="cm"># single entity nav</span>
+<span class="st">GET /odata/v4/Products(101)/OrderItems</span>       <span class="cm"># collection nav</span>
+<span class="st">GET /odata/v4/Products(101)/Supplier/Country</span>  <span class="cm"># property of nav</span>
+
+<span class="cm"># Basic $expand — include supplier inline</span>
+<span class="st">GET /odata/v4/Products?$expand=Supplier</span>
+
+<span class="cm"># Multiple $expand</span>
+<span class="st">GET /odata/v4/Products?$expand=Supplier,OrderItems</span>
+
+<span class="cm"># Nested $expand (Product &gt; Order &gt; Customer)</span>
+<span class="st">GET /odata/v4/Products?$expand=OrderItems($expand=Order($expand=Customer))</span></pre></div>
+<div class="rb"><div class="rb-bar ok"><div class="rb-dot" style="background:var(--green)"></div><span class="rb-lbl" style="color:var(--green)">200 OK</span><span class="rb-note">Product with Supplier expanded inline — no second request needed</span></div><div class="rb-body"><pre>{
+  <span class="pk">"@odata.context"</span>: <span class="st">".../$metadata#Products"</span>,
+  <span class="pk">"value"</span>: [
+    {
+      <span class="pk">"Id"</span>: <span class="nm">101</span>,
+      <span class="pk">"Name"</span>: <span class="st">"iPhone 15"</span>,
+      <span class="pk">"Price"</span>: <span class="nm">79999</span>,
+      <span class="pk">"Supplier"</span>: {         <span class="cm">// expanded navigation property</span>
+        <span class="pk">"Id"</span>: <span class="nm">5</span>,
+        <span class="pk">"Name"</span>: <span class="st">"Apple Inc."</span>,
+        <span class="pk">"Country"</span>: <span class="st">"USA"</span>
+      }
+    }
+  ]
+}</pre></div></div>
+</div></div>
+<div class="lesson"><div class="lesson-hd"><span class="lesson-ico">&#x1f4e6;</span><div><div class="lesson-title">$expand with nested query options</div><div class="lesson-desc">Filter, select, order, and limit expanded collections.</div></div></div><div class="lesson-body">
+<div class="cb"><div class="cb-bar"><span class="cb-file">expand_nested.url</span><span class="cb-tag url">URL</span></div><pre><span class="cm"># $expand with $select on the expanded entity</span>
+<span class="st">GET /odata/v4/Customers?$expand=Orders($select=Id,OrderDate,TotalAmt)</span>
+
+<span class="cm"># $expand with $filter on the expanded collection</span>
+<span class="st">GET /odata/v4/Customers?$expand=Orders($filter=Status eq 'delivered')</span>
+
+<span class="cm"># $expand with $top on collection (last 3 orders per customer)</span>
+<span class="st">GET /odata/v4/Customers?$expand=Orders($orderby=OrderDate desc;$top=3)</span>
+
+<span class="cm"># $expand with $count</span>
+<span class="st">GET /odata/v4/Customers?$expand=Orders($count=true)</span>
+
+<span class="cm"># Full nested options: select + filter + orderby + top</span>
+<span class="st">GET /odata/v4/Customers
+  ?$select=Id,Name
+  &amp;$expand=Orders(
+    $select=Id,TotalAmt,Status;
+    $filter=Status eq 'delivered';
+    $orderby=TotalAmt desc;
+    $top=2
+  )</span>
+<span class="cm"># Note: semicolon (;) separates options inside $expand(), not &amp;</span></pre></div>
+<div class="rb"><div class="rb-bar ok"><div class="rb-dot" style="background:var(--green)"></div><span class="rb-lbl" style="color:var(--green)">200 OK</span><span class="rb-note">Each customer with their top 2 delivered orders</span></div><div class="rb-body"><pre>{
+  <span class="pk">"value"</span>: [
+    {
+      <span class="pk">"Id"</span>: <span class="nm">1</span>,
+      <span class="pk">"Name"</span>: <span class="st">"Aditya Kumar"</span>,
+      <span class="pk">"Orders"</span>: [
+        { <span class="pk">"Id"</span>: <span class="nm">1002</span>, <span class="pk">"TotalAmt"</span>: <span class="nm">114999</span>, <span class="pk">"Status"</span>: <span class="st">"delivered"</span> },
+        { <span class="pk">"Id"</span>: <span class="nm">1001</span>, <span class="pk">"TotalAmt"</span>: <span class="nm">79999</span>,  <span class="pk">"Status"</span>: <span class="st">"delivered"</span> }
+      ]
+    }
+  ]
+}</pre></div></div>
+<div class="callout warn"><span>&#x26a0;&#xfe0f;</span><div><strong>Performance warning:</strong> Deeply nested $expand with large collections causes N+1 problems server-side. Many OData servers limit expand depth (MaxExpansionDepth). Always add <code>$select</code> inside $expand to limit payload. Avoid expanding large collections without <code>$top</code>.</div></div>
+</div></div>
+</div>
+<div class="section" id="s7"><div class="sec-hd"><div class="sec-n">7</div><div class="sec-title">CRUD Operations</div></div>
+<div class="sec-sub">Create, Read, Update, Delete — HTTP verbs, headers, ETag concurrency</div>
+<div class="lesson"><div class="lesson-hd"><span class="lesson-ico">&#x270f;&#xfe0f;</span><div><div class="lesson-title">CREATE — POST</div><div class="lesson-desc">POST to an entity set creates a new entity. Server generates the key.</div></div></div><div class="lesson-body">
+<div class="cb"><div class="cb-bar"><span class="cb-file">create.http</span><span class="cb-tag http">HTTP</span></div><pre><span class="kw">POST</span> /odata/v4/Products <span class="op">HTTP/1.1</span>
+<span class="tp">Content-Type:</span> <span class="st">application/json</span>
+<span class="tp">OData-Version:</span> <span class="st">4.0</span>
+
+{
+  <span class="pk">"Name"</span>:     <span class="st">"Samsung Galaxy S24"</span>,
+  <span class="pk">"Price"</span>:    <span class="nm">74999</span>,
+  <span class="pk">"Category"</span>: <span class="st">"Electronics"</span>,
+  <span class="pk">"InStock"</span>:  <span class="kw">true</span>,
+  <span class="pk">"Supplier"</span>: { <span class="pk">"@odata.id"</span>: <span class="st">"Suppliers(3)"</span> }  <span class="cm">// link to existing supplier</span>
+}</pre></div>
+<div class="rb"><div class="rb-bar ok"><div class="rb-dot" style="background:var(--green)"></div><span class="rb-lbl" style="color:var(--green)">201 Created</span><span class="rb-note">New entity returned with server-assigned Id and ETag</span></div><div class="rb-body"><pre>{
+  <span class="pk">"@odata.context"</span>: <span class="st">".../$metadata#Products/$entity"</span>,
+  <span class="pk">"@odata.etag"</span>: <span class="st">"W/\"MjAyNC0wNC0wMQ==\""</span>,
+  <span class="pk">"Id"</span>:       <span class="nm">109</span>,
+  <span class="pk">"Name"</span>:     <span class="st">"Samsung Galaxy S24"</span>,
+  <span class="pk">"Price"</span>:    <span class="nm">74999</span>,
+  <span class="pk">"Category"</span>: <span class="st">"Electronics"</span>,
+  <span class="pk">"InStock"</span>:  <span class="kw">true</span>
+}</pre></div></div>
+</div></div>
+<div class="lesson"><div class="lesson-hd"><span class="lesson-ico">&#x1f504;</span><div><div class="lesson-title">UPDATE — PATCH vs PUT</div><div class="lesson-desc">PATCH = partial update (recommended). PUT = full replacement (dangerous — omitted fields become null).</div></div></div><div class="lesson-body">
+<div class="cmp"><div class="cmp-side"><div class="cmp-lbl good">&#x2705; PATCH — partial update</div>
+<div class="cb" style="border:none;border-radius:0"><pre style="font-size:12px"><span class="kw">PATCH</span> /odata/v4/Products(109) HTTP/1.1
+<span class="tp">Content-Type:</span> application/json
+<span class="tp">If-Match:</span> W/"MjAyNC0wNC0wMQ=="
+
+{
+  "Price": 69999,
+  "InStock": false
+}
+<span class="cm">// Only Price and InStock updated.
+// All other fields unchanged.</span></pre></div></div>
+<div class="cmp-side"><div class="cmp-lbl bad">&#x274c; PUT — full replacement (risky)</div>
+<div class="cb" style="border:none;border-radius:0"><pre style="font-size:12px"><span class="kw">PUT</span> /odata/v4/Products(109) HTTP/1.1
+<span class="tp">Content-Type:</span> application/json
+
+{
+  "Name": "Samsung Galaxy S24",
+  "Price": 69999
+  <span class="cm">// Category, InStock, Supplier not sent
+  // → they become null/default!</span>
+}
+<span class="cm">// Returns 204 No Content</span></pre></div></div></div>
+<div class="callout info"><span>&#x1f512;</span><div><strong>If-Match / ETag (Optimistic Concurrency):</strong> Send the ETag you received from GET in the <code>If-Match</code> header of PATCH/DELETE. If another client changed the entity since you read it, the server returns <code>412 Precondition Failed</code> instead of overwriting their changes. Always use ETags for concurrent edits.</div></div>
+<div class="rb"><div class="rb-bar err"><div class="rb-dot" style="background:var(--red)"></div><span class="rb-lbl" style="color:var(--red)">412 Precondition Failed</span><span class="rb-note">Another user modified this entity — your ETag is stale</span></div><div class="rb-body"><pre>{
+  <span class="pk">"error"</span>: {
+    <span class="pk">"code"</span>:    <span class="st">"PreconditionFailed"</span>,
+    <span class="pk">"message"</span>: <span class="st">"The ETag value in the If-Match header does not match the current ETag."</span>
+  }
+}</pre></div></div>
+</div></div>
+<div class="lesson"><div class="lesson-hd"><span class="lesson-ico">&#x1f5d1;&#xfe0f;</span><div><div class="lesson-title">DELETE — Remove an entity</div><div class="lesson-desc">Simple DELETE on the keyed URL. Use If-Match for safe concurrent deletes.</div></div></div><div class="lesson-body">
+<div class="cb"><div class="cb-bar"><span class="cb-file">delete.http</span><span class="cb-tag http">HTTP</span></div><pre><span class="kw">DELETE</span> /odata/v4/Products(109) <span class="op">HTTP/1.1</span>
+<span class="tp">If-Match:</span> <span class="st">W/"MjAyNC0wNC0wMQ=="</span>   <span class="cm">// safe concurrent delete
+</span>
+<span class="cm"># Cascading delete via nav property</span>
+<span class="kw">DELETE</span> /odata/v4/Orders(1001)/Items(3) <span class="op">HTTP/1.1</span></pre></div>
+<div class="rb"><div class="rb-bar ok"><div class="rb-dot" style="background:var(--green)"></div><span class="rb-lbl" style="color:var(--green)">204 No Content</span><span class="rb-note">Entity deleted — no body returned</span></div><div class="rb-body"><pre><span class='cm'>// 204 No Content — success, empty body</span></pre></div></div>
+</div></div>
+</div>
+<div class="section" id="s8"><div class="sec-hd"><div class="sec-n">8</div><div class="sec-title">Functions &amp; Actions</div></div>
+<div class="sec-sub">Custom operations beyond basic CRUD</div>
+<div class="lesson"><div class="lesson-hd"><span class="lesson-ico">&#x1f9e9;</span><div><div class="lesson-title">Functions vs Actions — the difference</div><div class="lesson-desc">Functions are GET (side-effect free). Actions are POST (may modify data).</div></div></div><div class="lesson-body">
+<div class="ref-wrap"><table class="ref-tbl"><tr><th></th><th>Function</th><th>Action</th></tr><tr><td>HTTP method</td><td>GET</td><td>POST</td></tr><tr><td>Side effects</td><td>None (safe, idempotent)</td><td>May modify data</td></tr><tr><td>Parameters</td><td>In URL</td><td>In request body (JSON)</td></tr><tr><td>Can be composed</td><td>Yes (in $filter, $orderby)</td><td>No</td></tr><tr><td>Example</td><td>Calculate discount price</td><td>Process payment, send email</td></tr></table></div>
+</div></div>
+<div class="lesson"><div class="lesson-hd"><span class="lesson-ico">&#x1f527;</span><div><div class="lesson-title">Bound vs Unbound Functions/Actions</div><div class="lesson-desc">Bound = operates on a specific entity/set. Unbound = standalone operation.</div></div></div><div class="lesson-body">
+<div class="cb"><div class="cb-bar"><span class="cb-file">functions.url</span><span class="cb-tag url">URL</span></div><pre><span class="cm"># Unbound function (standalone, like a static method)</span>
+<span class="st">GET /odata/v4/GetTopProducts(count=5)</span>
+
+<span class="cm"># Bound function on entity type (like instance method)</span>
+<span class="st">GET /odata/v4/Products(101)/GetRelatedProducts()</span>
+
+<span class="cm"># Bound function on entity set (operates on the whole collection)</span>
+<span class="st">GET /odata/v4/Products/GetProductsByCategory(category='Electronics')</span>
+
+<span class="cm"># Function composable with query options</span>
+<span class="st">GET /odata/v4/Products/GetMostExpensive()?$select=Name,Price&amp;$top=3</span>
+
+<span class="cm"># Unbound action (POST, parameters in body)</span>
+<span class="kw">POST</span> /odata/v4/SendConfirmationEmail
+<span class="pk">Content-Type:</span> application/json
+{ "orderId": 1001, "email": "customer@example.com" }
+
+<span class="cm"># Bound action on single entity</span>
+<span class="kw">POST</span> /odata/v4/Orders(1001)/ProcessPayment
+{ "paymentMethod": "UPI", "amount": 79999 }</pre></div>
+<div class="rb"><div class="rb-bar ok"><div class="rb-dot" style="background:var(--green)"></div><span class="rb-lbl" style="color:var(--green)">200 OK</span><span class="rb-note">GetTopProducts function response</span></div><div class="rb-body"><pre>{
+  <span class="pk">"@odata.context"</span>: <span class="st">".../$metadata#Collection(MyService.Product)"</span>,
+  <span class="pk">"value"</span>: [
+    { <span class="pk">"Id"</span>: <span class="nm">102</span>, <span class="pk">"Name"</span>: <span class="st">"MacBook Air"</span>,  <span class="pk">"Price"</span>: <span class="nm">114999</span> },
+    { <span class="pk">"Id"</span>: <span class="nm">107</span>, <span class="pk">"Name"</span>: <span class="st">"iPhone 15 Pro"</span>, <span class="pk">"Price"</span>: <span class="nm">134900</span> }
+  ]
+}</pre></div></div>
+</div></div>
+</div>
+<div class="section" id="s9"><div class="sec-hd"><div class="sec-n">9</div><div class="sec-title">$batch — Batch Requests</div></div>
+<div class="sec-sub">Multiple operations in one HTTP round-trip. Critical for mobile and SAP Fiori.</div>
+<div class="lesson"><div class="lesson-hd"><span class="lesson-ico">&#x1f4e6;</span><div><div class="lesson-title">Why Batch?</div><div class="lesson-desc">Mobile networks are slow. Each HTTP request has latency overhead. $batch bundles multiple requests into one.</div></div></div><div class="lesson-body">
+<div class="callout info"><span>&#x1f4a1;</span><div>SAP Fiori apps heavily use $batch. When a user saves a complex form with master-detail data, SAP generates a $batch with dozens of operations. This reduces roundtrips from N to 1, dramatically improving perceived performance on mobile networks.</div></div>
+<div class="cb"><div class="cb-bar"><span class="cb-file">batch.http</span><span class="cb-tag http">HTTP</span></div><pre><span class="kw">POST</span> /odata/v4/$batch <span class="op">HTTP/1.1</span>
+<span class="tp">Content-Type:</span> <span class="st">multipart/mixed; boundary=batch_abc123</span>
+<span class="tp">OData-Version:</span> <span class="st">4.0</span>
+
+--batch_abc123
+Content-Type: application/http
+
+<span class="kw">GET</span> /odata/v4/Products(101) HTTP/1.1
+Accept: application/json
+
+--batch_abc123
+Content-Type: application/http
+
+<span class="kw">GET</span> /odata/v4/Customers?$filter=Segment eq 'Premium' HTTP/1.1
+Accept: application/json
+
+--batch_abc123
+Content-Type: multipart/mixed; boundary=changeset_xyz  <span class="cm">// atomic group</span>
+
+--changeset_xyz
+Content-Type: application/http
+
+<span class="kw">PATCH</span> /odata/v4/Products(101) HTTP/1.1
+Content-Type: application/json
+{"Price": 75000}
+
+--changeset_xyz
+Content-Type: application/http
+
+<span class="kw">POST</span> /odata/v4/AuditLog HTTP/1.1
+Content-Type: application/json
+{"Action": "PriceUpdate", "ProductId": 101}
+
+--changeset_xyz--
+--batch_abc123--</pre></div>
+<div class="callout tip"><span>&#x2705;</span><div><strong>Changesets = atomic groups:</strong> Operations inside a <code>changeset</code> boundary are treated as a single transaction. If the PATCH fails, the AuditLog POST also rolls back. Operations outside changesets (the plain GET requests above) are independent.</div></div>
+<div class="rb"><div class="rb-bar ok"><div class="rb-dot" style="background:var(--green)"></div><span class="rb-lbl" style="color:var(--green)">200 OK</span><span class="rb-note">Batch response — one response per sub-request</span></div><div class="rb-body"><pre>Content-Type: multipart/mixed; boundary=batchresponse_abc
+
+--batchresponse_abc
+Content-Type: application/http
+
+HTTP/1.1 <span class="hi2">200 OK</span>
+{ "Id": 101, "Name": "iPhone 15", "Price": 79999 }
+
+--batchresponse_abc
+Content-Type: application/http
+
+HTTP/1.1 <span class="hi2">200 OK</span>
+{ "value": [{"Id":1,"Name":"Aditya Kumar"}, ...] }
+
+--batchresponse_abc
+Content-Type: multipart/mixed; boundary=changesetresponse_xyz
+
+--changesetresponse_xyz
+HTTP/1.1 <span class="hi2">204 No Content</span>
+--changesetresponse_xyz
+HTTP/1.1 <span class="hi2">201 Created</span>
+{"Id": 500, "Action": "PriceUpdate"}
+
+--batchresponse_abc--</pre></div></div>
+<div class="callout info"><span>&#x1f4a1;</span><div><strong>JSON batch format (v4):</strong> OData v4 also supports a cleaner JSON batch format instead of multipart/mixed. Check if your server supports <code>Content-Type: application/json</code> for $batch — it's much easier to generate and parse programmatically.</div></div>
+</div></div>
+</div>
+<div class="section" id="s10"><div class="sec-hd"><div class="sec-n">10</div><div class="sec-title">OData v2 vs v4</div></div>
+<div class="sec-sub">Key differences you'll encounter in SAP and enterprise environments</div>
+<div class="lesson"><div class="lesson-hd"><span class="lesson-ico">&#x1f4ca;</span><div><div class="lesson-title">Side-by-Side Comparison</div><div class="lesson-desc">The most important differences with concrete URL and response examples.</div></div></div><div class="lesson-body">
+<div class="ref-wrap"><table class="ref-tbl"><tr><th>Feature</th><th>OData v2</th><th>OData v4</th></tr><tr><td>Default format</td><td>AtomPub XML</td><td>JSON (preferred)</td></tr><tr><td>JSON metadata</td><td>Verbose (d:, results:)</td><td>@odata.* annotations</td></tr><tr><td>Null values</td><td>Omitted or <code>null</code></td><td>Omitted by default</td></tr><tr><td>Actions</td><td>Not supported</td><td>POST to action URL</td></tr><tr><td>Functions</td><td>Limited</td><td>Full composable functions</td></tr><tr><td>Singletons</td><td>Not supported</td><td>Supported</td></tr><tr><td>Date type</td><td><code>datetime'2024-01-01T00:00:00'</code></td><td><code>2024-01-01T00:00:00Z</code> (ISO 8601)</td></tr><tr><td>Any/All lambda</td><td>Not supported</td><td><code>Items/any(i: ...)</code></td></tr><tr><td>$count in URL</td><td><code>$inlinecount=allpages</code></td><td><code>$count=true</code></td></tr><tr><td>in operator</td><td>Not supported</td><td><code>Category in ('a','b')</code></td></tr><tr><td>Collection count</td><td><code>/Products/$count</code></td><td><code>/Products/$count</code></td></tr><tr><td>Containment</td><td>Not supported</td><td><code>ContainmentPath</code></td></tr><tr><td>SAP usage</td><td>NetWeaver Gateway, Fiori 1.x</td><td>SAP CAP, S/4HANA Cloud, Fiori Elements 2</td></tr></table></div>
+</div></div>
+<div class="lesson"><div class="lesson-hd"><span class="lesson-ico">&#x1f4bb;</span><div><div class="lesson-title">v2 vs v4 Request/Response — Real diff</div><div class="lesson-desc">The same query looks very different between versions.</div></div></div><div class="lesson-body">
+<div class="cmp"><div class="cmp-side"><div class="cmp-lbl v2">OData v2 — XML default + d: wrapper</div>
+<div class="cb" style="border:none;border-radius:0"><pre style="font-size:12px"><span class="cm"># v2 URL — $inlinecount instead of $count</span>
+GET /sap/opu/odata/sap/MY_SERVICE_SRV
+  /ProductSet?$inlinecount=allpages
+  &amp;$top=2&amp;$format=json
+
+<span class="cm">// v2 JSON Response:</span>
+{
+  "d": {
+    "__count": "47",
+    "results": [
+      {
+        "__metadata": {
+          "id": "...ProductSet('101')",
+          "type": "MY_SERVICE.Product",
+          "etag": "W/\"abc\""
+        },
+        "Id": "101",
+        "Name": "iPhone 15",
+        "Price": "79999.00",
+        "CreatedAt": "/Date(1705276800000)/"
+      }
+    ]
+  }
+}</pre></div></div>
+<div class="cmp-side"><div class="cmp-lbl v4">OData v4 — JSON-first, clean @odata annotations</div>
+<div class="cb" style="border:none;border-radius:0"><pre style="font-size:12px"><span class="cm"># v4 URL — $count=true</span>
+GET /odata/v4/Products
+  ?$count=true
+  &amp;$top=2
+
+<span class="cm">// v4 JSON Response:</span>
+{
+  "@odata.context": ".../$metadata#Products",
+  "@odata.count": 47,
+  "value": [
+    {
+      "@odata.etag": "W/\"abc\"",
+      "Id": 101,
+      "Name": "iPhone 15",
+      "Price": 79999.00,
+      "CreatedAt": "2024-01-15T00:00:00Z"
+    }
+  ]
+}</pre></div></div></div>
+<div class="callout warn"><span>&#x26a0;&#xfe0f;</span><div><strong>SAP v2 date format:</strong> OData v2 returns dates as <code>/Date(milliseconds)/</code> (Unix epoch in ms). Parse with <code>new Date(parseInt(val.replace('/Date(','').replace(')/','')))</code> or use SAP UI5's <code>ODataUtils.parseValue()</code>.</div></div>
+</div></div>
+</div>
+<div class="section" id="s11"><div class="sec-hd"><div class="sec-n">11</div><div class="sec-title">Error Handling</div></div>
+<div class="sec-sub">OData error format, HTTP status codes, inner errors</div>
+<div class="lesson"><div class="lesson-hd"><span class="lesson-ico">&#x1f6a8;</span><div><div class="lesson-title">Standard OData Error Format</div><div class="lesson-desc">Every OData error follows the same JSON structure. Always check error.code, not just HTTP status.</div></div></div><div class="lesson-body">
+<div class="rb"><div class="rb-bar err"><div class="rb-dot" style="background:var(--red)"></div><span class="rb-lbl" style="color:var(--red)">400 Bad Request</span><span class="rb-note">Malformed $filter expression</span></div><div class="rb-body"><pre>{
+  <span class="pk">"error"</span>: {
+    <span class="pk">"code"</span>:    <span class="st">"BadRequest"</span>,
+    <span class="pk">"message"</span>: <span class="st">"Invalid $filter expression: unexpected token ''Electronics'' at position 25."</span>,
+    <span class="pk">"target"</span>:  <span class="st">"$filter"</span>,        <span class="cm">// which parameter caused the error</span>
+    <span class="pk">"details"</span>: [           <span class="cm">// multiple validation errors</span>
+      {
+        <span class="pk">"code"</span>:    <span class="st">"InvalidOperator"</span>,
+        <span class="pk">"message"</span>: <span class="st">"Use eq instead of = for equality comparison"</span>,
+        <span class="pk">"target"</span>:  <span class="st">"Price"</span>
+      }
+    ],
+    <span class="pk">"innererror"</span>: {        <span class="cm">// server-side debug info (dev only)</span>
+      <span class="pk">"message"</span>:    <span class="st">"System.FormatException: ..."</span>,
+      <span class="pk">"stacktrace"</span>: <span class="st">"at OData.Parser.ParseFilter..."</span>
+    }
+  }
+}</pre></div></div>
+<div class="ref-wrap"><table class="ref-tbl"><tr><th>HTTP Status</th><th>OData meaning</th><th>Common cause</th></tr><tr><td>200 OK</td><td>Successful read</td><td>GET request succeeded</td></tr><tr><td>201 Created</td><td>Entity created</td><td>POST succeeded, returns new entity</td></tr><tr><td>204 No Content</td><td>Update/delete succeeded</td><td>PATCH, PUT, DELETE with no body returned</td></tr><tr><td>400 Bad Request</td><td>Malformed request</td><td>Invalid $filter syntax, wrong types</td></tr><tr><td>401 Unauthorized</td><td>Not authenticated</td><td>Missing/expired auth token</td></tr><tr><td>403 Forbidden</td><td>Not authorised</td><td>Authenticated but no permission</td></tr><tr><td>404 Not Found</td><td>Entity/set not found</td><td>Wrong key, wrong entity set name</td></tr><tr><td>405 Method Not Allowed</td><td>HTTP verb not supported</td><td>POST to read-only entity set</td></tr><tr><td>409 Conflict</td><td>Constraint violation</td><td>Duplicate key, FK violation</td></tr><tr><td>412 Precondition Failed</td><td>ETag mismatch</td><td>Optimistic concurrency conflict</td></tr><tr><td>422 Unprocessable</td><td>Validation error</td><td>Business rule violation</td></tr><tr><td>429 Too Many Requests</td><td>Rate limited</td><td>Exceed API call quota</td></tr><tr><td>501 Not Implemented</td><td>Feature not supported</td><td>$filter function not implemented by server</td></tr></table></div>
+</div></div>
+</div>
+<div class="section" id="s12"><div class="sec-hd"><div class="sec-n">12</div><div class="sec-title">Security Patterns</div></div>
+<div class="sec-sub">Authentication, authorisation, injection prevention</div>
+<div class="lesson"><div class="lesson-hd"><span class="lesson-ico">&#x1f510;</span><div><div class="lesson-title">Authentication Methods for OData</div><div class="lesson-desc">OData itself is auth-agnostic — your HTTP stack handles it.</div></div></div><div class="lesson-body">
+<div class="ref-wrap"><table class="ref-tbl"><tr><th>Method</th><th>How it works</th><th>Used in</th></tr><tr><td>Bearer Token (OAuth 2.0)</td><td><code>Authorization: Bearer eyJ...</code> header. Token from IDP.</td><td>SAP BTP, Azure AD, Okta</td></tr><tr><td>Basic Auth</td><td><code>Authorization: Basic base64(user:pass)</code>. <strong>Only over HTTPS!</strong></td><td>Legacy, internal tools</td></tr><tr><td>API Key</td><td>Custom header <code>X-API-Key: abc123</code> or query param.</td><td>Simple APIs, dev keys</td></tr><tr><td>SAP CSRF Token</td><td>SAP requires fetching a CSRF token first (GET with X-CSRF-Token: Fetch), then sending it back on mutating requests.</td><td>All SAP OData v2 write ops</td></tr><tr><td>Client Certificates (mTLS)</td><td>Client presents TLS certificate for authentication.</td><td>B2B integrations</td></tr><tr><td>SAML 2.0</td><td>Enterprise SSO via assertion.</td><td>SAP enterprise scenarios</td></tr></table></div>
+<div class="cb"><div class="cb-bar"><span class="cb-file">auth.http</span><span class="cb-tag http">HTTP</span></div><pre><span class="cm"># Step 1 (SAP): Fetch CSRF token before any write operation</span>
+<span class="kw">GET</span> /sap/opu/odata/sap/MY_SERVICE_SRV/ <span class="op">HTTP/1.1</span>
+<span class="tp">X-CSRF-Token:</span> <span class="st">Fetch</span>
+<span class="tp">Authorization:</span> <span class="st">Bearer eyJhbGci...</span>
+
+<span class="cm">--- Response includes: X-CSRF-Token: abc123xyz ---</span>
+
+<span class="cm"># Step 2: Use CSRF token in write request</span>
+<span class="kw">POST</span> /sap/opu/odata/sap/MY_SERVICE_SRV/ProductSet <span class="op">HTTP/1.1</span>
+<span class="tp">X-CSRF-Token:</span> <span class="st">abc123xyz</span>
+<span class="tp">Authorization:</span> <span class="st">Bearer eyJhbGci...</span>
+<span class="tp">Content-Type:</span> <span class="st">application/json</span>
+
+{ "Name": "New Product", "Price": "9999" }</pre></div>
+</div></div>
+<div class="lesson"><div class="lesson-hd"><span class="lesson-ico">&#x1f6e1;&#xfe0f;</span><div><div class="lesson-title">OData Injection Prevention</div><div class="lesson-desc">$filter expressions are user-supplied. Never build them with string concatenation.</div></div></div><div class="lesson-body">
+<div class="cmp"><div class="cmp-side"><div class="cmp-lbl bad">&#x274c; Vulnerable — string concatenation</div>
+<div class="cb" style="border:none;border-radius:0"><pre style="font-size:12px"><span class="cm">// JavaScript — NEVER do this</span>
+const userInput = "x' or 1 eq 1 or Name eq '";
+const url = `/odata/v4/Products`
+  + `?$filter=Name eq '${userInput}'`;
+
+<span class="cm">// Results in:</span>
+<span class="cm">// $filter=Name eq 'x' or 1 eq 1 or Name eq ''</span>
+<span class="cm">// Returns ALL products — data leak!</span></pre></div></div>
+<div class="cmp-side"><div class="cmp-lbl good">&#x2705; Safe — proper encoding</div>
+<div class="cb" style="border:none;border-radius:0"><pre style="font-size:12px"><span class="cm">// Encode single quotes by doubling them</span>
+function odataString(val) {
+  return "'"
+    + val.replace(/'/g, "''")
+    + "'";
+}
+
+const safe = odataString(userInput);
+// Input: x' or 1 eq 1
+// Output: 'x'' or 1 eq 1'
+
+<span class="cm">// Use OData client libraries:</span>
+<span class="cm">// SAP UI5: ODataUtils</span>
+<span class="cm">// .NET: Microsoft.OData.Client</span>
+<span class="cm">// JavaScript: odata-query npm package</span></pre></div></div></div>
+</div></div>
+</div>
+<div class="section" id="s13"><div class="sec-hd"><div class="sec-n">13</div><div class="sec-title">Real-World Patterns</div></div>
+<div class="sec-sub">Common production scenarios with complete request/response examples</div>
+<div class="lesson"><div class="lesson-hd"><span class="lesson-ico">&#x1f6d2;</span><div><div class="lesson-title">Pattern 1: E-commerce Product Listing Page</div><div class="lesson-desc">Filter + sort + paginate + count in one request. Power BI / Fiori list report pattern.</div></div></div><div class="lesson-body">
+<div class="cb"><div class="cb-bar"><span class="cb-file">pattern_listing.url</span><span class="cb-tag url">URL</span></div><pre><span class="cm"># Real product listing: category filter + price sort + page 2 + total count</span>
+<span class="st">GET /odata/v4/Products
+  ?$select=Id,Name,Price,Category,InStock
+  &amp;$filter=Category eq 'Electronics' and InStock eq true and Price le 100000
+  &amp;$orderby=Price desc
+  &amp;$top=10
+  &amp;$skip=10
+  &amp;$count=true</span></pre></div>
+<div class="rb"><div class="rb-bar ok"><div class="rb-dot" style="background:var(--green)"></div><span class="rb-lbl" style="color:var(--green)">200 OK</span><span class="rb-note">Page 2 of Electronics products with total count</span></div><div class="rb-body"><pre>{
+  <span class="pk">"@odata.count"</span>: <span class="nm">23</span>,
+  <span class="pk">"value"</span>: [
+    { <span class="pk">"Id"</span>:<span class="nm">101</span>, <span class="pk">"Name"</span>:<span class="st">"iPhone 15"</span>, <span class="pk">"Price"</span>:<span class="nm">79999</span>, <span class="pk">"InStock"</span>:<span class="kw">true</span> },
+    <span class="cm">// ... 9 more</span>
+  ],
+  <span class="pk">"@odata.nextLink"</span>: <span class="st">"...?$skip=20&amp;$top=10&amp;..."</span>
+}</pre></div></div>
+</div></div>
+<div class="lesson"><div class="lesson-hd"><span class="lesson-ico">&#x1f4ca;</span><div><div class="lesson-title">Pattern 2: SAP Fiori Master-Detail — $expand to avoid round trips</div><div class="lesson-desc">Single call fetches order header + all line items + product info.</div></div></div><div class="lesson-body">
+<div class="cb"><div class="cb-bar"><span class="cb-file">pattern_masterdetail.url</span><span class="cb-tag url">URL</span></div><pre><span class="cm"># Fetch order with all items + product details in one call</span>
+<span class="st">GET /odata/v4/Orders(1001)
+  ?$select=Id,OrderDate,Status,TotalAmt
+  &amp;$expand=
+    Customer($select=Id,Name,City),
+    Items(
+      $select=Id,Qty,UnitPrice;
+      $expand=Product($select=Name,Category)
+    )</span></pre></div>
+<div class="rb"><div class="rb-bar ok"><div class="rb-dot" style="background:var(--green)"></div><span class="rb-lbl" style="color:var(--green)">200 OK</span><span class="rb-note">Complete order in one HTTP call — no N+1</span></div><div class="rb-body"><pre>{
+  <span class="pk">"Id"</span>: <span class="nm">1001</span>, <span class="pk">"Status"</span>: <span class="st">"delivered"</span>, <span class="pk">"TotalAmt"</span>: <span class="nm">79999</span>,
+  <span class="pk">"Customer"</span>: { <span class="pk">"Id"</span>:<span class="nm">1</span>, <span class="pk">"Name"</span>:<span class="st">"Aditya Kumar"</span>, <span class="pk">"City"</span>:<span class="st">"Mumbai"</span> },
+  <span class="pk">"Items"</span>: [
+    {
+      <span class="pk">"Id"</span>:<span class="nm">1</span>, <span class="pk">"Qty"</span>:<span class="nm">1</span>, <span class="pk">"UnitPrice"</span>:<span class="nm">79999</span>,
+      <span class="pk">"Product"</span>: { <span class="pk">"Name"</span>:<span class="st">"iPhone 15"</span>, <span class="pk">"Category"</span>:<span class="st">"Electronics"</span> }
+    }
+  ]
+}</pre></div></div>
+</div></div>
+<div class="lesson"><div class="lesson-hd"><span class="lesson-ico">&#x1f504;</span><div><div class="lesson-title">Pattern 3: Delta Queries — Sync only changed data</div><div class="lesson-desc">Efficiently sync a local cache: first full load, then only changes.</div></div></div><div class="lesson-body">
+<div class="cb"><div class="cb-bar"><span class="cb-file">pattern_delta.url</span><span class="cb-tag url">URL</span></div><pre><span class="cm"># Step 1: Initial full sync — request delta tracking</span>
+<span class="st">GET /odata/v4/Products?$deltatoken=initial</span>
+
+<span class="cm">// Response includes @odata.deltaLink:</span>
+<span class="cm">// "@odata.deltaLink": "...?$deltatoken=abc123" </span>
+
+<span class="cm"># Step 2: Later — only fetch changes since last sync</span>
+<span class="st">GET /odata/v4/Products?$deltatoken=abc123</span></pre></div>
+<div class="rb"><div class="rb-bar ok"><div class="rb-dot" style="background:var(--green)"></div><span class="rb-lbl" style="color:var(--green)">200 OK</span><span class="rb-note">Only changed and deleted products returned</span></div><div class="rb-body"><pre>{
+  <span class="pk">"value"</span>: [
+    { <span class="pk">"Id"</span>: <span class="nm">101</span>, <span class="pk">"Price"</span>: <span class="nm">74999</span> },   <span class="cm">// changed</span>
+    { <span class="pk">"@removed"</span>: { <span class="pk">"reason"</span>: <span class="st">"deleted"</span> }, <span class="pk">"Id"</span>: <span class="nm">55</span> }  <span class="cm">// deleted</span>
+  ],
+  <span class="pk">"@odata.deltaLink"</span>: <span class="st">"...?$deltatoken=xyz789"</span>  <span class="cm">// save for next sync</span>
+}</pre></div></div>
+</div></div>
+</div>
+<div class="section" id="s14"><div class="sec-hd"><div class="sec-n">14</div><div class="sec-title">Complete Cheatsheet &amp; Q&amp;A</div></div>
+<div class="sec-sub">Quick reference for every concept in this guide</div>
+<h3>&#x1f517; URL Patterns Quick Reference</h3>
+<div class="ref-wrap"><table class="ref-tbl"><tr><th>Pattern</th><th>URL</th><th>Description</th></tr><tr><td>Entity set</td><td><code>/Products</code></td><td>All products</td></tr><tr><td>Single entity</td><td><code>/Products(42)</code></td><td>Product with Id=42</td></tr><tr><td>String key</td><td><code>/Products('ABC')</code></td><td>String key</td></tr><tr><td>Composite key</td><td><code>/OrderItems(OrderId=1,LineId=2)</code></td><td>Composite primary key</td></tr><tr><td>Navigation</td><td><code>/Products(42)/Supplier</code></td><td>Supplier of product 42</td></tr><tr><td>Nav collection</td><td><code>/Products(42)/Tags</code></td><td>Tags of product 42</td></tr><tr><td>Property value</td><td><code>/Products(42)/Name/$value</code></td><td>Raw string value (no JSON)</td></tr><tr><td>Count</td><td><code>/Products/$count</code></td><td>Integer count only</td></tr><tr><td>Metadata</td><td><code>/$metadata</code></td><td>CSDL XML service contract</td></tr><tr><td>Service root</td><td><code>/</code></td><td>Entity set discovery list</td></tr><tr><td>Function</td><td><code>/Products/GetByCategory(cat='Electronics')</code></td><td>Unbound function</td></tr><tr><td>Bound function</td><td><code>/Products(42)/GetRelated()</code></td><td>Function on entity</td></tr><tr><td>Action</td><td><code>POST /Orders(1)/ProcessPayment</code></td><td>Bound action (POST)</td></tr><tr><td>Batch</td><td><code>POST /$batch</code></td><td>Multiple ops in one request</td></tr></table></div>
+<h3 style="margin-top:24px">&#x1f9e0; $filter Cheatsheet</h3>
+<div class="cheat-grid">
+<div class="cheat"><div class="cheat-kw">eq / ne / gt / ge / lt / le</div><div class="cheat-desc">Comparison operators</div><div class="cheat-ex"><code>Price gt 1000 and Stock le 5</code></div></div>
+<div class="cheat"><div class="cheat-kw">and / or / not</div><div class="cheat-desc">Logical operators</div><div class="cheat-ex"><code>not (Status eq 'cancelled')</code></div></div>
+<div class="cheat"><div class="cheat-kw">in (v4.01)</div><div class="cheat-desc">Set membership</div><div class="cheat-ex"><code>Category in ('Books','Grocery')</code></div></div>
+<div class="cheat"><div class="cheat-kw">contains / startswith / endswith</div><div class="cheat-desc">String matching</div><div class="cheat-ex"><code>contains(Name,'Pro')</code></div></div>
+<div class="cheat"><div class="cheat-kw">tolower / toupper</div><div class="cheat-desc">Case-insensitive match</div><div class="cheat-ex"><code>tolower(Name) eq 'iphone 15'</code></div></div>
+<div class="cheat"><div class="cheat-kw">year / month / day</div><div class="cheat-desc">Date parts</div><div class="cheat-ex"><code>year(OrderDate) eq 2024</code></div></div>
+<div class="cheat"><div class="cheat-kw">now()</div><div class="cheat-desc">Current datetime</div><div class="cheat-ex"><code>OrderDate ge now()</code></div></div>
+<div class="cheat"><div class="cheat-kw">any(i: ...)</div><div class="cheat-desc">Collection: at least one</div><div class="cheat-ex"><code>Items/any(i: i/Price gt 500)</code></div></div>
+<div class="cheat"><div class="cheat-kw">all(i: ...)</div><div class="cheat-desc">Collection: every one</div><div class="cheat-ex"><code>Items/all(i: i/InStock eq true)</code></div></div>
+<div class="cheat"><div class="cheat-kw">not Items/any()</div><div class="cheat-desc">Empty collection</div><div class="cheat-ex"><code>not Orders/any()</code></div></div>
+<div class="cheat"><div class="cheat-kw">null check</div><div class="cheat-desc">Property is null</div><div class="cheat-ex"><code>Email eq null</code></div></div>
+<div class="cheat"><div class="cheat-kw">Arithmetic</div><div class="cheat-desc">Math in filter</div><div class="cheat-ex"><code>(Price mul 1.18) lt 10000</code></div></div>
+</div>
+<h3 style="margin-top:24px">&#x2753; Interview &amp; Real-World Q&amp;A</h3>
+<div class="qa">
+<div class="qa-item"><div class="qa-q">What is OData and why would you use it over plain REST?</div><div class="qa-a">OData is an OASIS-standard protocol for querying and manipulating data over HTTP. Unlike plain REST where every endpoint needs custom filter/sort/pagination logic, OData standardises these operations via URL query options ($filter, $orderby, $top, $skip, $expand). Clients can query what they need without new endpoints. Best for enterprise/BI scenarios, SAP, and data-driven apps.</div></div>
+<div class="qa-item"><div class="qa-q">What is $metadata and why does it matter?</div><div class="qa-a">GET /$metadata returns a CSDL XML document describing all entity types, their properties, data types, navigation properties, functions, and actions. It's the service's self-describing contract. Tools like Power BI, SAP UI5, and Microsoft OData clients auto-generate type-safe code from $metadata. It eliminates manual API documentation drift.</div></div>
+<div class="qa-item"><div class="qa-q">What's the difference between $filter and $search?</div><div class="qa-a"><code>$filter</code> is exact/logical matching with full boolean expressions: <code>Price gt 100</code>. <code>$search</code> is semantic full-text search across searchable properties — like a search box. Use $filter for programmatic queries with exact values, $search for user-typed search terms. They can be combined.</div></div>
+<div class="qa-item"><div class="qa-q">How do ETags work in OData?</div><div class="qa-a">ETags are concurrency tokens. When you GET an entity, you receive <code>@odata.etag</code>. When you PATCH or DELETE, send that value in <code>If-Match: W/"abc"</code>. If another client changed the entity since your read, the server returns <code>412 Precondition Failed</code> instead of silently overwriting. Use <code>If-Match: *</code> to skip the check.</div></div>
+<div class="qa-item"><div class="qa-q">Why does SAP OData v2 require a CSRF token?</div><div class="qa-a">SAP NetWeaver Gateway requires a Cross-Site Request Forgery token for all write operations (POST, PATCH, DELETE). First GET the service root with <code>X-CSRF-Token: Fetch</code> to receive a token. Then include that token as <code>X-CSRF-Token: {token}</code> on all write requests. SAP UI5 ODataModel handles this automatically.</div></div>
+<div class="qa-item"><div class="qa-q">What is the any() lambda operator and when do you use it?</div><div class="qa-a"><code>any()</code> filters entities based on whether at least one item in a related collection matches a condition. Example: <code>Orders/any(o: o/TotalAmt gt 10000)</code> returns customers who placed at least one order over ₹10,000. Without lambdas, this would require a subquery or client-side filtering.</div></div>
+<div class="qa-item"><div class="qa-q">What is $batch and when should you use it?</div><div class="qa-a">$batch bundles multiple HTTP requests into a single multipart HTTP call. Use it when: loading a master-detail page (fetch order + line items + customer in one call), saving a complex form with multiple entity changes, or in mobile apps where latency is high. Operations in a changeset boundary are atomic — all or nothing.</div></div>
+<div class="qa-item"><div class="qa-q">PATCH vs PUT in OData — which should you use?</div><div class="qa-a">Always PATCH for updates. PATCH is partial — only the properties you send are updated. PUT replaces the entire entity — omitted properties become null/default, which can silently corrupt data. PUT is only useful when you explicitly want to clear fields by omitting them.</div></div>
+</div>
+</div>
+</div>
+<div class="footer">&#x1f310; OData Deep Dive &nbsp;&middot;&nbsp; Built for Sairam &nbsp;&middot;&nbsp; Covers OData v2 &amp; v4 &nbsp;&middot;&nbsp; Protocol &bull; Query Options &bull; CRUD &bull; Batching &bull; Security</div>
+</body></html>

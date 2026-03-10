@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SQL Deep Dive — Real Table Examples</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080c10;--bg2:#0e1420;--bg3:#131a26;--bg4:#1a2236;
+  --border:#1e2d45;--text:#d4e2f4;--text2:#7a95b8;--text3:#48617e;
+  --accent:#4f9eff;--green:#34d399;--orange:#fb923c;
+  --purple:#a78bfa;--red:#f87171;--yellow:#fbbf24;--cyan:#22d3ee;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:Inter,sans-serif;font-size:14.5px;line-height:1.65}
+
+/* HERO */
+.hero{background:linear-gradient(160deg,#080c10,#0a1220 50%,#0b1525);border-bottom:1px solid var(--border);padding:70px 32px 56px;text-align:center;position:relative;overflow:hidden}
+.hero::after{content:"";position:absolute;inset:0;background:radial-gradient(ellipse 600px 250px at 50% -40px,rgba(79,158,255,.07),transparent 70%);pointer-events:none}
+.eyebrow{display:inline-block;background:rgba(79,158,255,.08);border:1px solid rgba(79,158,255,.2);color:var(--accent);font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:6px 16px;border-radius:100px;margin-bottom:24px;font-family:"JetBrains Mono",monospace}
+.hero h1{font-family:Syne,sans-serif;font-size:clamp(2.2rem,6vw,4rem);font-weight:800;letter-spacing:-1px;line-height:1.1;margin-bottom:10px;background:linear-gradient(135deg,#d4e2f4 30%,#4f9eff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-sub{color:var(--text2);font-size:15px;max-width:680px;margin:0 auto 20px;line-height:1.7}
+.chips{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
+.chip{background:var(--bg3);border:1px solid var(--border);color:var(--text2);font-size:12px;padding:4px 12px;border-radius:100px;font-family:"JetBrains Mono",monospace}
+
+/* NAV */
+.nav{position:sticky;top:0;z-index:99;background:rgba(8,12,16,.93);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:0 20px;display:flex;overflow-x:auto;scrollbar-width:none}
+.nav::-webkit-scrollbar{display:none}
+.nav a{color:var(--text3);text-decoration:none;font-size:12.5px;font-weight:500;padding:13px 12px;white-space:nowrap;border-bottom:2px solid transparent;transition:all .2s}
+.nav a:hover{color:var(--accent);border-bottom-color:var(--accent)}
+
+/* LAYOUT */
+.wrap{max-width:1060px;margin:0 auto;padding:0 20px 100px}
+.section{margin-top:52px}
+.sec-hd{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.sec-n{background:linear-gradient(135deg,var(--accent),#2d7de0);color:#fff;font-weight:700;font-size:12px;width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:"JetBrains Mono",monospace;flex-shrink:0}
+.sec-title{font-family:Syne,sans-serif;font-size:1.25rem;font-weight:700}
+.sec-sub{color:var(--text2);font-size:13px;margin-top:2px}
+
+/* DATA TABLES */
+.tables-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:4px}
+@media(max-width:700px){.tables-grid{grid-template-columns:1fr}}
+.tbl-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.tbl-card-hd{background:var(--bg3);border-bottom:1px solid var(--border);padding:12px 18px;display:flex;align-items:center;gap:10px}
+.tbl-card-name{font-family:Syne,sans-serif;font-weight:700;font-size:14px}
+.tbl-card-rows{color:var(--text2);font-size:12px;margin-left:auto}
+.tbl-card-body{overflow-x:auto}
+.dt{width:100%;border-collapse:collapse}
+.dt th{background:rgba(79,158,255,.06);color:var(--accent);font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;padding:8px 14px;text-align:left;border-bottom:1px solid var(--border);font-family:"JetBrains Mono",monospace}
+.dt td{padding:8px 14px;font-family:"JetBrains Mono",monospace;font-size:12.5px;border-bottom:1px solid rgba(30,45,69,.6)}
+.dt tr:last-child td{border-bottom:none}
+.dt tr:hover td{background:rgba(255,255,255,.015)}
+.tbl-note{padding:10px 16px;font-size:12px;color:var(--text3);border-top:1px solid var(--border)}
+.pk{color:var(--yellow)}.fk{color:var(--purple)}
+.vn{color:var(--orange)}.vs{color:var(--cyan)}.vnull{color:var(--text3);font-style:italic}.vd{color:var(--purple)}
+
+/* LESSON */
+.lesson{background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:18px}
+.lesson-hd{background:var(--bg3);border-bottom:1px solid var(--border);padding:14px 20px;display:flex;align-items:flex-start;gap:12px}
+.lesson-icon{font-size:1.3rem;flex-shrink:0;margin-top:2px}
+.lesson-title{font-weight:700;font-size:14.5px;margin-bottom:3px}
+.lesson-desc{color:var(--text2);font-size:13px;line-height:1.5}
+.lesson-body{padding:20px}
+
+/* CODE BLOCK */
+.cb{background:#060a0f;border:1px solid var(--border);border-radius:10px 10px 0 0;overflow:hidden}
+.cb-bar{background:var(--bg4);border-bottom:1px solid var(--border);padding:7px 14px;display:flex;align-items:center;justify-content:space-between}
+.cb-file{font-family:"JetBrains Mono",monospace;font-size:11.5px;color:var(--text2)}
+.cb-tag{font-family:"JetBrains Mono",monospace;font-size:10px;background:rgba(79,158,255,.1);color:var(--accent);border:1px solid rgba(79,158,255,.2);padding:2px 8px;border-radius:4px}
+.cb pre{padding:14px 18px;overflow-x:auto;font-family:"JetBrains Mono",monospace;font-size:12.5px;line-height:1.75;color:#c9d1d9}
+.kw{color:#ff7b72}.fn{color:#d2a8ff}.st{color:#a5d6ff}.nm{color:#f0883e}.cm{color:#3d5a7a;font-style:italic}.op{color:#79c0ff}
+
+/* RESULT */
+.rb{border:1px solid var(--border);border-top:none;border-radius:0 0 10px 10px;overflow:hidden;margin-bottom:16px}
+.rb-bar{background:linear-gradient(90deg,rgba(52,211,153,.08),rgba(52,211,153,.02));border-bottom:1px solid rgba(52,211,153,.15);padding:7px 14px;display:flex;align-items:center;gap:8px}
+.rb-dot{width:7px;height:7px;background:var(--green);border-radius:50%;flex-shrink:0}
+.rb-lbl{font-size:11px;font-weight:600;color:var(--green);font-family:"JetBrains Mono",monospace}
+.rb-cnt{font-size:11px;color:var(--text3);margin-left:auto;font-family:"JetBrains Mono",monospace}
+.rb-body{overflow-x:auto;background:var(--bg2)}
+.rt{width:100%;border-collapse:collapse;min-width:280px}
+.rt th{background:var(--bg3);color:var(--text2);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;padding:8px 14px;text-align:left;border-bottom:1px solid var(--border);font-family:"JetBrains Mono",monospace;white-space:nowrap}
+.rt td{padding:8px 14px;border-bottom:1px solid rgba(30,45,69,.5);white-space:nowrap;font-family:"JetBrains Mono",monospace;font-size:12.5px}
+.rt tr:last-child td{border-bottom:none}
+.rt tr:hover td{background:rgba(79,158,255,.025)}
+.hi{background:rgba(79,158,255,.12);color:var(--accent);border-radius:4px;padding:1px 6px}
+.warn{background:rgba(251,191,36,.1);color:var(--yellow);border-radius:4px;padding:1px 6px}
+
+/* CALLOUT */
+.callout{border-radius:8px;padding:11px 14px;margin:12px 0;font-size:13.5px;display:flex;gap:10px;align-items:flex-start;line-height:1.6}
+.callout.tip{background:rgba(52,211,153,.05);border:1px solid rgba(52,211,153,.2);color:var(--green)}
+.callout.info{background:rgba(79,158,255,.05);border:1px solid rgba(79,158,255,.2);color:var(--accent)}
+.callout.warn{background:rgba(251,191,36,.05);border:1px solid rgba(251,191,36,.2);color:var(--yellow)}
+.callout.danger{background:rgba(248,113,113,.05);border:1px solid rgba(248,113,113,.2);color:var(--red)}
+.callout strong{font-weight:700;color:inherit}
+
+/* JOIN CARDS */
+.join-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px;margin:14px 0}
+.jc{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center}
+.jvenn{position:relative;height:56px;width:96px;margin:0 auto 10px}
+.jc-name{font-weight:700;font-size:13px;margin-bottom:4px;font-family:Syne,sans-serif}
+.jc-rule{color:var(--text2);font-size:12px;line-height:1.4}
+
+/* WINDOW TABLE */
+.win-wrap{border:1px solid var(--border);border-radius:10px;overflow:hidden;margin:12px 0}
+.win-hd{background:var(--bg4);border-bottom:1px solid var(--border);padding:8px 14px;font-size:12px;color:var(--text2);font-weight:600}
+.wt{width:100%;border-collapse:collapse}
+.wt th{background:rgba(79,158,255,.07);color:var(--accent);font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;padding:7px 12px;border-bottom:1px solid var(--border);font-family:"JetBrains Mono",monospace}
+.wt td{padding:7px 12px;font-family:"JetBrains Mono",monospace;font-size:12px;border-bottom:1px solid rgba(30,45,69,.5)}
+.wt tr:last-child td{border-bottom:none}
+.p1{background:rgba(79,158,255,.07);border-left:3px solid var(--accent)}
+.p2{background:rgba(167,139,250,.06);border-left:3px solid var(--purple)}
+.p3{background:rgba(52,211,153,.05);border-left:3px solid var(--green)}
+
+/* INDEX VISUAL */
+.idx-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:12px 0}
+@media(max-width:640px){.idx-grid{grid-template-columns:1fr}}
+.idx-box{background:var(--bg3);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.idx-hd{padding:9px 14px;font-size:12px;font-weight:700;border-bottom:1px solid var(--border)}
+.idx-hd.s{background:rgba(248,113,113,.06);color:var(--red)}
+.idx-hd.f{background:rgba(52,211,153,.06);color:var(--green)}
+.idx-body{padding:12px;display:flex;flex-direction:column;gap:4px}
+.ir{display:flex;align-items:center;gap:8px;padding:5px 9px;border-radius:6px;font-family:"JetBrains Mono",monospace;font-size:12px}
+.ir.bad{background:rgba(248,113,113,.06);border:1px solid rgba(248,113,113,.15);color:var(--red)}
+.ir.skip{background:rgba(30,45,69,.3);border:1px solid var(--border);color:var(--text3);text-decoration:line-through}
+.ir.good{background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.2);color:var(--green);font-weight:700}
+.ir.ok{background:rgba(79,158,255,.06);border:1px solid rgba(79,158,255,.2);color:var(--accent)}
+.ir.neutral{background:var(--bg4);border:1px solid var(--border);color:var(--text2)}
+
+/* COMPARE */
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border-radius:10px;overflow:hidden;margin:12px 0}
+@media(max-width:660px){.cmp{grid-template-columns:1fr}}
+.cmp-side{background:var(--bg2)}
+.cmp-lbl{padding:8px 14px;font-size:12px;font-weight:700;border-bottom:1px solid var(--border)}
+.cmp-lbl.bad{background:rgba(248,113,113,.06);color:var(--red)}
+.cmp-lbl.good{background:rgba(52,211,153,.06);color:var(--green)}
+.cmp-side .cb{border:none;border-radius:0}
+
+/* REF TABLE */
+.ref-wrap{border:1px solid var(--border);border-radius:8px;overflow:hidden;margin:12px 0}
+.ref-tbl{width:100%;border-collapse:collapse}
+.ref-tbl th{background:var(--bg4);color:var(--text2);font-size:11.5px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:8px 14px;border-bottom:1px solid var(--border)}
+.ref-tbl td{padding:8px 14px;font-size:13px;border-bottom:1px solid rgba(30,45,69,.5)}
+.ref-tbl tr:last-child td{border-bottom:none}
+.ref-tbl tr:hover td{background:rgba(255,255,255,.01)}
+.ref-tbl code{background:var(--bg4);color:var(--orange);font-family:"JetBrains Mono",monospace;font-size:11.5px;padding:1px 6px;border-radius:4px}
+
+/* FLOW */
+.flow{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:16px;margin:12px 0}
+.flow-title{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:1.5px;font-weight:600;margin-bottom:12px}
+.flow-steps{display:flex;flex-direction:column;gap:5px}
+.fs{display:flex;align-items:flex-start;gap:10px;background:var(--bg4);border:1px solid var(--border);border-radius:8px;padding:10px 12px}
+.fn-n{background:var(--accent);color:#000;font-weight:700;font-size:11px;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:"JetBrains Mono",monospace}
+.fb{flex:1}.f-name{font-weight:600;font-size:13px}.f-detail{color:var(--text2);font-size:12.5px;margin-top:1px}
+.fa{text-align:center;color:var(--text3);font-size:11px;padding:1px 0}
+
+/* CHEAT */
+.cheat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
+.cheat{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:13px 15px}
+.cheat-kw{font-family:"JetBrains Mono",monospace;font-size:13px;color:var(--accent);font-weight:700;margin-bottom:4px}
+.cheat-desc{color:var(--text2);font-size:13px;line-height:1.5}
+
+/* QA */
+.qa{display:flex;flex-direction:column;gap:10px}
+.qa-item{background:var(--bg3);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.qa-q{padding:11px 14px;font-weight:600;font-size:13.5px;color:var(--accent);background:rgba(79,158,255,.04);border-bottom:1px solid var(--border)}
+.qa-q::before{content:"Q  ";font-family:"JetBrains Mono",monospace;font-size:10px;color:var(--text3)}
+.qa-a{padding:11px 14px;font-size:13.5px;color:var(--text2);line-height:1.7}
+.qa-a code{background:var(--bg4);color:var(--orange);font-family:"JetBrains Mono",monospace;font-size:12px;padding:1px 6px;border-radius:4px}
+
+p{color:var(--text2);font-size:13.5px;line-height:1.7;margin-bottom:10px}
+p:last-child{margin-bottom:0}
+strong{color:var(--text);font-weight:600}
+h3{font-size:15px;font-weight:700;margin:20px 0 10px;font-family:Syne,sans-serif}
+h3:first-child{margin-top:0}
+hr{border:none;border-top:1px solid var(--border);margin:22px 0}
+.footer{text-align:center;color:var(--text3);font-size:13px;padding:48px 20px;border-top:1px solid var(--border);margin-top:80px}
+</style></head><body>
+<div class="hero"><div style="position:relative;z-index:1">
+<div class="eyebrow">&#x1f5c3;&#xfe0f; SQL Deep Dive</div>
+<h1>SQL &mdash; Zero to Production</h1>
+<p class="hero-sub">Every concept explained using the <strong>same employees &amp; departments table</strong>. Write the query &rarr; see the exact output. No guessing.</p>
+<div class="chips">
+<span class="chip">SELECT &amp; WHERE</span><span class="chip">JOINs</span><span class="chip">GROUP BY</span><span class="chip">CTEs</span><span class="chip">Window Functions</span><span class="chip">Indexes</span><span class="chip">Transactions</span><span class="chip">EXPLAIN</span>
+</div></div></div>
+<nav class="nav">
+<a href="#s0">&#x1f4cb; The Tables</a>
+<a href="#s1">SELECT &amp; WHERE</a>
+<a href="#s2">JOINs</a>
+<a href="#s3">GROUP BY</a>
+<a href="#s4">CTEs &amp; Subqueries</a>
+<a href="#s5">Window Functions</a>
+<a href="#s6">DML</a>
+<a href="#s7">Indexes</a>
+<a href="#s8">Transactions</a>
+<a href="#s9">EXPLAIN</a>
+<a href="#s10">Cheatsheet</a>
+</nav>
+<div class="wrap">
+<div class="section" id="s0">
+<div class="sec-hd"><div class="sec-n">0</div>
+<div><div class="sec-title">The Example Tables</div><div class="sec-sub">All queries on this page use exactly these two tables. Memorise them.</div></div></div>
+<div class="tables-grid">
+<div class="tbl-card">
+<div class="tbl-card-hd"><span style="font-size:1.1rem">&#x1f464;</span><span class="tbl-card-name">employees</span><span class="tbl-card-rows">9 rows</span></div>
+<div class="tbl-card-body"><table class="dt">
+<tr><th>emp_id</th><th>name</th><th>dept_id</th><th>salary</th><th>manager_id</th><th>joined</th></tr>
+<tr><td class="pk">1</td><td class="vs">Alice</td><td class="fk">10</td><td class="vn">90000</td><td class="vnull">NULL</td><td class="vd">2019-03-12</td></tr>
+<tr><td class="pk">2</td><td class="vs">Bob</td><td class="fk">10</td><td class="vn">72000</td><td class="vn">1</td><td class="vd">2020-07-01</td></tr>
+<tr><td class="pk">3</td><td class="vs">Carol</td><td class="fk">10</td><td class="vn">68000</td><td class="vn">1</td><td class="vd">2021-01-15</td></tr>
+<tr><td class="pk">4</td><td class="vs">Dave</td><td class="fk">20</td><td class="vn">95000</td><td class="vnull">NULL</td><td class="vd">2018-11-20</td></tr>
+<tr><td class="pk">5</td><td class="vs">Eve</td><td class="fk">20</td><td class="vn">88000</td><td class="vn">4</td><td class="vd">2020-02-10</td></tr>
+<tr><td class="pk">6</td><td class="vs">Frank</td><td class="fk">20</td><td class="vn">76000</td><td class="vn">4</td><td class="vd">2022-06-05</td></tr>
+<tr><td class="pk">7</td><td class="vs">Grace</td><td class="fk">30</td><td class="vn">110000</td><td class="vnull">NULL</td><td class="vd">2017-09-01</td></tr>
+<tr><td class="pk">8</td><td class="vs">Hank</td><td class="fk">30</td><td class="vn">82000</td><td class="vn">7</td><td class="vd">2021-11-30</td></tr>
+<tr><td class="pk">9</td><td class="vs">Ivy</td><td class="vnull fk">NULL</td><td class="vn">61000</td><td class="vnull">NULL</td><td class="vd">2023-04-20</td></tr>
+</table></div>
+<div class="tbl-note">&#x1f7e1; emp_id = Primary Key &nbsp; &#x1f7e3; dept_id = Foreign Key &nbsp; &#x26a0;&#xfe0f; Ivy has no department</div>
+</div>
+<div class="tbl-card">
+<div class="tbl-card-hd"><span style="font-size:1.1rem">&#x1f3e2;</span><span class="tbl-card-name">departments</span><span class="tbl-card-rows">4 rows</span></div>
+<div class="tbl-card-body"><table class="dt">
+<tr><th>dept_id</th><th>dept_name</th><th>city</th><th>budget</th></tr>
+<tr><td class="pk">10</td><td class="vs">Engineering</td><td class="vs">Bangalore</td><td class="vn">500000</td></tr>
+<tr><td class="pk">20</td><td class="vs">Marketing</td><td class="vs">Mumbai</td><td class="vn">300000</td></tr>
+<tr><td class="pk">30</td><td class="vs">Finance</td><td class="vs">Delhi</td><td class="vn">450000</td></tr>
+<tr><td class="pk">40</td><td class="vs">HR</td><td class="vs">Chennai</td><td class="vn">200000</td></tr>
+</table></div>
+<div class="tbl-note">&#x26a0;&#xfe0f; dept_id=40 (HR) has zero employees &mdash; great for JOIN demos</div>
+</div></div>
+</div>
+<div class="section" id="s1">
+<div class="sec-hd"><div class="sec-n">1</div>
+<div><div class="sec-title">SELECT &amp; WHERE</div><div class="sec-sub">Filtering rows, comparing values, handling NULLs, CASE expressions</div></div></div>
+<div class="lesson"><div class="lesson-hd"><span class="lesson-icon">&#x1f50d;</span>
+<div><div class="lesson-title">Basic SELECT with WHERE &amp; ORDER BY</div><div class="lesson-desc">Fetch specific columns, filter rows, sort results.</div></div></div>
+<div class="lesson-body">
+<div class="cb"><div class="cb-bar"><span class="cb-file">basic_select.sql</span><span class="cb-tag">SQL</span></div>
+<pre><span class="kw">SELECT</span> name, salary, dept_id
+<span class="kw">FROM</span>   employees
+<span class="kw">WHERE</span>  salary &gt; <span class="nm">75000</span>
+<span class="kw">ORDER BY</span> salary <span class="kw">DESC</span>;</pre></div>
+<div class="rb"><div class="rb-bar"><div class="rb-dot"></div>
+<span class="rb-lbl">OUTPUT</span>
+<span class="rb-cnt">salary > 75000 &nbsp;&middot;&nbsp; 6 rows</span></div>
+<div class="rb-body"><table class="rt"><tr><th>name</th><th>salary</th><th>dept_id</th></tr><tr><td class="vs">Grace</td><td class="vn">110000</td><td class="vn">30</td></tr><tr><td class="vs">Dave</td><td class="vn">95000</td><td class="vn">20</td></tr><tr><td class="vs">Alice</td><td class="vn">90000</td><td class="vn">10</td></tr><tr><td class="vs">Eve</td><td class="vn">88000</td><td class="vn">20</td></tr><tr><td class="vs">Hank</td><td class="vn">82000</td><td class="vn">30</td></tr><tr><td class="vs">Frank</td><td class="vn">76000</td><td class="vn">20</td></tr></table></div></div>
+</div></div>
+<div class="lesson"><div class="lesson-hd"><span class="lesson-icon">&#x26a0;&#xfe0f;</span>
+<div><div class="lesson-title">IS NULL &mdash; the correct way to check for NULL</div><div class="lesson-desc">Never use = NULL. It always returns nothing. NULL = NULL is UNKNOWN, not TRUE.</div></div></div>
+<div class="lesson-body">
+<div class="cb"><div class="cb-bar"><span class="cb-file">null_check.sql</span><span class="cb-tag">SQL</span></div>
+<pre><span class="cm">-- Find top-level employees (no manager)</span>
+<span class="cm">-- WRONG: WHERE manager_id = NULL  &larr; returns 0 rows always!</span>
+<span class="cm">-- RIGHT:</span>
+<span class="kw">SELECT</span> name, manager_id
+<span class="kw">FROM</span>   employees
+<span class="kw">WHERE</span>  manager_id <span class="kw">IS NULL</span>;</pre></div>
+<div class="rb"><div class="rb-bar"><div class="rb-dot"></div>
+<span class="rb-lbl">OUTPUT</span>
+<span class="rb-cnt">No manager &nbsp;&middot;&nbsp; 4 rows</span></div>
+<div class="rb-body"><table class="rt"><tr><th>name</th><th>manager_id</th></tr><tr><td class="vs">Alice</td><td class="vnull">NULL</td></tr><tr><td class="vs">Dave</td><td class="vnull">NULL</td></tr><tr><td class="vs">Grace</td><td class="vnull">NULL</td></tr><tr><td class="vs">Ivy</td><td class="vnull">NULL</td></tr></table></div></div>
+</div></div>
+<div class="lesson"><div class="lesson-hd"><span class="lesson-icon">&#x1f3af;</span>
+<div><div class="lesson-title">CASE expression &mdash; SQL if-else</div><div class="lesson-desc">Categorise salary into bands. Works in SELECT, WHERE, ORDER BY.</div></div></div>
+<div class="lesson-body">
+<div class="cb"><div class="cb-bar"><span class="cb-file">case_expr.sql</span><span class="cb-tag">SQL</span></div>
+<pre><span class="kw">SELECT</span> name, salary,
+    <span class="kw">CASE</span>
+        <span class="kw">WHEN</span> salary &lt;  <span class="nm">75000</span> <span class="kw">THEN</span> <span class="st">'Junior'</span>
+        <span class="kw">WHEN</span> salary &lt;  <span class="nm">95000</span> <span class="kw">THEN</span> <span class="st">'Mid'</span>
+        <span class="kw">ELSE</span>                   <span class="st">'Senior'</span>
+    <span class="kw">END</span> <span class="kw">AS</span> band
+<span class="kw">FROM</span>  employees
+<span class="kw">ORDER BY</span> salary;</pre></div>
+<div class="rb"><div class="rb-bar"><div class="rb-dot"></div>
+<span class="rb-lbl">OUTPUT</span>
+<span class="rb-cnt">All employees, bucketed &nbsp;&middot;&nbsp; 9 rows</span></div>
+<div class="rb-body"><table class="rt"><tr><th>name</th><th>salary</th><th>band</th></tr><tr><td class="vs">Ivy</td><td class="vn">61000</td><td class="vs">Junior</td></tr><tr><td class="vs">Carol</td><td class="vn">68000</td><td class="vs">Junior</td></tr><tr><td class="vs">Bob</td><td class="vn">72000</td><td class="vs">Junior</td></tr><tr><td class="vs">Frank</td><td class="vn">76000</td><td class="vs">Mid</td></tr><tr><td class="vs">Hank</td><td class="vn">82000</td><td class="vs">Mid</td></tr><tr><td class="vs">Eve</td><td class="vn">88000</td><td class="vs">Mid</td></tr><tr><td class="vs">Alice</td><td class="vn">90000</td><td class="vs">Mid</td></tr><tr><td class="vs">Dave</td><td class="vn">95000</td><td class="vs">Senior</td></tr><tr><td class="vs">Grace</td><td class="vn">110000</td><td class="vs">Senior</td></tr></table></div></div>
+</div></div>
+</div>
+<div class="section" id="s2">
+<div class="sec-hd"><div class="sec-n">2</div>
+<div><div class="sec-title">JOINs</div><div class="sec-sub">See exactly which rows survive each join type using our tables</div></div></div>
+<div class="join-grid">
+<div class="jc"><div class="jvenn">
+  <div style="position:absolute;width:48px;height:48px;border-radius:50%;border:2px solid #4f9eff;background:rgba(79,158,255,.15);top:4px;left:0"></div>
+  <div style="position:absolute;width:48px;height:48px;border-radius:50%;border:2px solid #4f9eff;background:rgba(79,158,255,.15);top:4px;right:0"></div>
+  <div style="position:absolute;top:14px;left:24px;width:48px;height:28px;background:rgba(79,158,255,.4);border-radius:2px"></div>
+</div><div class="jc-name" style="color:var(--accent)">INNER JOIN</div><div class="jc-rule">Only rows matching in <strong>both</strong> tables</div></div>
+<div class="jc"><div class="jvenn">
+  <div style="position:absolute;width:48px;height:48px;border-radius:50%;border:2px solid var(--orange);background:rgba(251,146,60,.25);top:4px;left:0"></div>
+  <div style="position:absolute;width:48px;height:48px;border-radius:50%;border:2px solid var(--border);background:rgba(79,158,255,.08);top:4px;right:0"></div>
+</div><div class="jc-name" style="color:var(--orange)">LEFT JOIN</div><div class="jc-rule">All left rows + matched right (NULLs if no match)</div></div>
+<div class="jc"><div class="jvenn">
+  <div style="position:absolute;width:48px;height:48px;border-radius:50%;border:2px solid var(--green);background:rgba(52,211,153,.2);top:4px;left:0"></div>
+  <div style="position:absolute;width:48px;height:48px;border-radius:50%;border:2px solid var(--green);background:rgba(52,211,153,.2);top:4px;right:0"></div>
+</div><div class="jc-name" style="color:var(--green)">FULL OUTER</div><div class="jc-rule">All rows from both sides, NULLs where no match</div></div>
+<div class="jc"><div class="jvenn" style="height:44px">
+  <div style="position:absolute;top:2px;left:8px;width:80px;height:40px;background:rgba(251,191,36,.12);border:2px solid var(--yellow);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--yellow)">A &times; B</div>
+</div><div class="jc-name" style="color:var(--yellow)">CROSS JOIN</div><div class="jc-rule">Every row &times; every row. 9&times;4 = 36 rows!</div></div>
+<div class="jc"><div class="jvenn">
+  <div style="position:absolute;width:48px;height:48px;border-radius:50%;border:2px solid var(--cyan);background:rgba(34,211,238,.15);top:4px;left:4px"></div>
+  <div style="position:absolute;width:40px;height:40px;border-radius:50%;border:2px dashed var(--cyan);background:transparent;top:8px;right:4px"></div>
+</div><div class="jc-name" style="color:var(--cyan)">SELF JOIN</div><div class="jc-rule">Table joined to itself. Used for employee &rarr; manager</div></div>
+</div>
+<div class="lesson"><div class="lesson-hd"><span class="lesson-icon">&#x1f535;</span>
+<div><div class="lesson-title">INNER JOIN &mdash; only matched rows</div><div class="lesson-desc">Ivy (no dept) and HR dept (no employees) are both dropped.</div></div></div>
+<div class="lesson-body">
+<div class="cb"><div class="cb-bar"><span class="cb-file">inner_join.sql</span><span class="cb-tag">SQL</span></div>
+<pre><span class="kw">SELECT</span> e.name, e.salary, d.dept_name, d.city
+<span class="kw">FROM</span>   employees  e
+<span class="kw">JOIN</span>   departments d <span class="kw">ON</span> e.dept_id = d.dept_id
+<span class="kw">ORDER BY</span> e.name;</pre></div>
+<div class="rb"><div class="rb-bar"><div class="rb-dot"></div>
+<span class="rb-lbl">OUTPUT</span>
+<span class="rb-cnt">Ivy excluded (NULL dept) &middot; HR excluded (no employees) &nbsp;&middot;&nbsp; 8 rows</span></div>
+<div class="rb-body"><table class="rt"><tr><th>name</th><th>salary</th><th>dept_name</th><th>city</th></tr><tr><td class="vs">Alice</td><td class="vn">90000</td><td class="vs">Engineering</td><td class="vs">Bangalore</td></tr><tr><td class="vs">Bob</td><td class="vn">72000</td><td class="vs">Engineering</td><td class="vs">Bangalore</td></tr><tr><td class="vs">Carol</td><td class="vn">68000</td><td class="vs">Engineering</td><td class="vs">Bangalore</td></tr><tr><td class="vs">Dave</td><td class="vn">95000</td><td class="vs">Marketing</td><td class="vs">Mumbai</td></tr><tr><td class="vs">Eve</td><td class="vn">88000</td><td class="vs">Marketing</td><td class="vs">Mumbai</td></tr><tr><td class="vs">Frank</td><td class="vn">76000</td><td class="vs">Marketing</td><td class="vs">Mumbai</td></tr><tr><td class="vs">Grace</td><td class="vn">110000</td><td class="vs">Finance</td><td class="vs">Delhi</td></tr><tr><td class="vs">Hank</td><td class="vn">82000</td><td class="vs">Finance</td><td class="vs">Delhi</td></tr></table></div></div>
+</div></div>
+<div class="lesson"><div class="lesson-hd"><span class="lesson-icon">&#x1f7e0;</span>
+<div><div class="lesson-title">LEFT JOIN &mdash; keep all employees, even unassigned</div><div class="lesson-desc">Ivy appears with NULL dept. Use COALESCE for a fallback value.</div></div></div>
+<div class="lesson-body">
+<div class="cb"><div class="cb-bar"><span class="cb-file">left_join.sql</span><span class="cb-tag">SQL</span></div>
+<pre><span class="kw">SELECT</span>
+    e.name,
+    <span class="fn">COALESCE</span>(d.dept_name, <span class="st">'Unassigned'</span>) dept_name,
+    d.city
+<span class="kw">FROM</span>      employees  e
+<span class="kw">LEFT JOIN</span> departments d <span class="kw">ON</span> e.dept_id = d.dept_id
+<span class="kw">ORDER BY</span> e.name;</pre></div>
+<div class="rb"><div class="rb-bar"><div class="rb-dot"></div>
+<span class="rb-lbl">OUTPUT</span>
+<span class="rb-cnt">All 9 employees &middot; Ivy gets COALESCE fallback &nbsp;&middot;&nbsp; 9 rows</span></div>
+<div class="rb-body"><table class="rt"><tr><th>name</th><th>dept_name</th><th>city</th></tr><tr><td class="vs">Alice</td><td class="vs">Engineering</td><td class="vs">Bangalore</td></tr><tr><td class="vs">Bob</td><td class="vs">Engineering</td><td class="vs">Bangalore</td></tr><tr><td class="vs">Carol</td><td class="vs">Engineering</td><td class="vs">Bangalore</td></tr><tr><td class="vs">Dave</td><td class="vs">Marketing</td><td class="vs">Mumbai</td></tr><tr><td class="vs">Eve</td><td class="vs">Marketing</td><td class="vs">Mumbai</td></tr><tr><td class="vs">Frank</td><td class="vs">Marketing</td><td class="vs">Mumbai</td></tr><tr><td class="vs">Grace</td><td class="vs">Finance</td><td class="vs">Delhi</td></tr><tr><td class="vs">Hank</td><td class="vs">Finance</td><td class="vs">Delhi</td></tr><tr><td class="vs">Ivy</td><td class="warn">Unassigned</td><td class="vnull">NULL</td></tr></table></div></div>
+</div></div>
+<div class="lesson"><div class="lesson-hd"><span class="lesson-icon">&#x1f7e2;</span>
+<div><div class="lesson-title">FULL OUTER JOIN &mdash; expose orphans on both sides</div><div class="lesson-desc">Ivy (no dept) AND HR dept (no employees) both appear.</div></div></div>
+<div class="lesson-body">
+<div class="cb"><div class="cb-bar"><span class="cb-file">full_outer.sql</span><span class="cb-tag">SQL</span></div>
+<pre><span class="cm">-- Show only unmatched rows from BOTH sides</span>
+<span class="kw">SELECT</span> e.name, d.dept_name
+<span class="kw">FROM</span>            employees  e
+<span class="kw">FULL OUTER JOIN</span> departments d <span class="kw">ON</span> e.dept_id = d.dept_id
+<span class="kw">WHERE</span> e.emp_id <span class="kw">IS NULL</span> <span class="kw">OR</span> d.dept_id <span class="kw">IS NULL</span>;</pre></div>
+<div class="rb"><div class="rb-bar"><div class="rb-dot"></div>
+<span class="rb-lbl">OUTPUT</span>
+<span class="rb-cnt">Orphans only &mdash; no match on either side &nbsp;&middot;&nbsp; 2 rows</span></div>
+<div class="rb-body"><table class="rt"><tr><th>name</th><th>dept_name</th></tr><tr><td class="vs">Ivy</td><td class="vnull">NULL</td></tr><tr><td class="vnull">NULL</td><td class="vs">HR</td></tr></table></div></div>
+</div></div>
+<div class="lesson"><div class="lesson-hd"><span class="lesson-icon">&#x1f501;</span>
+<div><div class="lesson-title">SELF JOIN &mdash; employee with their manager name</div><div class="lesson-desc">Join employees to itself with two different aliases: e (employee) and m (manager).</div></div></div>
+<div class="lesson-body">
+<div class="cb"><div class="cb-bar"><span class="cb-file">self_join.sql</span><span class="cb-tag">SQL</span></div>
+<pre><span class="kw">SELECT</span>
+    e.name                                    AS employee,
+    <span class="fn">COALESCE</span>(m.name, <span class="st">'&mdash; Top Level'</span>) AS manager
+<span class="kw">FROM</span>      employees e
+<span class="kw">LEFT JOIN</span> employees m <span class="kw">ON</span> e.manager_id = m.emp_id
+<span class="kw">ORDER BY</span> manager <span class="kw">NULLS LAST</span>, e.name;</pre></div>
+<div class="rb"><div class="rb-bar"><div class="rb-dot"></div>
+<span class="rb-lbl">OUTPUT</span>
+<span class="rb-cnt">Each employee with manager name &nbsp;&middot;&nbsp; 9 rows</span></div>
+<div class="rb-body"><table class="rt"><tr><th>employee</th><th>manager</th></tr><tr><td class="vs">Bob</td><td class="vs">Alice</td></tr><tr><td class="vs">Carol</td><td class="vs">Alice</td></tr><tr><td class="vs">Eve</td><td class="vs">Dave</td></tr><tr><td class="vs">Frank</td><td class="vs">Dave</td></tr><tr><td class="vs">Hank</td><td class="vs">Grace</td></tr><tr><td class="vs">Alice</td><td class="warn">&mdash; Top Level</td></tr><tr><td class="vs">Dave</td><td class="warn">&mdash; Top Level</td></tr><tr><td class="vs">Grace</td><td class="warn">&mdash; Top Level</td></tr><tr><td class="vs">Ivy</td><td class="warn">&mdash; Top Level</td></tr></table></div></div>
+</div></div>
+</div>
+<div class="section" id="s3">
+<div class="sec-hd"><div class="sec-n">3</div>
+<div><div class="sec-title">GROUP BY &amp; Aggregations</div><div class="sec-sub">COUNT, SUM, AVG, MIN, MAX &mdash; computing stats per group</div></div></div>
+<div class="callout info"><span>&#x1f4a1;</span><div><strong>Execution order:</strong> WHERE filters rows &rarr; GROUP BY groups them &rarr; HAVING filters groups. You <em>cannot</em> use COUNT() or SUM() inside WHERE. Use HAVING for that.</div></div>
+<div class="lesson"><div class="lesson-hd"><span class="lesson-icon">&#x1f4ca;</span>
+<div><div class="lesson-title">Aggregate stats per department</div><div class="lesson-desc">headcount, average salary, min/max, total payroll &mdash; all in one query.</div></div></div>
+<div class="lesson-body">
+<div class="cb"><div class="cb-bar"><span class="cb-file">group_by.sql</span><span class="cb-tag">SQL</span></div>
+<pre><span class="kw">SELECT</span>
+    d.dept_name,
+    <span class="fn">COUNT</span>(e.emp_id)           headcount,
+    <span class="fn">ROUND</span>(<span class="fn">AVG</span>(e.salary), <span class="nm">0</span>)  avg_salary,
+    <span class="fn">MIN</span>(e.salary)             min_sal,
+    <span class="fn">MAX</span>(e.salary)             max_sal,
+    <span class="fn">SUM</span>(e.salary)             total_payroll
+<span class="kw">FROM</span>  employees  e
+<span class="kw">JOIN</span>  departments d <span class="kw">ON</span> e.dept_id = d.dept_id
+<span class="kw">GROUP BY</span> d.dept_name
+<span class="kw">HAVING</span>   <span class="fn">COUNT</span>(e.emp_id) &gt;= <span class="nm">2</span>   <span class="cm">-- filter groups, not rows</span>
+<span class="kw">ORDER BY</span> total_payroll <span class="kw">DESC</span>;</pre></div>
+<div class="rb"><div class="rb-bar"><div class="rb-dot"></div>
+<span class="rb-lbl">OUTPUT</span>
+<span class="rb-cnt">HR (0 employees) excluded by HAVING &nbsp;&middot;&nbsp; 3 rows</span></div>
+<div class="rb-body"><table class="rt"><tr><th>dept_name</th><th>headcount</th><th>avg_salary</th><th>min_sal</th><th>max_sal</th><th>total_payroll</th></tr><tr><td class="vs">Marketing</td><td class="vn">3</td><td class="vn">86333</td><td class="vn">76000</td><td class="vn">95000</td><td class="hi">259000</td></tr><tr><td class="vs">Engineering</td><td class="vn">3</td><td class="vn">76667</td><td class="vn">68000</td><td class="vn">90000</td><td class="hi">230000</td></tr><tr><td class="vs">Finance</td><td class="vn">2</td><td class="vn">96000</td><td class="vn">82000</td><td class="vn">110000</td><td class="hi">192000</td></tr></table></div></div>
+</div></div>
+</div>
+<div class="section" id="s4">
+<div class="sec-hd"><div class="sec-n">4</div>
+<div><div class="sec-title">Subqueries &amp; CTEs</div><div class="sec-sub">Scalar subqueries, correlated queries, WITH, Recursive CTE</div></div></div>
+<div class="lesson"><div class="lesson-hd"><span class="lesson-icon">&#x1f9ee;</span>
+<div><div class="lesson-title">Scalar Subquery &mdash; compare each row against a computed value</div><div class="lesson-desc">Find employees earning above the company average.</div></div></div>
+<div class="lesson-body">
+<div class="cb"><div class="cb-bar"><span class="cb-file">scalar_subquery.sql</span><span class="cb-tag">SQL</span></div>
+<pre><span class="kw">SELECT</span>
+    name, salary,
+    salary - (<span class="kw">SELECT</span> <span class="fn">ROUND</span>(<span class="fn">AVG</span>(salary),<span class="nm">0</span>) <span class="kw">FROM</span> employees) diff_from_avg
+<span class="kw">FROM</span>   employees
+<span class="kw">WHERE</span>  salary &gt; (<span class="kw">SELECT</span> <span class="fn">AVG</span>(salary) <span class="kw">FROM</span> employees)
+<span class="kw">ORDER BY</span> diff_from_avg <span class="kw">DESC</span>;
+<span class="cm">-- Company avg salary = 82,444</span></pre></div>
+<div class="rb"><div class="rb-bar"><div class="rb-dot"></div>
+<span class="rb-lbl">OUTPUT</span>
+<span class="rb-cnt">Above company average (82444) &nbsp;&middot;&nbsp; 4 rows</span></div>
+<div class="rb-body"><table class="rt"><tr><th>name</th><th>salary</th><th>diff_from_avg</th></tr><tr><td class="vs">Grace</td><td class="vn">110000</td><td class="hi">+27556</td></tr><tr><td class="vs">Dave</td><td class="vn">95000</td><td class="hi">+12556</td></tr><tr><td class="vs">Alice</td><td class="vn">90000</td><td class="hi">+7556</td></tr><tr><td class="vs">Eve</td><td class="vn">88000</td><td class="hi">+5556</td></tr></table></div></div>
+</div></div>
+<div class="lesson"><div class="lesson-hd"><span class="lesson-icon">&#x1f4ce;</span>
+<div><div class="lesson-title">CTE (WITH) &mdash; name your subqueries for readability</div><div class="lesson-desc">Compute dept averages first, then compare each employee against their own dept avg.</div></div></div>
+<div class="lesson-body">
+<div class="cb"><div class="cb-bar"><span class="cb-file">cte.sql</span><span class="cb-tag">SQL</span></div>
+<pre><span class="kw">WITH</span> dept_avg <span class="kw">AS</span> (
+    <span class="kw">SELECT</span> dept_id, <span class="fn">ROUND</span>(<span class="fn">AVG</span>(salary), <span class="nm">0</span>) avg_sal
+    <span class="kw">FROM</span>   employees
+    <span class="kw">WHERE</span>  dept_id <span class="kw">IS NOT NULL</span>
+    <span class="kw">GROUP BY</span> dept_id
+)
+<span class="kw">SELECT</span>
+    e.name, e.salary,
+    da.avg_sal                             dept_avg,
+    <span class="fn">ROUND</span>(e.salary - da.avg_sal, <span class="nm">0</span>)      vs_dept_avg
+<span class="kw">FROM</span>      employees e
+<span class="kw">JOIN</span>      dept_avg  da <span class="kw">ON</span> e.dept_id = da.dept_id
+<span class="kw">ORDER BY</span> vs_dept_avg <span class="kw">DESC</span>;</pre></div>
+<div class="rb"><div class="rb-bar"><div class="rb-dot"></div>
+<span class="rb-lbl">OUTPUT</span>
+<span class="rb-cnt">Each employee vs their dept average &mdash; Ivy excluded (no dept) &nbsp;&middot;&nbsp; 8 rows</span></div>
+<div class="rb-body"><table class="rt"><tr><th>name</th><th>salary</th><th>dept_avg</th><th>vs_dept_avg</th></tr><tr><td class="vs">Grace</td><td class="vn">110000</td><td class="vn">96000</td><td class="hi">+14000</td></tr><tr><td class="vs">Alice</td><td class="vn">90000</td><td class="vn">76667</td><td class="hi">+13333</td></tr><tr><td class="vs">Dave</td><td class="vn">95000</td><td class="vn">86333</td><td class="hi">+8667</td></tr><tr><td class="vs">Eve</td><td class="vn">88000</td><td class="vn">86333</td><td class="hi">+1667</td></tr><tr><td class="vs">Bob</td><td class="vn">72000</td><td class="vn">76667</td><td class="warn">-4667</td></tr><tr><td class="vs">Carol</td><td class="vn">68000</td><td class="vn">76667</td><td class="warn">-8667</td></tr><tr><td class="vs">Frank</td><td class="vn">76000</td><td class="vn">86333</td><td class="warn">-10333</td></tr><tr><td class="vs">Hank</td><td class="vn">82000</td><td class="vn">96000</td><td class="warn">-14000</td></tr></table></div></div>
+</div></div>
+<div class="lesson"><div class="lesson-hd"><span class="lesson-icon">&#x1f300;</span>
+<div><div class="lesson-title">Recursive CTE &mdash; walk the org hierarchy tree</div><div class="lesson-desc">Anchor at top-level managers, recursively find their reports.</div></div></div>
+<div class="lesson-body">
+<div class="cb"><div class="cb-bar"><span class="cb-file">recursive_cte.sql</span><span class="cb-tag">SQL</span></div>
+<pre><span class="kw">WITH RECURSIVE</span> org <span class="kw">AS</span> (
+    <span class="cm">-- Anchor: start from employees with no manager</span>
+    <span class="kw">SELECT</span> emp_id, name, manager_id, <span class="nm">0</span> depth
+    <span class="kw">FROM</span>   employees <span class="kw">WHERE</span> manager_id <span class="kw">IS NULL</span>
+    <span class="kw">AND</span>    dept_id <span class="kw">IS NOT NULL</span>
+
+    <span class="kw">UNION ALL</span>
+
+    <span class="cm">-- Recursive: add direct reports of current level</span>
+    <span class="kw">SELECT</span> e.emp_id, e.name, e.manager_id, o.depth+<span class="nm">1</span>
+    <span class="kw">FROM</span>   employees e
+    <span class="kw">JOIN</span>   org       o <span class="kw">ON</span> e.manager_id = o.emp_id
+)
+<span class="kw">SELECT</span> <span class="fn">REPEAT</span>(<span class="st">'&nbsp;&nbsp;'</span>, depth) || name org_chart, depth
+<span class="kw">FROM</span>  org <span class="kw">ORDER BY</span> emp_id;</pre></div>
+<div class="rb"><div class="rb-bar"><div class="rb-dot"></div>
+<span class="rb-lbl">OUTPUT</span>
+<span class="rb-cnt">Indented org tree &nbsp;&middot;&nbsp; 8 rows</span></div>
+<div class="rb-body"><table class="rt"><tr><th>org_chart</th><th>depth</th></tr><tr><td class="vs">Alice</td><td class="vn">0</td></tr><tr><td class="vs">&nbsp;&nbsp;Bob</td><td class="vn">1</td></tr><tr><td class="vs">&nbsp;&nbsp;Carol</td><td class="vn">1</td></tr><tr><td class="vs">Dave</td><td class="vn">0</td></tr><tr><td class="vs">&nbsp;&nbsp;Eve</td><td class="vn">1</td></tr><tr><td class="vs">&nbsp;&nbsp;Frank</td><td class="vn">1</td></tr><tr><td class="vs">Grace</td><td class="vn">0</td></tr><tr><td class="vs">&nbsp;&nbsp;Hank</td><td class="vn">1</td></tr></table></div></div>
+</div></div>
+</div>
+<div class="section" id="s5">
+<div class="sec-hd"><div class="sec-n">5</div>
+<div><div class="sec-title">Window Functions</div><div class="sec-sub">ROW_NUMBER &middot; RANK &middot; DENSE_RANK &middot; LAG &middot; LEAD &middot; Running Totals</div></div></div>
+<div class="callout tip"><span>&#x1f4a1;</span><div><strong>Key difference from GROUP BY:</strong> GROUP BY collapses 9 rows &rarr; 3 groups. Window functions keep all 9 rows AND add a computed column using a window of related rows. You cannot filter on window results in WHERE &mdash; wrap in a CTE first.</div></div>
+<div class="lesson"><div class="lesson-hd"><span class="lesson-icon">&#x1f3c6;</span>
+<div><div class="lesson-title">RANK vs DENSE_RANK vs ROW_NUMBER &mdash; side by side</div><div class="lesson-desc">All three rank salary per department. Watch how ties are handled.</div></div></div>
+<div class="lesson-body">
+<div class="cb"><div class="cb-bar"><span class="cb-file">ranking.sql</span><span class="cb-tag">SQL</span></div>
+<pre><span class="kw">SELECT</span>
+    name, dept_id, salary,
+    <span class="fn">ROW_NUMBER</span>() <span class="kw">OVER</span> (<span class="kw">PARTITION BY</span> dept_id <span class="kw">ORDER BY</span> salary <span class="kw">DESC</span>) row_num,
+    <span class="fn">RANK</span>()       <span class="kw">OVER</span> (<span class="kw">PARTITION BY</span> dept_id <span class="kw">ORDER BY</span> salary <span class="kw">DESC</span>) rnk,
+    <span class="fn">DENSE_RANK</span>() <span class="kw">OVER</span> (<span class="kw">PARTITION BY</span> dept_id <span class="kw">ORDER BY</span> salary <span class="kw">DESC</span>) dense_rnk
+<span class="kw">FROM</span>   employees
+<span class="kw">WHERE</span>  dept_id <span class="kw">IS NOT NULL</span>
+<span class="kw">ORDER BY</span> dept_id, salary <span class="kw">DESC</span>;</pre></div>
+<div class="win-wrap">
+<div class="win-hd">&#x1f3af; Coloured bands = PARTITION BY dept_id windows. Ranking restarts at 1 per partition.</div>
+<div style="overflow-x:auto"><table class="wt">
+<tr><th>name</th><th>dept_id</th><th>salary</th><th>row_num</th><th>rnk</th><th>dense_rnk</th></tr>
+<tr class="p1"><td class="vs">Alice</td><td class="vn">10</td><td class="vn">90000</td><td class="vn">1</td><td class="vn">1</td><td class="vn">1</td></tr>
+<tr class="p1"><td class="vs">Bob</td><td class="vn">10</td><td class="vn">72000</td><td class="vn">2</td><td class="vn">2</td><td class="vn">2</td></tr>
+<tr class="p1"><td class="vs">Carol</td><td class="vn">10</td><td class="vn">68000</td><td class="vn">3</td><td class="vn">3</td><td class="vn">3</td></tr>
+<tr class="p2"><td class="vs">Dave</td><td class="vn">20</td><td class="vn">95000</td><td class="vn">1</td><td class="vn">1</td><td class="vn">1</td></tr>
+<tr class="p2"><td class="vs">Eve</td><td class="vn">20</td><td class="vn">88000</td><td class="vn">2</td><td class="vn">2</td><td class="vn">2</td></tr>
+<tr class="p2"><td class="vs">Frank</td><td class="vn">20</td><td class="vn">76000</td><td class="vn">3</td><td class="vn">3</td><td class="vn">3</td></tr>
+<tr class="p3"><td class="vs">Grace</td><td class="vn">30</td><td class="vn">110000</td><td class="vn">1</td><td class="vn">1</td><td class="vn">1</td></tr>
+<tr class="p3"><td class="vs">Hank</td><td class="vn">30</td><td class="vn">82000</td><td class="vn">2</td><td class="vn">2</td><td class="vn">2</td></tr>
+</table></div></div>
+</div></div>
+<div class="lesson"><div class="lesson-hd"><span class="lesson-icon">&#x1f4c8;</span>
+<div><div class="lesson-title">LAG &amp; Running Total &mdash; trends over time</div><div class="lesson-desc">Compare each hire's salary to the previous hire. Cumulative payroll running total.</div></div></div>
+<div class="lesson-body">
+<div class="cb"><div class="cb-bar"><span class="cb-file">lag_running.sql</span><span class="cb-tag">SQL</span></div>
+<pre><span class="kw">SELECT</span>
+    name, joined, salary,
+    <span class="fn">LAG</span>(salary) <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> joined)          prev_salary,
+    salary - <span class="fn">LAG</span>(salary) <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> joined)  change,
+    <span class="fn">SUM</span>(salary)  <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> joined
+        <span class="kw">ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW</span>) running_total
+<span class="kw">FROM</span>   employees
+<span class="kw">ORDER BY</span> joined;</pre></div>
+<div class="rb"><div class="rb-bar"><div class="rb-dot"></div>
+<span class="rb-lbl">OUTPUT</span>
+<span class="rb-cnt">Ordered by hire date &nbsp;&middot;&nbsp; 9 rows</span></div>
+<div class="rb-body"><table class="rt"><tr><th>name</th><th>joined</th><th>salary</th><th>prev_salary</th><th>change</th><th>running_total</th></tr><tr><td class="vs">Grace</td><td class="vd">2017-09-01</td><td class="vn">110000</td><td class="vnull">NULL</td><td class="vnull">NULL</td><td class="vn">110000</td></tr><tr><td class="vs">Dave</td><td class="vd">2018-11-20</td><td class="vn">95000</td><td class="vn">110000</td><td class="warn">-15000</td><td class="vn">205000</td></tr><tr><td class="vs">Alice</td><td class="vd">2019-03-12</td><td class="vn">90000</td><td class="vn">95000</td><td class="warn">-5000</td><td class="vn">295000</td></tr><tr><td class="vs">Eve</td><td class="vd">2020-02-10</td><td class="vn">88000</td><td class="vn">90000</td><td class="warn">-2000</td><td class="vn">383000</td></tr><tr><td class="vs">Bob</td><td class="vd">2020-07-01</td><td class="vn">72000</td><td class="vn">88000</td><td class="warn">-16000</td><td class="vn">455000</td></tr><tr><td class="vs">Carol</td><td class="vd">2021-01-15</td><td class="vn">68000</td><td class="vn">72000</td><td class="warn">-4000</td><td class="vn">523000</td></tr><tr><td class="vs">Hank</td><td class="vd">2021-11-30</td><td class="vn">82000</td><td class="vn">68000</td><td class="hi">+14000</td><td class="vn">605000</td></tr><tr><td class="vs">Frank</td><td class="vd">2022-06-05</td><td class="vn">76000</td><td class="vn">82000</td><td class="warn">-6000</td><td class="vn">681000</td></tr><tr><td class="vs">Ivy</td><td class="vd">2023-04-20</td><td class="vn">61000</td><td class="vn">76000</td><td class="warn">-15000</td><td class="vn">742000</td></tr></table></div></div>
+</div></div>
+<div class="lesson"><div class="lesson-hd"><span class="lesson-icon">&#x1f947;</span>
+<div><div class="lesson-title">Top-N per group &mdash; highest paid per department</div><div class="lesson-desc">Cannot filter window results in WHERE. Use CTE wrapper.</div></div></div>
+<div class="lesson-body">
+<div class="cb"><div class="cb-bar"><span class="cb-file">top_n_per_group.sql</span><span class="cb-tag">SQL</span></div>
+<pre><span class="kw">WITH</span> ranked <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        e.name, d.dept_name, e.salary,
+        <span class="fn">DENSE_RANK</span>() <span class="kw">OVER</span> (
+            <span class="kw">PARTITION BY</span> e.dept_id
+            <span class="kw">ORDER BY</span> e.salary <span class="kw">DESC</span>
+        ) rnk
+    <span class="kw">FROM</span>  employees  e
+    <span class="kw">JOIN</span>  departments d <span class="kw">ON</span> e.dept_id = d.dept_id
+)
+<span class="kw">SELECT</span> name, dept_name, salary, rnk
+<span class="kw">FROM</span>   ranked
+<span class="kw">WHERE</span>  rnk &lt;= <span class="nm">2</span>   <span class="cm">-- top 2 earners per department</span>
+<span class="kw">ORDER BY</span> dept_name, rnk;</pre></div>
+<div class="rb"><div class="rb-bar"><div class="rb-dot"></div>
+<span class="rb-lbl">OUTPUT</span>
+<span class="rb-cnt">Top 2 per department &nbsp;&middot;&nbsp; 6 rows</span></div>
+<div class="rb-body"><table class="rt"><tr><th>name</th><th>dept_name</th><th>salary</th><th>rnk</th></tr><tr><td class="vs">Alice</td><td class="vs">Engineering</td><td class="vn">90000</td><td class="hi">1</td></tr><tr><td class="vs">Bob</td><td class="vs">Engineering</td><td class="vn">72000</td><td class="vn">2</td></tr><tr><td class="vs">Grace</td><td class="vs">Finance</td><td class="vn">110000</td><td class="hi">1</td></tr><tr><td class="vs">Hank</td><td class="vs">Finance</td><td class="vn">82000</td><td class="vn">2</td></tr><tr><td class="vs">Dave</td><td class="vs">Marketing</td><td class="vn">95000</td><td class="hi">1</td></tr><tr><td class="vs">Eve</td><td class="vs">Marketing</td><td class="vn">88000</td><td class="vn">2</td></tr></table></div></div>
+</div></div>
+</div>
+<div class="section" id="s6">
+<div class="sec-hd"><div class="sec-n">6</div>
+<div><div class="sec-title">INSERT &middot; UPDATE &middot; DELETE</div><div class="sec-sub">Modifying data &mdash; always use transactions for multi-step changes</div></div></div>
+<div class="lesson"><div class="lesson-hd"><span class="lesson-icon">&#x270f;&#xfe0f;</span>
+<div><div class="lesson-title">INSERT, UPDATE, DELETE with RETURNING</div><div class="lesson-desc">RETURNING shows you exactly what changed &mdash; no separate SELECT needed.</div></div></div>
+<div class="lesson-body">
+<div class="cb"><div class="cb-bar"><span class="cb-file">dml.sql</span><span class="cb-tag">SQL</span></div>
+<pre><span class="cm">-- INSERT a new employee</span>
+<span class="kw">INSERT INTO</span> employees (emp_id, name, dept_id, salary, joined)
+<span class="kw">VALUES</span> (<span class="nm">10</span>, <span class="st">'Jack'</span>, <span class="nm">10</span>, <span class="nm">71000</span>, <span class="st">'2024-01-10'</span>)
+<span class="kw">RETURNING</span> *;
+
+<span class="cm">-- UPDATE: 10% raise for Engineering</span>
+<span class="kw">UPDATE</span> employees
+<span class="kw">SET</span>    salary = <span class="fn">ROUND</span>(salary * <span class="nm">1.10</span>)
+<span class="kw">WHERE</span>  dept_id = <span class="nm">10</span>
+<span class="kw">RETURNING</span> name, salary <span class="kw">AS</span> new_salary;
+
+<span class="cm">-- UPSERT: insert or update on conflict</span>
+<span class="kw">INSERT INTO</span> employees (emp_id, name, dept_id, salary, joined)
+<span class="kw">VALUES</span> (<span class="nm">2</span>, <span class="st">'Bob'</span>, <span class="nm">10</span>, <span class="nm">80000</span>, <span class="st">'2020-07-01'</span>)
+<span class="kw">ON CONFLICT</span> (emp_id) <span class="kw">DO UPDATE SET</span> salary = EXCLUDED.salary
+<span class="kw">RETURNING</span> emp_id, name, salary;</pre></div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:4px">
+<div class="rb"><div class="rb-bar"><div class="rb-dot"></div><span class="rb-lbl">INSERT RETURNING</span><span class="rb-cnt">1 row</span></div>
+<div class="rb-body"><table class="rt">
+<tr><th>emp_id</th><th>name</th><th>salary</th></tr>
+<tr><td class="vn">10</td><td class="vs">Jack</td><td class="vn">71000</td></tr>
+</table></div></div>
+<div class="rb"><div class="rb-bar"><div class="rb-dot"></div><span class="rb-lbl">UPDATE RETURNING</span><span class="rb-cnt">3 rows</span></div>
+<div class="rb-body"><table class="rt">
+<tr><th>name</th><th>new_salary</th></tr>
+<tr><td class="vs">Alice</td><td class="hi">99000</td></tr>
+<tr><td class="vs">Bob</td><td class="hi">79200</td></tr>
+<tr><td class="vs">Carol</td><td class="hi">74800</td></tr>
+</table></div></div>
+<div class="rb"><div class="rb-bar"><div class="rb-dot"></div><span class="rb-lbl">UPSERT RETURNING</span><span class="rb-cnt">1 row</span></div>
+<div class="rb-body"><table class="rt">
+<tr><th>emp_id</th><th>name</th><th>salary</th></tr>
+<tr><td class="vn">2</td><td class="vs">Bob</td><td class="hi">80000</td></tr>
+</table></div></div>
+</div>
+</div></div>
+</div>
+<div class="section" id="s7">
+<div class="sec-hd"><div class="sec-n">7</div>
+<div><div class="sec-title">Indexes</div><div class="sec-sub">Sequential scan vs Index scan &mdash; visualised</div></div></div>
+<div class="lesson"><div class="lesson-hd"><span class="lesson-icon">&#x26a1;</span>
+<div><div class="lesson-title">How indexes speed up lookups</div><div class="lesson-desc">Without index: read every row. With index: jump directly. O(n) vs O(log n).</div></div></div>
+<div class="lesson-body">
+<div class="idx-grid">
+<div class="idx-box">
+<div class="idx-hd s">&#x274c; No Index &mdash; Sequential Scan (reads ALL rows)</div>
+<div class="idx-body">
+<div class="ir bad">Row 1: emp_id=1 &rarr; not 7, continue...</div>
+<div class="ir bad">Row 2: emp_id=2 &rarr; not 7, continue...</div>
+<div class="ir bad">Row 3: emp_id=3 &rarr; not 7, continue...</div>
+<div class="ir bad">Row 4: emp_id=4 &rarr; not 7, continue...</div>
+<div class="ir bad">Row 5: emp_id=5 &rarr; not 7, continue...</div>
+<div class="ir bad">Row 6: emp_id=6 &rarr; not 7, continue...</div>
+<div class="ir good">Row 7: emp_id=7 &rarr; &#x2713; FOUND!</div>
+<div class="ir bad">Row 8: emp_id=8 &rarr; still must check</div>
+<div class="ir bad">Row 9: emp_id=9 &rarr; done (read all 9)</div>
+<div style="margin-top:8px;font-size:12px;color:var(--red)">9 reads. With 1M rows &rarr; 1,000,000 reads</div>
+</div>
+</div>
+<div class="idx-box">
+<div class="idx-hd f">&#x2705; With B-Tree Index &mdash; Binary Search (log n)</div>
+<div class="idx-body">
+<div class="ir neutral">Index tree: [1 2 3 4 5 6 7 8 9]</div>
+<div class="ir ok">Check mid=5 &rarr; need higher half</div>
+<div class="ir ok">Check mid=7 &rarr; exact match! Get row pointer</div>
+<div class="ir good">Jump directly to Row 7 &#x2713;</div>
+<div class="ir skip">Rows 1,2,3,4,5,6,8,9 never read</div>
+<div class="ir skip">Rows 1,2,3,4,5,6,8,9 never read</div>
+<div class="ir skip">Rows 1,2,3,4,5,6,8,9 never read</div>
+<div class="ir skip">Rows 1,2,3,4,5,6,8,9 never read</div>
+<div style="margin-top:8px;font-size:12px;color:var(--green)">&sim;3 reads. With 1M rows &rarr; only &sim;20 reads!</div>
+</div>
+</div>
+</div>
+<div class="cb"><div class="cb-bar"><span class="cb-file">indexes.sql</span><span class="cb-tag">SQL</span></div>
+<pre><span class="cm">-- Basic index on frequently queried column</span>
+<span class="kw">CREATE INDEX</span> idx_dept    <span class="kw">ON</span> employees(dept_id);
+<span class="kw">CREATE INDEX</span> idx_salary  <span class="kw">ON</span> employees(salary);
+
+<span class="cm">-- Composite: order matters! Supports WHERE dept_id=? AND salary&gt;?</span>
+<span class="cm">-- Also supports WHERE dept_id=? alone (leftmost prefix rule)</span>
+<span class="cm">-- Does NOT help: WHERE salary&gt;? alone (skips first column)</span>
+<span class="kw">CREATE INDEX</span> idx_dept_sal <span class="kw">ON</span> employees(dept_id, salary);
+
+<span class="cm">-- Partial: only index high earners &mdash; smaller and faster</span>
+<span class="kw">CREATE INDEX</span> idx_high_sal <span class="kw">ON</span> employees(salary)
+    <span class="kw">WHERE</span> salary &gt; <span class="nm">80000</span>;
+
+<span class="cm">-- Covering: includes extra cols &rarr; no table row fetch needed</span>
+<span class="kw">CREATE INDEX</span> idx_covering <span class="kw">ON</span> employees(dept_id)
+    <span class="op">INCLUDE</span> (name, salary);
+
+<span class="cm">-- Check which plan is chosen</span>
+<span class="kw">EXPLAIN ANALYZE</span>
+<span class="kw">SELECT</span> name, salary <span class="kw">FROM</span> employees <span class="kw">WHERE</span> dept_id = <span class="nm">10</span>;</pre></div>
+</div></div>
+<div class="ref-wrap"><table class="ref-tbl">
+<tr><th>Scenario</th><th>Index?</th><th>Why</th></tr>
+<tr><td>Primary Key columns</td><td>&#x2705; Auto-created</td><td>Always indexed automatically</td></tr>
+<tr><td>Foreign Key columns (dept_id, manager_id)</td><td>&#x2705; Add manually</td><td>JOIN performance &mdash; critical</td></tr>
+<tr><td>Columns in WHERE frequently</td><td>&#x2705; Yes</td><td>Direct lookup benefit if high cardinality</td></tr>
+<tr><td>Boolean, status (2-3 values)</td><td>&#x274c; No</td><td>Optimizer skips index if &gt;5-10% rows match</td></tr>
+<tr><td>Heavily updated columns</td><td>&#x26a0;&#xfe0f; Careful</td><td>Every write pays index update cost</td></tr>
+<tr><td>Tables &lt; 10K rows</td><td>&#x274c; Skip</td><td>Full scan is faster than index overhead</td></tr>
+</table></div>
+</div>
+<div class="section" id="s8">
+<div class="sec-hd"><div class="sec-n">8</div>
+<div><div class="sec-title">Transactions &amp; ACID</div><div class="sec-sub">Atomicity &middot; Consistency &middot; Isolation &middot; Durability</div></div></div>
+<div class="lesson"><div class="lesson-hd"><span class="lesson-icon">&#x1f512;</span>
+<div><div class="lesson-title">Transfer budget between departments &mdash; atomically</div><div class="lesson-desc">If either UPDATE fails, both roll back. No partial state ever persists.</div></div></div>
+<div class="lesson-body">
+<div class="cb"><div class="cb-bar"><span class="cb-file">transaction.sql</span><span class="cb-tag">SQL</span></div>
+<pre><span class="kw">BEGIN</span>;  <span class="cm">-- start transaction</span>
+
+    <span class="cm">-- Step 1: Reduce Engineering budget by 50000</span>
+    <span class="kw">UPDATE</span> departments
+    <span class="kw">SET</span>    budget = budget - <span class="nm">50000</span>
+    <span class="kw">WHERE</span>  dept_id = <span class="nm">10</span>;
+
+    <span class="cm">-- Step 2: Add 50000 to Finance budget</span>
+    <span class="kw">UPDATE</span> departments
+    <span class="kw">SET</span>    budget = budget + <span class="nm">50000</span>
+    <span class="kw">WHERE</span>  dept_id = <span class="nm">30</span>;
+
+    <span class="cm">-- If Step 2 throws an error &rarr; ROLLBACK undoes Step 1 too</span>
+
+<span class="kw">COMMIT</span>;  <span class="cm">-- persist both changes atomically</span>
+
+<span class="cm">-- Verify</span>
+<span class="kw">SELECT</span> dept_name, budget <span class="kw">FROM</span> departments
+<span class="kw">WHERE</span>  dept_id <span class="kw">IN</span> (<span class="nm">10</span>, <span class="nm">30</span>);</pre></div>
+<div class="rb"><div class="rb-bar"><div class="rb-dot"></div>
+<span class="rb-lbl">OUTPUT</span>
+<span class="rb-cnt">After COMMIT &mdash; both changed or neither &nbsp;&middot;&nbsp; 2 rows</span></div>
+<div class="rb-body"><table class="rt"><tr><th>dept_name</th><th>budget</th></tr><tr><td class="vs">Engineering</td><td class="warn">450000</td></tr><tr><td class="vs">Finance</td><td class="hi">500000</td></tr></table></div></div>
+<div class="callout danger"><span>&#x1f6a8;</span><div><strong>Rollback scenario:</strong> If the Finance UPDATE fails, the ENTIRE transaction rolls back. Engineering stays at 500000. No half-transfers, no inconsistent state.</div></div>
+</div></div>
+</div>
+<div class="section" id="s9">
+<div class="sec-hd"><div class="sec-n">9</div>
+<div><div class="sec-title">EXPLAIN ANALYZE</div><div class="sec-sub">Read the query plan to diagnose slow queries</div></div></div>
+<div class="lesson"><div class="lesson-hd"><span class="lesson-icon">&#x1f50e;</span>
+<div><div class="lesson-title">Seq Scan vs Index Scan &mdash; what to look for</div><div class="lesson-desc">Run EXPLAIN ANALYZE before adding random indexes. Let the plan guide you.</div></div></div>
+<div class="lesson-body">
+<div class="cmp">
+<div class="cmp-side">
+<div class="cmp-lbl bad">&#x274c; No index &mdash; Seq Scan</div>
+<div class="cb" style="border-radius:0;border:none"><pre style="font-size:12px"><span class="kw">EXPLAIN ANALYZE</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> employees
+<span class="kw">WHERE</span>  salary &gt; <span class="nm">85000</span>;
+
+<span class="cm">-- Plan output:
+-- Seq Scan on employees
+--   cost=0.00..1.11 rows=4
+--   actual time=0.018..0.035
+--   Filter: (salary &gt; 85000)
+--   Rows Removed: 5
+-- Execution: 0.05 ms</span></pre></div>
+</div>
+<div class="cmp-side">
+<div class="cmp-lbl good">&#x2705; With index &mdash; Index Scan</div>
+<div class="cb" style="border-radius:0;border:none"><pre style="font-size:12px"><span class="kw">CREATE INDEX</span> idx_sal
+    <span class="kw">ON</span> employees(salary);
+
+<span class="kw">EXPLAIN ANALYZE</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> employees
+<span class="kw">WHERE</span>  salary &gt; <span class="nm">85000</span>;
+
+<span class="cm">-- Plan output:
+-- Index Scan using idx_sal
+--   cost=0.14..8.19 rows=4
+--   actual time=0.008..0.012
+--   Index Cond: (salary &gt; 85000)
+-- Execution: 0.02 ms  &#x2190; faster!</span></pre></div>
+</div>
+</div>
+<div class="ref-wrap" style="margin-top:14px"><table class="ref-tbl">
+<tr><th>EXPLAIN keyword</th><th>Meaning</th><th>Action</th></tr>
+<tr><td><code>Seq Scan</code></td><td>Reading every row, no index</td><td>Add index if table is large</td></tr>
+<tr><td><code>Index Scan</code></td><td>Index used, then fetches table rows</td><td>Good &#x2705;</td></tr>
+<tr><td><code>Index Only Scan</code></td><td>Covering index &mdash; no table fetch</td><td>Best &#x2705;&#x2705;</td></tr>
+<tr><td><code>Hash Join</code></td><td>Joining via in-memory hash table</td><td>Normal for large joins</td></tr>
+<tr><td><code>rows=1000 actual=50000</code></td><td>Estimate far off &mdash; stale statistics</td><td>Run <code>ANALYZE tablename</code></td></tr>
+</table></div>
+</div></div>
+</div>
+<div class="section" id="s10">
+<div class="sec-hd"><div class="sec-n">10</div>
+<div><div class="sec-title">Cheatsheet &amp; Interview Q&amp;A</div><div class="sec-sub">Everything in one place</div></div></div>
+<h3>&#x26a1; SQL Execution Order</h3>
+<div class="flow"><div class="flow-title">SQL runs in this order &mdash; NOT the order you write it</div>
+<div class="flow-steps">
+<div class="fs"><div class="fn-n">1</div><div class="fb"><div class="f-name">FROM / JOIN</div><div class="f-detail">Identify tables &amp; build combined row set</div></div></div>
+<div class="fa">&#x2193;</div>
+<div class="fs"><div class="fn-n">2</div><div class="fb"><div class="f-name">WHERE</div><div class="f-detail">Filter rows. No aliases or aggregates allowed here</div></div></div>
+<div class="fa">&#x2193;</div>
+<div class="fs"><div class="fn-n">3</div><div class="fb"><div class="f-name">GROUP BY</div><div class="f-detail">Group filtered rows into buckets</div></div></div>
+<div class="fa">&#x2193;</div>
+<div class="fs"><div class="fn-n">4</div><div class="fb"><div class="f-name">HAVING</div><div class="f-detail">Filter groups. Aggregates like COUNT() allowed here</div></div></div>
+<div class="fa">&#x2193;</div>
+<div class="fs"><div class="fn-n">5</div><div class="fb"><div class="f-name">SELECT</div><div class="f-detail">Compute columns, aliases, window functions</div></div></div>
+<div class="fa">&#x2193;</div>
+<div class="fs"><div class="fn-n">6</div><div class="fb"><div class="f-name">ORDER BY &rarr; LIMIT</div><div class="f-detail">Sort &amp; trim. SELECT aliases usable here (evaluated after SELECT)</div></div></div>
+</div></div>
+<h3 style="margin-top:24px">&#x1f4cc; Key Concepts</h3>
+<div class="cheat-grid">
+<div class="cheat"><div class="cheat-kw">WHERE vs HAVING</div><div class="cheat-desc">WHERE filters rows before grouping. HAVING filters groups after. Never use COUNT() in WHERE.</div></div>
+<div class="cheat"><div class="cheat-kw">IS NULL vs = NULL</div><div class="cheat-desc">= NULL always returns UNKNOWN (no rows). Always use IS NULL or IS NOT NULL.</div></div>
+<div class="cheat"><div class="cheat-kw">INNER vs LEFT JOIN</div><div class="cheat-desc">INNER drops unmatched rows. LEFT keeps all left rows, NULLs on unmatched right.</div></div>
+<div class="cheat"><div class="cheat-kw">GROUP BY collapses rows</div><div class="cheat-desc">9 rows &rarr; 3 groups. Window functions keep all 9 rows and add a computed column.</div></div>
+<div class="cheat"><div class="cheat-kw">RANK gaps, DENSE_RANK doesn't</div><div class="cheat-desc">Ties: RANK gives 1,1,3. DENSE_RANK gives 1,1,2. Use DENSE_RANK for top-N filtering.</div></div>
+<div class="cheat"><div class="cheat-kw">COALESCE(a, fallback)</div><div class="cheat-desc">Returns first non-NULL. COALESCE(dept_name, 'Unassigned') for safe NULL handling.</div></div>
+<div class="cheat"><div class="cheat-kw">Covering Index</div><div class="cheat-desc">Holds all columns a query needs. DB never reads the table. Fastest possible read (index-only scan).</div></div>
+<div class="cheat"><div class="cheat-kw">Recursive CTE</div><div class="cheat-desc">Anchor query + recursive part via UNION ALL. Classic use: org hierarchies, category trees.</div></div>
+<div class="cheat"><div class="cheat-kw">ON CONFLICT (UPSERT)</div><div class="cheat-desc">INSERT ... ON CONFLICT (col) DO UPDATE SET ... Atomic insert-or-update. No race conditions.</div></div>
+</div>
+<h3 style="margin-top:28px">&#x2753; Interview Q&amp;A</h3>
+<div class="qa">
+<div class="qa-item"><div class="qa-q">What happens when you use = NULL in a WHERE clause?</div><div class="qa-a">It always returns zero rows. NULL comparisons return UNKNOWN, not TRUE or FALSE. Use <code>IS NULL</code> or <code>IS NOT NULL</code>.</div></div>
+<div class="qa-item"><div class="qa-q">Why can't you use a SELECT alias in WHERE?</div><div class="qa-a">Because WHERE is evaluated before SELECT in execution order. The alias doesn't exist yet. Wrap in a CTE or subquery.</div></div>
+<div class="qa-item"><div class="qa-q">INNER JOIN vs LEFT JOIN &mdash; when to use which?</div><div class="qa-a">INNER when you only want matched rows. LEFT when you need all rows from the left table regardless of match &mdash; use COALESCE to handle NULLs on the right.</div></div>
+<div class="qa-item"><div class="qa-q">ROW_NUMBER vs RANK vs DENSE_RANK?</div><div class="qa-a"><code>ROW_NUMBER</code>: always unique (1,2,3,4). <code>RANK</code>: ties same rank, skips next (1,1,3). <code>DENSE_RANK</code>: ties same rank, no gap (1,1,2). Use DENSE_RANK for top-N per group.</div></div>
+<div class="qa-item"><div class="qa-q">When should you NOT add an index?</div><div class="qa-a">Small tables (&lt;10K rows), low-cardinality columns (boolean, status with 2-3 values), heavily written columns. Every write pays an index update cost.</div></div>
+<div class="qa-item"><div class="qa-q">What does EXPLAIN ANALYZE tell you?</div><div class="qa-a">The plan the DB chose, how many rows were actually processed, and real timings. Look for <code>Seq Scan</code> on large tables. Compare estimated vs actual rows &mdash; big gap means stale stats, run <code>ANALYZE</code>.</div></div>
+</div>
+</div>
+</div>
+<div class="footer">&#x1f5c3;&#xfe0f; SQL Deep Dive &nbsp;&middot;&nbsp; Built for Sairam &nbsp;&middot;&nbsp; All examples use the same employees + departments table</div>
+</body></html>
