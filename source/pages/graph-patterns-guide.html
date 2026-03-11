@@ -1,0 +1,3815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Graph Problems Patterns - Complete Guide</title>
+<style>
+:root{
+  --bg:#0a0e14;
+  --card:#141920;
+  --txt:#d4d7dd;
+  --txt2:#9ca3af;
+  --gold:#f0b429;
+  --teal:#00d4aa;
+  --sky:#4db8ff;
+  --mint:#00e599;
+  --violet:#9d7ff3;
+  --coral:#ff6b6b;
+  --orange:#ff9d5c;
+  --pink:#ff6ec7;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,Cantarell,sans-serif;
+  background:var(--bg);
+  color:var(--txt);
+  line-height:1.6;
+  padding-left:90px;
+  padding-top:20px;
+  padding-bottom:20px;
+  overflow-x:hidden;
+  transition:padding-left .3s ease
+}
+.container{max-width:1200px;margin:0 auto;padding:0 20px;transition:none}
+/* .container.shifted{margin-left:280px} */
+@media(min-width:1025px){.container{margin-left:0;max-width:100%}}
+header{text-align:center;margin-bottom:50px;padding:40px 20px}
+h1{font-size:42px;margin-bottom:15px;background:linear-gradient(135deg,var(--teal),var(--sky));-webkit-background-clip:text;background-clip:text;color:transparent}
+.subtitle{font-size:18px;color:var(--txt2)}
+
+/* HERO */
+.hero{background:linear-gradient(135deg,rgba(0,212,170,.05),rgba(77,184,255,.05));border:1px solid rgba(0,212,170,.15);border-radius:12px;padding:30px;margin-bottom:40px}
+.hero-grid{display:grid;gap:20px}
+.hero-top{margin-bottom:20px}
+.hero-badge{display:inline-block;background:rgba(0,212,170,.1);color:var(--teal);padding:6px 14px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:1.5px;margin-bottom:15px}
+.hero h1{font-size:36px;margin-bottom:10px;background:linear-gradient(135deg,var(--teal),var(--mint));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{color:var(--txt2);font-size:15px;line-height:1.7}
+.hero-boxes{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.hero-box{background:rgba(0,212,170,.03);border:1px solid rgba(0,212,170,.15);border-radius:8px;padding:16px;text-decoration:none;transition:all .3s;cursor:pointer}
+.hero-box:hover{background:rgba(0,212,170,.08);transform:translateY(-2px)}
+.hero-box.active{background:rgba(0,212,170,.12);border:2px solid var(--teal);box-shadow:0 0 20px rgba(0,212,170,.3);transform:scale(1.02)}
+.hero-box-icon{font-size:24px;margin-bottom:8px}
+.hero-box-title{color:var(--teal);font-weight:700;font-size:13px;margin-bottom:4px}
+.hero-box-desc{color:var(--txt2);font-size:12px;line-height:1.5}
+
+/* SECTIONS */
+.section{display:none}
+.section.active{display:block}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid rgba(255,255,255,.05);border-radius:10px;margin-bottom:24px;overflow:hidden;transition:transform .3s}
+.card:hover{transform:translateY(-2px)}
+.card-top{padding:20px 24px;border-bottom:1px solid rgba(255,255,255,.03)}
+.card-top{display:flex;gap:16px;align-items:flex-start}
+.icon{width:50px;height:50px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+.icon-teal{background:linear-gradient(135deg,rgba(0,212,170,.15),rgba(0,212,170,.05))}
+.icon-sky{background:linear-gradient(135deg,rgba(77,184,255,.15),rgba(77,184,255,.05))}
+.icon-gold{background:linear-gradient(135deg,rgba(240,180,41,.15),rgba(240,180,41,.05))}
+.icon-violet{background:linear-gradient(135deg,rgba(157,127,243,.15),rgba(157,127,243,.05))}
+.icon-coral{background:linear-gradient(135deg,rgba(255,107,107,.15),rgba(255,107,107,.05))}
+.icon-orange{background:linear-gradient(135deg,rgba(255,157,92,.15),rgba(255,157,92,.05))}
+.icon-pink{background:linear-gradient(135deg,rgba(255,110,199,.15),rgba(255,110,199,.05))}
+.icon-mint{background:linear-gradient(135deg,rgba(0,229,153,.15),rgba(0,229,153,.05))}
+.card-meta{flex:1}
+.card-label{font-size:12px;color:var(--teal);font-weight:700;letter-spacing:1px;margin-bottom:8px;text-transform:uppercase}
+.card-name{font-size:19px;font-weight:700;margin-bottom:5px}
+.card-tag{font-size:14px;color:var(--txt2);line-height:1.6}
+.card-body{padding:22px 24px}
+
+/* CALLOUTS */
+.when{background:rgba(240,180,41,.04);border:1px solid rgba(240,180,41,.18);border-radius:8px;padding:14px 18px;margin-bottom:14px}
+.when-t{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:7px}
+.when ul{list-style:none}
+.when ul li{font-size:13.5px;color:var(--txt2);padding:2px 0 2px 18px;position:relative}
+.when ul li::before{content:'›';position:absolute;left:0;color:var(--gold)}
+
+.scen{background:rgba(0,212,170,.04);border:1px solid rgba(0,212,170,.18);border-radius:8px;padding:14px 18px;margin-bottom:14px}
+.scen-t{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:var(--teal);margin-bottom:7px}
+.scen ul{list-style:none}
+.scen ul li{font-size:13.5px;color:var(--txt2);padding:2px 0 2px 18px;position:relative}
+.scen ul li::before{content:'›';position:absolute;left:0;color:var(--teal)}
+
+.warn{background:rgba(255,107,107,.04);border:1px solid rgba(255,107,107,.18);border-radius:8px;padding:14px 18px;margin-bottom:14px}
+.warn-t{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:var(--coral);margin-bottom:7px;display:block}
+.warn ul{list-style:none}
+.warn ul li{font-size:13.5px;color:var(--txt2);padding:2px 0 2px 18px;position:relative}
+.warn ul li::before{content:'›';position:absolute;left:0;color:var(--coral)}
+
+.note{background:rgba(157,127,243,.04);border:1px solid rgba(157,127,243,.18);border-radius:8px;padding:14px 18px;margin-bottom:14px}
+.note b{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:var(--violet);display:block;margin-bottom:7px}
+.note ul{list-style:none}
+.note ul li{font-size:13.5px;color:var(--txt2);padding:2px 0 2px 18px;position:relative}
+.note ul li::before{content:'›';position:absolute;left:0;color:var(--violet)}
+
+.tip{background:rgba(0,229,153,.04);border:1px solid rgba(0,229,153,.18);border-radius:8px;padding:14px 18px;margin-bottom:14px}
+.tip-t{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:var(--mint);margin-bottom:7px;display:block}
+.tip ul{list-style:none}
+.tip ul li{font-size:13.5px;color:var(--txt2);padding:2px 0 2px 18px;position:relative}
+.tip ul li::before{content:'›';position:absolute;left:0;color:var(--mint)}
+
+/* CODE */
+.code{background:#0d1117;border:1px solid rgba(255,255,255,.05);border-radius:8px;margin:14px 0;overflow:hidden}
+.code-head{background:#161b22;padding:8px 16px;border-bottom:1px solid rgba(255,255,255,.05);display:flex;align-items:center;gap:12px}
+.dots{display:flex;gap:6px}
+.dot{width:10px;height:10px;border-radius:50%}
+.dot.r{background:#ff6b6b}
+.dot.y{background:#ffd93d}
+.dot.g{background:#6bcf7f}
+.code-file{color:var(--txt2);font-size:12px;font-family:'JetBrains Mono',monospace;flex:1}
+.code-lang{color:var(--txt2);font-size:11px;background:rgba(255,255,255,.05);padding:2px 8px;border-radius:4px}
+.code pre{padding:18px;overflow-x:auto;font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.6}
+.kw{color:#ff6ec7}
+.tp{color:#4db8ff}
+.fn{color:#ffd93d}
+.st{color:#6bcf7f}
+.cm{color:#6a737d}
+.nm{color:#ff9d5c}
+.an{color:#9d7ff3}
+
+/* CODE INLINE */
+code{background:rgba(0,212,170,.1);color:var(--teal);padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:12.5px}
+.code code{background:transparent;padding:0}
+
+/* TABLE */
+.prop-table{width:100%;border-collapse:collapse;margin:14px 0;font-size:13px}
+.prop-table th{background:rgba(0,212,170,.08);color:var(--teal);padding:10px 14px;text-align:left;font-weight:700;border:1px solid rgba(0,212,170,.2)}
+.prop-table td{padding:10px 14px;border:1px solid rgba(255,255,255,.05);vertical-align:top}
+.prop-table td:first-child{font-family:'JetBrains Mono',monospace;color:var(--sky);font-size:12px}
+.prop-table td:last-child{color:var(--txt2)}
+.prop-table tr:hover{background:rgba(0,212,170,.02)}
+
+/* LEETCODE PROBLEMS */
+.lc-list{display:grid;gap:10px;margin:14px 0}
+.lc-item{background:rgba(0,212,170,.03);border:1px solid rgba(0,212,170,.15);border-radius:6px;padding:12px 16px;display:flex;align-items:center;gap:12px;transition:all .2s}
+.lc-item:hover{background:rgba(0,212,170,.08);transform:translateX(4px)}
+.lc-badge{font-size:10px;font-weight:700;padding:4px 8px;border-radius:4px;letter-spacing:.5px}
+.lc-easy{background:rgba(0,229,153,.15);color:var(--mint)}
+.lc-medium{background:rgba(240,180,41,.15);color:var(--gold)}
+.lc-hard{background:rgba(255,107,107,.15);color:var(--coral)}
+.lc-num{font-family:'JetBrains Mono',monospace;color:var(--txt2);font-size:12px;min-width:50px}
+.lc-name{color:var(--txt);font-size:14px;flex:1}
+
+/* HAMBURGER MENU */
+.hamburger-btn{position:fixed;left:20px;top:20px;z-index:1000;width:50px;height:50px;background:linear-gradient(135deg,rgba(0,212,170,.15),rgba(77,184,255,.15));border:1px solid var(--teal);border-radius:10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;transition:all .3s}
+.hamburger-btn:hover{background:linear-gradient(135deg,rgba(0,212,170,.25),rgba(77,184,255,.25));transform:scale(1.05)}
+.hamburger-btn span{width:24px;height:2px;background:var(--teal);border-radius:2px;transition:all .3s}
+.hamburger-btn.active span:nth-child(1){transform:rotate(45deg) translate(5px,5px)}
+.hamburger-btn.active span:nth-child(2){opacity:0}
+.hamburger-btn.active span:nth-child(3){transform:rotate(-45deg) translate(7px,-7px)}
+
+.sidebar{position:fixed;left:-280px;top:0;width:280px;height:100vh;background:rgba(20,25,32,.98);backdrop-filter:blur(10px);border-right:1px solid rgba(0,212,170,.15);z-index:999;transition:left .3s ease;overflow-y:auto;scrollbar-width:thin;padding:80px 0 20px 0}
+.sidebar.open{left:0}
+.sidebar::-webkit-scrollbar{width:4px}
+.sidebar::-webkit-scrollbar-track{background:rgba(255,255,255,.05)}
+.sidebar::-webkit-scrollbar-thumb{background:var(--teal);border-radius:2px}
+
+.sidebar-title{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--teal);margin:0 20px 16px 20px;padding-bottom:8px;border-bottom:1px solid rgba(0,212,170,.2)}
+
+.nav-section{margin-bottom:8px}
+.nav-section-title{padding:10px 20px;font-size:13px;font-weight:700;color:var(--teal);cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:8px}
+.nav-section-title:hover{background:rgba(0,212,170,.08)}
+.nav-section-title.active{background:rgba(0,212,170,.12);border-left:3px solid var(--teal)}
+.nav-section-number{font-family:'JetBrains Mono',monospace;font-size:11px;min-width:20px}
+.nav-section-icon{font-size:16px;margin-right:4px}
+
+.nav-subsections{max-height:0;overflow:hidden;transition:max-height .3s ease}
+.nav-subsections.open{max-height:500px}
+.nav-subsection{padding:8px 20px 8px 48px;font-size:12px;color:var(--txt2);cursor:pointer;transition:all .2s;border-left:2px solid transparent}
+.nav-subsection:hover{color:var(--txt);background:rgba(0,212,170,.05);border-left-color:var(--teal)}
+.nav-subsection.active{color:var(--teal);background:rgba(0,212,170,.08);border-left-color:var(--teal)}
+
+@media(max-width:1024px){
+  .hamburger-btn{display:flex}
+  .sidebar{display:block}
+}
+@media(min-width:1025px){
+  .hamburger-btn{display:flex}
+  .sidebar{display:block}
+  .container{padding-left:30px}
+  .section{min-width:0}
+}
+
+/* FOOTER */
+footer{text-align:center;margin-top:60px;padding:30px;color:var(--txt2);font-size:14px;border-top:1px solid rgba(255,255,255,.05)}
+footer a{color:var(--teal);text-decoration:none}
+footer a:hover{text-decoration:underline}
+</style>
+</head>
+<body>
+<!-- HAMBURGER MENU -->
+<div class="hamburger-btn" id="hamburgerBtn">
+  <span></span>
+  <span></span>
+  <span></span>
+</div>
+
+<!-- SIDEBAR NAVIGATION -->
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-title">📍 Navigation</div>
+
+  <div class="nav-section">
+    <div class="nav-section-title" onclick="showSection(0)">
+      <span class="nav-section-number">0</span>
+      <span class="nav-section-icon">📚</span>
+      <span>Graph Basics</span>
+    </div>
+    <div class="nav-subsections">
+      <div class="nav-subsection" onclick="scrollToCard(0, 0)">Graph Representations</div>
+      <div class="nav-subsection" onclick="scrollToCard(0, 1)">Graph Types</div>
+      <div class="nav-subsection" onclick="scrollToCard(0, 2)">Identify Problems</div>
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-title" onclick="showSection(1)">
+      <span class="nav-section-number">1</span>
+      <span class="nav-section-icon">🌲</span>
+      <span>DFS Patterns</span>
+    </div>
+    <div class="nav-subsections">
+      <div class="nav-subsection" onclick="scrollToCard(1, 0)">DFS Pattern</div>
+      <div class="nav-subsection" onclick="scrollToCard(1, 1)">Connected Components</div>
+      <div class="nav-subsection" onclick="scrollToCard(1, 2)">Cycle Detection</div>
+      <div class="nav-subsection" onclick="scrollToCard(1, 3)">All Paths</div>
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-title" onclick="showSection(2)">
+      <span class="nav-section-number">2</span>
+      <span class="nav-section-icon">🌊</span>
+      <span>BFS Patterns</span>
+    </div>
+    <div class="nav-subsections">
+      <div class="nav-subsection" onclick="scrollToCard(2, 0)">BFS Pattern</div>
+      <div class="nav-subsection" onclick="scrollToCard(2, 1)">Grid/Matrix BFS</div>
+      <div class="nav-subsection" onclick="scrollToCard(2, 2)">Bidirectional BFS</div>
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-title" onclick="showSection(3)">
+      <span class="nav-section-number">3</span>
+      <span class="nav-section-icon">📊</span>
+      <span>Topological Sort</span>
+    </div>
+    <div class="nav-subsections">
+      <div class="nav-subsection" onclick="scrollToCard(3, 0)">Ordering with Dependencies</div>
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-title" onclick="showSection(4)">
+      <span class="nav-section-number">4</span>
+      <span class="nav-section-icon">🔗</span>
+      <span>Union Find</span>
+    </div>
+    <div class="nav-subsections">
+      <div class="nav-subsection" onclick="scrollToCard(4, 0)">Track Connected Components</div>
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-title" onclick="showSection(5)">
+      <span class="nav-section-number">5</span>
+      <span class="nav-section-icon">🛤️</span>
+      <span>Shortest Path</span>
+    </div>
+    <div class="nav-subsections">
+      <div class="nav-subsection" onclick="scrollToCard(5, 0)">Dijkstra's Algorithm</div>
+      <div class="nav-subsection" onclick="scrollToCard(5, 1)">Bellman-Ford Algorithm</div>
+      <div class="nav-subsection" onclick="scrollToCard(5, 2)">Floyd-Warshall Algorithm</div>
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-title" onclick="showSection(6)">
+      <span class="nav-section-number">6</span>
+      <span class="nav-section-icon">🌳</span>
+      <span>MST</span>
+    </div>
+    <div class="nav-subsections">
+      <div class="nav-subsection" onclick="scrollToCard(6, 0)">Kruskal's Algorithm</div>
+      <div class="nav-subsection" onclick="scrollToCard(6, 1)">Prim's Algorithm</div>
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-title" onclick="showSection(7)">
+      <span class="nav-section-number">7</span>
+      <span class="nav-section-icon">⚡</span>
+      <span>Advanced</span>
+    </div>
+    <div class="nav-subsections">
+      <div class="nav-subsection" onclick="scrollToCard(7, 0)">Bridges & Articulation Points</div>
+      <div class="nav-subsection" onclick="scrollToCard(7, 1)">Strongly Connected Components</div>
+      <div class="nav-subsection" onclick="scrollToCard(7, 2)">Bipartite Graph Check</div>
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-title" onclick="showSection(8)">
+      <span class="nav-section-number">8</span>
+      <span class="nav-section-icon">📋</span>
+      <span>Cheat Sheet</span>
+    </div>
+    <div class="nav-subsections">
+      <div class="nav-subsection" onclick="scrollToCard(8, 0)">Pattern Recognition</div>
+      <div class="nav-subsection" onclick="scrollToCard(8, 1)">DFS Patterns</div>
+      <div class="nav-subsection" onclick="scrollToCard(8, 2)">BFS Patterns</div>
+      <div class="nav-subsection" onclick="scrollToCard(8, 3)">Topo Sort & Union Find</div>
+      <div class="nav-subsection" onclick="scrollToCard(8, 4)">Shortest Path Algorithms</div>
+      <div class="nav-subsection" onclick="scrollToCard(8, 5)">Minimum Spanning Tree</div>
+      <div class="nav-subsection" onclick="scrollToCard(8, 6)">Problem-Solving Strategy</div>
+      <div class="nav-subsection" onclick="scrollToCard(8, 7)">Algorithm Selection</div>
+      <div class="nav-subsection" onclick="scrollToCard(8, 8)">Top Interview Questions</div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+<!-- Header -->
+<header>
+  <h1>🕸️ Graph Patterns Mastery</h1>
+  <p class="subtitle">Complete guide to solving graph problems with patterns and LeetCode questions</p>
+</header>
+
+<!-- SECTION 0: GRAPH BASICS -->
+<div class="section active" id="sec-0">
+
+<div class="card">
+  <div class="card-top">
+    <div class="icon icon-teal">📊</div>
+    <div class="card-meta">
+      <div class="card-label">FUNDAMENTALS</div>
+      <div class="card-name">Graph Representations</div>
+      <div class="card-tag">How to store and represent graphs in Java</div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <div class="scen">
+      <div class="scen-t">Graph Representations</div>
+      <ul>
+        <li><strong>Adjacency List</strong>: Best for sparse graphs, O(V+E) space</li>
+        <li><strong>Adjacency Matrix</strong>: Best for dense graphs, O(V²) space</li>
+        <li><strong>Edge List</strong>: Simple representation, useful for Union Find</li>
+      </ul>
+    </div>
+
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">GraphRepresentations.java</div>
+        <div class="code-lang">java</div>
+      </div>
+      <div class="code">
+<pre><span class="cm">// 1. Adjacency List (Most Common)</span>
+<span class="kw">class</span> <span class="tp">Graph</span> {
+    <span class="tp">Map</span>&lt;<span class="tp">Integer</span>, <span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; adjList = <span class="kw">new</span> <span class="tp">HashMap</span>&lt;&gt;();
+
+    <span class="kw">void</span> <span class="fn">addEdge</span>(<span class="tp">int</span> u, <span class="tp">int</span> v) {
+        adjList.<span class="fn">computeIfAbsent</span>(u, k -&gt; <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;()).<span class="fn">add</span>(v);
+        <span class="cm">// For undirected: adjList.computeIfAbsent(v, k -> new ArrayList<>()).add(u);</span>
+    }
+}
+
+<span class="cm">// 2. Adjacency Matrix</span>
+<span class="tp">int</span>[][] adjMatrix = <span class="kw">new</span> <span class="tp">int</span>[n][n];
+adjMatrix[u][v] = <span class="nm">1</span>; <span class="cm">// Edge from u to v</span>
+
+<span class="cm">// 3. Edge List</span>
+<span class="tp">List</span>&lt;<span class="tp">int</span>[]&gt; edges = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;();
+edges.<span class="fn">add</span>(<span class="kw">new</span> <span class="tp">int</span>[]{u, v, weight});</pre>
+      </div>
+    </div>
+
+    <div class="tip">
+      <span class="tip-t">CHOOSING THE RIGHT REPRESENTATION</span>
+      <ul>
+        <li>Use <strong>Adjacency List</strong> for: DFS, BFS, most interview problems</li>
+        <li>Use <strong>Adjacency Matrix</strong> for: Dense graphs, quick edge lookup O(1)</li>
+        <li>Use <strong>Edge List</strong> for: Union Find, Kruskal's MST</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-top">
+    <div class="icon icon-sky">🎯</div>
+    <div class="card-meta">
+      <div class="card-label">GRAPH TYPES</div>
+      <div class="card-name">Understanding Graph Types</div>
+      <div class="card-tag">Different types of graphs and their properties</div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <table class="prop-table">
+      <tr>
+        <th>Graph Type</th>
+        <th>Description</th>
+        <th>Use Cases</th>
+      </tr>
+      <tr>
+        <td>Directed (Digraph)</td>
+        <td>Edges have direction (u → v)</td>
+        <td>Prerequisites, web links, dependency graphs</td>
+      </tr>
+      <tr>
+        <td>Undirected</td>
+        <td>Edges are bidirectional</td>
+        <td>Social networks, road networks</td>
+      </tr>
+      <tr>
+        <td>Weighted</td>
+        <td>Edges have weights/costs</td>
+        <td>Distance, cost, time optimization</td>
+      </tr>
+      <tr>
+        <td>Unweighted</td>
+        <td>All edges have equal weight</td>
+        <td>Reachability, connectivity</td>
+      </tr>
+      <tr>
+        <td>Cyclic</td>
+        <td>Contains at least one cycle</td>
+        <td>Circular dependencies, loops</td>
+      </tr>
+      <tr>
+        <td>Acyclic (DAG)</td>
+        <td>No cycles (Directed Acyclic Graph)</td>
+        <td>Task scheduling, compilation order</td>
+      </tr>
+      <tr>
+        <td>Connected</td>
+        <td>Path exists between any two vertices</td>
+        <td>Single network component</td>
+      </tr>
+      <tr>
+        <td>Disconnected</td>
+        <td>Multiple separate components</td>
+        <td>Multiple networks, islands</td>
+      </tr>
+    </table>
+
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">example-graphs.txt</div>
+        <div class="code-lang">pseudocode</div>
+      </div>
+      <div class="code">
+<pre><span class="cm">Undirected Graph:</span>
+    1 --- 2
+    |     |
+    3 --- 4
+
+<span class="cm">Directed Graph (Digraph):</span>
+    1 → 2
+    ↑   ↓
+    3 ← 4
+
+<span class="cm">Weighted Graph:</span>
+    1 --(5)-- 2
+    |         |
+   (3)       (2)
+    |         |
+    3 --(4)-- 4
+
+<span class="cm">Tree (Special Graph):</span>
+        1
+       / \
+      2   3
+     / \
+    4   5</pre>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-top">
+    <div class="icon icon-mint">🔧</div>
+    <div class="card-meta">
+      <div class="card-label">PATTERN RECOGNITION</div>
+      <div class="card-name">How to Identify Graph Problems</div>
+      <div class="card-tag">Keywords and clues to spot graph problems</div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <div class="when">
+      <div class="when-t">KEYWORDS THAT INDICATE GRAPH PROBLEMS</div>
+      <ul>
+        <li><strong>Nodes/Vertices</strong>: Cities, people, rooms, tasks</li>
+        <li><strong>Edges/Connections</strong>: Roads, friendships, dependencies, prerequisites</li>
+        <li><strong>Path/Route</strong>: Finding a path from A to B</li>
+        <li><strong>Connected/Reachable</strong>: Can you reach from X to Y?</li>
+        <li><strong>Cycle/Loop</strong>: Circular dependencies, deadlock</li>
+        <li><strong>Network</strong>: Computer network, social network</li>
+        <li><strong>Grid/Matrix</strong>: Islands, maze, board game</li>
+        <li><strong>Dependency</strong>: Course prerequisites, build order</li>
+        <li><strong>Shortest/Longest path</strong>: Minimum distance, maximum path</li>
+        <li><strong>All paths</strong>: Find all possible routes</li>
+      </ul>
+    </div>
+
+    <div class="scen">
+      <div class="scen-t">COMMON PROBLEM TYPES</div>
+      <ul>
+        <li><strong>Traversal</strong>: Visit all nodes (DFS/BFS)</li>
+        <li><strong>Connectivity</strong>: Connected components, islands</li>
+        <li><strong>Shortest Path</strong>: BFS for unweighted, Dijkstra for weighted</li>
+        <li><strong>Cycle Detection</strong>: DFS with recursion stack</li>
+        <li><strong>Topological Sort</strong>: Order with dependencies</li>
+        <li><strong>Minimum Spanning Tree</strong>: Connect all nodes with minimum cost</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+</div>
+
+<!-- SECTION 1: DFS PATTERNS -->
+<div class="section" id="sec-1">
+
+<div class="card">
+  <div class="card-top">
+    <div class="icon icon-teal">🔍</div>
+    <div class="card-meta">
+      <div class="card-label">DEPTH-FIRST SEARCH</div>
+      <div class="card-name">DFS Pattern - Go Deep First</div>
+      <div class="card-tag">Master the fundamental DFS traversal technique</div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <div class="scen">
+      <div class="scen-t">WHEN TO USE DFS</div>
+      <ul>
+        <li>Finding connected components</li>
+        <li>Detecting cycles in directed/undirected graphs</li>
+        <li>Path finding (not necessarily shortest)</li>
+        <li>Backtracking problems</li>
+        <li>Topological sorting</li>
+        <li>Checking if graph is bipartite</li>
+      </ul>
+    </div>
+
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">DFSTemplate.java</div>
+        <div class="code-lang">java</div>
+      </div>
+      <div class="code">
+<pre><span class="cm">// DFS Template - Recursive</span>
+<span class="kw">class</span> <span class="tp">Solution</span> {
+    <span class="kw">void</span> <span class="fn">dfs</span>(<span class="tp">int</span> node, <span class="tp">Map</span>&lt;<span class="tp">Integer</span>, <span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; graph, <span class="tp">Set</span>&lt;<span class="tp">Integer</span>&gt; visited) {
+        <span class="cm">// Base case: already visited</span>
+        <span class="kw">if</span> (visited.<span class="fn">contains</span>(node)) <span class="kw">return</span>;
+
+        <span class="cm">// Mark as visited</span>
+        visited.<span class="fn">add</span>(node);
+
+        <span class="cm">// Process current node (optional)</span>
+        <span class="fn">process</span>(node);
+
+        <span class="cm">// Visit all neighbors</span>
+        <span class="kw">for</span> (<span class="tp">int</span> neighbor : graph.<span class="fn">getOrDefault</span>(node, <span class="tp">Collections</span>.<span class="fn">emptyList</span>())) {
+            <span class="fn">dfs</span>(neighbor, graph, visited);
+        }
+    }
+}
+
+<span class="cm">// DFS Template - Iterative (using Stack)</span>
+<span class="kw">void</span> <span class="fn">dfsIterative</span>(<span class="tp">int</span> start, <span class="tp">Map</span>&lt;<span class="tp">Integer</span>, <span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; graph) {
+    <span class="tp">Set</span>&lt;<span class="tp">Integer</span>&gt; visited = <span class="kw">new</span> <span class="tp">HashSet</span>&lt;&gt;();
+    <span class="tp">Stack</span>&lt;<span class="tp">Integer</span>&gt; stack = <span class="kw">new</span> <span class="tp">Stack</span>&lt;&gt;();
+
+    stack.<span class="fn">push</span>(start);
+
+    <span class="kw">while</span> (!stack.<span class="fn">isEmpty</span>()) {
+        <span class="tp">int</span> node = stack.<span class="fn">pop</span>();
+
+        <span class="kw">if</span> (visited.<span class="fn">contains</span>(node)) <span class="kw">continue</span>;
+
+        visited.<span class="fn">add</span>(node);
+        <span class="fn">process</span>(node);
+
+        <span class="kw">for</span> (<span class="tp">int</span> neighbor : graph.<span class="fn">getOrDefault</span>(node, <span class="tp">Collections</span>.<span class="fn">emptyList</span>())) {
+            <span class="kw">if</span> (!visited.<span class="fn">contains</span>(neighbor)) {
+                stack.<span class="fn">push</span>(neighbor);
+            }
+        }
+    }
+}</pre>
+      </div>
+    </div>
+
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">dfs-visualization.txt</div>
+        <div class="code-lang">pseudocode</div>
+      </div>
+      <div class="code">
+<pre><span class="cm">DFS Traversal Example:</span>
+
+Graph:          1
+               / \
+              2   3
+             / \   \
+            4   5   6
+
+DFS Order: 1 → 2 → 4 → 5 → 3 → 6
+
+<span class="cm">Stack States:</span>
+Start: [1]
+Visit 1, push children: [3, 2]
+Visit 2, push children: [3, 5, 4]
+Visit 4: [3, 5]
+Visit 5: [3]
+Visit 3, push children: [6]
+Visit 6: []</pre>
+      </div>
+    </div>
+
+    <div class="tip">
+      <span class="tip-t">DFS TIME & SPACE COMPLEXITY</span>
+      <ul>
+        <li><strong>Time</strong>: O(V + E) where V = vertices, E = edges</li>
+        <li><strong>Space</strong>: O(V) for visited set + O(H) for recursion stack (H = height)</li>
+        <li>Worst case space: O(V) when graph is a linked list</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-top">
+    <div class="icon icon-sky">🌊</div>
+    <div class="card-meta">
+      <div class="card-label">DFS PATTERN</div>
+      <div class="card-name">Connected Components</div>
+      <div class="card-tag">Count or find all connected components in a graph</div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <div class="scen">
+      <div class="scen-t">PROBLEM CHARACTERISTICS</div>
+      <ul>
+        <li>Count number of separate islands/networks</li>
+        <li>Find all nodes in same component</li>
+        <li>Group connected elements</li>
+      </ul>
+    </div>
+
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">ConnectedComponents.java</div>
+        <div class="code-lang">java</div>
+      </div>
+      <div class="code">
+<pre><span class="cm">// Count Connected Components</span>
+<span class="kw">class</span> <span class="tp">Solution</span> {
+    <span class="kw">public</span> <span class="tp">int</span> <span class="fn">countComponents</span>(<span class="tp">int</span> n, <span class="tp">int</span>[][] edges) {
+        <span class="cm">// Build adjacency list</span>
+        <span class="tp">Map</span>&lt;<span class="tp">Integer</span>, <span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; graph = <span class="kw">new</span> <span class="tp">HashMap</span>&lt;&gt;();
+        <span class="kw">for</span> (<span class="tp">int</span>[] edge : edges) {
+            graph.<span class="fn">computeIfAbsent</span>(edge[<span class="nm">0</span>], k -&gt; <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;()).<span class="fn">add</span>(edge[<span class="nm">1</span>]);
+            graph.<span class="fn">computeIfAbsent</span>(edge[<span class="nm">1</span>], k -&gt; <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;()).<span class="fn">add</span>(edge[<span class="nm">0</span>]);
+        }
+
+        <span class="tp">Set</span>&lt;<span class="tp">Integer</span>&gt; visited = <span class="kw">new</span> <span class="tp">HashSet</span>&lt;&gt;();
+        <span class="tp">int</span> count = <span class="nm">0</span>;
+
+        <span class="cm">// Try DFS from each unvisited node</span>
+        <span class="kw">for</span> (<span class="tp">int</span> i = <span class="nm">0</span>; i &lt; n; i++) {
+            <span class="kw">if</span> (!visited.<span class="fn">contains</span>(i)) {
+                <span class="fn">dfs</span>(i, graph, visited);
+                count++; <span class="cm">// Found a new component</span>
+            }
+        }
+
+        <span class="kw">return</span> count;
+    }
+
+    <span class="kw">private</span> <span class="kw">void</span> <span class="fn">dfs</span>(<span class="tp">int</span> node, <span class="tp">Map</span>&lt;<span class="tp">Integer</span>, <span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; graph, <span class="tp">Set</span>&lt;<span class="tp">Integer</span>&gt; visited) {
+        visited.<span class="fn">add</span>(node);
+        <span class="kw">for</span> (<span class="tp">int</span> neighbor : graph.<span class="fn">getOrDefault</span>(node, <span class="tp">Collections</span>.<span class="fn">emptyList</span>())) {
+            <span class="kw">if</span> (!visited.<span class="fn">contains</span>(neighbor)) {
+                <span class="fn">dfs</span>(neighbor, graph, visited);
+            }
+        }
+    }
+}</pre>
+      </div>
+    </div>
+
+    <div class="tip">
+      <span class="tip-t">KEY PATTERN STEPS</span>
+      <ul>
+        <li><strong>Step 1</strong>: Build graph representation</li>
+        <li><strong>Step 2</strong>: Maintain visited set globally</li>
+        <li><strong>Step 3</strong>: Loop through all nodes</li>
+        <li><strong>Step 4</strong>: If node not visited, start DFS (found new component)</li>
+        <li><strong>Step 5</strong>: Increment component counter</li>
+      </ul>
+    </div>
+
+    <div class="note">
+      <b>LEETCODE PROBLEMS</b>
+      <div class="lc-list">
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#200</span>
+          <span class="lc-name">Number of Islands</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#323</span>
+          <span class="lc-name">Number of Connected Components in Undirected Graph</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#547</span>
+          <span class="lc-name">Number of Provinces</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#695</span>
+          <span class="lc-name">Max Area of Island</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-top">
+    <div class="icon icon-coral">⭕</div>
+    <div class="card-meta">
+      <div class="card-label">DFS PATTERN</div>
+      <div class="card-name">Cycle Detection</div>
+      <div class="card-tag">Detect cycles in directed and undirected graphs</div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <div class="scen">
+      <div class="scen-t">CYCLE DETECTION APPROACHES</div>
+      <ul>
+        <li><strong>Undirected Graph</strong>: Use parent tracking</li>
+        <li><strong>Directed Graph</strong>: Use recursion stack (3-color algorithm)</li>
+      </ul>
+    </div>
+
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">CycleDetection.java</div>
+        <div class="code-lang">java</div>
+      </div>
+      <div class="code">
+<pre><span class="cm">// Cycle Detection in UNDIRECTED Graph</span>
+<span class="kw">class</span> <span class="tp">Solution</span> {
+    <span class="kw">public</span> <span class="tp">boolean</span> <span class="fn">hasCycle</span>(<span class="tp">Map</span>&lt;<span class="tp">Integer</span>, <span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; graph, <span class="tp">int</span> n) {
+        <span class="tp">Set</span>&lt;<span class="tp">Integer</span>&gt; visited = <span class="kw">new</span> <span class="tp">HashSet</span>&lt;&gt;();
+
+        <span class="kw">for</span> (<span class="tp">int</span> i = <span class="nm">0</span>; i &lt; n; i++) {
+            <span class="kw">if</span> (!visited.<span class="fn">contains</span>(i)) {
+                <span class="kw">if</span> (<span class="fn">dfs</span>(i, -<span class="nm">1</span>, graph, visited)) {
+                    <span class="kw">return</span> <span class="kw">true</span>;
+                }
+            }
+        }
+        <span class="kw">return</span> <span class="kw">false</span>;
+    }
+
+    <span class="kw">private</span> <span class="tp">boolean</span> <span class="fn">dfs</span>(<span class="tp">int</span> node, <span class="tp">int</span> parent, <span class="tp">Map</span>&lt;<span class="tp">Integer</span>, <span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; graph,
+                         <span class="tp">Set</span>&lt;<span class="tp">Integer</span>&gt; visited) {
+        visited.<span class="fn">add</span>(node);
+
+        <span class="kw">for</span> (<span class="tp">int</span> neighbor : graph.<span class="fn">getOrDefault</span>(node, <span class="tp">Collections</span>.<span class="fn">emptyList</span>())) {
+            <span class="kw">if</span> (!visited.<span class="fn">contains</span>(neighbor)) {
+                <span class="kw">if</span> (<span class="fn">dfs</span>(neighbor, node, graph, visited)) {
+                    <span class="kw">return</span> <span class="kw">true</span>;
+                }
+            } <span class="kw">else</span> <span class="kw">if</span> (neighbor != parent) {
+                <span class="cm">// Visited neighbor that's not parent = cycle</span>
+                <span class="kw">return</span> <span class="kw">true</span>;
+            }
+        }
+        <span class="kw">return</span> <span class="kw">false</span>;
+    }
+}
+
+<span class="cm">// Cycle Detection in DIRECTED Graph (3-Color DFS)</span>
+<span class="kw">class</span> <span class="tp">Solution</span> {
+    <span class="kw">enum</span> <span class="tp">State</span> { <span class="nm">WHITE</span>, <span class="nm">GRAY</span>, <span class="nm">BLACK</span> }
+
+    <span class="kw">public</span> <span class="tp">boolean</span> <span class="fn">hasCycle</span>(<span class="tp">Map</span>&lt;<span class="tp">Integer</span>, <span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; graph, <span class="tp">int</span> n) {
+        <span class="tp">Map</span>&lt;<span class="tp">Integer</span>, <span class="tp">State</span>&gt; state = <span class="kw">new</span> <span class="tp">HashMap</span>&lt;&gt;();
+
+        <span class="kw">for</span> (<span class="tp">int</span> i = <span class="nm">0</span>; i &lt; n; i++) {
+            state.<span class="fn">put</span>(i, <span class="tp">State</span>.<span class="nm">WHITE</span>);
+        }
+
+        <span class="kw">for</span> (<span class="tp">int</span> i = <span class="nm">0</span>; i &lt; n; i++) {
+            <span class="kw">if</span> (state.<span class="fn">get</span>(i) == <span class="tp">State</span>.<span class="nm">WHITE</span>) {
+                <span class="kw">if</span> (<span class="fn">dfs</span>(i, graph, state)) {
+                    <span class="kw">return</span> <span class="kw">true</span>;
+                }
+            }
+        }
+        <span class="kw">return</span> <span class="kw">false</span>;
+    }
+
+    <span class="kw">private</span> <span class="tp">boolean</span> <span class="fn">dfs</span>(<span class="tp">int</span> node, <span class="tp">Map</span>&lt;<span class="tp">Integer</span>, <span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; graph,
+                         <span class="tp">Map</span>&lt;<span class="tp">Integer</span>, <span class="tp">State</span>&gt; state) {
+        state.<span class="fn">put</span>(node, <span class="tp">State</span>.<span class="nm">GRAY</span>); <span class="cm">// Currently exploring</span>
+
+        <span class="kw">for</span> (<span class="tp">int</span> neighbor : graph.<span class="fn">getOrDefault</span>(node, <span class="tp">Collections</span>.<span class="fn">emptyList</span>())) {
+            <span class="kw">if</span> (state.<span class="fn">get</span>(neighbor) == <span class="tp">State</span>.<span class="nm">GRAY</span>) {
+                <span class="cm">// Back edge = cycle</span>
+                <span class="kw">return</span> <span class="kw">true</span>;
+            }
+            <span class="kw">if</span> (state.<span class="fn">get</span>(neighbor) == <span class="tp">State</span>.<span class="nm">WHITE</span>) {
+                <span class="kw">if</span> (<span class="fn">dfs</span>(neighbor, graph, state)) {
+                    <span class="kw">return</span> <span class="kw">true</span>;
+                }
+            }
+        }
+
+        state.<span class="fn">put</span>(node, <span class="tp">State</span>.<span class="nm">BLACK</span>); <span class="cm">// Finished exploring</span>
+        <span class="kw">return</span> <span class="kw">false</span>;
+    }
+}</pre>
+      </div>
+    </div>
+
+    <div class="warn">
+      <span class="warn-t">COMMON PITFALLS</span>
+      <ul>
+        <li>In undirected graphs, forgetting to track parent leads to false positives</li>
+        <li>In directed graphs, using only visited set won't detect cycles</li>
+        <li>Need recursion stack (GRAY state) to detect back edges</li>
+      </ul>
+    </div>
+
+    <div class="tip">
+      <span class="tip-t">3-COLOR ALGORITHM EXPLAINED</span>
+      <ul>
+        <li><strong>WHITE</strong>: Not visited yet</li>
+        <li><strong>GRAY</strong>: Currently in recursion stack (being explored)</li>
+        <li><strong>BLACK</strong>: Completely explored (all neighbors processed)</li>
+        <li><strong>Cycle exists</strong>: If we encounter a GRAY node (back edge)</li>
+      </ul>
+    </div>
+
+    <div class="note">
+      <b>LEETCODE PROBLEMS</b>
+      <div class="lc-list">
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#207</span>
+          <span class="lc-name">Course Schedule (Detect cycle in directed graph)</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#261</span>
+          <span class="lc-name">Graph Valid Tree</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#684</span>
+          <span class="lc-name">Redundant Connection</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-top">
+    <div class="icon icon-violet">🛤️</div>
+    <div class="card-meta">
+      <div class="card-label">DFS PATTERN</div>
+      <div class="card-name">All Paths From Source to Target</div>
+      <div class="card-tag">Find all possible paths using backtracking</div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">AllPaths.java</div>
+        <div class="code-lang">java</div>
+      </div>
+      <div class="code">
+<pre><span class="cm">// Find All Paths from Source to Target</span>
+<span class="kw">class</span> <span class="tp">Solution</span> {
+    <span class="kw">public</span> <span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; <span class="fn">allPathsSourceTarget</span>(<span class="tp">int</span>[][] graph) {
+        <span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; result = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;();
+        <span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt; path = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;();
+
+        path.<span class="fn">add</span>(<span class="nm">0</span>); <span class="cm">// Start from node 0</span>
+        <span class="fn">dfs</span>(<span class="nm">0</span>, graph, path, result, graph.<span class="fn">length</span> - <span class="nm">1</span>);
+
+        <span class="kw">return</span> result;
+    }
+
+    <span class="kw">private</span> <span class="kw">void</span> <span class="fn">dfs</span>(<span class="tp">int</span> node, <span class="tp">int</span>[][] graph, <span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt; path,
+                       <span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; result, <span class="tp">int</span> target) {
+        <span class="cm">// Base case: reached target</span>
+        <span class="kw">if</span> (node == target) {
+            result.<span class="fn">add</span>(<span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;(path));
+            <span class="kw">return</span>;
+        }
+
+        <span class="cm">// Explore all neighbors</span>
+        <span class="kw">for</span> (<span class="tp">int</span> neighbor : graph[node]) {
+            path.<span class="fn">add</span>(neighbor);           <span class="cm">// Choose</span>
+            <span class="fn">dfs</span>(neighbor, graph, path, result, target); <span class="cm">// Explore</span>
+            path.<span class="fn">remove</span>(path.<span class="fn">size</span>() - <span class="nm">1</span>);  <span class="cm">// Backtrack</span>
+        }
+    }
+}
+
+<span class="cm">// Generic Path Finding Template with Visited Set</span>
+<span class="kw">void</span> <span class="fn">findPaths</span>(<span class="tp">int</span> node, <span class="tp">int</span> target, <span class="tp">Map</span>&lt;<span class="tp">Integer</span>, <span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; graph,
+               <span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt; path, <span class="tp">Set</span>&lt;<span class="tp">Integer</span>&gt; visited, <span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; result) {
+    <span class="kw">if</span> (node == target) {
+        result.<span class="fn">add</span>(<span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;(path));
+        <span class="kw">return</span>;
+    }
+
+    <span class="kw">for</span> (<span class="tp">int</span> neighbor : graph.<span class="fn">getOrDefault</span>(node, <span class="tp">Collections</span>.<span class="fn">emptyList</span>())) {
+        <span class="kw">if</span> (!visited.<span class="fn">contains</span>(neighbor)) {
+            path.<span class="fn">add</span>(neighbor);
+            visited.<span class="fn">add</span>(neighbor);
+
+            <span class="fn">findPaths</span>(neighbor, target, graph, path, visited, result);
+
+            path.<span class="fn">remove</span>(path.<span class="fn">size</span>() - <span class="nm">1</span>);
+            visited.<span class="fn">remove</span>(neighbor); <span class="cm">// CRITICAL: Remove from visited for other paths</span>
+        }
+    }
+}</pre>
+      </div>
+    </div>
+
+    <div class="tip">
+      <span class="tip-t">BACKTRACKING PATTERN</span>
+      <ul>
+        <li><strong>Choose</strong>: Add node to path</li>
+        <li><strong>Explore</strong>: Recursively visit neighbors</li>
+        <li><strong>Unchoose</strong>: Remove node from path (backtrack)</li>
+        <li>For graphs with cycles, maintain visited set and remove in backtrack</li>
+      </ul>
+    </div>
+
+    <div class="note">
+      <b>LEETCODE PROBLEMS</b>
+      <div class="lc-list">
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#797</span>
+          <span class="lc-name">All Paths From Source to Target</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-hard">HARD</span>
+          <span class="lc-num">#1192</span>
+          <span class="lc-name">Critical Connections in a Network</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</div>
+
+<!-- SECTION 2: BFS PATTERNS -->
+<div class="section" id="sec-2">
+
+<div class="card">
+  <div class="card-top">
+    <div class="icon icon-sky">🌊</div>
+    <div class="card-meta">
+      <div class="card-label">BREADTH-FIRST SEARCH</div>
+      <div class="card-name">BFS Pattern - Level by Level</div>
+      <div class="card-tag">Master the BFS traversal for shortest paths</div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <div class="scen">
+      <div class="scen-t">WHEN TO USE BFS</div>
+      <ul>
+        <li>Finding shortest path in <strong>unweighted</strong> graphs</li>
+        <li>Level-order traversal</li>
+        <li>Finding minimum steps/moves</li>
+        <li>All nodes at distance K</li>
+        <li>Word ladder problems</li>
+        <li>Grid problems (shortest path in maze)</li>
+      </ul>
+    </div>
+
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">BFSTemplate.java</div>
+        <div class="code-lang">java</div>
+      </div>
+      <div class="code">
+<pre><span class="cm">// BFS Template for Shortest Path</span>
+<span class="kw">class</span> <span class="tp">Solution</span> {
+    <span class="kw">public</span> <span class="tp">int</span> <span class="fn">bfs</span>(<span class="tp">int</span> start, <span class="tp">int</span> target, <span class="tp">Map</span>&lt;<span class="tp">Integer</span>, <span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; graph) {
+        <span class="tp">Queue</span>&lt;<span class="tp">Integer</span>&gt; queue = <span class="kw">new</span> <span class="tp">LinkedList</span>&lt;&gt;();
+        <span class="tp">Set</span>&lt;<span class="tp">Integer</span>&gt; visited = <span class="kw">new</span> <span class="tp">HashSet</span>&lt;&gt;();
+
+        queue.<span class="fn">offer</span>(start);
+        visited.<span class="fn">add</span>(start);
+        <span class="tp">int</span> distance = <span class="nm">0</span>;
+
+        <span class="kw">while</span> (!queue.<span class="fn">isEmpty</span>()) {
+            <span class="tp">int</span> size = queue.<span class="fn">size</span>();
+
+            <span class="cm">// Process all nodes at current level</span>
+            <span class="kw">for</span> (<span class="tp">int</span> i = <span class="nm">0</span>; i &lt; size; i++) {
+                <span class="tp">int</span> node = queue.<span class="fn">poll</span>();
+
+                <span class="cm">// Check if target found</span>
+                <span class="kw">if</span> (node == target) {
+                    <span class="kw">return</span> distance;
+                }
+
+                <span class="cm">// Add all unvisited neighbors to queue</span>
+                <span class="kw">for</span> (<span class="tp">int</span> neighbor : graph.<span class="fn">getOrDefault</span>(node, <span class="tp">Collections</span>.<span class="fn">emptyList</span>())) {
+                    <span class="kw">if</span> (!visited.<span class="fn">contains</span>(neighbor)) {
+                        queue.<span class="fn">offer</span>(neighbor);
+                        visited.<span class="fn">add</span>(neighbor);
+                    }
+                }
+            }
+
+            distance++; <span class="cm">// Increment level</span>
+        }
+
+        <span class="kw">return</span> -<span class="nm">1</span>; <span class="cm">// Target not reachable</span>
+    }
+}</pre>
+      </div>
+    </div>
+
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">bfs-visualization.txt</div>
+        <div class="code-lang">pseudocode</div>
+      </div>
+      <div class="code">
+<pre><span class="cm">BFS Traversal Example:</span>
+
+Graph:          1
+               / \
+              2   3
+             / \   \
+            4   5   6
+
+BFS Order: 1 → 2 → 3 → 4 → 5 → 6
+
+<span class="cm">Queue States by Level:</span>
+Level 0: [1]
+Level 1: [2, 3]
+Level 2: [4, 5, 6]
+
+<span class="cm">Distance from node 1:</span>
+Node 1: 0
+Nodes 2,3: 1
+Nodes 4,5,6: 2</pre>
+      </div>
+    </div>
+
+    <div class="tip">
+      <span class="tip-t">BFS VS DFS</span>
+      <ul>
+        <li><strong>BFS</strong>: Uses Queue (FIFO), finds shortest path, more memory</li>
+        <li><strong>DFS</strong>: Uses Stack/Recursion (LIFO), explores deep, less memory</li>
+        <li>For shortest path in unweighted graph → always use BFS</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-top">
+    <div class="icon icon-gold">🔲</div>
+    <div class="card-meta">
+      <div class="card-label">BFS PATTERN</div>
+      <div class="card-name">Grid/Matrix BFS</div>
+      <div class="card-tag">Navigate 2D grids to find shortest paths</div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <div class="scen">
+      <div class="scen-t">GRID PROBLEM CHARACTERISTICS</div>
+      <ul>
+        <li>2D matrix navigation (up, down, left, right)</li>
+        <li>Finding shortest path in maze</li>
+        <li>Flood fill algorithms</li>
+        <li>Island problems</li>
+        <li>Rotting oranges, walls and gates</li>
+      </ul>
+    </div>
+
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">GridBFS.java</div>
+        <div class="code-lang">java</div>
+      </div>
+      <div class="code">
+<pre><span class="cm">// Grid BFS Template (4-directional)</span>
+<span class="kw">class</span> <span class="tp">Solution</span> {
+    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> <span class="tp">int</span>[][] DIRECTIONS = {{<span class="nm">0</span>,<span class="nm">1</span>}, {<span class="nm">1</span>,<span class="nm">0</span>}, {<span class="nm">0</span>,-<span class="nm">1</span>}, {-<span class="nm">1</span>,<span class="nm">0</span>}};
+
+    <span class="kw">public</span> <span class="tp">int</span> <span class="fn">shortestPath</span>(<span class="tp">int</span>[][] grid, <span class="tp">int</span>[] start, <span class="tp">int</span>[] target) {
+        <span class="tp">int</span> rows = grid.<span class="fn">length</span>, cols = grid[<span class="nm">0</span>].<span class="fn">length</span>;
+        <span class="tp">Queue</span>&lt;<span class="tp">int</span>[]&gt; queue = <span class="kw">new</span> <span class="tp">LinkedList</span>&lt;&gt;();
+        <span class="tp">boolean</span>[][] visited = <span class="kw">new</span> <span class="tp">boolean</span>[rows][cols];
+
+        queue.<span class="fn">offer</span>(start);
+        visited[start[<span class="nm">0</span>]][start[<span class="nm">1</span>]] = <span class="kw">true</span>;
+        <span class="tp">int</span> steps = <span class="nm">0</span>;
+
+        <span class="kw">while</span> (!queue.<span class="fn">isEmpty</span>()) {
+            <span class="tp">int</span> size = queue.<span class="fn">size</span>();
+
+            <span class="kw">for</span> (<span class="tp">int</span> i = <span class="nm">0</span>; i &lt; size; i++) {
+                <span class="tp">int</span>[] cell = queue.<span class="fn">poll</span>();
+                <span class="tp">int</span> row = cell[<span class="nm">0</span>], col = cell[<span class="nm">1</span>];
+
+                <span class="cm">// Check if target reached</span>
+                <span class="kw">if</span> (row == target[<span class="nm">0</span>] &amp;&amp; col == target[<span class="nm">1</span>]) {
+                    <span class="kw">return</span> steps;
+                }
+
+                <span class="cm">// Explore 4 directions</span>
+                <span class="kw">for</span> (<span class="tp">int</span>[] dir : DIRECTIONS) {
+                    <span class="tp">int</span> newRow = row + dir[<span class="nm">0</span>];
+                    <span class="tp">int</span> newCol = col + dir[<span class="nm">1</span>];
+
+                    <span class="cm">// Check bounds and visited</span>
+                    <span class="kw">if</span> (<span class="fn">isValid</span>(newRow, newCol, rows, cols) &amp;&amp;
+                        !visited[newRow][newCol] &amp;&amp;
+                        grid[newRow][newCol] != <span class="nm">1</span>) { <span class="cm">// 1 = obstacle</span>
+
+                        queue.<span class="fn">offer</span>(<span class="kw">new</span> <span class="tp">int</span>[]{newRow, newCol});
+                        visited[newRow][newCol] = <span class="kw">true</span>;
+                    }
+                }
+            }
+
+            steps++;
+        }
+
+        <span class="kw">return</span> -<span class="nm">1</span>; <span class="cm">// No path found</span>
+    }
+
+    <span class="kw">private</span> <span class="tp">boolean</span> <span class="fn">isValid</span>(<span class="tp">int</span> row, <span class="tp">int</span> col, <span class="tp">int</span> rows, <span class="tp">int</span> cols) {
+        <span class="kw">return</span> row &gt;= <span class="nm">0</span> &amp;&amp; row &lt; rows &amp;&amp; col &gt;= <span class="nm">0</span> &amp;&amp; col &lt; cols;
+    }
+}
+
+<span class="cm">// Multi-Source BFS (e.g., Rotting Oranges)</span>
+<span class="kw">public</span> <span class="tp">int</span> <span class="fn">multiSourceBFS</span>(<span class="tp">int</span>[][] grid) {
+    <span class="tp">Queue</span>&lt;<span class="tp">int</span>[]&gt; queue = <span class="kw">new</span> <span class="tp">LinkedList</span>&lt;&gt;();
+    <span class="tp">int</span> fresh = <span class="nm">0</span>;
+
+    <span class="cm">// Add all rotten oranges to queue (multiple sources)</span>
+    <span class="kw">for</span> (<span class="tp">int</span> i = <span class="nm">0</span>; i &lt; grid.<span class="fn">length</span>; i++) {
+        <span class="kw">for</span> (<span class="tp">int</span> j = <span class="nm">0</span>; j &lt; grid[<span class="nm">0</span>].<span class="fn">length</span>; j++) {
+            <span class="kw">if</span> (grid[i][j] == <span class="nm">2</span>) queue.<span class="fn">offer</span>(<span class="kw">new</span> <span class="tp">int</span>[]{i, j});
+            <span class="kw">else</span> <span class="kw">if</span> (grid[i][j] == <span class="nm">1</span>) fresh++;
+        }
+    }
+
+    <span class="cm">// Standard BFS from multiple sources simultaneously</span>
+    <span class="cm">// ...</span>
+}</pre>
+      </div>
+    </div>
+
+    <div class="tip">
+      <span class="tip-t">GRID BFS TIPS</span>
+      <ul>
+        <li>Use <code>int[][] DIRECTIONS</code> for cleaner direction handling</li>
+        <li>Mark visited immediately when adding to queue (not when polling)</li>
+        <li>For multi-source BFS, add all sources to queue initially</li>
+        <li>Consider using queue of <code>int[]</code> or custom Cell class</li>
+      </ul>
+    </div>
+
+    <div class="note">
+      <b>LEETCODE PROBLEMS</b>
+      <div class="lc-list">
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#994</span>
+          <span class="lc-name">Rotting Oranges</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#286</span>
+          <span class="lc-name">Walls and Gates</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#542</span>
+          <span class="lc-name">01 Matrix</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-hard">HARD</span>
+          <span class="lc-num">#1091</span>
+          <span class="lc-name">Shortest Path in Binary Matrix</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-top">
+    <div class="icon icon-mint">🔄</div>
+    <div class="card-meta">
+      <div class="card-label">BFS PATTERN</div>
+      <div class="card-name">Bidirectional BFS</div>
+      <div class="card-tag">Optimize BFS by searching from both ends</div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <div class="scen">
+      <div class="scen-t">WHEN TO USE BIDIRECTIONAL BFS</div>
+      <ul>
+        <li>Large search space (exponential branching)</li>
+        <li>Both start and end points are known</li>
+        <li>Word ladder, transformation problems</li>
+        <li>Reduces complexity from O(b^d) to O(b^(d/2))</li>
+      </ul>
+    </div>
+
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">BidirectionalBFS.java</div>
+        <div class="code-lang">java</div>
+      </div>
+      <div class="code">
+<pre><span class="cm">// Bidirectional BFS Template</span>
+<span class="kw">class</span> <span class="tp">Solution</span> {
+    <span class="kw">public</span> <span class="tp">int</span> <span class="fn">bidirectionalBFS</span>(<span class="tp">String</span> start, <span class="tp">String</span> end, <span class="tp">Set</span>&lt;<span class="tp">String</span>&gt; wordList) {
+        <span class="tp">Set</span>&lt;<span class="tp">String</span>&gt; beginSet = <span class="kw">new</span> <span class="tp">HashSet</span>&lt;&gt;();
+        <span class="tp">Set</span>&lt;<span class="tp">String</span>&gt; endSet = <span class="kw">new</span> <span class="tp">HashSet</span>&lt;&gt;();
+        <span class="tp">Set</span>&lt;<span class="tp">String</span>&gt; visited = <span class="kw">new</span> <span class="tp">HashSet</span>&lt;&gt;();
+
+        beginSet.<span class="fn">add</span>(start);
+        endSet.<span class="fn">add</span>(end);
+        <span class="tp">int</span> steps = <span class="nm">1</span>;
+
+        <span class="kw">while</span> (!beginSet.<span class="fn">isEmpty</span>() &amp;&amp; !endSet.<span class="fn">isEmpty</span>()) {
+            <span class="cm">// Always expand the smaller set (optimization)</span>
+            <span class="kw">if</span> (beginSet.<span class="fn">size</span>() &gt; endSet.<span class="fn">size</span>()) {
+                <span class="tp">Set</span>&lt;<span class="tp">String</span>&gt; temp = beginSet;
+                beginSet = endSet;
+                endSet = temp;
+            }
+
+            <span class="tp">Set</span>&lt;<span class="tp">String</span>&gt; nextLevel = <span class="kw">new</span> <span class="tp">HashSet</span>&lt;&gt;();
+
+            <span class="kw">for</span> (<span class="tp">String</span> word : beginSet) {
+                <span class="cm">// Generate all possible next words</span>
+                <span class="kw">for</span> (<span class="tp">String</span> nextWord : <span class="fn">getNeighbors</span>(word, wordList)) {
+                    <span class="cm">// If other set contains this word, paths meet!</span>
+                    <span class="kw">if</span> (endSet.<span class="fn">contains</span>(nextWord)) {
+                        <span class="kw">return</span> steps + <span class="nm">1</span>;
+                    }
+
+                    <span class="kw">if</span> (!visited.<span class="fn">contains</span>(nextWord)) {
+                        nextLevel.<span class="fn">add</span>(nextWord);
+                        visited.<span class="fn">add</span>(nextWord);
+                    }
+                }
+            }
+
+            beginSet = nextLevel;
+            steps++;
+        }
+
+        <span class="kw">return</span> <span class="nm">0</span>; <span class="cm">// No path found</span>
+    }
+
+    <span class="kw">private</span> <span class="tp">List</span>&lt;<span class="tp">String</span>&gt; <span class="fn">getNeighbors</span>(<span class="tp">String</span> word, <span class="tp">Set</span>&lt;<span class="tp">String</span>&gt; wordList) {
+        <span class="tp">List</span>&lt;<span class="tp">String</span>&gt; neighbors = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;();
+        <span class="tp">char</span>[] chars = word.<span class="fn">toCharArray</span>();
+
+        <span class="kw">for</span> (<span class="tp">int</span> i = <span class="nm">0</span>; i &lt; chars.<span class="fn">length</span>; i++) {
+            <span class="tp">char</span> old = chars[i];
+            <span class="kw">for</span> (<span class="tp">char</span> c = <span class="st">'a'</span>; c &lt;= <span class="st">'z'</span>; c++) {
+                chars[i] = c;
+                <span class="tp">String</span> newWord = <span class="kw">new</span> <span class="tp">String</span>(chars);
+                <span class="kw">if</span> (wordList.<span class="fn">contains</span>(newWord)) {
+                    neighbors.<span class="fn">add</span>(newWord);
+                }
+            }
+            chars[i] = old;
+        }
+
+        <span class="kw">return</span> neighbors;
+    }
+}</pre>
+      </div>
+    </div>
+
+    <div class="note">
+      <b>LEETCODE PROBLEMS</b>
+      <div class="lc-list">
+        <div class="lc-item">
+          <span class="lc-badge lc-hard">HARD</span>
+          <span class="lc-num">#127</span>
+          <span class="lc-name">Word Ladder</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-hard">HARD</span>
+          <span class="lc-num">#126</span>
+          <span class="lc-name">Word Ladder II</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</div>
+
+<!-- SECTION 3: TOPOLOGICAL SORT -->
+<div class="section" id="sec-3">
+
+<div class="card">
+  <div class="card-top">
+    <div class="icon icon-violet">📋</div>
+    <div class="card-meta">
+      <div class="card-label">TOPOLOGICAL SORT</div>
+      <div class="card-name">Ordering with Dependencies</div>
+      <div class="card-tag">Linear ordering of vertices in a DAG</div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <div class="scen">
+      <div class="scen-t">WHEN TO USE TOPOLOGICAL SORT</div>
+      <ul>
+        <li>Course scheduling with prerequisites</li>
+        <li>Build/compilation order</li>
+        <li>Task dependencies</li>
+        <li>Only works on <strong>Directed Acyclic Graphs (DAG)</strong></li>
+        <li>If cycle exists, topological sort is impossible</li>
+      </ul>
+    </div>
+
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">TopologicalSort.java</div>
+        <div class="code-lang">java</div>
+      </div>
+      <div class="code">
+<pre><span class="cm">// Kahn's Algorithm (BFS-based) - Most Common</span>
+<span class="kw">class</span> <span class="tp">Solution</span> {
+    <span class="kw">public</span> <span class="tp">int</span>[] <span class="fn">topologicalSort</span>(<span class="tp">int</span> numCourses, <span class="tp">int</span>[][] prerequisites) {
+        <span class="cm">// Build graph and calculate in-degrees</span>
+        <span class="tp">Map</span>&lt;<span class="tp">Integer</span>, <span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; graph = <span class="kw">new</span> <span class="tp">HashMap</span>&lt;&gt;();
+        <span class="tp">int</span>[] inDegree = <span class="kw">new</span> <span class="tp">int</span>[numCourses];
+
+        <span class="kw">for</span> (<span class="tp">int</span>[] pre : prerequisites) {
+            <span class="tp">int</span> course = pre[<span class="nm">0</span>], prereq = pre[<span class="nm">1</span>];
+            graph.<span class="fn">computeIfAbsent</span>(prereq, k -&gt; <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;()).<span class="fn">add</span>(course);
+            inDegree[course]++;
+        }
+
+        <span class="cm">// Add all nodes with in-degree 0 to queue</span>
+        <span class="tp">Queue</span>&lt;<span class="tp">Integer</span>&gt; queue = <span class="kw">new</span> <span class="tp">LinkedList</span>&lt;&gt;();
+        <span class="kw">for</span> (<span class="tp">int</span> i = <span class="nm">0</span>; i &lt; numCourses; i++) {
+            <span class="kw">if</span> (inDegree[i] == <span class="nm">0</span>) {
+                queue.<span class="fn">offer</span>(i);
+            }
+        }
+
+        <span class="tp">int</span>[] result = <span class="kw">new</span> <span class="tp">int</span>[numCourses];
+        <span class="tp">int</span> index = <span class="nm">0</span>;
+
+        <span class="cm">// Process nodes with in-degree 0</span>
+        <span class="kw">while</span> (!queue.<span class="fn">isEmpty</span>()) {
+            <span class="tp">int</span> node = queue.<span class="fn">poll</span>();
+            result[index++] = node;
+
+            <span class="cm">// Reduce in-degree of neighbors</span>
+            <span class="kw">for</span> (<span class="tp">int</span> neighbor : graph.<span class="fn">getOrDefault</span>(node, <span class="tp">Collections</span>.<span class="fn">emptyList</span>())) {
+                inDegree[neighbor]--;
+                <span class="kw">if</span> (inDegree[neighbor] == <span class="nm">0</span>) {
+                    queue.<span class="fn">offer</span>(neighbor);
+                }
+            }
+        }
+
+        <span class="cm">// If not all nodes processed, cycle exists</span>
+        <span class="kw">return</span> index == numCourses ? result : <span class="kw">new</span> <span class="tp">int</span>[<span class="nm">0</span>];
+    }
+}
+
+<span class="cm">// DFS-based Topological Sort</span>
+<span class="kw">class</span> <span class="tp">Solution</span> {
+    <span class="kw">public</span> <span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt; <span class="fn">topologicalSortDFS</span>(<span class="tp">Map</span>&lt;<span class="tp">Integer</span>, <span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; graph, <span class="tp">int</span> n) {
+        <span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt; result = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;();
+        <span class="tp">Set</span>&lt;<span class="tp">Integer</span>&gt; visited = <span class="kw">new</span> <span class="tp">HashSet</span>&lt;&gt;();
+        <span class="tp">Set</span>&lt;<span class="tp">Integer</span>&gt; recStack = <span class="kw">new</span> <span class="tp">HashSet</span>&lt;&gt;();
+
+        <span class="kw">for</span> (<span class="tp">int</span> i = <span class="nm">0</span>; i &lt; n; i++) {
+            <span class="kw">if</span> (!visited.<span class="fn">contains</span>(i)) {
+                <span class="kw">if</span> (<span class="fn">dfs</span>(i, graph, visited, recStack, result)) {
+                    <span class="kw">return</span> <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;(); <span class="cm">// Cycle detected</span>
+                }
+            }
+        }
+
+        <span class="tp">Collections</span>.<span class="fn">reverse</span>(result); <span class="cm">// Reverse to get correct order</span>
+        <span class="kw">return</span> result;
+    }
+
+    <span class="kw">private</span> <span class="tp">boolean</span> <span class="fn">dfs</span>(<span class="tp">int</span> node, <span class="tp">Map</span>&lt;<span class="tp">Integer</span>, <span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; graph,
+                         <span class="tp">Set</span>&lt;<span class="tp">Integer</span>&gt; visited, <span class="tp">Set</span>&lt;<span class="tp">Integer</span>&gt; recStack,
+                         <span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt; result) {
+        visited.<span class="fn">add</span>(node);
+        recStack.<span class="fn">add</span>(node);
+
+        <span class="kw">for</span> (<span class="tp">int</span> neighbor : graph.<span class="fn">getOrDefault</span>(node, <span class="tp">Collections</span>.<span class="fn">emptyList</span>())) {
+            <span class="kw">if</span> (recStack.<span class="fn">contains</span>(neighbor)) <span class="kw">return</span> <span class="kw">true</span>; <span class="cm">// Cycle</span>
+            <span class="kw">if</span> (!visited.<span class="fn">contains</span>(neighbor)) {
+                <span class="kw">if</span> (<span class="fn">dfs</span>(neighbor, graph, visited, recStack, result)) {
+                    <span class="kw">return</span> <span class="kw">true</span>;
+                }
+            }
+        }
+
+        recStack.<span class="fn">remove</span>(node);
+        result.<span class="fn">add</span>(node); <span class="cm">// Add after visiting all descendants</span>
+        <span class="kw">return</span> <span class="kw">false</span>;
+    }
+}</pre>
+      </div>
+    </div>
+
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">topological-sort-example.txt</div>
+        <div class="code-lang">pseudocode</div>
+      </div>
+      <div class="code">
+<pre><span class="cm">Course Prerequisites Example:</span>
+
+Courses: 0, 1, 2, 3
+Prerequisites: [[1,0], [2,0], [3,1], [3,2]]
+
+Graph:      0
+           / \
+          1   2
+           \ /
+            3
+
+In-Degrees:
+0 → 0 (no prerequisites)
+1 → 1 (needs course 0)
+2 → 1 (needs course 0)
+3 → 2 (needs courses 1 and 2)
+
+Topological Order: 0 → 1 → 2 → 3  (or 0 → 2 → 1 → 3)</pre>
+      </div>
+    </div>
+
+    <div class="tip">
+      <span class="tip-t">KAHN'S ALGORITHM STEPS</span>
+      <ul>
+        <li><strong>Step 1</strong>: Calculate in-degree for all vertices</li>
+        <li><strong>Step 2</strong>: Add all vertices with in-degree 0 to queue</li>
+        <li><strong>Step 3</strong>: While queue not empty:
+          <ul style="margin-left:20px">
+            <li>Remove vertex, add to result</li>
+            <li>Decrease in-degree of neighbors</li>
+            <li>If neighbor's in-degree becomes 0, add to queue</li>
+          </ul>
+        </li>
+        <li><strong>Step 4</strong>: If result has all vertices → success, else cycle exists</li>
+      </ul>
+    </div>
+
+    <div class="warn">
+      <span class="warn-t">COMMON PITFALLS</span>
+      <ul>
+        <li>Forgetting to check if all nodes are processed (cycle detection)</li>
+        <li>Confusing edge direction: [a,b] means b → a (b is prerequisite of a)</li>
+        <li>DFS approach requires reversing the result list</li>
+      </ul>
+    </div>
+
+    <div class="note">
+      <b>LEETCODE PROBLEMS</b>
+      <div class="lc-list">
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#207</span>
+          <span class="lc-name">Course Schedule</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#210</span>
+          <span class="lc-name">Course Schedule II</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#310</span>
+          <span class="lc-name">Minimum Height Trees</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-hard">HARD</span>
+          <span class="lc-num">#269</span>
+          <span class="lc-name">Alien Dictionary</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</div>
+
+<!-- SECTION 4: UNION FIND -->
+<div class="section" id="sec-4">
+
+<div class="card">
+  <div class="card-top">
+    <div class="icon icon-orange">🔗</div>
+    <div class="card-meta">
+      <div class="card-label">UNION FIND (DISJOINT SET)</div>
+      <div class="card-name">Efficiently Track Connected Components</div>
+      <div class="card-tag">Union-Find with path compression and union by rank</div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <div class="scen">
+      <div class="scen-t">WHEN TO USE UNION FIND</div>
+      <ul>
+        <li>Dynamically tracking connected components</li>
+        <li>Detecting cycles in undirected graphs</li>
+        <li>Kruskal's MST algorithm</li>
+        <li>Network connectivity</li>
+        <li>Checking if two nodes are in same component</li>
+        <li>Friend circles, accounts merge</li>
+      </ul>
+    </div>
+
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">UnionFind.java</div>
+        <div class="code-lang">java</div>
+      </div>
+      <div class="code">
+<pre><span class="cm">// Union Find (Disjoint Set Union) with Path Compression & Union by Rank</span>
+<span class="kw">class</span> <span class="tp">UnionFind</span> {
+    <span class="kw">private</span> <span class="tp">int</span>[] parent;
+    <span class="kw">private</span> <span class="tp">int</span>[] rank;
+    <span class="kw">private</span> <span class="tp">int</span> components; <span class="cm">// Number of disjoint sets</span>
+
+    <span class="kw">public</span> <span class="fn">UnionFind</span>(<span class="tp">int</span> n) {
+        parent = <span class="kw">new</span> <span class="tp">int</span>[n];
+        rank = <span class="kw">new</span> <span class="tp">int</span>[n];
+        components = n;
+
+        <span class="cm">// Initially, each node is its own parent</span>
+        <span class="kw">for</span> (<span class="tp">int</span> i = <span class="nm">0</span>; i &lt; n; i++) {
+            parent[i] = i;
+            rank[i] = <span class="nm">0</span>;
+        }
+    }
+
+    <span class="cm">// Find with Path Compression</span>
+    <span class="kw">public</span> <span class="tp">int</span> <span class="fn">find</span>(<span class="tp">int</span> x) {
+        <span class="kw">if</span> (parent[x] != x) {
+            parent[x] = <span class="fn">find</span>(parent[x]); <span class="cm">// Path compression</span>
+        }
+        <span class="kw">return</span> parent[x];
+    }
+
+    <span class="cm">// Union by Rank</span>
+    <span class="kw">public</span> <span class="tp">boolean</span> <span class="fn">union</span>(<span class="tp">int</span> x, <span class="tp">int</span> y) {
+        <span class="tp">int</span> rootX = <span class="fn">find</span>(x);
+        <span class="tp">int</span> rootY = <span class="fn">find</span>(y);
+
+        <span class="kw">if</span> (rootX == rootY) {
+            <span class="kw">return</span> <span class="kw">false</span>; <span class="cm">// Already in same set (cycle!)</span>
+        }
+
+        <span class="cm">// Attach smaller rank tree under root of higher rank tree</span>
+        <span class="kw">if</span> (rank[rootX] &lt; rank[rootY]) {
+            parent[rootX] = rootY;
+        } <span class="kw">else</span> <span class="kw">if</span> (rank[rootX] &gt; rank[rootY]) {
+            parent[rootY] = rootX;
+        } <span class="kw">else</span> {
+            parent[rootY] = rootX;
+            rank[rootX]++;
+        }
+
+        components--;
+        <span class="kw">return</span> <span class="kw">true</span>;
+    }
+
+    <span class="cm">// Check if two nodes are connected</span>
+    <span class="kw">public</span> <span class="tp">boolean</span> <span class="fn">isConnected</span>(<span class="tp">int</span> x, <span class="tp">int</span> y) {
+        <span class="kw">return</span> <span class="fn">find</span>(x) == <span class="fn">find</span>(y);
+    }
+
+    <span class="cm">// Get number of connected components</span>
+    <span class="kw">public</span> <span class="tp">int</span> <span class="fn">getComponents</span>() {
+        <span class="kw">return</span> components;
+    }
+}
+
+<span class="cm">// Example: Count Connected Components</span>
+<span class="kw">public</span> <span class="tp">int</span> <span class="fn">countComponents</span>(<span class="tp">int</span> n, <span class="tp">int</span>[][] edges) {
+    <span class="tp">UnionFind</span> uf = <span class="kw">new</span> <span class="tp">UnionFind</span>(n);
+
+    <span class="kw">for</span> (<span class="tp">int</span>[] edge : edges) {
+        uf.<span class="fn">union</span>(edge[<span class="nm">0</span>], edge[<span class="nm">1</span>]);
+    }
+
+    <span class="kw">return</span> uf.<span class="fn">getComponents</span>();
+}</pre>
+      </div>
+    </div>
+
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">union-find-visualization.txt</div>
+        <div class="code-lang">pseudocode</div>
+      </div>
+      <div class="code">
+<pre><span class="cm">Union Find Example:</span>
+
+Initial: 0  1  2  3  4  5
+         ↑  ↑  ↑  ↑  ↑  ↑
+        (0)(1)(2)(3)(4)(5)  - Each node is its own parent
+
+After union(0,1):
+         0───1  2  3  4  5
+         ↑      ↑  ↑  ↑  ↑
+        (0)    (2)(3)(4)(5)
+
+After union(2,3):
+         0───1  2───3  4  5
+         ↑      ↑      ↑  ↑
+        (0)    (2)    (4)(5)
+
+After union(0,2):
+         0───1
+         |
+         2───3  4  5
+         ↑      ↑  ↑
+        (0)    (4)(5)
+
+<span class="cm">Path Compression: When we find(3), we make 3 point directly to 0:</span>
+         0───1
+        /|
+       2 3    4  5</pre>
+      </div>
+    </div>
+
+    <div class="tip">
+      <span class="tip-t">TIME COMPLEXITY</span>
+      <ul>
+        <li><strong>Find</strong>: O(α(n)) ≈ O(1) amortized with path compression</li>
+        <li><strong>Union</strong>: O(α(n)) ≈ O(1) amortized</li>
+        <li>α(n) is inverse Ackermann function, grows extremely slowly</li>
+        <li>For practical purposes, both operations are near-constant time</li>
+      </ul>
+    </div>
+
+    <div class="warn">
+      <span class="warn-t">COMMON PITFALLS</span>
+      <ul>
+        <li>Forgetting path compression in find() - reduces efficiency</li>
+        <li>Not using union by rank - creates unbalanced trees</li>
+        <li>Calling union before find - must find roots first</li>
+      </ul>
+    </div>
+
+    <div class="note">
+      <b>LEETCODE PROBLEMS</b>
+      <div class="lc-list">
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#323</span>
+          <span class="lc-name">Number of Connected Components in Undirected Graph</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#547</span>
+          <span class="lc-name">Number of Provinces</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#684</span>
+          <span class="lc-name">Redundant Connection</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#721</span>
+          <span class="lc-name">Accounts Merge</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-hard">HARD</span>
+          <span class="lc-num">#128</span>
+          <span class="lc-name">Longest Consecutive Sequence</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</div>
+
+<!-- SECTION 5: SHORTEST PATH -->
+<div class="section" id="sec-5">
+
+<div class="card">
+  <div class="card-top">
+    <div class="icon icon-sky">🛣️</div>
+    <div class="card-meta">
+      <div class="card-label">SHORTEST PATH</div>
+      <div class="card-name">Dijkstra's Algorithm</div>
+      <div class="card-tag">Find shortest path in weighted graphs (non-negative weights)</div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <div class="scen">
+      <div class="scen-t">WHEN TO USE DIJKSTRA'S</div>
+      <ul>
+        <li>Weighted graph with <strong>non-negative</strong> edge weights</li>
+        <li>Finding shortest path from single source to all vertices</li>
+        <li>Network routing, GPS navigation</li>
+        <li>Cheapest flights, minimum cost problems</li>
+      </ul>
+    </div>
+
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">Dijkstra.java</div>
+        <div class="code-lang">java</div>
+      </div>
+      <div class="code">
+<pre><span class="cm">// Dijkstra's Algorithm using Priority Queue</span>
+<span class="kw">class</span> <span class="tp">Solution</span> {
+    <span class="kw">class</span> <span class="tp">Node</span> {
+        <span class="tp">int</span> vertex;
+        <span class="tp">int</span> distance;
+
+        <span class="fn">Node</span>(<span class="tp">int</span> vertex, <span class="tp">int</span> distance) {
+            <span class="kw">this</span>.vertex = vertex;
+            <span class="kw">this</span>.distance = distance;
+        }
+    }
+
+    <span class="kw">public</span> <span class="tp">int</span> <span class="fn">dijkstra</span>(<span class="tp">Map</span>&lt;<span class="tp">Integer</span>, <span class="tp">List</span>&lt;<span class="tp">Node</span>&gt;&gt; graph, <span class="tp">int</span> src, <span class="tp">int</span> target, <span class="tp">int</span> n) {
+        <span class="cm">// Min heap: [distance, vertex]</span>
+        <span class="tp">PriorityQueue</span>&lt;<span class="tp">Node</span>&gt; pq = <span class="kw">new</span> <span class="tp">PriorityQueue</span>&lt;&gt;(
+            (<span class="tp">a</span>, <span class="tp">b</span>) -&gt; a.distance - b.distance
+        );
+
+        <span class="tp">int</span>[] dist = <span class="kw">new</span> <span class="tp">int</span>[n];
+        <span class="tp">Arrays</span>.<span class="fn">fill</span>(dist, <span class="tp">Integer</span>.<span class="nm">MAX_VALUE</span>);
+        dist[src] = <span class="nm">0</span>;
+
+        pq.<span class="fn">offer</span>(<span class="kw">new</span> <span class="tp">Node</span>(src, <span class="nm">0</span>));
+
+        <span class="kw">while</span> (!pq.<span class="fn">isEmpty</span>()) {
+            <span class="tp">Node</span> current = pq.<span class="fn">poll</span>();
+            <span class="tp">int</span> u = current.vertex;
+            <span class="tp">int</span> currDist = current.distance;
+
+            <span class="cm">// If we reached target, return distance</span>
+            <span class="kw">if</span> (u == target) {
+                <span class="kw">return</span> currDist;
+            }
+
+            <span class="cm">// Skip if we've already found a better path</span>
+            <span class="kw">if</span> (currDist &gt; dist[u]) {
+                <span class="kw">continue</span>;
+            }
+
+            <span class="cm">// Relax all edges from u</span>
+            <span class="kw">for</span> (<span class="tp">Node</span> neighbor : graph.<span class="fn">getOrDefault</span>(u, <span class="tp">Collections</span>.<span class="fn">emptyList</span>())) {
+                <span class="tp">int</span> v = neighbor.vertex;
+                <span class="tp">int</span> weight = neighbor.distance;
+                <span class="tp">int</span> newDist = currDist + weight;
+
+                <span class="cm">// If found shorter path to v</span>
+                <span class="kw">if</span> (newDist &lt; dist[v]) {
+                    dist[v] = newDist;
+                    pq.<span class="fn">offer</span>(<span class="kw">new</span> <span class="tp">Node</span>(v, newDist));
+                }
+            }
+        }
+
+        <span class="kw">return</span> dist[target] == <span class="tp">Integer</span>.<span class="nm">MAX_VALUE</span> ? -<span class="nm">1</span> : dist[target];
+    }
+}
+
+<span class="cm">// Dijkstra with Path Reconstruction</span>
+<span class="kw">public</span> <span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt; <span class="fn">dijkstraWithPath</span>(<span class="tp">Map</span>&lt;<span class="tp">Integer</span>, <span class="tp">List</span>&lt;<span class="tp">Node</span>&gt;&gt; graph,
+                                         <span class="tp">int</span> src, <span class="tp">int</span> target, <span class="tp">int</span> n) {
+    <span class="tp">int</span>[] dist = <span class="kw">new</span> <span class="tp">int</span>[n];
+    <span class="tp">int</span>[] parent = <span class="kw">new</span> <span class="tp">int</span>[n];
+    <span class="tp">Arrays</span>.<span class="fn">fill</span>(dist, <span class="tp">Integer</span>.<span class="nm">MAX_VALUE</span>);
+    <span class="tp">Arrays</span>.<span class="fn">fill</span>(parent, -<span class="nm">1</span>);
+
+    <span class="tp">PriorityQueue</span>&lt;<span class="tp">Node</span>&gt; pq = <span class="kw">new</span> <span class="tp">PriorityQueue</span>&lt;&gt;((a, b) -&gt; a.distance - b.distance);
+    dist[src] = <span class="nm">0</span>;
+    pq.<span class="fn">offer</span>(<span class="kw">new</span> <span class="tp">Node</span>(src, <span class="nm">0</span>));
+
+    <span class="kw">while</span> (!pq.<span class="fn">isEmpty</span>()) {
+        <span class="tp">Node</span> curr = pq.<span class="fn">poll</span>();
+        <span class="tp">int</span> u = curr.vertex;
+
+        <span class="kw">if</span> (curr.distance &gt; dist[u]) <span class="kw">continue</span>;
+
+        <span class="kw">for</span> (<span class="tp">Node</span> neighbor : graph.<span class="fn">getOrDefault</span>(u, <span class="tp">Collections</span>.<span class="fn">emptyList</span>())) {
+            <span class="tp">int</span> v = neighbor.vertex;
+            <span class="tp">int</span> newDist = dist[u] + neighbor.distance;
+
+            <span class="kw">if</span> (newDist &lt; dist[v]) {
+                dist[v] = newDist;
+                parent[v] = u; <span class="cm">// Track parent for path reconstruction</span>
+                pq.<span class="fn">offer</span>(<span class="kw">new</span> <span class="tp">Node</span>(v, newDist));
+            }
+        }
+    }
+
+    <span class="cm">// Reconstruct path</span>
+    <span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt; path = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;();
+    <span class="kw">for</span> (<span class="tp">int</span> at = target; at != -<span class="nm">1</span>; at = parent[at]) {
+        path.<span class="fn">add</span>(at);
+    }
+    <span class="tp">Collections</span>.<span class="fn">reverse</span>(path);
+    <span class="kw">return</span> path;
+}</pre>
+      </div>
+    </div>
+
+    <div class="tip">
+      <span class="tip-t">DIJKSTRA'S KEY CONCEPTS</span>
+      <ul>
+        <li><strong>Greedy approach</strong>: Always pick the closest unvisited vertex</li>
+        <li><strong>Relaxation</strong>: Update dist[v] if dist[u] + weight(u,v) < dist[v]</li>
+        <li><strong>Time Complexity</strong>: O((V + E) log V) with priority queue</li>
+        <li><strong>Space Complexity</strong>: O(V)</li>
+        <li><strong>Limitation</strong>: Does NOT work with negative weights</li>
+      </ul>
+    </div>
+
+    <div class="note">
+      <b>LEETCODE PROBLEMS</b>
+      <div class="lc-list">
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#743</span>
+          <span class="lc-name">Network Delay Time</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#787</span>
+          <span class="lc-name">Cheapest Flights Within K Stops</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#1334</span>
+          <span class="lc-name">Find the City With Smallest Number of Neighbors</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#1631</span>
+          <span class="lc-name">Path With Minimum Effort</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-top">
+    <div class="icon icon-coral">⚡</div>
+    <div class="card-meta">
+      <div class="card-label">SHORTEST PATH</div>
+      <div class="card-name">Bellman-Ford Algorithm</div>
+      <div class="card-tag">Handles negative weights and detects negative cycles</div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <div class="scen">
+      <div class="scen-t">WHEN TO USE BELLMAN-FORD</div>
+      <ul>
+        <li>Graph has <strong>negative edge weights</strong></li>
+        <li>Need to detect negative weight cycles</li>
+        <li>Single source shortest path</li>
+        <li>Slower than Dijkstra: O(VE) vs O((V+E) log V)</li>
+      </ul>
+    </div>
+
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">BellmanFord.java</div>
+        <div class="code-lang">java</div>
+      </div>
+      <div class="code">
+<pre><span class="cm">// Bellman-Ford Algorithm</span>
+<span class="kw">class</span> <span class="tp">Solution</span> {
+    <span class="kw">class</span> <span class="tp">Edge</span> {
+        <span class="tp">int</span> from, to, weight;
+
+        <span class="fn">Edge</span>(<span class="tp">int</span> from, <span class="tp">int</span> to, <span class="tp">int</span> weight) {
+            <span class="kw">this</span>.from = from;
+            <span class="kw">this</span>.to = to;
+            <span class="kw">this</span>.weight = weight;
+        }
+    }
+
+    <span class="kw">public</span> <span class="tp">int</span>[] <span class="fn">bellmanFord</span>(<span class="tp">List</span>&lt;<span class="tp">Edge</span>&gt; edges, <span class="tp">int</span> n, <span class="tp">int</span> src) {
+        <span class="tp">int</span>[] dist = <span class="kw">new</span> <span class="tp">int</span>[n];
+        <span class="tp">Arrays</span>.<span class="fn">fill</span>(dist, <span class="tp">Integer</span>.<span class="nm">MAX_VALUE</span>);
+        dist[src] = <span class="nm">0</span>;
+
+        <span class="cm">// Relax all edges V-1 times</span>
+        <span class="kw">for</span> (<span class="tp">int</span> i = <span class="nm">0</span>; i &lt; n - <span class="nm">1</span>; i++) {
+            <span class="kw">for</span> (<span class="tp">Edge</span> edge : edges) {
+                <span class="kw">if</span> (dist[edge.from] != <span class="tp">Integer</span>.<span class="nm">MAX_VALUE</span> &amp;&amp;
+                    dist[edge.from] + edge.weight &lt; dist[edge.to]) {
+                    dist[edge.to] = dist[edge.from] + edge.weight;
+                }
+            }
+        }
+
+        <span class="cm">// Check for negative weight cycles</span>
+        <span class="kw">for</span> (<span class="tp">Edge</span> edge : edges) {
+            <span class="kw">if</span> (dist[edge.from] != <span class="tp">Integer</span>.<span class="nm">MAX_VALUE</span> &amp;&amp;
+                dist[edge.from] + edge.weight &lt; dist[edge.to]) {
+                <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"Negative weight cycle detected!"</span>);
+                <span class="kw">return</span> <span class="kw">null</span>;
+            }
+        }
+
+        <span class="kw">return</span> dist;
+    }
+}
+
+<span class="cm">// Optimized: Early termination if no changes</span>
+<span class="kw">public</span> <span class="tp">int</span>[] <span class="fn">bellmanFordOptimized</span>(<span class="tp">List</span>&lt;<span class="tp">Edge</span>&gt; edges, <span class="tp">int</span> n, <span class="tp">int</span> src) {
+    <span class="tp">int</span>[] dist = <span class="kw">new</span> <span class="tp">int</span>[n];
+    <span class="tp">Arrays</span>.<span class="fn">fill</span>(dist, <span class="tp">Integer</span>.<span class="nm">MAX_VALUE</span>);
+    dist[src] = <span class="nm">0</span>;
+
+    <span class="kw">for</span> (<span class="tp">int</span> i = <span class="nm">0</span>; i &lt; n - <span class="nm">1</span>; i++) {
+        <span class="tp">boolean</span> updated = <span class="kw">false</span>;
+
+        <span class="kw">for</span> (<span class="tp">Edge</span> edge : edges) {
+            <span class="kw">if</span> (dist[edge.from] != <span class="tp">Integer</span>.<span class="nm">MAX_VALUE</span>) {
+                <span class="tp">int</span> newDist = dist[edge.from] + edge.weight;
+                <span class="kw">if</span> (newDist &lt; dist[edge.to]) {
+                    dist[edge.to] = newDist;
+                    updated = <span class="kw">true</span>;
+                }
+            }
+        }
+
+        <span class="cm">// If no updates in this iteration, we're done</span>
+        <span class="kw">if</span> (!updated) <span class="kw">break</span>;
+    }
+
+    <span class="kw">return</span> dist;
+}</pre>
+      </div>
+    </div>
+
+    <div class="tip">
+      <span class="tip-t">BELLMAN-FORD ALGORITHM STEPS</span>
+      <ul>
+        <li><strong>Step 1</strong>: Initialize dist[src] = 0, all others = ∞</li>
+        <li><strong>Step 2</strong>: Relax all edges V-1 times</li>
+        <li><strong>Step 3</strong>: Check one more time for negative cycles</li>
+        <li><strong>Why V-1 times?</strong> Longest simple path has V-1 edges</li>
+      </ul>
+    </div>
+
+    <div class="note">
+      <b>LEETCODE PROBLEMS</b>
+      <div class="lc-list">
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#787</span>
+          <span class="lc-name">Cheapest Flights Within K Stops</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#743</span>
+          <span class="lc-name">Network Delay Time</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-top">
+    <div class="icon icon-violet">🌐</div>
+    <div class="card-meta">
+      <div class="card-label">ALL-PAIRS SHORTEST PATH</div>
+      <div class="card-name">Floyd-Warshall Algorithm</div>
+      <div class="card-tag">Find shortest paths between all pairs of vertices</div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <div class="scen">
+      <div class="scen-t">WHEN TO USE FLOYD-WARSHALL</div>
+      <ul>
+        <li>Need shortest paths between <strong>all pairs</strong> of vertices</li>
+        <li>Graph is small (n ≤ 400) due to O(V³) complexity</li>
+        <li>Can handle negative weights (but no negative cycles)</li>
+        <li>Dense graphs represented as adjacency matrix</li>
+      </ul>
+    </div>
+
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">FloydWarshall.java</div>
+        <div class="code-lang">java</div>
+      </div>
+      <div class="code">
+<pre><span class="cm">// Floyd-Warshall Algorithm</span>
+<span class="kw">class</span> <span class="tp">Solution</span> {
+    <span class="kw">public</span> <span class="tp">int</span>[][] <span class="fn">floydWarshall</span>(<span class="tp">int</span>[][] graph) {
+        <span class="tp">int</span> n = graph.<span class="fn">length</span>;
+        <span class="tp">int</span>[][] dist = <span class="kw">new</span> <span class="tp">int</span>[n][n];
+
+        <span class="cm">// Initialize distance matrix</span>
+        <span class="kw">for</span> (<span class="tp">int</span> i = <span class="nm">0</span>; i &lt; n; i++) {
+            <span class="kw">for</span> (<span class="tp">int</span> j = <span class="nm">0</span>; j &lt; n; j++) {
+                dist[i][j] = graph[i][j];
+            }
+        }
+
+        <span class="cm">// Try all intermediate vertices k</span>
+        <span class="kw">for</span> (<span class="tp">int</span> k = <span class="nm">0</span>; k &lt; n; k++) {
+            <span class="kw">for</span> (<span class="tp">int</span> i = <span class="nm">0</span>; i &lt; n; i++) {
+                <span class="kw">for</span> (<span class="tp">int</span> j = <span class="nm">0</span>; j &lt; n; j++) {
+                    <span class="cm">// If path through k is shorter</span>
+                    <span class="kw">if</span> (dist[i][k] != <span class="tp">Integer</span>.<span class="nm">MAX_VALUE</span> &amp;&amp;
+                        dist[k][j] != <span class="tp">Integer</span>.<span class="nm">MAX_VALUE</span> &amp;&amp;
+                        dist[i][k] + dist[k][j] &lt; dist[i][j]) {
+                        dist[i][j] = dist[i][k] + dist[k][j];
+                    }
+                }
+            }
+        }
+
+        <span class="cm">// Check for negative cycles</span>
+        <span class="kw">for</span> (<span class="tp">int</span> i = <span class="nm">0</span>; i &lt; n; i++) {
+            <span class="kw">if</span> (dist[i][i] &lt; <span class="nm">0</span>) {
+                <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"Negative cycle detected!"</span>);
+                <span class="kw">return</span> <span class="kw">null</span>;
+            }
+        }
+
+        <span class="kw">return</span> dist;
+    }
+}</pre>
+      </div>
+    </div>
+
+    <div class="tip">
+      <span class="tip-t">KEY INSIGHT</span>
+      <ul>
+        <li>For each pair (i, j), try all possible intermediate vertices k</li>
+        <li>dist[i][j] = min(dist[i][j], dist[i][k] + dist[k][j])</li>
+        <li><strong>Time</strong>: O(V³), <strong>Space</strong>: O(V²)</li>
+        <li>Order of loops matters: k must be outermost loop!</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+</div>
+
+<!-- SECTION 6: MST ALGORITHMS -->
+<div class="section" id="sec-6">
+
+<div class="card">
+  <div class="card-top">
+    <div class="icon icon-mint">🌳</div>
+    <div class="card-meta">
+      <div class="card-label">MINIMUM SPANNING TREE</div>
+      <div class="card-name">Kruskal's Algorithm</div>
+      <div class="card-tag">Find MST using Union Find (edge-based)</div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <div class="scen">
+      <div class="scen-t">WHAT IS MST?</div>
+      <ul>
+        <li>Subset of edges connecting all vertices</li>
+        <li>No cycles (it's a tree)</li>
+        <li>Minimum total edge weight</li>
+        <li>For graph with V vertices, MST has exactly V-1 edges</li>
+      </ul>
+    </div>
+
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">Kruskal.java</div>
+        <div class="code-lang">java</div>
+      </div>
+      <div class="code">
+<pre><span class="cm">// Kruskal's Algorithm (Union Find)</span>
+<span class="kw">class</span> <span class="tp">Solution</span> {
+    <span class="kw">class</span> <span class="tp">Edge</span> <span class="kw">implements</span> <span class="tp">Comparable</span>&lt;<span class="tp">Edge</span>&gt; {
+        <span class="tp">int</span> u, v, weight;
+
+        <span class="fn">Edge</span>(<span class="tp">int</span> u, <span class="tp">int</span> v, <span class="tp">int</span> weight) {
+            <span class="kw">this</span>.u = u;
+            <span class="kw">this</span>.v = v;
+            <span class="kw">this</span>.weight = weight;
+        }
+
+        <span class="an">@Override</span>
+        <span class="kw">public</span> <span class="tp">int</span> <span class="fn">compareTo</span>(<span class="tp">Edge</span> other) {
+            <span class="kw">return</span> <span class="kw">this</span>.weight - other.weight;
+        }
+    }
+
+    <span class="kw">public</span> <span class="tp">int</span> <span class="fn">kruskalMST</span>(<span class="tp">int</span> n, <span class="tp">List</span>&lt;<span class="tp">Edge</span>&gt; edges) {
+        <span class="cm">// Step 1: Sort edges by weight</span>
+        <span class="tp">Collections</span>.<span class="fn">sort</span>(edges);
+
+        <span class="cm">// Step 2: Initialize Union Find</span>
+        <span class="tp">UnionFind</span> uf = <span class="kw">new</span> <span class="tp">UnionFind</span>(n);
+
+        <span class="tp">int</span> mstCost = <span class="nm">0</span>;
+        <span class="tp">int</span> edgesUsed = <span class="nm">0</span>;
+        <span class="tp">List</span>&lt;<span class="tp">Edge</span>&gt; mstEdges = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;();
+
+        <span class="cm">// Step 3: Process edges in sorted order</span>
+        <span class="kw">for</span> (<span class="tp">Edge</span> edge : edges) {
+            <span class="cm">// If adding this edge doesn't create cycle</span>
+            <span class="kw">if</span> (uf.<span class="fn">union</span>(edge.u, edge.v)) {
+                mstCost += edge.weight;
+                mstEdges.<span class="fn">add</span>(edge);
+                edgesUsed++;
+
+                <span class="cm">// MST complete when we have V-1 edges</span>
+                <span class="kw">if</span> (edgesUsed == n - <span class="nm">1</span>) {
+                    <span class="kw">break</span>;
+                }
+            }
+        }
+
+        <span class="cm">// Check if MST is possible</span>
+        <span class="kw">if</span> (edgesUsed != n - <span class="nm">1</span>) {
+            <span class="kw">return</span> -<span class="nm">1</span>; <span class="cm">// Graph not connected</span>
+        }
+
+        <span class="kw">return</span> mstCost;
+    }
+}</pre>
+      </div>
+    </div>
+
+    <div class="tip">
+      <span class="tip-t">KRUSKAL'S ALGORITHM STEPS</span>
+      <ul>
+        <li><strong>Step 1</strong>: Sort all edges by weight (ascending)</li>
+        <li><strong>Step 2</strong>: Initialize Union Find structure</li>
+        <li><strong>Step 3</strong>: Iterate through sorted edges:
+          <ul style="margin-left:20px">
+            <li>If edge connects two different components → add to MST</li>
+            <li>If edge creates cycle → skip it</li>
+          </ul>
+        </li>
+        <li><strong>Step 4</strong>: Stop when MST has V-1 edges</li>
+        <li><strong>Time</strong>: O(E log E) for sorting</li>
+      </ul>
+    </div>
+
+    <div class="note">
+      <b>LEETCODE PROBLEMS</b>
+      <div class="lc-list">
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#1584</span>
+          <span class="lc-name">Min Cost to Connect All Points</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#1135</span>
+          <span class="lc-name">Connecting Cities With Minimum Cost</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-top">
+    <div class="icon icon-gold">🎯</div>
+    <div class="card-meta">
+      <div class="card-label">MINIMUM SPANNING TREE</div>
+      <div class="card-name">Prim's Algorithm</div>
+      <div class="card-tag">Find MST using Priority Queue (vertex-based)</div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <div class="scen">
+      <div class="scen-t">PRIM'S VS KRUSKAL'S</div>
+      <ul>
+        <li><strong>Prim's</strong>: Grows one tree, vertex-based, better for dense graphs</li>
+        <li><strong>Kruskal's</strong>: Merges trees, edge-based, better for sparse graphs</li>
+        <li>Both produce same MST weight (though edges may differ)</li>
+      </ul>
+    </div>
+
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">Prim.java</div>
+        <div class="code-lang">java</div>
+      </div>
+      <div class="code">
+<pre><span class="cm">// Prim's Algorithm</span>
+<span class="kw">class</span> <span class="tp">Solution</span> {
+    <span class="kw">class</span> <span class="tp">Edge</span> {
+        <span class="tp">int</span> vertex, weight;
+
+        <span class="fn">Edge</span>(<span class="tp">int</span> vertex, <span class="tp">int</span> weight) {
+            <span class="kw">this</span>.vertex = vertex;
+            <span class="kw">this</span>.weight = weight;
+        }
+    }
+
+    <span class="kw">public</span> <span class="tp">int</span> <span class="fn">primMST</span>(<span class="tp">Map</span>&lt;<span class="tp">Integer</span>, <span class="tp">List</span>&lt;<span class="tp">Edge</span>&gt;&gt; graph, <span class="tp">int</span> n) {
+        <span class="cm">// Min heap: [weight, vertex]</span>
+        <span class="tp">PriorityQueue</span>&lt;<span class="tp">Edge</span>&gt; pq = <span class="kw">new</span> <span class="tp">PriorityQueue</span>&lt;&gt;(
+            (<span class="tp">a</span>, <span class="tp">b</span>) -&gt; a.weight - b.weight
+        );
+
+        <span class="tp">boolean</span>[] inMST = <span class="kw">new</span> <span class="tp">boolean</span>[n];
+        <span class="tp">int</span> mstCost = <span class="nm">0</span>;
+        <span class="tp">int</span> edgesUsed = <span class="nm">0</span>;
+
+        <span class="cm">// Start from vertex 0</span>
+        pq.<span class="fn">offer</span>(<span class="kw">new</span> <span class="tp">Edge</span>(<span class="nm">0</span>, <span class="nm">0</span>));
+
+        <span class="kw">while</span> (!pq.<span class="fn">isEmpty</span>() &amp;&amp; edgesUsed &lt; n) {
+            <span class="tp">Edge</span> curr = pq.<span class="fn">poll</span>();
+            <span class="tp">int</span> u = curr.vertex;
+            <span class="tp">int</span> weight = curr.weight;
+
+            <span class="cm">// Skip if already in MST</span>
+            <span class="kw">if</span> (inMST[u]) <span class="kw">continue</span>;
+
+            <span class="cm">// Add vertex to MST</span>
+            inMST[u] = <span class="kw">true</span>;
+            mstCost += weight;
+            edgesUsed++;
+
+            <span class="cm">// Add all edges from u to unvisited vertices</span>
+            <span class="kw">for</span> (<span class="tp">Edge</span> edge : graph.<span class="fn">getOrDefault</span>(u, <span class="tp">Collections</span>.<span class="fn">emptyList</span>())) {
+                <span class="kw">if</span> (!inMST[edge.vertex]) {
+                    pq.<span class="fn">offer</span>(edge);
+                }
+            }
+        }
+
+        <span class="cm">// Check if all vertices included</span>
+        <span class="kw">return</span> edgesUsed == n ? mstCost : -<span class="nm">1</span>;
+    }
+}</pre>
+      </div>
+    </div>
+
+    <div class="tip">
+      <span class="tip-t">PRIM'S ALGORITHM STEPS</span>
+      <ul>
+        <li><strong>Step 1</strong>: Start from any vertex (usually 0)</li>
+        <li><strong>Step 2</strong>: Add all edges from current vertex to PQ</li>
+        <li><strong>Step 3</strong>: Pick minimum weight edge to unvisited vertex</li>
+        <li><strong>Step 4</strong>: Add vertex to MST, repeat until all vertices included</li>
+        <li><strong>Time</strong>: O((V + E) log V) with binary heap</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+</div>
+
+<!-- SECTION 7: ADVANCED PATTERNS -->
+<div class="section" id="sec-7">
+
+<div class="card">
+  <div class="card-top">
+    <div class="icon icon-pink">🌉</div>
+    <div class="card-meta">
+      <div class="card-label">ADVANCED</div>
+      <div class="card-name">Bridges and Articulation Points</div>
+      <div class="card-tag">Find critical edges and vertices in a graph</div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <div class="scen">
+      <div class="scen-t">DEFINITIONS</div>
+      <ul>
+        <li><strong>Bridge</strong>: Edge whose removal increases connected components</li>
+        <li><strong>Articulation Point</strong>: Vertex whose removal increases components</li>
+        <li>Used in network reliability analysis</li>
+      </ul>
+    </div>
+
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">BridgesArticulationPoints.java</div>
+        <div class="code-lang">java</div>
+      </div>
+      <div class="code">
+<pre><span class="cm">// Find Bridges (Critical Connections)</span>
+<span class="kw">class</span> <span class="tp">Solution</span> {
+    <span class="kw">private</span> <span class="tp">int</span> time = <span class="nm">0</span>;
+
+    <span class="kw">public</span> <span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; <span class="fn">findBridges</span>(<span class="tp">int</span> n, <span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; connections) {
+        <span class="tp">Map</span>&lt;<span class="tp">Integer</span>, <span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; graph = <span class="kw">new</span> <span class="tp">HashMap</span>&lt;&gt;();
+        <span class="kw">for</span> (<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt; conn : connections) {
+            graph.<span class="fn">computeIfAbsent</span>(conn.<span class="fn">get</span>(<span class="nm">0</span>), k -&gt; <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;()).<span class="fn">add</span>(conn.<span class="fn">get</span>(<span class="nm">1</span>));
+            graph.<span class="fn">computeIfAbsent</span>(conn.<span class="fn">get</span>(<span class="nm">1</span>), k -&gt; <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;()).<span class="fn">add</span>(conn.<span class="fn">get</span>(<span class="nm">0</span>));
+        }
+
+        <span class="tp">int</span>[] disc = <span class="kw">new</span> <span class="tp">int</span>[n];  <span class="cm">// Discovery time</span>
+        <span class="tp">int</span>[] low = <span class="kw">new</span> <span class="tp">int</span>[n];   <span class="cm">// Lowest reachable</span>
+        <span class="tp">Arrays</span>.<span class="fn">fill</span>(disc, -<span class="nm">1</span>);
+        <span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; bridges = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;();
+
+        <span class="fn">dfs</span>(<span class="nm">0</span>, -<span class="nm">1</span>, disc, low, graph, bridges);
+
+        <span class="kw">return</span> bridges;
+    }
+
+    <span class="kw">private</span> <span class="kw">void</span> <span class="fn">dfs</span>(<span class="tp">int</span> u, <span class="tp">int</span> parent, <span class="tp">int</span>[] disc, <span class="tp">int</span>[] low,
+                       <span class="tp">Map</span>&lt;<span class="tp">Integer</span>, <span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; graph,
+                       <span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; bridges) {
+        disc[u] = low[u] = time++;
+
+        <span class="kw">for</span> (<span class="tp">int</span> v : graph.<span class="fn">getOrDefault</span>(u, <span class="tp">Collections</span>.<span class="fn">emptyList</span>())) {
+            <span class="kw">if</span> (v == parent) <span class="kw">continue</span>; <span class="cm">// Skip parent edge</span>
+
+            <span class="kw">if</span> (disc[v] == -<span class="nm">1</span>) {
+                <span class="cm">// v not visited</span>
+                <span class="fn">dfs</span>(v, u, disc, low, graph, bridges);
+                low[u] = <span class="tp">Math</span>.<span class="fn">min</span>(low[u], low[v]);
+
+                <span class="cm">// If v can't reach earlier than u, (u,v) is bridge</span>
+                <span class="kw">if</span> (low[v] &gt; disc[u]) {
+                    bridges.<span class="fn">add</span>(<span class="tp">Arrays</span>.<span class="fn">asList</span>(u, v));
+                }
+            } <span class="kw">else</span> {
+                <span class="cm">// v already visited (back edge)</span>
+                low[u] = <span class="tp">Math</span>.<span class="fn">min</span>(low[u], disc[v]);
+            }
+        }
+    }
+}</pre>
+      </div>
+    </div>
+
+    <div class="tip">
+      <span class="tip-t">KEY CONCEPTS</span>
+      <ul>
+        <li><strong>disc[u]</strong>: Discovery time of vertex u</li>
+        <li><strong>low[u]</strong>: Lowest discovery time reachable from u</li>
+        <li><strong>Bridge condition</strong>: low[v] > disc[u]</li>
+        <li>Uses Tarjan's algorithm with DFS</li>
+      </ul>
+    </div>
+
+    <div class="note">
+      <b>LEETCODE PROBLEMS</b>
+      <div class="lc-list">
+        <div class="lc-item">
+          <span class="lc-badge lc-hard">HARD</span>
+          <span class="lc-num">#1192</span>
+          <span class="lc-name">Critical Connections in a Network</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-top">
+    <div class="icon icon-coral">🔄</div>
+    <div class="card-meta">
+      <div class="card-label">ADVANCED</div>
+      <div class="card-name">Strongly Connected Components (SCC)</div>
+      <div class="card-tag">Find maximal strongly connected subgraphs</div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <div class="scen">
+      <div class="scen-t">WHAT ARE SCCs?</div>
+      <ul>
+        <li>In directed graph: maximal set where every vertex reaches every other</li>
+        <li>Used in: dependency analysis, social networks, circuit design</li>
+        <li>Kosaraju's or Tarjan's algorithm</li>
+      </ul>
+    </div>
+
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">KosarajuSCC.java</div>
+        <div class="code-lang">java</div>
+      </div>
+      <div class="code">
+<pre><span class="cm">// Kosaraju's Algorithm for SCCs</span>
+<span class="kw">class</span> <span class="tp">Solution</span> {
+    <span class="kw">public</span> <span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; <span class="fn">findSCCs</span>(<span class="tp">Map</span>&lt;<span class="tp">Integer</span>, <span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; graph, <span class="tp">int</span> n) {
+        <span class="cm">// Step 1: Fill stack with finish times (DFS on original graph)</span>
+        <span class="tp">Stack</span>&lt;<span class="tp">Integer</span>&gt; stack = <span class="kw">new</span> <span class="tp">Stack</span>&lt;&gt;();
+        <span class="tp">boolean</span>[] visited = <span class="kw">new</span> <span class="tp">boolean</span>[n];
+
+        <span class="kw">for</span> (<span class="tp">int</span> i = <span class="nm">0</span>; i &lt; n; i++) {
+            <span class="kw">if</span> (!visited[i]) {
+                <span class="fn">dfs1</span>(i, graph, visited, stack);
+            }
+        }
+
+        <span class="cm">// Step 2: Create reversed graph</span>
+        <span class="tp">Map</span>&lt;<span class="tp">Integer</span>, <span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; reversed = <span class="fn">reverseGraph</span>(graph, n);
+
+        <span class="cm">// Step 3: DFS on reversed graph in stack order</span>
+        <span class="tp">Arrays</span>.<span class="fn">fill</span>(visited, <span class="kw">false</span>);
+        <span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; sccs = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;();
+
+        <span class="kw">while</span> (!stack.<span class="fn">isEmpty</span>()) {
+            <span class="tp">int</span> node = stack.<span class="fn">pop</span>();
+            <span class="kw">if</span> (!visited[node]) {
+                <span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt; scc = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;();
+                <span class="fn">dfs2</span>(node, reversed, visited, scc);
+                sccs.<span class="fn">add</span>(scc);
+            }
+        }
+
+        <span class="kw">return</span> sccs;
+    }
+
+    <span class="kw">private</span> <span class="kw">void</span> <span class="fn">dfs1</span>(<span class="tp">int</span> node, <span class="tp">Map</span>&lt;<span class="tp">Integer</span>, <span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; graph,
+                        <span class="tp">boolean</span>[] visited, <span class="tp">Stack</span>&lt;<span class="tp">Integer</span>&gt; stack) {
+        visited[node] = <span class="kw">true</span>;
+        <span class="kw">for</span> (<span class="tp">int</span> neighbor : graph.<span class="fn">getOrDefault</span>(node, <span class="tp">Collections</span>.<span class="fn">emptyList</span>())) {
+            <span class="kw">if</span> (!visited[neighbor]) {
+                <span class="fn">dfs1</span>(neighbor, graph, visited, stack);
+            }
+        }
+        stack.<span class="fn">push</span>(node); <span class="cm">// Push after visiting all descendants</span>
+    }
+
+    <span class="kw">private</span> <span class="kw">void</span> <span class="fn">dfs2</span>(<span class="tp">int</span> node, <span class="tp">Map</span>&lt;<span class="tp">Integer</span>, <span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; graph,
+                        <span class="tp">boolean</span>[] visited, <span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt; scc) {
+        visited[node] = <span class="kw">true</span>;
+        scc.<span class="fn">add</span>(node);
+        <span class="kw">for</span> (<span class="tp">int</span> neighbor : graph.<span class="fn">getOrDefault</span>(node, <span class="tp">Collections</span>.<span class="fn">emptyList</span>())) {
+            <span class="kw">if</span> (!visited[neighbor]) {
+                <span class="fn">dfs2</span>(neighbor, graph, visited, scc);
+            }
+        }
+    }
+
+    <span class="kw">private</span> <span class="tp">Map</span>&lt;<span class="tp">Integer</span>, <span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; <span class="fn">reverseGraph</span>(
+            <span class="tp">Map</span>&lt;<span class="tp">Integer</span>, <span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; graph, <span class="tp">int</span> n) {
+        <span class="tp">Map</span>&lt;<span class="tp">Integer</span>, <span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; reversed = <span class="kw">new</span> <span class="tp">HashMap</span>&lt;&gt;();
+        <span class="kw">for</span> (<span class="tp">int</span> u : graph.<span class="fn">keySet</span>()) {
+            <span class="kw">for</span> (<span class="tp">int</span> v : graph.<span class="fn">get</span>(u)) {
+                reversed.<span class="fn">computeIfAbsent</span>(v, k -&gt; <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;()).<span class="fn">add</span>(u);
+            }
+        }
+        <span class="kw">return</span> reversed;
+    }
+}</pre>
+      </div>
+    </div>
+
+    <div class="tip">
+      <span class="tip-t">KOSARAJU'S ALGORITHM STEPS</span>
+      <ul>
+        <li><strong>Step 1</strong>: DFS on original graph, store finish times in stack</li>
+        <li><strong>Step 2</strong>: Reverse all edges in graph</li>
+        <li><strong>Step 3</strong>: DFS on reversed graph in stack order</li>
+        <li>Each DFS tree in step 3 is one SCC</li>
+        <li><strong>Time</strong>: O(V + E)</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-top">
+    <div class="icon icon-violet">🎨</div>
+    <div class="card-meta">
+      <div class="card-label">ADVANCED</div>
+      <div class="card-name">Bipartite Graph Check</div>
+      <div class="card-tag">Check if graph can be 2-colored</div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <div class="scen">
+      <div class="scen-t">BIPARTITE GRAPH</div>
+      <ul>
+        <li>Vertices can be divided into two independent sets</li>
+        <li>No edges within same set (only between sets)</li>
+        <li>Equivalent to: graph is 2-colorable</li>
+        <li>Equivalent to: no odd-length cycles</li>
+      </ul>
+    </div>
+
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">BipartiteCheck.java</div>
+        <div class="code-lang">java</div>
+      </div>
+      <div class="code">
+<pre><span class="cm">// Check if Graph is Bipartite (BFS)</span>
+<span class="kw">class</span> <span class="tp">Solution</span> {
+    <span class="kw">public</span> <span class="tp">boolean</span> <span class="fn">isBipartite</span>(<span class="tp">int</span>[][] graph) {
+        <span class="tp">int</span> n = graph.<span class="fn">length</span>;
+        <span class="tp">int</span>[] colors = <span class="kw">new</span> <span class="tp">int</span>[n];
+        <span class="tp">Arrays</span>.<span class="fn">fill</span>(colors, -<span class="nm">1</span>); <span class="cm">// -1 = not colored</span>
+
+        <span class="cm">// Check each component</span>
+        <span class="kw">for</span> (<span class="tp">int</span> i = <span class="nm">0</span>; i &lt; n; i++) {
+            <span class="kw">if</span> (colors[i] == -<span class="nm">1</span>) {
+                <span class="kw">if</span> (!<span class="fn">bfs</span>(i, graph, colors)) {
+                    <span class="kw">return</span> <span class="kw">false</span>;
+                }
+            }
+        }
+
+        <span class="kw">return</span> <span class="kw">true</span>;
+    }
+
+    <span class="kw">private</span> <span class="tp">boolean</span> <span class="fn">bfs</span>(<span class="tp">int</span> start, <span class="tp">int</span>[][] graph, <span class="tp">int</span>[] colors) {
+        <span class="tp">Queue</span>&lt;<span class="tp">Integer</span>&gt; queue = <span class="kw">new</span> <span class="tp">LinkedList</span>&lt;&gt;();
+        queue.<span class="fn">offer</span>(start);
+        colors[start] = <span class="nm">0</span>; <span class="cm">// Color with 0</span>
+
+        <span class="kw">while</span> (!queue.<span class="fn">isEmpty</span>()) {
+            <span class="tp">int</span> node = queue.<span class="fn">poll</span>();
+
+            <span class="kw">for</span> (<span class="tp">int</span> neighbor : graph[node]) {
+                <span class="kw">if</span> (colors[neighbor] == -<span class="nm">1</span>) {
+                    <span class="cm">// Not colored yet, color with opposite color</span>
+                    colors[neighbor] = <span class="nm">1</span> - colors[node];
+                    queue.<span class="fn">offer</span>(neighbor);
+                } <span class="kw">else</span> <span class="kw">if</span> (colors[neighbor] == colors[node]) {
+                    <span class="cm">// Same color as current node = not bipartite</span>
+                    <span class="kw">return</span> <span class="kw">false</span>;
+                }
+            }
+        }
+
+        <span class="kw">return</span> <span class="kw">true</span>;
+    }
+}
+
+<span class="cm">// DFS Approach</span>
+<span class="kw">private</span> <span class="tp">boolean</span> <span class="fn">dfs</span>(<span class="tp">int</span> node, <span class="tp">int</span>[][] graph, <span class="tp">int</span>[] colors, <span class="tp">int</span> color) {
+    colors[node] = color;
+
+    <span class="kw">for</span> (<span class="tp">int</span> neighbor : graph[node]) {
+        <span class="kw">if</span> (colors[neighbor] == -<span class="nm">1</span>) {
+            <span class="kw">if</span> (!<span class="fn">dfs</span>(neighbor, graph, colors, <span class="nm">1</span> - color)) {
+                <span class="kw">return</span> <span class="kw">false</span>;
+            }
+        } <span class="kw">else</span> <span class="kw">if</span> (colors[neighbor] == color) {
+            <span class="kw">return</span> <span class="kw">false</span>;
+        }
+    }
+
+    <span class="kw">return</span> <span class="kw">true</span>;
+}</pre>
+      </div>
+    </div>
+
+    <div class="note">
+      <b>LEETCODE PROBLEMS</b>
+      <div class="lc-list">
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#785</span>
+          <span class="lc-name">Is Graph Bipartite?</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#886</span>
+          <span class="lc-name">Possible Bipartition</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</div>
+
+<!-- SECTION 8: CHEAT SHEET -->
+<div class="section" id="sec-8">
+
+<div class="card">
+  <div class="card-top">
+    <div class="icon icon-gold">📝</div>
+    <div class="card-meta">
+      <div class="card-label">QUICK REFERENCE</div>
+      <div class="card-name">Pattern Recognition Guide</div>
+      <div class="card-tag">Identify patterns quickly based on problem keywords</div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <table class="prop-table">
+      <tr>
+        <th>Problem Type</th>
+        <th>Keywords</th>
+        <th>Algorithm</th>
+        <th>Complexity</th>
+      </tr>
+      <tr>
+        <td>Connected Components</td>
+        <td>islands, groups, clusters, connected</td>
+        <td>DFS / BFS / Union Find</td>
+        <td>O(V + E)</td>
+      </tr>
+      <tr>
+        <td>Shortest Path (Unweighted)</td>
+        <td>minimum steps, shortest path, level</td>
+        <td>BFS</td>
+        <td>O(V + E)</td>
+      </tr>
+      <tr>
+        <td>Shortest Path (Weighted)</td>
+        <td>minimum cost, cheapest, weighted</td>
+        <td>Dijkstra's</td>
+        <td>O((V+E) log V)</td>
+      </tr>
+      <tr>
+        <td>Shortest Path (Negative Weights)</td>
+        <td>negative weights, negative edges</td>
+        <td>Bellman-Ford</td>
+        <td>O(VE)</td>
+      </tr>
+      <tr>
+        <td>All Pairs Shortest Path</td>
+        <td>between all pairs, every pair</td>
+        <td>Floyd-Warshall</td>
+        <td>O(V³)</td>
+      </tr>
+      <tr>
+        <td>Cycle Detection</td>
+        <td>cycle, circular dependency, deadlock</td>
+        <td>DFS (3-color) / Union Find</td>
+        <td>O(V + E)</td>
+      </tr>
+      <tr>
+        <td>Topological Sort</td>
+        <td>prerequisites, dependencies, order</td>
+        <td>Kahn's / DFS</td>
+        <td>O(V + E)</td>
+      </tr>
+      <tr>
+        <td>Minimum Spanning Tree</td>
+        <td>connect all, minimum cost, spanning</td>
+        <td>Kruskal's / Prim's</td>
+        <td>O(E log E)</td>
+      </tr>
+      <tr>
+        <td>Path Finding (All Paths)</td>
+        <td>all paths, count paths</td>
+        <td>DFS + Backtracking</td>
+        <td>O(V + E)</td>
+      </tr>
+      <tr>
+        <td>Bipartite Check</td>
+        <td>two groups, 2-color, matching</td>
+        <td>BFS / DFS (Coloring)</td>
+        <td>O(V + E)</td>
+      </tr>
+      <tr>
+        <td>Critical Connections</td>
+        <td>bridges, critical edges, remove edge</td>
+        <td>Tarjan's Algorithm</td>
+        <td>O(V + E)</td>
+      </tr>
+      <tr>
+        <td>Strongly Connected Components</td>
+        <td>SCC, strongly connected</td>
+        <td>Kosaraju's / Tarjan's</td>
+        <td>O(V + E)</td>
+      </tr>
+    </table>
+
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-top">
+    <div class="icon icon-teal">🔍</div>
+    <div class="card-meta">
+      <div class="card-label">PSEUDOCODE STEPS</div>
+      <div class="card-name">DFS Patterns</div>
+      <div class="card-tag">Step-by-step pseudocode for DFS variations</div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <h3 style="color:var(--teal);margin-bottom:20px;font-size:16px">📌 Basic DFS - Recursive Traversal</h3>
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">basic-dfs.txt</div>
+        <div class="code-lang">pseudocode</div>
+      </div>
+      <div class="code">
+<pre>ALGORITHM DFS(node, graph, visited):
+  STEP 1: Mark current node as visited
+  STEP 2: Process/print current node
+  STEP 3: For each neighbor of current node:
+          IF neighbor NOT in visited:
+              Recursively call DFS(neighbor, graph, visited)
+
+TIME: O(V + E)  |  SPACE: O(V)</pre>
+      </div>
+    </div>
+
+    <h3 style="color:var(--sky);margin:30px 0 20px 0;font-size:16px">📌 Count Connected Components</h3>
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">count-components.txt</div>
+        <div class="code-lang">pseudocode</div>
+      </div>
+      <div class="code">
+<pre>ALGORITHM CountComponents(graph, n):
+  STEP 1: Initialize visited set = empty
+  STEP 2: Initialize count = 0
+  STEP 3: For each node from 0 to n-1:
+          IF node NOT in visited:
+              Call DFS(node, graph, visited)
+              Increment count by 1
+  STEP 4: Return count
+
+TIME: O(V + E)  |  SPACE: O(V)</pre>
+      </div>
+    </div>
+
+    <h3 style="color:var(--violet);margin:30px 0 20px 0;font-size:16px">📌 Detect Cycle in Directed Graph (3-Color Method)</h3>
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">cycle-directed.txt</div>
+        <div class="code-lang">pseudocode</div>
+      </div>
+      <div class="code">
+<pre>ALGORITHM HasCycle(graph, n):
+  STEP 1: Initialize color array with WHITE for all nodes
+  STEP 2: For each node in graph:
+          IF color[node] is WHITE:
+              IF DFS_Cycle(node) returns TRUE:
+                  Return TRUE (cycle found)
+  STEP 3: Return FALSE (no cycle)
+
+ALGORITHM DFS_Cycle(node, graph, color):
+  STEP 1: Mark node as GRAY (in current path)
+  STEP 2: For each neighbor of node:
+          IF neighbor is GRAY:
+              Return TRUE (back edge = cycle)
+          IF neighbor is WHITE:
+              IF DFS_Cycle(neighbor) returns TRUE:
+                  Return TRUE
+  STEP 3: Mark node as BLACK (finished processing)
+  STEP 4: Return FALSE
+
+TIME: O(V + E)  |  SPACE: O(V)</pre>
+      </div>
+    </div>
+
+    <h3 style="color:var(--gold);margin:30px 0 20px 0;font-size:16px">📌 Detect Cycle in Undirected Graph</h3>
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">cycle-undirected.txt</div>
+        <div class="code-lang">pseudocode</div>
+      </div>
+      <div class="code">
+<pre>ALGORITHM HasCycle(graph, n):
+  STEP 1: Initialize visited set = empty
+  STEP 2: For each node from 0 to n-1:
+          IF node NOT in visited:
+              IF DFS_Cycle(node, parent=-1) returns TRUE:
+                  Return TRUE
+  STEP 3: Return FALSE
+
+ALGORITHM DFS_Cycle(node, parent, graph, visited):
+  STEP 1: Add node to visited
+  STEP 2: For each neighbor of node:
+          IF neighbor equals parent: CONTINUE (skip)
+          IF neighbor in visited:
+              Return TRUE (cycle found)
+          IF DFS_Cycle(neighbor, parent=node) returns TRUE:
+              Return TRUE
+  STEP 3: Return FALSE
+
+TIME: O(V + E)  |  SPACE: O(V)</pre>
+      </div>
+    </div>
+
+    <h3 style="color:var(--mint);margin:30px 0 20px 0;font-size:16px">📌 Find All Paths from Source to Target</h3>
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">all-paths.txt</div>
+        <div class="code-lang">pseudocode</div>
+      </div>
+      <div class="code">
+<pre>ALGORITHM FindAllPaths(source, target, graph):
+  STEP 1: Initialize result = empty list
+  STEP 2: Initialize path = [source]
+  STEP 3: Initialize visited = {source}
+  STEP 4: Call DFS_Paths(source, target, path, visited, result)
+  STEP 5: Return result
+
+ALGORITHM DFS_Paths(node, target, path, visited, result):
+  STEP 1: IF node equals target:
+              Add copy of path to result
+              Return
+  STEP 2: For each neighbor of node:
+          IF neighbor NOT in visited:
+              Add neighbor to path       (Choose)
+              Add neighbor to visited
+              Call DFS_Paths(neighbor, target, path, visited, result)
+              Remove neighbor from path  (Backtrack)
+              Remove neighbor from visited
+
+TIME: O(V + E)  |  SPACE: O(V)</pre>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-top">
+    <div class="icon icon-sky">🌊</div>
+    <div class="card-meta">
+      <div class="card-label">PSEUDOCODE STEPS</div>
+      <div class="card-name">BFS Patterns</div>
+      <div class="card-tag">Step-by-step pseudocode for BFS variations</div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <h3 style="color:var(--teal);margin-bottom:20px;font-size:16px">📌 Basic BFS - Shortest Path in Unweighted Graph</h3>
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">basic-bfs.txt</div>
+        <div class="code-lang">pseudocode</div>
+      </div>
+      <div class="code">
+<pre>ALGORITHM BFS(start, target, graph):
+  STEP 1: Initialize queue and add start node
+  STEP 2: Initialize visited set and add start node
+  STEP 3: Initialize distance = 0
+  STEP 4: While queue is NOT empty:
+          Get size of current level
+          For each node in current level:
+              Dequeue node
+              IF node equals target: Return distance
+              For each neighbor of node:
+                  IF neighbor NOT in visited:
+                      Add neighbor to queue
+                      Add neighbor to visited
+          Increment distance by 1
+  STEP 5: Return -1 (target not reachable)
+
+TIME: O(V + E)  |  SPACE: O(V)</pre>
+      </div>
+    </div>
+
+    <h3 style="color:var(--sky);margin:30px 0 20px 0;font-size:16px">📌 Grid BFS - 4-Directional Movement</h3>
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">grid-bfs.txt</div>
+        <div class="code-lang">pseudocode</div>
+      </div>
+      <div class="code">
+<pre>ALGORITHM GridBFS(grid, start, target):
+  STEP 1: Define directions = [[0,1], [1,0], [0,-1], [-1,0]]
+  STEP 2: Initialize queue with start position
+  STEP 3: Initialize visited 2D array
+  STEP 4: Mark start position as visited
+  STEP 5: Initialize steps = 0
+  STEP 6: While queue is NOT empty:
+          Get size of current level
+          For each cell in current level:
+              Dequeue [row, col]
+              IF [row, col] equals target: Return steps
+              For each direction [dr, dc]:
+                  Calculate newRow = row + dr
+                  Calculate newCol = col + dc
+                  IF valid position AND NOT visited AND NOT obstacle:
+                      Add [newRow, newCol] to queue
+                      Mark [newRow, newCol] as visited
+          Increment steps by 1
+  STEP 7: Return -1 (target not reachable)
+
+TIME: O(rows × cols)  |  SPACE: O(rows × cols)</pre>
+      </div>
+    </div>
+
+    <h3 style="color:var(--violet);margin:30px 0 20px 0;font-size:16px">📌 Multi-Source BFS (Rotting Oranges Pattern)</h3>
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">multi-source-bfs.txt</div>
+        <div class="code-lang">pseudocode</div>
+      </div>
+      <div class="code">
+<pre>ALGORITHM MultiSourceBFS(grid):
+  STEP 1: Initialize queue = empty
+  STEP 2: Initialize freshCount = 0
+  STEP 3: Scan entire grid:
+          IF cell is SOURCE:
+              Add cell to queue
+          IF cell is FRESH:
+              Increment freshCount
+  STEP 4: Initialize time = 0
+  STEP 5: While queue is NOT empty AND freshCount > 0:
+          Get size of current level
+          For each cell in current level:
+              Dequeue cell
+              For each neighbor in 4 directions:
+                  IF neighbor is FRESH:
+                      Mark neighbor as SOURCE
+                      Add neighbor to queue
+                      Decrement freshCount
+          Increment time by 1
+  STEP 6: IF freshCount equals 0:
+              Return time
+          ELSE:
+              Return -1 (not all cells reachable)
+
+TIME: O(rows × cols)  |  SPACE: O(rows × cols)</pre>
+      </div>
+    </div>
+
+    <h3 style="color:var(--gold);margin:30px 0 20px 0;font-size:16px">📌 Bidirectional BFS</h3>
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">bidirectional-bfs.txt</div>
+        <div class="code-lang">pseudocode</div>
+      </div>
+      <div class="code">
+<pre>ALGORITHM BidirectionalBFS(start, end, graph):
+  STEP 1: Initialize beginSet = {start}
+  STEP 2: Initialize endSet = {end}
+  STEP 3: Initialize visited = empty set
+  STEP 4: Initialize steps = 1
+  STEP 5: While both sets are NOT empty:
+          IF beginSet is larger than endSet:
+              Swap beginSet and endSet
+          Initialize nextLevel = empty set
+          For each node in beginSet:
+              For each neighbor of node:
+                  IF neighbor in endSet:
+                      Return steps (paths meet!)
+                  IF neighbor NOT in visited:
+                      Add neighbor to nextLevel
+                      Add neighbor to visited
+          Set beginSet = nextLevel
+          Increment steps by 1
+  STEP 6: Return -1 (no path exists)
+
+TIME: O(b^(d/2)) instead of O(b^d)  |  b=branching, d=depth</pre>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-top">
+    <div class="icon icon-violet">📋</div>
+    <div class="card-meta">
+      <div class="card-label">PSEUDOCODE STEPS</div>
+      <div class="card-name">Topological Sort & Union Find</div>
+      <div class="card-tag">Step-by-step pseudocode for ordering and connectivity</div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <h3 style="color:var(--teal);margin-bottom:20px;font-size:16px">📌 Topological Sort - Kahn's Algorithm (BFS)</h3>
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">kahn-algorithm.txt</div>
+        <div class="code-lang">pseudocode</div>
+      </div>
+      <div class="code">
+<pre>ALGORITHM TopologicalSort(graph, n):
+  STEP 1: Initialize inDegree array of size n with 0s
+  STEP 2: For each node u in graph:
+              For each neighbor v of u:
+                  Increment inDegree[v] by 1
+  STEP 3: Initialize queue = empty
+  STEP 4: For each node from 0 to n-1:
+              IF inDegree[node] equals 0:
+                  Add node to queue
+  STEP 5: Initialize result = empty list
+  STEP 6: While queue is NOT empty:
+              Dequeue node
+              Add node to result
+              For each neighbor of node:
+                  Decrement inDegree[neighbor] by 1
+                  IF inDegree[neighbor] equals 0:
+                      Add neighbor to queue
+  STEP 7: IF size of result equals n:
+              Return result (success)
+          ELSE:
+              Return empty (cycle exists)
+
+TIME: O(V + E)  |  SPACE: O(V)</pre>
+      </div>
+    </div>
+
+    <h3 style="color:var(--sky);margin:30px 0 20px 0;font-size:16px">📌 Topological Sort - DFS Based</h3>
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">topo-dfs.txt</div>
+        <div class="code-lang">pseudocode</div>
+      </div>
+      <div class="code">
+<pre>ALGORITHM TopologicalSortDFS(graph, n):
+  STEP 1: Initialize visited = empty set
+  STEP 2: Initialize stack = empty
+  STEP 3: For each node from 0 to n-1:
+              IF node NOT in visited:
+                  Call DFS(node, visited, stack)
+  STEP 4: Initialize result = empty list
+  STEP 5: While stack is NOT empty:
+              Pop node from stack
+              Add node to result
+  STEP 6: Return result
+
+ALGORITHM DFS(node, visited, stack):
+  STEP 1: Add node to visited
+  STEP 2: For each neighbor of node:
+              IF neighbor NOT in visited:
+                  Call DFS(neighbor, visited, stack)
+  STEP 3: Push node to stack (post-order)
+
+TIME: O(V + E)  |  SPACE: O(V)</pre>
+      </div>
+    </div>
+
+    <h3 style="color:var(--violet);margin:30px 0 20px 0;font-size:16px">📌 Union Find (Disjoint Set Union)</h3>
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">union-find.txt</div>
+        <div class="code-lang">pseudocode</div>
+      </div>
+      <div class="code">
+<pre>INITIALIZE UnionFind(n):
+  STEP 1: Create parent array of size n
+  STEP 2: Create rank array of size n with 0s
+  STEP 3: For each i from 0 to n-1:
+              Set parent[i] = i (each node is its own parent)
+
+ALGORITHM Find(x):
+  STEP 1: IF parent[x] NOT equals x:
+              Set parent[x] = Find(parent[x]) (Path Compression)
+  STEP 2: Return parent[x]
+
+ALGORITHM Union(x, y):
+  STEP 1: rootX = Find(x)
+  STEP 2: rootY = Find(y)
+  STEP 3: IF rootX equals rootY:
+              Return FALSE (already in same set)
+  STEP 4: (Union by Rank)
+          IF rank[rootX] < rank[rootY]:
+              Set parent[rootX] = rootY
+          ELSE IF rank[rootX] > rank[rootY]:
+              Set parent[rootY] = rootX
+          ELSE:
+              Set parent[rootY] = rootX
+              Increment rank[rootX] by 1
+  STEP 5: Return TRUE
+
+TIME: O(α(n)) ≈ O(1) per operation</pre>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-top">
+    <div class="icon icon-orange">🛣️</div>
+    <div class="card-meta">
+      <div class="card-label">PSEUDOCODE STEPS</div>
+      <div class="card-name">Shortest Path Algorithms</div>
+      <div class="card-tag">Dijkstra, Bellman-Ford, Floyd-Warshall</div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <h3 style="color:var(--teal);margin-bottom:20px;font-size:16px">📌 Dijkstra's Algorithm (Non-negative weights)</h3>
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">dijkstra.txt</div>
+        <div class="code-lang">pseudocode</div>
+      </div>
+      <div class="code">
+<pre>ALGORITHM Dijkstra(graph, start, target, n):
+  STEP 1: Initialize dist array of size n with INFINITY
+  STEP 2: Set dist[start] = 0
+  STEP 3: Initialize minHeap (priority queue)
+  STEP 4: Add [0, start] to minHeap (distance, node)
+  STEP 5: While minHeap is NOT empty:
+              Extract [currDist, u] with minimum distance
+              IF u equals target:
+                  Return currDist
+              IF currDist > dist[u]:
+                  Continue (skip, already processed)
+              For each neighbor [v, weight] of u:
+                  Calculate newDist = dist[u] + weight
+                  IF newDist < dist[v]:
+                      Set dist[v] = newDist
+                      Add [newDist, v] to minHeap
+  STEP 6: IF dist[target] equals INFINITY:
+              Return -1 (not reachable)
+          ELSE:
+              Return dist[target]
+
+TIME: O((V + E) log V)  |  SPACE: O(V)
+⚠️ LIMITATION: Does NOT work with negative edge weights</pre>
+      </div>
+    </div>
+
+    <h3 style="color:var(--sky);margin:30px 0 20px 0;font-size:16px">📌 Bellman-Ford Algorithm (Handles negative weights)</h3>
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">bellman-ford.txt</div>
+        <div class="code-lang">pseudocode</div>
+      </div>
+      <div class="code">
+<pre>ALGORITHM BellmanFord(edges, n, start):
+  STEP 1: Initialize dist array of size n with INFINITY
+  STEP 2: Set dist[start] = 0
+  STEP 3: Repeat (n-1) times:
+              For each edge [u, v, weight] in edges:
+                  IF dist[u] NOT equals INFINITY:
+                      IF dist[u] + weight < dist[v]:
+                          Set dist[v] = dist[u] + weight
+  STEP 4: (Check for negative cycle)
+          For each edge [u, v, weight] in edges:
+              IF dist[u] NOT equals INFINITY:
+                  IF dist[u] + weight < dist[v]:
+                      Return NULL (negative cycle detected)
+  STEP 5: Return dist array
+
+TIME: O(V × E)  |  SPACE: O(V)
+💡 WHY n-1 iterations? Longest simple path has at most (n-1) edges</pre>
+      </div>
+    </div>
+
+    <h3 style="color:var(--violet);margin:30px 0 20px 0;font-size:16px">📌 Floyd-Warshall (All pairs shortest path)</h3>
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">floyd-warshall.txt</div>
+        <div class="code-lang">pseudocode</div>
+      </div>
+      <div class="code">
+<pre>ALGORITHM FloydWarshall(graph, n):
+  STEP 1: Initialize dist as 2D array (n × n)
+  STEP 2: For each i from 0 to n-1:
+              For each j from 0 to n-1:
+                  IF i equals j:
+                      Set dist[i][j] = 0
+                  ELSE IF edge exists from i to j:
+                      Set dist[i][j] = weight(i, j)
+                  ELSE:
+                      Set dist[i][j] = INFINITY
+  STEP 3: For each intermediate vertex k from 0 to n-1:
+              For each source vertex i from 0 to n-1:
+                  For each destination vertex j from 0 to n-1:
+                      IF dist[i][k] + dist[k][j] < dist[i][j]:
+                          Set dist[i][j] = dist[i][k] + dist[k][j]
+  STEP 4: Return dist (contains shortest paths between all pairs)
+
+TIME: O(V³)  |  SPACE: O(V²)
+⚠️ NOTE: k loop must be outermost!</pre>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-top">
+    <div class="icon icon-mint">🌳</div>
+    <div class="card-meta">
+      <div class="card-label">PSEUDOCODE STEPS</div>
+      <div class="card-name">Minimum Spanning Tree</div>
+      <div class="card-tag">Kruskal's and Prim's algorithms</div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <h3 style="color:var(--teal);margin-bottom:20px;font-size:16px">📌 Kruskal's MST (Edge-based, uses Union Find)</h3>
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">kruskal-mst.txt</div>
+        <div class="code-lang">pseudocode</div>
+      </div>
+      <div class="code">
+<pre>ALGORITHM KruskalMST(edges, n):
+  STEP 1: Sort all edges by weight in ascending order
+  STEP 2: Initialize UnionFind structure with n nodes
+  STEP 3: Initialize mstCost = 0
+  STEP 4: Initialize edgesUsed = 0
+  STEP 5: For each edge [u, v, weight] in sorted edges:
+              IF Union(u, v) returns TRUE:
+                  (Edge doesn't create cycle)
+                  Add weight to mstCost
+                  Increment edgesUsed by 1
+                  IF edgesUsed equals (n-1):
+                      Break (MST complete)
+  STEP 6: IF edgesUsed equals (n-1):
+              Return mstCost (success)
+          ELSE:
+              Return -1 (graph not connected)
+
+TIME: O(E log E)  |  SPACE: O(V)
+✨ Best for: Sparse graphs</pre>
+      </div>
+    </div>
+
+    <h3 style="color:var(--sky);margin:30px 0 20px 0;font-size:16px">📌 Prim's MST (Vertex-based, uses Priority Queue)</h3>
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">prim-mst.txt</div>
+        <div class="code-lang">pseudocode</div>
+      </div>
+      <div class="code">
+<pre>ALGORITHM PrimMST(graph, n):
+  STEP 1: Initialize inMST array of size n with FALSE
+  STEP 2: Initialize minHeap (priority queue)
+  STEP 3: Add [0, 0] to minHeap (weight=0, start vertex=0)
+  STEP 4: Initialize mstCost = 0
+  STEP 5: Initialize edgesUsed = 0
+  STEP 6: While minHeap is NOT empty AND edgesUsed < n:
+              Extract [weight, u] with minimum weight
+              IF inMST[u] is TRUE:
+                  Continue (skip, already in MST)
+              Set inMST[u] = TRUE
+              Add weight to mstCost
+              Increment edgesUsed by 1
+              For each neighbor [v, edgeWeight] of u:
+                  IF inMST[v] is FALSE:
+                      Add [edgeWeight, v] to minHeap
+  STEP 7: IF edgesUsed equals n:
+              Return mstCost (success)
+          ELSE:
+              Return -1 (graph not connected)
+
+TIME: O((V + E) log V)  |  SPACE: O(V)
+✨ Best for: Dense graphs</pre>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-top">
+    <div class="icon icon-coral">💡</div>
+    <div class="card-meta">
+      <div class="card-label">INTERVIEW TIPS</div>
+      <div class="card-name">Problem-Solving Strategy</div>
+      <div class="card-tag">Step-by-step approach to tackle graph problems</div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <div class="tip">
+      <span class="tip-t">STEP-BY-STEP APPROACH</span>
+      <ul>
+        <li><strong>Step 1: Identify it's a graph problem</strong>
+          <ul style="margin-left:20px">
+            <li>Look for nodes/vertices and edges/connections</li>
+            <li>Keywords: connected, path, network, dependencies</li>
+          </ul>
+        </li>
+        <li><strong>Step 2: Determine graph type</strong>
+          <ul style="margin-left:20px">
+            <li>Directed or undirected?</li>
+            <li>Weighted or unweighted?</li>
+            <li>Cyclic or acyclic (DAG)?</li>
+          </ul>
+        </li>
+        <li><strong>Step 3: Choose representation</strong>
+          <ul style="margin-left:20px">
+            <li>Adjacency list (most common)</li>
+            <li>Adjacency matrix (for dense graphs)</li>
+            <li>Edge list (for Union Find)</li>
+          </ul>
+        </li>
+        <li><strong>Step 4: Select algorithm</strong>
+          <ul style="margin-left:20px">
+            <li>Shortest path? → BFS (unweighted) or Dijkstra (weighted)</li>
+            <li>All paths? → DFS with backtracking</li>
+            <li>Cycle? → DFS with colors or Union Find</li>
+            <li>Dependencies? → Topological Sort</li>
+            <li>Components? → DFS/BFS or Union Find</li>
+          </ul>
+        </li>
+        <li><strong>Step 5: Consider edge cases</strong>
+          <ul style="margin-left:20px">
+            <li>Disconnected graph (multiple components)</li>
+            <li>Empty graph, single node</li>
+            <li>Self-loops, duplicate edges</li>
+            <li>Negative weights (affects algorithm choice)</li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+
+    <div class="when">
+      <div class="when-t">TIME COMPLEXITY QUICK REFERENCE</div>
+      <ul>
+        <li><strong>DFS/BFS</strong>: O(V + E) - visit each vertex and edge once</li>
+        <li><strong>Dijkstra's</strong>: O((V + E) log V) - with priority queue</li>
+        <li><strong>Bellman-Ford</strong>: O(VE) - relax all edges V-1 times</li>
+        <li><strong>Floyd-Warshall</strong>: O(V³) - three nested loops</li>
+        <li><strong>Topological Sort</strong>: O(V + E) - DFS or Kahn's</li>
+        <li><strong>Union Find</strong>: O(α(n)) ≈ O(1) - per operation</li>
+        <li><strong>Kruskal's MST</strong>: O(E log E) - sorting edges</li>
+        <li><strong>Prim's MST</strong>: O((V + E) log V) - with heap</li>
+      </ul>
+    </div>
+
+    <div class="warn">
+      <span class="warn-t">COMMON INTERVIEW MISTAKES</span>
+      <ul>
+        <li>Not checking if graph is connected (may need to run DFS from multiple sources)</li>
+        <li>Forgetting to mark nodes as visited (infinite loops)</li>
+        <li>In undirected graphs, forgetting to add edges in both directions</li>
+        <li>Using DFS for shortest path in weighted graphs (use Dijkstra)</li>
+        <li>Not handling negative weights (use Bellman-Ford, not Dijkstra)</li>
+        <li>Modifying visited set incorrectly in backtracking problems</li>
+        <li>Confusing parent tracking in cycle detection</li>
+        <li>Not considering time/space trade-offs</li>
+      </ul>
+    </div>
+
+    <div class="scen">
+      <div class="scen-t">OPTIMIZATION TECHNIQUES</div>
+      <ul>
+        <li><strong>Early termination</strong>: Return immediately when target found</li>
+        <li><strong>Bidirectional BFS</strong>: For large search spaces</li>
+        <li><strong>Union Find</strong>: For dynamic connectivity queries</li>
+        <li><strong>Memoization</strong>: Cache results in path-counting problems</li>
+        <li><strong>Pruning</strong>: Skip already visited nodes in BFS/DFS</li>
+        <li><strong>In-place modifications</strong>: Use input grid as visited array</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-top">
+    <div class="icon icon-pink">🎯</div>
+    <div class="card-meta">
+      <div class="card-label">DECISION TREE</div>
+      <div class="card-name">Algorithm Selection Guide</div>
+      <div class="card-tag">Flowchart to choose the right algorithm</div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">decision-tree.txt</div>
+        <div class="code-lang">pseudocode</div>
+      </div>
+      <div class="code">
+<pre>GRAPH ALGORITHM DECISION TREE
+══════════════════════════════════════════════════════════════
+
+Need shortest path?
+│
+├─ YES → Is graph weighted?
+│        │
+│        ├─ NO → Use BFS
+│        │
+│        └─ YES → Has negative weights?
+│                 │
+│                 ├─ NO → Use Dijkstra's
+│                 │
+│                 └─ YES → Use Bellman-Ford
+│
+└─ NO → Need all pairs shortest path?
+         │
+         ├─ YES → Use Floyd-Warshall
+         │
+         └─ NO → Detecting cycle?
+                  │
+                  ├─ YES → Directed graph?
+                  │        │
+                  │        ├─ YES → Use DFS (3-color)
+                  │        └─ NO → Use Union Find or DFS (parent)
+                  │
+                  └─ NO → Count/find components?
+                           │
+                           ├─ YES → Use DFS or Union Find
+                           │
+                           └─ NO → Has dependencies?
+                                    │
+                                    ├─ YES → Use Topological Sort
+                                    │
+                                    └─ NO → Find all paths?
+                                             │
+                                             ├─ YES → Use DFS + Backtracking
+                                             │
+                                             └─ NO → Minimum spanning tree?
+                                                      │
+                                                      ├─ YES → Use Kruskal's or Prim's
+                                                      │
+                                                      └─ NO → Check if bipartite?
+                                                               │
+                                                               └─ Use BFS/DFS Coloring</pre>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-top">
+    <div class="icon icon-gold">📚</div>
+    <div class="card-meta">
+      <div class="card-label">MUST-KNOW</div>
+      <div class="card-name">Top Interview Questions by Pattern</div>
+      <div class="card-tag">Curated list of essential LeetCode problems</div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <div class="note">
+      <b>DFS PATTERNS (Must Practice)</b>
+      <div class="lc-list">
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#200</span>
+          <span class="lc-name">Number of Islands ⭐⭐⭐</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#133</span>
+          <span class="lc-name">Clone Graph ⭐⭐⭐</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#695</span>
+          <span class="lc-name">Max Area of Island ⭐⭐</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#417</span>
+          <span class="lc-name">Pacific Atlantic Water Flow ⭐⭐</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#130</span>
+          <span class="lc-name">Surrounded Regions ⭐⭐</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="note">
+      <b>BFS PATTERNS (Must Practice)</b>
+      <div class="lc-list">
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#994</span>
+          <span class="lc-name">Rotting Oranges ⭐⭐⭐</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-hard">HARD</span>
+          <span class="lc-num">#127</span>
+          <span class="lc-name">Word Ladder ⭐⭐⭐</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#1091</span>
+          <span class="lc-name">Shortest Path in Binary Matrix ⭐⭐</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#542</span>
+          <span class="lc-name">01 Matrix ⭐⭐</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="note">
+      <b>TOPOLOGICAL SORT (Must Practice)</b>
+      <div class="lc-list">
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#207</span>
+          <span class="lc-name">Course Schedule ⭐⭐⭐</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#210</span>
+          <span class="lc-name">Course Schedule II ⭐⭐⭐</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-hard">HARD</span>
+          <span class="lc-num">#269</span>
+          <span class="lc-name">Alien Dictionary ⭐⭐</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="note">
+      <b>UNION FIND (Must Practice)</b>
+      <div class="lc-list">
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#684</span>
+          <span class="lc-name">Redundant Connection ⭐⭐⭐</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#547</span>
+          <span class="lc-name">Number of Provinces ⭐⭐</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#721</span>
+          <span class="lc-name">Accounts Merge ⭐⭐</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="note">
+      <b>SHORTEST PATH (Must Practice)</b>
+      <div class="lc-list">
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#743</span>
+          <span class="lc-name">Network Delay Time ⭐⭐⭐</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#787</span>
+          <span class="lc-name">Cheapest Flights Within K Stops ⭐⭐</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-hard">HARD</span>
+          <span class="lc-num">#1631</span>
+          <span class="lc-name">Path With Minimum Effort ⭐⭐</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="note">
+      <b>ADVANCED (Must Practice)</b>
+      <div class="lc-list">
+        <div class="lc-item">
+          <span class="lc-badge lc-hard">HARD</span>
+          <span class="lc-num">#1192</span>
+          <span class="lc-name">Critical Connections in Network ⭐⭐</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#785</span>
+          <span class="lc-name">Is Graph Bipartite? ⭐⭐</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#1584</span>
+          <span class="lc-name">Min Cost to Connect All Points ⭐⭐</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</div>
+
+</div>
+
+<script>
+const hamburgerBtn = document.getElementById('hamburgerBtn');
+const sidebar = document.getElementById('sidebar');
+const container = document.querySelector('.container');
+const bodyElement = document.body;
+
+hamburgerBtn.addEventListener('click', () => {
+  hamburgerBtn.classList.toggle('active');
+  sidebar.classList.toggle('open');
+  // Shift body to accommodate sidebar
+  if (sidebar.classList.contains('open')) {
+    bodyElement.style.paddingLeft = '310px'; // 90px + 280px - 60px overlap
+  } else {
+    bodyElement.style.paddingLeft = '90px';
+  }
+});
+
+// Close sidebar when clicking outside
+document.addEventListener('click', (e) => {
+  if (!sidebar.contains(e.target) && !hamburgerBtn.contains(e.target)) {
+    sidebar.classList.remove('open');
+    hamburgerBtn.classList.remove('active');
+    bodyElement.style.paddingLeft = '90px';
+  }
+});
+
+// Tab and Section Management
+function showSection(index, skipScroll = false) {
+  const sections = document.querySelectorAll('.section');
+  const navSectionTitles = document.querySelectorAll('.nav-section-title');
+  const allSubsections = document.querySelectorAll('.nav-subsections');
+
+  sections.forEach((sec, i) => {
+    sec.classList.toggle('active', i === index);
+  });
+
+  navSectionTitles.forEach((title, i) => {
+    title.classList.toggle('active', i === index);
+  });
+
+  allSubsections.forEach((subsections, i) => {
+    if (i === index) {
+      subsections.classList.add('open');
+    } else {
+      subsections.classList.remove('open');
+    }
+  });
+
+  // Only scroll to top if skipScroll is false
+  if (!skipScroll) {
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }
+}
+
+// Scroll to specific card within a section
+function scrollToCard(sectionIndex, cardIndex) {
+  // First, ensure we're on the right section WITHOUT scrolling to top
+  showSection(sectionIndex, true); // Pass true to skip scroll
+
+  // Wait longer for section to be fully rendered and visible
+  setTimeout(() => {
+    const sections = document.querySelectorAll('.section');
+    const targetSection = sections[sectionIndex];
+
+    if (targetSection && targetSection.classList.contains('active')) {
+      const cards = targetSection.querySelectorAll('.card');
+
+      if (cards[cardIndex]) {
+        // Get the card's position relative to the document
+        const card = cards[cardIndex];
+        const rect = card.getBoundingClientRect();
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        const cardPosition = rect.top + scrollTop;
+
+        // Scroll with appropriate offset (hamburger button + some padding)
+        window.scrollTo({
+          top: cardPosition - 100,
+          behavior: 'auto'
+        });
+
+        // Highlight the card briefly
+        card.style.transition = 'transform 0.3s ease';
+        card.style.transform = 'scale(1.02)';
+        setTimeout(() => {
+          card.style.transform = 'scale(1)';
+        }, 500);
+      }
+    }
+  }, 400); // Increased timeout for better reliability
+}
+
+// Subsection navigation active state
+document.querySelectorAll('.nav-subsection').forEach(item => {
+  item.addEventListener('click', function() {
+    document.querySelectorAll('.nav-subsection').forEach(s => s.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+// Initialize: Mark first section as active and open first subsection
+document.addEventListener('DOMContentLoaded', () => {
+  showSection(0);
+  // Open first section's subsections by default
+  const firstSubsections = document.querySelector('.nav-subsections');
+  if (firstSubsections) {
+    firstSubsections.classList.add('open');
+  }
+});
+</script>
+
+<footer>
+  <p>Master graph patterns through practice • <a href="https://leetcode.com">LeetCode</a> • Keep exploring! 🚀</p>
+</footer>
+
+</div>
+</body>
+</html>

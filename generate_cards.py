@@ -14,7 +14,11 @@ icons = {
     "spring": "🌱",
     "security": "🔐",
     "sql": "🗄️",
-    "solid": "🏗️"
+    "solid": "🏗️",
+    "recursion": "🔄",
+    "graph": "📈",
+    "java": "☕",
+    "trees": "🌳"
 }
 
 print("Reading index.html...")

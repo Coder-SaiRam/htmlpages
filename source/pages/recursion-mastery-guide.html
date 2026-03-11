@@ -1,0 +1,3271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recursion Mastery Guide - Complete Reference</title>
+<style>
+:root{
+  --bg:#0a0e14;
+  --card:#141920;
+  --txt:#d4d7dd;
+  --txt2:#9ca3af;
+  --gold:#f0b429;
+  --teal:#00d4aa;
+  --sky:#4db8ff;
+  --mint:#00e599;
+  --violet:#9d7ff3;
+  --coral:#ff6b6b;
+  --orange:#ff9d5c;
+  --pink:#ff6ec7;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,Cantarell,sans-serif;
+  background:var(--bg);
+  color:var(--txt);
+  line-height:1.6;
+  padding-left:90px;
+  padding-top:20px;
+  padding-bottom:20px;
+  overflow-x:hidden;
+  transition:padding-left .3s ease
+}
+.container{max-width:1200px;margin:0 auto;padding:0 20px;transition:none}
+/* .container.shifted{margin-left:280px} */
+@media(min-width:1025px){.container{margin-left:0;max-width:100%}}
+header{text-align:center;margin-bottom:50px;padding:40px 20px}
+h1{font-size:42px;margin-bottom:15px;background:linear-gradient(135deg,var(--teal),var(--sky));-webkit-background-clip:text;background-clip:text;color:transparent}
+.subtitle{font-size:18px;color:var(--txt2)}
+
+/* HERO */
+.hero{background:linear-gradient(135deg,rgba(0,212,170,.05),rgba(77,184,255,.05));border:1px solid rgba(0,212,170,.15);border-radius:12px;padding:30px;margin-bottom:40px}
+.hero-grid{display:grid;gap:20px}
+.hero-top{margin-bottom:20px}
+.hero-badge{display:inline-block;background:rgba(0,212,170,.1);color:var(--teal);padding:6px 14px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:1.5px;margin-bottom:15px}
+.hero h1{font-size:36px;margin-bottom:10px;background:linear-gradient(135deg,var(--teal),var(--mint));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{color:var(--txt2);font-size:15px;line-height:1.7}
+.hero-boxes{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.hero-box{background:rgba(0,212,170,.03);border:1px solid rgba(0,212,170,.15);border-radius:8px;padding:16px;text-decoration:none;transition:all .3s;cursor:pointer}
+.hero-box:hover{background:rgba(0,212,170,.08);transform:translateY(-2px)}
+.hero-box.active{background:rgba(0,212,170,.12);border:2px solid var(--teal);box-shadow:0 0 20px rgba(0,212,170,.3);transform:scale(1.02)}
+.hero-box-icon{font-size:24px;margin-bottom:8px}
+.hero-box-title{color:var(--teal);font-weight:700;font-size:13px;margin-bottom:4px}
+.hero-box-desc{color:var(--txt2);font-size:12px;line-height:1.5}
+
+/* SECTIONS */
+.section{display:none}
+.section.active{display:block}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid rgba(255,255,255,.05);border-radius:10px;margin-bottom:24px;overflow:hidden;transition:transform .3s}
+.card:hover{transform:translateY(-2px)}
+.card-top{padding:20px 24px;border-bottom:1px solid rgba(255,255,255,.03)}
+.card-top{display:flex;gap:16px;align-items:flex-start}
+.icon{width:50px;height:50px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+.icon-teal{background:linear-gradient(135deg,rgba(0,212,170,.15),rgba(0,212,170,.05))}
+.icon-sky{background:linear-gradient(135deg,rgba(77,184,255,.15),rgba(77,184,255,.05))}
+.icon-gold{background:linear-gradient(135deg,rgba(240,180,41,.15),rgba(240,180,41,.05))}
+.icon-violet{background:linear-gradient(135deg,rgba(157,127,243,.15),rgba(157,127,243,.05))}
+.icon-coral{background:linear-gradient(135deg,rgba(255,107,107,.15),rgba(255,107,107,.05))}
+.icon-orange{background:linear-gradient(135deg,rgba(255,157,92,.15),rgba(255,157,92,.05))}
+.icon-pink{background:linear-gradient(135deg,rgba(255,110,199,.15),rgba(255,110,199,.05))}
+.icon-mint{background:linear-gradient(135deg,rgba(0,229,153,.15),rgba(0,229,153,.05))}
+.card-meta{flex:1}
+.card-label{font-size:12px;color:var(--teal);font-weight:700;letter-spacing:1px;margin-bottom:8px;text-transform:uppercase}
+.card-name{font-size:19px;font-weight:700;margin-bottom:5px}
+.card-tag{font-size:14px;color:var(--txt2);line-height:1.6}
+.card-body{padding:22px 24px}
+
+/* CALLOUTS */
+.when{background:rgba(240,180,41,.04);border:1px solid rgba(240,180,41,.18);border-radius:8px;padding:14px 18px;margin-bottom:14px}
+.when-t{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:7px}
+.when ul{list-style:none}
+.when ul li{font-size:13.5px;color:var(--txt2);padding:2px 0 2px 18px;position:relative}
+.when ul li::before{content:'›';position:absolute;left:0;color:var(--gold)}
+
+.scen{background:rgba(0,212,170,.04);border:1px solid rgba(0,212,170,.18);border-radius:8px;padding:14px 18px;margin-bottom:14px}
+.scen-t{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:var(--teal);margin-bottom:7px}
+.scen ul{list-style:none}
+.scen ul li{font-size:13.5px;color:var(--txt2);padding:2px 0 2px 18px;position:relative}
+.scen ul li::before{content:'›';position:absolute;left:0;color:var(--teal)}
+
+.warn{background:rgba(255,107,107,.04);border:1px solid rgba(255,107,107,.18);border-radius:8px;padding:14px 18px;margin-bottom:14px}
+.warn-t{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:var(--coral);margin-bottom:7px;display:block}
+.warn ul{list-style:none}
+.warn ul li{font-size:13.5px;color:var(--txt2);padding:2px 0 2px 18px;position:relative}
+.warn ul li::before{content:'›';position:absolute;left:0;color:var(--coral)}
+
+.note{background:rgba(157,127,243,.04);border:1px solid rgba(157,127,243,.18);border-radius:8px;padding:14px 18px;margin-bottom:14px}
+.note b{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:var(--violet);display:block;margin-bottom:7px}
+.note ul{list-style:none}
+.note ul li{font-size:13.5px;color:var(--txt2);padding:2px 0 2px 18px;position:relative}
+.note ul li::before{content:'›';position:absolute;left:0;color:var(--violet)}
+
+.tip{background:rgba(0,229,153,.04);border:1px solid rgba(0,229,153,.18);border-radius:8px;padding:14px 18px;margin-bottom:14px}
+.tip-t{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:var(--mint);margin-bottom:7px;display:block}
+.tip ul{list-style:none}
+.tip ul li{font-size:13.5px;color:var(--txt2);padding:2px 0 2px 18px;position:relative}
+.tip ul li::before{content:'›';position:absolute;left:0;color:var(--mint)}
+
+/* CODE */
+.code{background:#0d1117;border:1px solid rgba(255,255,255,.05);border-radius:8px;margin:14px 0;overflow:hidden}
+.code-head{background:#161b22;padding:8px 16px;border-bottom:1px solid rgba(255,255,255,.05);display:flex;align-items:center;gap:12px}
+.dots{display:flex;gap:6px}
+.dot{width:10px;height:10px;border-radius:50%}
+.dot.r{background:#ff6b6b}
+.dot.y{background:#ffd93d}
+.dot.g{background:#6bcf7f}
+.code-file{color:var(--txt2);font-size:12px;font-family:'JetBrains Mono',monospace;flex:1}
+.code-lang{color:var(--txt2);font-size:11px;background:rgba(255,255,255,.05);padding:2px 8px;border-radius:4px}
+.code pre{padding:18px;overflow-x:auto;font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.6}
+.kw{color:#ff6ec7}
+.tp{color:#4db8ff}
+.fn{color:#ffd93d}
+.st{color:#6bcf7f}
+.cm{color:#6a737d}
+.nm{color:#ff9d5c}
+.an{color:#9d7ff3}
+
+/* CODE INLINE */
+code{background:rgba(0,212,170,.1);color:var(--teal);padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:12.5px}
+.code code{background:transparent;padding:0}
+
+/* TABLE */
+.prop-table{width:100%;border-collapse:collapse;margin:14px 0;font-size:13px}
+.prop-table th{background:rgba(0,212,170,.08);color:var(--teal);padding:10px 14px;text-align:left;font-weight:700;border:1px solid rgba(0,212,170,.2)}
+.prop-table td{padding:10px 14px;border:1px solid rgba(255,255,255,.05);vertical-align:top}
+.prop-table td:first-child{font-family:'JetBrains Mono',monospace;color:var(--sky);font-size:12px}
+.prop-table td:last-child{color:var(--txt2)}
+.prop-table tr:hover{background:rgba(0,212,170,.02)}
+
+/* LEETCODE PROBLEMS */
+.lc-list{display:grid;gap:10px;margin:14px 0}
+.lc-item{background:rgba(0,212,170,.03);border:1px solid rgba(0,212,170,.15);border-radius:6px;padding:12px 16px;display:flex;align-items:center;gap:12px;transition:all .2s}
+.lc-item:hover{background:rgba(0,212,170,.08);transform:translateX(4px)}
+.lc-badge{font-size:10px;font-weight:700;padding:4px 8px;border-radius:4px;letter-spacing:.5px}
+.lc-easy{background:rgba(0,229,153,.15);color:var(--mint)}
+.lc-medium{background:rgba(240,180,41,.15);color:var(--gold)}
+.lc-hard{background:rgba(255,107,107,.15);color:var(--coral)}
+.lc-num{font-family:'JetBrains Mono',monospace;color:var(--txt2);font-size:12px;min-width:50px}
+.lc-name{color:var(--txt);font-size:14px;flex:1}
+
+/* HAMBURGER MENU */
+.hamburger-btn{position:fixed;left:20px;top:20px;z-index:1000;width:50px;height:50px;background:linear-gradient(135deg,rgba(0,212,170,.15),rgba(77,184,255,.15));border:1px solid var(--teal);border-radius:10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;transition:all .3s}
+.hamburger-btn:hover{background:linear-gradient(135deg,rgba(0,212,170,.25),rgba(77,184,255,.25));transform:scale(1.05)}
+.hamburger-btn span{width:24px;height:2px;background:var(--teal);border-radius:2px;transition:all .3s}
+.hamburger-btn.active span:nth-child(1){transform:rotate(45deg) translate(5px,5px)}
+.hamburger-btn.active span:nth-child(2){opacity:0}
+.hamburger-btn.active span:nth-child(3){transform:rotate(-45deg) translate(7px,-7px)}
+
+.sidebar{position:fixed;left:-280px;top:0;width:280px;height:100vh;background:rgba(20,25,32,.98);backdrop-filter:blur(10px);border-right:1px solid rgba(0,212,170,.15);z-index:999;transition:left .3s ease;overflow-y:auto;scrollbar-width:thin;padding:80px 0 20px 0}
+.sidebar.open{left:0}
+.sidebar::-webkit-scrollbar{width:4px}
+.sidebar::-webkit-scrollbar-track{background:rgba(255,255,255,.05)}
+.sidebar::-webkit-scrollbar-thumb{background:var(--teal);border-radius:2px}
+
+.sidebar-title{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--teal);margin:0 20px 16px 20px;padding-bottom:8px;border-bottom:1px solid rgba(0,212,170,.2)}
+
+.nav-section{margin-bottom:8px}
+.nav-section-title{padding:10px 20px;font-size:13px;font-weight:700;color:var(--teal);cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:8px}
+.nav-section-title:hover{background:rgba(0,212,170,.08)}
+.nav-section-title.active{background:rgba(0,212,170,.12);border-left:3px solid var(--teal)}
+.nav-section-number{font-family:'JetBrains Mono',monospace;font-size:11px;min-width:20px}
+.nav-section-icon{font-size:16px;margin-right:4px}
+
+.nav-subsections{max-height:0;overflow:hidden;transition:max-height .3s ease}
+.nav-subsections.open{max-height:500px}
+.nav-subsection{padding:8px 20px 8px 48px;font-size:12px;color:var(--txt2);cursor:pointer;transition:all .2s;border-left:2px solid transparent}
+.nav-subsection:hover{color:var(--txt);background:rgba(0,212,170,.05);border-left-color:var(--teal)}
+.nav-subsection.active{color:var(--teal);background:rgba(0,212,170,.08);border-left-color:var(--teal)}
+
+@media(max-width:1024px){
+  .hamburger-btn{display:flex}
+  .sidebar{display:block}
+}
+@media(min-width:1025px){
+  .hamburger-btn{display:flex}
+  .sidebar{display:block}
+  .container{padding-left:30px}
+  .section{min-width:0}
+}
+@media(min-width:1025px){
+  .container{padding-left:30px}
+  .section{min-width:0}
+}
+
+/* FOOTER */
+footer{text-align:center;margin-top:60px;padding:30px;color:var(--txt2);font-size:14px;border-top:1px solid rgba(255,255,255,.05)}
+footer a{color:var(--teal);text-decoration:none}
+footer a:hover{text-decoration:underline}
+</style>
+</head>
+<body>
+<!-- HAMBURGER MENU -->
+<div class="hamburger-btn" id="hamburgerBtn">
+  <span></span>
+  <span></span>
+  <span></span>
+</div>
+
+<!-- SIDEBAR NAVIGATION -->
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-title">📍 Navigation</div>
+
+  <div class="nav-section">
+    <div class="nav-section-title" onclick="showSection(0)">
+      <span class="nav-section-number">0</span>
+      <span class="nav-section-icon">📚</span>
+      <span>Fundamentals</span>
+    </div>
+    <div class="nav-subsections">
+      <div class="nav-subsection" onclick="scrollToCard(0, 0)">What is Recursion</div>
+      <div class="nav-subsection" onclick="scrollToCard(0, 1)">Three Rules</div>
+      <div class="nav-subsection" onclick="scrollToCard(0, 2)">Types of Recursion</div>
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-title" onclick="showSection(1)">
+      <span class="nav-section-number">1</span>
+      <span class="nav-section-icon">🎯</span>
+      <span>Basic Patterns</span>
+    </div>
+    <div class="nav-subsections">
+      <div class="nav-subsection" onclick="scrollToCard(1, 0)">Essential Templates</div>
+      <div class="nav-subsection" onclick="scrollToCard(1, 1)">Problems</div>
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-title" onclick="showSection(2)">
+      <span class="nav-section-number">2</span>
+      <span class="nav-section-icon">🔙</span>
+      <span>Backtracking</span>
+    </div>
+    <div class="nav-subsections">
+      <div class="nav-subsection" onclick="scrollToCard(2, 0)">Backtracking Template</div>
+      <div class="nav-subsection" onclick="scrollToCard(2, 1)">Permutations</div>
+      <div class="nav-subsection" onclick="scrollToCard(2, 2)">Combinations/Subsets</div>
+      <div class="nav-subsection" onclick="scrollToCard(2, 3)">N-Queens</div>
+      <div class="nav-subsection" onclick="scrollToCard(2, 4)">Problems</div>
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-title" onclick="showSection(3)">
+      <span class="nav-section-number">3</span>
+      <span class="nav-section-icon">📝</span>
+      <span>String Problems</span>
+    </div>
+    <div class="nav-subsections">
+      <div class="nav-subsection" onclick="scrollToCard(3, 0)">String Permutations</div>
+      <div class="nav-subsection" onclick="scrollToCard(3, 1)">Palindrome Problems</div>
+      <div class="nav-subsection" onclick="scrollToCard(3, 2)">Substring Generation</div>
+      <div class="nav-subsection" onclick="scrollToCard(3, 3)">Problems</div>
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-title" onclick="showSection(4)">
+      <span class="nav-section-number">4</span>
+      <span class="nav-section-icon">🔢</span>
+      <span>Array Problems</span>
+    </div>
+    <div class="nav-subsections">
+      <div class="nav-subsection" onclick="scrollToCard(4, 0)">Array Subsets</div>
+      <div class="nav-subsection" onclick="scrollToCard(4, 1)">Number Generation</div>
+      <div class="nav-subsection" onclick="scrollToCard(4, 2)">Problems</div>
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-title" onclick="showSection(5)">
+      <span class="nav-section-number">5</span>
+      <span class="nav-section-icon">🌳</span>
+      <span>Tree Recursion</span>
+    </div>
+    <div class="nav-subsections">
+      <div class="nav-subsection" onclick="scrollToCard(5, 0)">Tree DFS</div>
+      <div class="nav-subsection" onclick="scrollToCard(5, 1)">Path Problems</div>
+      <div class="nav-subsection" onclick="scrollToCard(5, 2)">Tree Construction</div>
+      <div class="nav-subsection" onclick="scrollToCard(5, 3)">Problems</div>
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-title" onclick="showSection(6)">
+      <span class="nav-section-number">6</span>
+      <span class="nav-section-icon">💾</span>
+      <span>Memoization</span>
+    </div>
+    <div class="nav-subsections">
+      <div class="nav-subsection" onclick="scrollToCard(6, 0)">What is Memoization</div>
+      <div class="nav-subsection" onclick="scrollToCard(6, 1)">1D DP</div>
+      <div class="nav-subsection" onclick="scrollToCard(6, 2)">2D DP</div>
+      <div class="nav-subsection" onclick="scrollToCard(6, 3)">Problems</div>
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-title" onclick="showSection(7)">
+      <span class="nav-section-number">7</span>
+      <span class="nav-section-icon">📋</span>
+      <span>Cheat Sheet</span>
+    </div>
+    <div class="nav-subsections">
+      <div class="nav-subsection" onclick="scrollToCard(7, 0)">Recursion Templates</div>
+      <div class="nav-subsection" onclick="scrollToCard(7, 1)">Tree Templates</div>
+      <div class="nav-subsection" onclick="scrollToCard(7, 2)">Memoization Templates</div>
+      <div class="nav-subsection" onclick="scrollToCard(7, 3)">Best Practices</div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+<!-- Header -->
+<header>
+  <h1>🔄 Recursion Mastery</h1>
+  <p class="subtitle">Complete guide to mastering recursion with patterns and problem-solving strategies</p>
+</header>
+
+<!-- SECTION 0: FUNDAMENTALS -->
+<div class="section active" id="sec-0">
+
+<div class="card">
+  <div class="card-top">
+    <div class="icon icon-teal">📚</div>
+    <div class="card-meta">
+      <div class="card-label">FUNDAMENTALS</div>
+      <div class="card-name">What is Recursion?</div>
+      <div class="card-tag">Understanding the core concept and components</div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <div class="scen">
+      <div class="scen-t">RECURSION DEFINITION</div>
+      <ul>
+        <li><strong>Recursion</strong>: A function that calls itself to solve a smaller version of the same problem</li>
+        <li><strong>Base Case</strong>: The terminating condition that stops recursion</li>
+        <li><strong>Recursive Case</strong>: The part where function calls itself with modified parameters</li>
+        <li><strong>Call Stack</strong>: Memory structure that tracks function calls</li>
+      </ul>
+    </div>
+
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">BasicRecursion.java</div>
+        <div class="code-lang">java</div>
+      </div>
+      <div class="code">
+<pre><span class="cm">// Classic Example: Factorial</span>
+<span class="kw">public</span> <span class="tp">int</span> <span class="fn">factorial</span>(<span class="tp">int</span> n) {
+    <span class="cm">// BASE CASE: Stop condition</span>
+    <span class="kw">if</span> (n == <span class="nm">0</span> || n == <span class="nm">1</span>) {
+        <span class="kw">return</span> <span class="nm">1</span>;
+    }
+
+    <span class="cm">// RECURSIVE CASE: Break down the problem</span>
+    <span class="kw">return</span> n * <span class="fn">factorial</span>(n - <span class="nm">1</span>);
+}
+
+<span class="cm">// Visualization of factorial(4):
+// factorial(4) = 4 * factorial(3)
+//              = 4 * (3 * factorial(2))
+//              = 4 * (3 * (2 * factorial(1)))
+//              = 4 * (3 * (2 * 1))
+//              = 24</span></pre>
+      </div>
+    </div>
+
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">recursion-visualization.txt</div>
+        <div class="code-lang">text</div>
+      </div>
+      <div class="code">
+<pre>CALL STACK VISUALIZATION for factorial(4):
+
+│ factorial(4) │ ← Start: n=4, return 4 * factorial(3)
+├───────────────┤
+│ factorial(3) │ ← n=3, return 3 * factorial(2)
+├───────────────┤
+│ factorial(2) │ ← n=2, return 2 * factorial(1)
+├───────────────┤
+│ factorial(1) │ ← BASE CASE: return 1
+└───────────────┘
+
+UNWINDING (returning values back up):
+
+    factorial(1) returns 1
+           ↓
+    factorial(2) returns 2 * 1 = 2
+           ↓
+    factorial(3) returns 3 * 2 = 6
+           ↓
+    factorial(4) returns 4 * 6 = 24</pre>
+      </div>
+    </div>
+
+    <div class="tip">
+      <span class="tip-t">KEY COMPONENTS OF RECURSION</span>
+      <ul>
+        <li><strong>Base Case</strong>: MUST have at least one to prevent infinite recursion</li>
+        <li><strong>Progress Toward Base</strong>: Each recursive call must move closer to base case</li>
+        <li><strong>Trust the Recursion</strong>: Assume the recursive call works for smaller inputs</li>
+        <li><strong>Combine Results</strong>: Use the result from recursive call to build solution</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-top">
+    <div class="icon icon-sky">🎯</div>
+    <div class="card-meta">
+      <div class="card-label">CORE CONCEPTS</div>
+      <div class="card-name">The Three Rules of Recursion</div>
+      <div class="card-tag">Essential principles every recursive function must follow</div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <table class="prop-table">
+      <tr>
+        <th>Rule</th>
+        <th>Description</th>
+        <th>Example</th>
+      </tr>
+      <tr>
+        <td>1. Base Case</td>
+        <td>Must have a stopping condition</td>
+        <td>if (n == 0) return 1;</td>
+      </tr>
+      <tr>
+        <td>2. Move Toward Base</td>
+        <td>Each call must progress toward the base case</td>
+        <td>factorial(n-1) reduces n each time</td>
+      </tr>
+      <tr>
+        <td>3. Call Itself</td>
+        <td>Function must call itself recursively</td>
+        <td>return n * factorial(n-1);</td>
+      </tr>
+    </table>
+
+    <div class="warn">
+      <span class="warn-t">COMMON PITFALLS TO AVOID</span>
+      <ul>
+        <li><strong>Missing Base Case</strong>: Causes StackOverflowError (infinite recursion)</li>
+        <li><strong>Wrong Base Case</strong>: May never be reached or return incorrect result</li>
+        <li><strong>Not Progressing</strong>: Calling with same parameter (e.g., func(n) instead of func(n-1))</li>
+        <li><strong>Multiple Base Cases</strong>: Don't forget edge cases (e.g., negative numbers)</li>
+        <li><strong>Excessive Recursion</strong>: Some problems are better solved iteratively</li>
+      </ul>
+    </div>
+
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">RecursionMistakes.java</div>
+        <div class="code-lang">java</div>
+      </div>
+      <div class="code">
+<pre><span class="cm">// ❌ WRONG: Missing base case</span>
+<span class="kw">public</span> <span class="tp">int</span> <span class="fn">badFactorial</span>(<span class="tp">int</span> n) {
+    <span class="kw">return</span> n * <span class="fn">badFactorial</span>(n - <span class="nm">1</span>); <span class="cm">// Infinite recursion!</span>
+}
+
+<span class="cm">// ❌ WRONG: Not progressing toward base case</span>
+<span class="kw">public</span> <span class="tp">int</span> <span class="fn">badFactorial2</span>(<span class="tp">int</span> n) {
+    <span class="kw">if</span> (n == <span class="nm">0</span>) <span class="kw">return</span> <span class="nm">1</span>;
+    <span class="kw">return</span> n * <span class="fn">badFactorial2</span>(n); <span class="cm">// Same n! Infinite loop!</span>
+}
+
+<span class="cm">// ✅ CORRECT: Has base case and progresses</span>
+<span class="kw">public</span> <span class="tp">int</span> <span class="fn">goodFactorial</span>(<span class="tp">int</span> n) {
+    <span class="kw">if</span> (n <= <span class="nm">1</span>) <span class="kw">return</span> <span class="nm">1</span>; <span class="cm">// Base case (handles 0 and 1)</span>
+    <span class="kw">return</span> n * <span class="fn">goodFactorial</span>(n - <span class="nm">1</span>); <span class="cm">// Progresses toward base</span>
+}</pre>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-top">
+    <div class="icon icon-violet">🔄</div>
+    <div class="card-meta">
+      <div class="card-label">TYPES</div>
+      <div class="card-name">Types of Recursion</div>
+      <div class="card-tag">Different recursive structures and their use cases</div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <h3 style="color:var(--teal);margin-bottom:15px;font-size:16px">1. Linear Recursion (Single Recursive Call)</h3>
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">LinearRecursion.java</div>
+        <div class="code-lang">java</div>
+      </div>
+      <div class="code">
+<pre><span class="cm">// Linear Recursion: One recursive call per execution</span>
+<span class="kw">public</span> <span class="tp">int</span> <span class="fn">sum</span>(<span class="tp">int</span> n) {
+    <span class="kw">if</span> (n == <span class="nm">0</span>) <span class="kw">return</span> <span class="nm">0</span>;
+    <span class="kw">return</span> n + <span class="fn">sum</span>(n - <span class="nm">1</span>); <span class="cm">// Single recursive call</span>
+}
+
+<span class="cm">// Time: O(n), Space: O(n) for call stack</span></pre>
+      </div>
+    </div>
+
+    <h3 style="color:var(--sky);margin:25px 0 15px 0;font-size:16px">2. Binary Recursion (Two Recursive Calls)</h3>
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">BinaryRecursion.java</div>
+        <div class="code-lang">java</div>
+      </div>
+      <div class="code">
+<pre><span class="cm">// Binary Recursion: Two recursive calls per execution</span>
+<span class="kw">public</span> <span class="tp">int</span> <span class="fn">fibonacci</span>(<span class="tp">int</span> n) {
+    <span class="kw">if</span> (n <= <span class="nm">1</span>) <span class="kw">return</span> n;
+    <span class="kw">return</span> <span class="fn">fibonacci</span>(n - <span class="nm">1</span>) + <span class="fn">fibonacci</span>(n - <span class="nm">2</span>); <span class="cm">// Two recursive calls</span>
+}
+
+<span class="cm">// Time: O(2^n) - Exponential!, Space: O(n) for deepest call</span></pre>
+      </div>
+    </div>
+
+    <h3 style="color:var(--violet);margin:25px 0 15px 0;font-size:16px">3. Multiple Recursion (Many Recursive Calls)</h3>
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">MultipleRecursion.java</div>
+        <div class="code-lang">java</div>
+      </div>
+      <div class="code">
+<pre><span class="cm">// Multiple Recursion: Many recursive calls (e.g., in loops)</span>
+<span class="kw">public</span> <span class="kw">void</span> <span class="fn">printPermutations</span>(<span class="tp">String</span> prefix, <span class="tp">String</span> remaining) {
+    <span class="kw">if</span> (remaining.<span class="fn">length</span>() == <span class="nm">0</span>) {
+        <span class="tp">System</span>.out.<span class="fn">println</span>(prefix);
+        <span class="kw">return</span>;
+    }
+
+    <span class="kw">for</span> (<span class="tp">int</span> i = <span class="nm">0</span>; i < remaining.<span class="fn">length</span>(); i++) {
+        <span class="tp">String</span> newPrefix = prefix + remaining.<span class="fn">charAt</span>(i);
+        <span class="tp">String</span> newRemaining = remaining.<span class="fn">substring</span>(<span class="nm">0</span>, i) +
+                             remaining.<span class="fn">substring</span>(i + <span class="nm">1</span>);
+        <span class="fn">printPermutations</span>(newPrefix, newRemaining); <span class="cm">// Multiple calls in loop</span>
+    }
+}</pre>
+      </div>
+    </div>
+
+    <h3 style="color:var(--gold);margin:25px 0 15px 0;font-size:16px">4. Tail Recursion (Optimizable)</h3>
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">TailRecursion.java</div>
+        <div class="code-lang">java</div>
+      </div>
+      <div class="code">
+<pre><span class="cm">// Tail Recursion: Recursive call is the last operation</span>
+<span class="kw">public</span> <span class="tp">int</span> <span class="fn">factorialTail</span>(<span class="tp">int</span> n, <span class="tp">int</span> accumulator) {
+    <span class="kw">if</span> (n == <span class="nm">0</span>) <span class="kw">return</span> accumulator;
+    <span class="kw">return</span> <span class="fn">factorialTail</span>(n - <span class="nm">1</span>, n * accumulator); <span class="cm">// Last operation</span>
+}
+
+<span class="cm">// Can be optimized by compiler to iterative form (not in Java though)</span>
+<span class="cm">// Time: O(n), Space: O(1) with tail call optimization</span></pre>
+      </div>
+    </div>
+
+    <div class="note">
+      <b>CHOOSING THE RIGHT TYPE</b>
+      <ul>
+        <li><strong>Linear</strong>: Simple problems with sequential reduction (sum, reverse)</li>
+        <li><strong>Binary</strong>: Problems with two subproblems (fibonacci, binary search tree)</li>
+        <li><strong>Multiple</strong>: Problems with many choices (permutations, combinations)</li>
+        <li><strong>Tail</strong>: When you want potential optimization (accumulators pattern)</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+</div>
+
+<!-- SECTION 1: BASIC PATTERNS -->
+<div class="section" id="sec-1">
+
+<div class="card">
+  <div class="card-top">
+    <div class="icon icon-teal">🎯</div>
+    <div class="card-meta">
+      <div class="card-label">BASIC PATTERNS</div>
+      <div class="card-name">Essential Recursion Templates</div>
+      <div class="card-tag">Common patterns you'll use in 80% of problems</div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <h3 style="color:var(--teal);margin-bottom:15px;font-size:16px">Pattern 1: Process and Recurse</h3>
+    <div class="scen">
+      <div class="scen-t">WHEN TO USE</div>
+      <ul>
+        <li>Need to perform an action at each step</li>
+        <li>Building result as you go down the recursion</li>
+        <li>Examples: Print elements, count nodes, calculate sum</li>
+      </ul>
+    </div>
+
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">ProcessAndRecurse.java</div>
+        <div class="code-lang">java</div>
+      </div>
+      <div class="code">
+<pre><span class="cm">// Pattern: Process current, then recurse</span>
+<span class="kw">public</span> <span class="kw">void</span> <span class="fn">printArray</span>(<span class="tp">int</span>[] arr, <span class="tp">int</span> index) {
+    <span class="cm">// Base case</span>
+    <span class="kw">if</span> (index >= arr.length) <span class="kw">return</span>;
+
+    <span class="cm">// Process: Print current element</span>
+    <span class="tp">System</span>.out.<span class="fn">print</span>(arr[index] + <span class="st">" "</span>);
+
+    <span class="cm">// Recurse: Move to next</span>
+    <span class="fn">printArray</span>(arr, index + <span class="nm">1</span>);
+}
+
+<span class="cm">// Count elements</span>
+<span class="kw">public</span> <span class="tp">int</span> <span class="fn">countElements</span>(<span class="tp">int</span>[] arr, <span class="tp">int</span> index) {
+    <span class="kw">if</span> (index >= arr.length) <span class="kw">return</span> <span class="nm">0</span>;
+    <span class="kw">return</span> <span class="nm">1</span> + <span class="fn">countElements</span>(arr, index + <span class="nm">1</span>);
+}</pre>
+      </div>
+    </div>
+
+    <h3 style="color:var(--sky);margin:25px 0 15px 0;font-size:16px">Pattern 2: Recurse and Process</h3>
+    <div class="scen">
+      <div class="scen-t">WHEN TO USE</div>
+      <ul>
+        <li>Need result from recursive call before processing</li>
+        <li>Building result on the way back up</li>
+        <li>Examples: Reverse operations, bottom-up calculations</li>
+      </ul>
+    </div>
+
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">RecurseAndProcess.java</div>
+        <div class="code-lang">java</div>
+      </div>
+      <div class="code">
+<pre><span class="cm">// Pattern: Recurse first, then process</span>
+<span class="kw">public</span> <span class="kw">void</span> <span class="fn">printReverse</span>(<span class="tp">int</span>[] arr, <span class="tp">int</span> index) {
+    <span class="cm">// Base case</span>
+    <span class="kw">if</span> (index >= arr.length) <span class="kw">return</span>;
+
+    <span class="cm">// Recurse first: Go to end</span>
+    <span class="fn">printReverse</span>(arr, index + <span class="nm">1</span>);
+
+    <span class="cm">// Process: Print on way back (reverse order)</span>
+    <span class="tp">System</span>.out.<span class="fn">print</span>(arr[index] + <span class="st">" "</span>);
+}
+
+<span class="cm">// Calculate factorial (need result from below)</span>
+<span class="kw">public</span> <span class="tp">int</span> <span class="fn">factorial</span>(<span class="tp">int</span> n) {
+    <span class="kw">if</span> (n <= <span class="nm">1</span>) <span class="kw">return</span> <span class="nm">1</span>;
+    <span class="tp">int</span> result = <span class="fn">factorial</span>(n - <span class="nm">1</span>); <span class="cm">// Recurse first</span>
+    <span class="kw">return</span> n * result; <span class="cm">// Then process</span>
+}</pre>
+      </div>
+    </div>
+
+    <h3 style="color:var(--violet);margin:25px 0 15px 0;font-size:16px">Pattern 3: Divide and Conquer</h3>
+    <div class="scen">
+      <div class="scen-t">WHEN TO USE</div>
+      <ul>
+        <li>Split problem into smaller subproblems</li>
+        <li>Solve each subproblem recursively</li>
+        <li>Combine results from subproblems</li>
+        <li>Examples: Merge sort, binary search, quick sort</li>
+      </ul>
+    </div>
+
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">DivideAndConquer.java</div>
+        <div class="code-lang">java</div>
+      </div>
+      <div class="code">
+<pre><span class="cm">// Pattern: Divide, Conquer, Combine</span>
+<span class="kw">public</span> <span class="tp">int</span> <span class="fn">binarySearch</span>(<span class="tp">int</span>[] arr, <span class="tp">int</span> target, <span class="tp">int</span> left, <span class="tp">int</span> right) {
+    <span class="cm">// Base case</span>
+    <span class="kw">if</span> (left > right) <span class="kw">return</span> -<span class="nm">1</span>;
+
+    <span class="cm">// Divide: Split problem in half</span>
+    <span class="tp">int</span> mid = left + (right - left) / <span class="nm">2</span>;
+
+    <span class="kw">if</span> (arr[mid] == target) <span class="kw">return</span> mid;
+
+    <span class="cm">// Conquer: Recursively search one half</span>
+    <span class="kw">if</span> (arr[mid] > target) {
+        <span class="kw">return</span> <span class="fn">binarySearch</span>(arr, target, left, mid - <span class="nm">1</span>);
+    } <span class="kw">else</span> {
+        <span class="kw">return</span> <span class="fn">binarySearch</span>(arr, target, mid + <span class="nm">1</span>, right);
+    }
+}
+
+<span class="cm">// Find maximum in array</span>
+<span class="kw">public</span> <span class="tp">int</span> <span class="fn">findMax</span>(<span class="tp">int</span>[] arr, <span class="tp">int</span> left, <span class="tp">int</span> right) {
+    <span class="kw">if</span> (left == right) <span class="kw">return</span> arr[left];
+
+    <span class="tp">int</span> mid = (left + right) / <span class="nm">2</span>;
+    <span class="tp">int</span> leftMax = <span class="fn">findMax</span>(arr, left, mid);
+    <span class="tp">int</span> rightMax = <span class="fn">findMax</span>(arr, mid + <span class="nm">1</span>, right);
+
+    <span class="cm">// Combine: Take maximum of both halves</span>
+    <span class="kw">return</span> <span class="tp">Math</span>.<span class="fn">max</span>(leftMax, rightMax);
+}</pre>
+      </div>
+    </div>
+
+    <h3 style="color:var(--gold);margin:25px 0 15px 0;font-size:16px">Pattern 4: Helper Method Pattern</h3>
+    <div class="scen">
+      <div class="scen-t">WHEN TO USE</div>
+      <ul>
+        <li>Need to maintain additional state across recursive calls</li>
+        <li>Clean API for user but complex implementation</li>
+        <li>Accumulator pattern, index tracking</li>
+      </ul>
+    </div>
+
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">HelperMethod.java</div>
+        <div class="code-lang">java</div>
+      </div>
+      <div class="code">
+<pre><span class="cm">// Pattern: Public method calls private helper</span>
+<span class="kw">public</span> <span class="tp">int</span> <span class="fn">sumArray</span>(<span class="tp">int</span>[] arr) {
+    <span class="cm">// Clean API for user</span>
+    <span class="kw">return</span> <span class="fn">sumHelper</span>(arr, <span class="nm">0</span>);
+}
+
+<span class="kw">private</span> <span class="tp">int</span> <span class="fn">sumHelper</span>(<span class="tp">int</span>[] arr, <span class="tp">int</span> index) {
+    <span class="cm">// Helper tracks index</span>
+    <span class="kw">if</span> (index >= arr.length) <span class="kw">return</span> <span class="nm">0</span>;
+    <span class="kw">return</span> arr[index] + <span class="fn">sumHelper</span>(arr, index + <span class="nm">1</span>);
+}
+
+<span class="cm">// With accumulator</span>
+<span class="kw">public</span> <span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt; <span class="fn">getAllNodes</span>(<span class="tp">TreeNode</span> root) {
+    <span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt; result = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;();
+    <span class="fn">collectNodes</span>(root, result); <span class="cm">// Helper with accumulator</span>
+    <span class="kw">return</span> result;
+}
+
+<span class="kw">private</span> <span class="kw">void</span> <span class="fn">collectNodes</span>(<span class="tp">TreeNode</span> node, <span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt; result) {
+    <span class="kw">if</span> (node == <span class="kw">null</span>) <span class="kw">return</span>;
+    result.<span class="fn">add</span>(node.val);
+    <span class="fn">collectNodes</span>(node.left, result);
+    <span class="fn">collectNodes</span>(node.right, result);
+}</pre>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-top">
+    <div class="icon icon-mint">💡</div>
+    <div class="card-meta">
+      <div class="card-label">PRACTICE</div>
+      <div class="card-name">Basic Recursion Problems</div>
+      <div class="card-tag">Essential problems to build your foundation</div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <div class="note">
+      <b>STARTER PROBLEMS (Build Foundation)</b>
+      <div class="lc-list">
+        <div class="lc-item">
+          <span class="lc-badge lc-easy">EASY</span>
+          <span class="lc-num">#509</span>
+          <span class="lc-name">Fibonacci Number ⭐⭐⭐</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-easy">EASY</span>
+          <span class="lc-num">#344</span>
+          <span class="lc-name">Reverse String ⭐⭐⭐</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-easy">EASY</span>
+          <span class="lc-num">#206</span>
+          <span class="lc-name">Reverse Linked List ⭐⭐⭐</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-easy">EASY</span>
+          <span class="lc-num">#70</span>
+          <span class="lc-name">Climbing Stairs ⭐⭐</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#50</span>
+          <span class="lc-name">Pow(x, n) ⭐⭐</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</div>
+
+<!-- SECTION 2: BACKTRACKING -->
+<div id="sec-2" class="section">
+
+<div class="card">
+  <div class="card-top">
+    <div class="icon icon-violet">🎯</div>
+    <div class="card-meta">
+      <div class="card-label">PATTERN</div>
+      <div class="card-name">The Backtracking Template</div>
+      <div class="card-tag">Choose → Explore → Unchoose</div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <div class="scen">
+      <div class="scen-t">📌 UNIVERSAL BACKTRACKING TEMPLATE</div>
+      <ul>
+        <li><b>Choose</b> - Make a decision and add it to your current path</li>
+        <li><b>Explore</b> - Recursively explore further with this choice</li>
+        <li><b>Unchoose</b> - Remove the choice (backtrack) to try other options</li>
+      </ul>
+    </div>
+
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">BacktrackTemplate.java</div>
+        <div class="code-lang">java</div>
+      </div>
+      <div class="code">
+<pre><span class="kw">public class</span> BacktrackTemplate {
+    <span class="kw">public</span> <span class="tp">void</span> <span class="fn">backtrack</span>(State state, <span class="tp">List</span>&lt;Result&gt; results) {
+        <span class="cm">// BASE CASE: Found a valid solution</span>
+        <span class="kw">if</span> (<span class="fn">isValidSolution</span>(state)) {
+            results.<span class="fn">add</span>(<span class="kw">new</span> <span class="fn">Result</span>(state));
+            <span class="kw">return</span>;
+        }
+
+        <span class="cm">// ITERATE through all possible choices</span>
+        <span class="kw">for</span> (Choice choice : <span class="fn">getPossibleChoices</span>(state)) {
+            <span class="cm">// 1. CHOOSE: Make a choice</span>
+            state.<span class="fn">choose</span>(choice);
+
+            <span class="cm">// 2. EXPLORE: Recurse with this choice</span>
+            <span class="fn">backtrack</span>(state, results);
+
+            <span class="cm">// 3. UNCHOOSE: Backtrack (undo choice)</span>
+            state.<span class="fn">unchoose</span>(choice);
+        }
+    }
+
+    <span class="cm">// Example: Generate all permutations</span>
+    <span class="kw">public</span> <span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; <span class="fn">permute</span>(<span class="tp">int</span>[] nums) {
+        <span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; results = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;();
+        <span class="fn">backtrackPermute</span>(nums, <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;(), <span class="kw">new</span> <span class="tp">boolean</span>[nums.length], results);
+        <span class="kw">return</span> results;
+    }
+
+    <span class="kw">private</span> <span class="tp">void</span> <span class="fn">backtrackPermute</span>(<span class="tp">int</span>[] nums, <span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt; current,
+                                   <span class="tp">boolean</span>[] used, <span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; results) {
+        <span class="cm">// Base case: permutation complete</span>
+        <span class="kw">if</span> (current.<span class="fn">size</span>() == nums.length) {
+            results.<span class="fn">add</span>(<span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;(current));
+            <span class="kw">return</span>;
+        }
+
+        <span class="kw">for</span> (<span class="tp">int</span> i = <span class="nm">0</span>; i &lt; nums.length; i++) {
+            <span class="kw">if</span> (used[i]) <span class="kw">continue</span>;  <span class="cm">// Skip used elements</span>
+
+            current.<span class="fn">add</span>(nums[i]);        <span class="cm">// CHOOSE</span>
+            used[i] = <span class="kw">true</span>;
+            <span class="fn">backtrackPermute</span>(nums, current, used, results);  <span class="cm">// EXPLORE</span>
+            current.<span class="fn">remove</span>(current.<span class="fn">size</span>() - <span class="nm">1</span>);  <span class="cm">// UNCHOOSE</span>
+            used[i] = <span class="kw">false</span>;
+        }
+    }
+}</pre>
+      </div>
+    </div>
+
+    <div class="when">
+      <div class="when-t">⚡ WHEN TO USE BACKTRACKING</div>
+      <ul>
+        <li>Finding all possible solutions (permutations, combinations, subsets)</li>
+        <li>Constraint satisfaction problems (N-Queens, Sudoku)</li>
+        <li>Searching decision trees where you need to explore all paths</li>
+        <li>When you need to "try" something and potentially undo it</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-top">
+    <div class="icon icon-sky">🔄</div>
+    <div class="card-meta">
+      <div class="card-label">PATTERN</div>
+      <div class="card-name">Permutations Pattern</div>
+      <div class="card-tag">All possible orderings</div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">Permutations.java</div>
+        <div class="code-lang">java</div>
+      </div>
+      <div class="code">
+<pre><span class="cm">// Permutations: Order matters, use all elements</span>
+<span class="kw">public</span> <span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; <span class="fn">permute</span>(<span class="tp">int</span>[] nums) {
+    <span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; result = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;();
+    <span class="fn">backtrack</span>(nums, <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;(), result);
+    <span class="kw">return</span> result;
+}
+
+<span class="kw">private</span> <span class="tp">void</span> <span class="fn">backtrack</span>(<span class="tp">int</span>[] nums, <span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt; current, <span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; result) {
+    <span class="kw">if</span> (current.<span class="fn">size</span>() == nums.length) {
+        result.<span class="fn">add</span>(<span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;(current));
+        <span class="kw">return</span>;
+    }
+
+    <span class="kw">for</span> (<span class="tp">int</span> num : nums) {
+        <span class="kw">if</span> (current.<span class="fn">contains</span>(num)) <span class="kw">continue</span>;  <span class="cm">// Skip if already used</span>
+        current.<span class="fn">add</span>(num);                     <span class="cm">// Choose</span>
+        <span class="fn">backtrack</span>(nums, current, result);     <span class="cm">// Explore</span>
+        current.<span class="fn">remove</span>(current.<span class="fn">size</span>() - <span class="nm">1</span>);   <span class="cm">// Unchoose</span>
+    }
+}
+
+<span class="cm">// With Duplicates: [1,1,2] → [[1,1,2], [1,2,1], [2,1,1]]</span>
+<span class="kw">public</span> <span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; <span class="fn">permuteUnique</span>(<span class="tp">int</span>[] nums) {
+    <span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; result = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;();
+    <span class="tp">Arrays</span>.<span class="fn">sort</span>(nums);  <span class="cm">// Sort to handle duplicates</span>
+    <span class="fn">backtrackUnique</span>(nums, <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;(), <span class="kw">new</span> <span class="tp">boolean</span>[nums.length], result);
+    <span class="kw">return</span> result;
+}
+
+<span class="kw">private</span> <span class="tp">void</span> <span class="fn">backtrackUnique</span>(<span class="tp">int</span>[] nums, <span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt; current,
+                             <span class="tp">boolean</span>[] used, <span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; result) {
+    <span class="kw">if</span> (current.<span class="fn">size</span>() == nums.length) {
+        result.<span class="fn">add</span>(<span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;(current));
+        <span class="kw">return</span>;
+    }
+
+    <span class="kw">for</span> (<span class="tp">int</span> i = <span class="nm">0</span>; i &lt; nums.length; i++) {
+        <span class="kw">if</span> (used[i]) <span class="kw">continue</span>;
+        <span class="cm">// Skip duplicates: if current num = previous num and previous not used</span>
+        <span class="kw">if</span> (i &gt; <span class="nm">0</span> && nums[i] == nums[i<span class="nm">-1</span>] && !used[i<span class="nm">-1</span>]) <span class="kw">continue</span>;
+
+        current.<span class="fn">add</span>(nums[i]);
+        used[i] = <span class="kw">true</span>;
+        <span class="fn">backtrackUnique</span>(nums, current, used, result);
+        current.<span class="fn">remove</span>(current.<span class="fn">size</span>() - <span class="nm">1</span>);
+        used[i] = <span class="kw">false</span>;
+    }
+}</pre>
+      </div>
+    </div>
+
+    <div class="tip">
+      <b>💡 KEY INSIGHT</b>
+      <ul>
+        <li><code>contains()</code> check is O(n), use boolean[] for O(1) lookup</li>
+        <li>For duplicates: sort first, skip if <code>nums[i] == nums[i-1] && !used[i-1]</code></li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-top">
+    <div class="icon icon-teal">🎲</div>
+    <div class="card-meta">
+      <div class="card-label">PATTERN</div>
+      <div class="card-name">Combinations & Subsets Pattern</div>
+      <div class="card-tag">Order doesn't matter, varying sizes</div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">CombinationsSubsets.java</div>
+        <div class="code-lang">java</div>
+      </div>
+      <div class="code">
+<pre><span class="cm">// Subsets: All possible subsets (power set)</span>
+<span class="cm">// [1,2,3] → [[], [1], [2], [3], [1,2], [1,3], [2,3], [1,2,3]]</span>
+<span class="kw">public</span> <span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; <span class="fn">subsets</span>(<span class="tp">int</span>[] nums) {
+    <span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; result = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;();
+    <span class="fn">backtrackSubsets</span>(nums, <span class="nm">0</span>, <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;(), result);
+    <span class="kw">return</span> result;
+}
+
+<span class="kw">private</span> <span class="tp">void</span> <span class="fn">backtrackSubsets</span>(<span class="tp">int</span>[] nums, <span class="tp">int</span> start,
+                              <span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt; current, <span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; result) {
+    result.<span class="fn">add</span>(<span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;(current));  <span class="cm">// Add at every level</span>
+
+    <span class="kw">for</span> (<span class="tp">int</span> i = start; i &lt; nums.length; i++) {
+        current.<span class="fn">add</span>(nums[i]);                      <span class="cm">// Choose</span>
+        <span class="fn">backtrackSubsets</span>(nums, i + <span class="nm">1</span>, current, result);  <span class="cm">// Explore (i+1 to avoid reuse)</span>
+        current.<span class="fn">remove</span>(current.<span class="fn">size</span>() - <span class="nm">1</span>);        <span class="cm">// Unchoose</span>
+    }
+}
+
+<span class="cm">// Combinations: Choose k elements from n</span>
+<span class="cm">// C(4, 2) → [[1,2], [1,3], [1,4], [2,3], [2,4], [3,4]]</span>
+<span class="kw">public</span> <span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; <span class="fn">combine</span>(<span class="tp">int</span> n, <span class="tp">int</span> k) {
+    <span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; result = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;();
+    <span class="fn">backtrackCombine</span>(n, k, <span class="nm">1</span>, <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;(), result);
+    <span class="kw">return</span> result;
+}
+
+<span class="kw">private</span> <span class="tp">void</span> <span class="fn">backtrackCombine</span>(<span class="tp">int</span> n, <span class="tp">int</span> k, <span class="tp">int</span> start,
+                              <span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt; current, <span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; result) {
+    <span class="kw">if</span> (current.<span class="fn">size</span>() == k) {  <span class="cm">// Found k elements</span>
+        result.<span class="fn">add</span>(<span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;(current));
+        <span class="kw">return</span>;
+    }
+
+    <span class="kw">for</span> (<span class="tp">int</span> i = start; i &lt;= n; i++) {
+        current.<span class="fn">add</span>(i);
+        <span class="fn">backtrackCombine</span>(n, k, i + <span class="nm">1</span>, current, result);  <span class="cm">// Start from i+1</span>
+        current.<span class="fn">remove</span>(current.<span class="fn">size</span>() - <span class="nm">1</span>);
+    }
+}
+
+<span class="cm">// Combination Sum: Elements can be reused</span>
+<span class="cm">// [2,3,6,7], target=7 → [[2,2,3], [7]]</span>
+<span class="kw">public</span> <span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; <span class="fn">combinationSum</span>(<span class="tp">int</span>[] candidates, <span class="tp">int</span> target) {
+    <span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; result = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;();
+    <span class="tp">Arrays</span>.<span class="fn">sort</span>(candidates);
+    <span class="fn">backtrackComboSum</span>(candidates, target, <span class="nm">0</span>, <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;(), result);
+    <span class="kw">return</span> result;
+}
+
+<span class="kw">private</span> <span class="tp">void</span> <span class="fn">backtrackComboSum</span>(<span class="tp">int</span>[] candidates, <span class="tp">int</span> target, <span class="tp">int</span> start,
+                               <span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt; current, <span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; result) {
+    <span class="kw">if</span> (target == <span class="nm">0</span>) {
+        result.<span class="fn">add</span>(<span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;(current));
+        <span class="kw">return</span>;
+    }
+    <span class="kw">if</span> (target &lt; <span class="nm">0</span>) <span class="kw">return</span>;  <span class="cm">// Exceeded target</span>
+
+    <span class="kw">for</span> (<span class="tp">int</span> i = start; i &lt; candidates.length; i++) {
+        current.<span class="fn">add</span>(candidates[i]);
+        <span class="fn">backtrackComboSum</span>(candidates, target - candidates[i], i, current, result);  <span class="cm">// i not i+1 (reuse)</span>
+        current.<span class="fn">remove</span>(current.<span class="fn">size</span>() - <span class="nm">1</span>);
+    }
+}</pre>
+      </div>
+    </div>
+
+    <div class="note">
+      <b>🎯 PATTERN DIFFERENCES</b>
+      <ul>
+        <li><b>Permutations</b>: All elements, order matters → use <code>contains()</code> or <code>used[]</code></li>
+        <li><b>Combinations</b>: k elements, order doesn't matter → use <code>start</code> index</li>
+        <li><b>Subsets</b>: All sizes, order doesn't matter → add at every level</li>
+        <li><b>Combination Sum</b>: Reuse allowed → pass <code>i</code> not <code>i+1</code></li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-top">
+    <div class="icon icon-gold">👸</div>
+    <div class="card-meta">
+      <div class="card-label">PROBLEM</div>
+      <div class="card-name">N-Queens Pattern</div>
+      <div class="card-tag">Constraint satisfaction with validation</div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">NQueens.java</div>
+        <div class="code-lang">java</div>
+      </div>
+      <div class="code">
+<pre><span class="kw">public</span> <span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="tp">String</span>&gt;&gt; <span class="fn">solveNQueens</span>(<span class="tp">int</span> n) {
+    <span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="tp">String</span>&gt;&gt; result = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;();
+    <span class="tp">char</span>[][] board = <span class="kw">new</span> <span class="tp">char</span>[n][n];
+    <span class="kw">for</span> (<span class="tp">char</span>[] row : board) <span class="tp">Arrays</span>.<span class="fn">fill</span>(row, <span class="st">'.'</span>);
+    <span class="fn">backtrack</span>(board, <span class="nm">0</span>, result);
+    <span class="kw">return</span> result;
+}
+
+<span class="kw">private</span> <span class="tp">void</span> <span class="fn">backtrack</span>(<span class="tp">char</span>[][] board, <span class="tp">int</span> row, <span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="tp">String</span>&gt;&gt; result) {
+    <span class="kw">if</span> (row == board.length) {  <span class="cm">// Placed all queens</span>
+        result.<span class="fn">add</span>(<span class="fn">construct</span>(board));
+        <span class="kw">return</span>;
+    }
+
+    <span class="kw">for</span> (<span class="tp">int</span> col = <span class="nm">0</span>; col &lt; board.length; col++) {
+        <span class="kw">if</span> (!<span class="fn">isValid</span>(board, row, col)) <span class="kw">continue</span>;  <span class="cm">// Check constraints</span>
+
+        board[row][col] = <span class="st">'Q'</span>;              <span class="cm">// Choose</span>
+        <span class="fn">backtrack</span>(board, row + <span class="nm">1</span>, result);  <span class="cm">// Explore next row</span>
+        board[row][col] = <span class="st">'.'</span>;              <span class="cm">// Unchoose</span>
+    }
+}
+
+<span class="kw">private</span> <span class="tp">boolean</span> <span class="fn">isValid</span>(<span class="tp">char</span>[][] board, <span class="tp">int</span> row, <span class="tp">int</span> col) {
+    <span class="cm">// Check column</span>
+    <span class="kw">for</span> (<span class="tp">int</span> i = <span class="nm">0</span>; i &lt; row; i++) {
+        <span class="kw">if</span> (board[i][col] == <span class="st">'Q'</span>) <span class="kw">return</span> <span class="kw">false</span>;
+    }
+
+    <span class="cm">// Check upper-left diagonal</span>
+    <span class="kw">for</span> (<span class="tp">int</span> i = row - <span class="nm">1</span>, j = col - <span class="nm">1</span>; i &gt;= <span class="nm">0</span> && j &gt;= <span class="nm">0</span>; i--, j--) {
+        <span class="kw">if</span> (board[i][j] == <span class="st">'Q'</span>) <span class="kw">return</span> <span class="kw">false</span>;
+    }
+
+    <span class="cm">// Check upper-right diagonal</span>
+    <span class="kw">for</span> (<span class="tp">int</span> i = row - <span class="nm">1</span>, j = col + <span class="nm">1</span>; i &gt;= <span class="nm">0</span> && j &lt; board.length; i--, j++) {
+        <span class="kw">if</span> (board[i][j] == <span class="st">'Q'</span>) <span class="kw">return</span> <span class="kw">false</span>;
+    }
+
+    <span class="kw">return</span> <span class="kw">true</span>;
+}
+
+<span class="kw">private</span> <span class="tp">List</span>&lt;<span class="tp">String</span>&gt; <span class="fn">construct</span>(<span class="tp">char</span>[][] board) {
+    <span class="tp">List</span>&lt;<span class="tp">String</span>&gt; result = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;();
+    <span class="kw">for</span> (<span class="tp">char</span>[] row : board) {
+        result.<span class="fn">add</span>(<span class="kw">new</span> <span class="tp">String</span>(row));
+    }
+    <span class="kw">return</span> result;
+}</pre>
+      </div>
+    </div>
+
+    <div class="tip">
+      <b>💡 OPTIMIZATION</b>
+      <ul>
+        <li>Use sets to track occupied columns and diagonals: <code>Set&lt;Integer&gt; cols, diag1, diag2</code></li>
+        <li>Diagonal formula: upper-left = <code>row - col</code>, upper-right = <code>row + col</code></li>
+        <li>This reduces validation from O(n) to O(1)</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-top">
+    <div class="icon icon-pink">💡</div>
+    <div class="card-meta">
+      <div class="card-label">PRACTICE</div>
+      <div class="card-name">Backtracking Problems</div>
+      <div class="card-tag">Master the choose-explore-unchoose pattern</div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <div class="note">
+      <b>PERMUTATIONS & COMBINATIONS</b>
+      <div class="lc-list">
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#46</span>
+          <span class="lc-name">Permutations ⭐⭐⭐</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#47</span>
+          <span class="lc-name">Permutations II (with duplicates) ⭐⭐⭐</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#78</span>
+          <span class="lc-name">Subsets ⭐⭐⭐</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#90</span>
+          <span class="lc-name">Subsets II (with duplicates) ⭐⭐</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#77</span>
+          <span class="lc-name">Combinations ⭐⭐⭐</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#39</span>
+          <span class="lc-name">Combination Sum ⭐⭐⭐</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#40</span>
+          <span class="lc-name">Combination Sum II ⭐⭐</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="note">
+      <b>CONSTRAINT SATISFACTION</b>
+      <div class="lc-list">
+        <div class="lc-item">
+          <span class="lc-badge lc-hard">HARD</span>
+          <span class="lc-num">#51</span>
+          <span class="lc-name">N-Queens ⭐⭐⭐</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-hard">HARD</span>
+          <span class="lc-num">#52</span>
+          <span class="lc-name">N-Queens II ⭐⭐</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-hard">HARD</span>
+          <span class="lc-num">#37</span>
+          <span class="lc-name">Sudoku Solver ⭐⭐⭐</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#79</span>
+          <span class="lc-name">Word Search ⭐⭐⭐</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-hard">HARD</span>
+          <span class="lc-num">#212</span>
+          <span class="lc-name">Word Search II ⭐⭐</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="note">
+      <b>ADVANCED BACKTRACKING</b>
+      <div class="lc-list">
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#131</span>
+          <span class="lc-name">Palindrome Partitioning ⭐⭐⭐</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#93</span>
+          <span class="lc-name">Restore IP Addresses ⭐⭐</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#22</span>
+          <span class="lc-name">Generate Parentheses ⭐⭐⭐</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#17</span>
+          <span class="lc-name">Letter Combinations of Phone Number ⭐⭐</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</div>
+
+<!-- SECTION 3: STRING PROBLEMS -->
+<div id="sec-3" class="section">
+
+<div class="card">
+  <div class="card-top">
+    <div class="icon icon-coral">📝</div>
+    <div class="card-meta">
+      <div class="card-label">PATTERN</div>
+      <div class="card-name">String Permutations</div>
+      <div class="card-tag">Generate all possible arrangements</div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">StringPermutations.java</div>
+        <div class="code-lang">java</div>
+      </div>
+      <div class="code">
+<pre><span class="cm">// Generate all permutations of a string</span>
+<span class="kw">public</span> <span class="tp">List</span>&lt;<span class="tp">String</span>&gt; <span class="fn">permutations</span>(<span class="tp">String</span> s) {
+    <span class="tp">List</span>&lt;<span class="tp">String</span>&gt; result = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;();
+    <span class="fn">backtrack</span>(s.<span class="fn">toCharArray</span>(), <span class="nm">0</span>, result);
+    <span class="kw">return</span> result;
+}
+
+<span class="cm">// Method 1: Swap-based (in-place)</span>
+<span class="kw">private</span> <span class="tp">void</span> <span class="fn">backtrack</span>(<span class="tp">char</span>[] chars, <span class="tp">int</span> index, <span class="tp">List</span>&lt;<span class="tp">String</span>&gt; result) {
+    <span class="kw">if</span> (index == chars.length) {
+        result.<span class="fn">add</span>(<span class="kw">new</span> <span class="tp">String</span>(chars));
+        <span class="kw">return</span>;
+    }
+
+    <span class="kw">for</span> (<span class="tp">int</span> i = index; i &lt; chars.length; i++) {
+        <span class="fn">swap</span>(chars, index, i);              <span class="cm">// Choose</span>
+        <span class="fn">backtrack</span>(chars, index + <span class="nm">1</span>, result); <span class="cm">// Explore</span>
+        <span class="fn">swap</span>(chars, index, i);              <span class="cm">// Unchoose (backtrack)</span>
+    }
+}
+
+<span class="cm">// Method 2: StringBuilder-based (clearer)</span>
+<span class="kw">private</span> <span class="tp">void</span> <span class="fn">backtrackWithSB</span>(<span class="tp">String</span> s, <span class="tp">StringBuilder</span> current,
+                             <span class="tp">boolean</span>[] used, <span class="tp">List</span>&lt;<span class="tp">String</span>&gt; result) {
+    <span class="kw">if</span> (current.<span class="fn">length</span>() == s.<span class="fn">length</span>()) {
+        result.<span class="fn">add</span>(current.<span class="fn">toString</span>());
+        <span class="kw">return</span>;
+    }
+
+    <span class="kw">for</span> (<span class="tp">int</span> i = <span class="nm">0</span>; i &lt; s.<span class="fn">length</span>(); i++) {
+        <span class="kw">if</span> (used[i]) <span class="kw">continue</span>;
+
+        current.<span class="fn">append</span>(s.<span class="fn">charAt</span>(i));
+        used[i] = <span class="kw">true</span>;
+        <span class="fn">backtrackWithSB</span>(s, current, used, result);
+        current.<span class="fn">deleteCharAt</span>(current.<span class="fn">length</span>() - <span class="nm">1</span>);
+        used[i] = <span class="kw">false</span>;
+    }
+}
+
+<span class="cm">// With duplicates: "AAB" → ["AAB", "ABA", "BAA"]</span>
+<span class="kw">public</span> <span class="tp">List</span>&lt;<span class="tp">String</span>&gt; <span class="fn">permuteUnique</span>(<span class="tp">String</span> s) {
+    <span class="tp">List</span>&lt;<span class="tp">String</span>&gt; result = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;();
+    <span class="tp">char</span>[] chars = s.<span class="fn">toCharArray</span>();
+    <span class="tp">Arrays</span>.<span class="fn">sort</span>(chars);  <span class="cm">// Sort to group duplicates</span>
+    <span class="fn">backtrackUnique</span>(chars, <span class="kw">new</span> <span class="tp">StringBuilder</span>(), <span class="kw">new</span> <span class="tp">boolean</span>[chars.length], result);
+    <span class="kw">return</span> result;
+}
+
+<span class="kw">private</span> <span class="tp">void</span> <span class="fn">backtrackUnique</span>(<span class="tp">char</span>[] chars, <span class="tp">StringBuilder</span> current,
+                             <span class="tp">boolean</span>[] used, <span class="tp">List</span>&lt;<span class="tp">String</span>&gt; result) {
+    <span class="kw">if</span> (current.<span class="fn">length</span>() == chars.length) {
+        result.<span class="fn">add</span>(current.<span class="fn">toString</span>());
+        <span class="kw">return</span>;
+    }
+
+    <span class="kw">for</span> (<span class="tp">int</span> i = <span class="nm">0</span>; i &lt; chars.length; i++) {
+        <span class="kw">if</span> (used[i]) <span class="kw">continue</span>;
+        <span class="cm">// Skip duplicates: if current == previous and previous not used</span>
+        <span class="kw">if</span> (i &gt; <span class="nm">0</span> && chars[i] == chars[i<span class="nm">-1</span>] && !used[i<span class="nm">-1</span>]) <span class="kw">continue</span>;
+
+        current.<span class="fn">append</span>(chars[i]);
+        used[i] = <span class="kw">true</span>;
+        <span class="fn">backtrackUnique</span>(chars, current, used, result);
+        current.<span class="fn">deleteCharAt</span>(current.<span class="fn">length</span>() - <span class="nm">1</span>);
+        used[i] = <span class="kw">false</span>;
+    }
+}</pre>
+      </div>
+    </div>
+
+    <div class="tip">
+      <b>💡 STRING MANIPULATION TIPS</b>
+      <ul>
+        <li>Use <code>StringBuilder</code> for building strings (mutable, efficient)</li>
+        <li>Swap-based approach is O(1) space but modifies input</li>
+        <li>Always sort first when handling duplicates</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-top">
+    <div class="icon icon-sky">🔤</div>
+    <div class="card-meta">
+      <div class="card-label">PATTERN</div>
+      <div class="card-name">Palindrome Problems</div>
+      <div class="card-tag">Substring checking and partitioning</div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">PalindromePartitioning.java</div>
+        <div class="code-lang">java</div>
+      </div>
+      <div class="code">
+<pre><span class="cm">// Partition string into all palindromic substrings</span>
+<span class="cm">// "aab" → [["a","a","b"], ["aa","b"]]</span>
+<span class="kw">public</span> <span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="tp">String</span>&gt;&gt; <span class="fn">partition</span>(<span class="tp">String</span> s) {
+    <span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="tp">String</span>&gt;&gt; result = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;();
+    <span class="fn">backtrack</span>(s, <span class="nm">0</span>, <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;(), result);
+    <span class="kw">return</span> result;
+}
+
+<span class="kw">private</span> <span class="tp">void</span> <span class="fn">backtrack</span>(<span class="tp">String</span> s, <span class="tp">int</span> start, <span class="tp">List</span>&lt;<span class="tp">String</span>&gt; current,
+                      <span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="tp">String</span>&gt;&gt; result) {
+    <span class="kw">if</span> (start == s.<span class="fn">length</span>()) {
+        result.<span class="fn">add</span>(<span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;(current));
+        <span class="kw">return</span>;
+    }
+
+    <span class="kw">for</span> (<span class="tp">int</span> end = start + <span class="nm">1</span>; end &lt;= s.<span class="fn">length</span>(); end++) {
+        <span class="tp">String</span> substring = s.<span class="fn">substring</span>(start, end);
+        <span class="kw">if</span> (<span class="fn">isPalindrome</span>(substring)) {
+            current.<span class="fn">add</span>(substring);              <span class="cm">// Choose</span>
+            <span class="fn">backtrack</span>(s, end, current, result);  <span class="cm">// Explore</span>
+            current.<span class="fn">remove</span>(current.<span class="fn">size</span>() - <span class="nm">1</span>);  <span class="cm">// Unchoose</span>
+        }
+    }
+}
+
+<span class="kw">private</span> <span class="tp">boolean</span> <span class="fn">isPalindrome</span>(<span class="tp">String</span> s) {
+    <span class="tp">int</span> left = <span class="nm">0</span>, right = s.<span class="fn">length</span>() - <span class="nm">1</span>;
+    <span class="kw">while</span> (left &lt; right) {
+        <span class="kw">if</span> (s.<span class="fn">charAt</span>(left++) != s.<span class="fn">charAt</span>(right--)) {
+            <span class="kw">return</span> <span class="kw">false</span>;
+        }
+    }
+    <span class="kw">return</span> <span class="kw">true</span>;
+}
+
+<span class="cm">// OPTIMIZATION: Pre-compute palindrome table with DP</span>
+<span class="kw">private</span> <span class="tp">boolean</span>[][] <span class="fn">computePalindromeTable</span>(<span class="tp">String</span> s) {
+    <span class="tp">int</span> n = s.<span class="fn">length</span>();
+    <span class="tp">boolean</span>[][] dp = <span class="kw">new</span> <span class="tp">boolean</span>[n][n];
+
+    <span class="cm">// Single characters are palindromes</span>
+    <span class="kw">for</span> (<span class="tp">int</span> i = <span class="nm">0</span>; i &lt; n; i++) {
+        dp[i][i] = <span class="kw">true</span>;
+    }
+
+    <span class="cm">// Check for length 2</span>
+    <span class="kw">for</span> (<span class="tp">int</span> i = <span class="nm">0</span>; i &lt; n - <span class="nm">1</span>; i++) {
+        <span class="kw">if</span> (s.<span class="fn">charAt</span>(i) == s.<span class="fn">charAt</span>(i + <span class="nm">1</span>)) {
+            dp[i][i + <span class="nm">1</span>] = <span class="kw">true</span>;
+        }
+    }
+
+    <span class="cm">// Check for lengths 3+</span>
+    <span class="kw">for</span> (<span class="tp">int</span> len = <span class="nm">3</span>; len &lt;= n; len++) {
+        <span class="kw">for</span> (<span class="tp">int</span> i = <span class="nm">0</span>; i &lt;= n - len; i++) {
+            <span class="tp">int</span> j = i + len - <span class="nm">1</span>;
+            <span class="kw">if</span> (s.<span class="fn">charAt</span>(i) == s.<span class="fn">charAt</span>(j) && dp[i + <span class="nm">1</span>][j - <span class="nm">1</span>]) {
+                dp[i][j] = <span class="kw">true</span>;
+            }
+        }
+    }
+
+    <span class="kw">return</span> dp;
+}</pre>
+      </div>
+    </div>
+
+    <div class="note">
+      <b>🎯 PALINDROME PATTERNS</b>
+      <ul>
+        <li><b>Two Pointer</b>: Expand from center or shrink from edges</li>
+        <li><b>DP Table</b>: Pre-compute O(n²) for O(1) lookup</li>
+        <li><b>Recursion</b>: <code>isPalindrome(s) = (s[0] == s[n-1]) && isPalindrome(s[1..n-2])</code></li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-top">
+    <div class="icon icon-teal">✂️</div>
+    <div class="card-meta">
+      <div class="card-label">PATTERN</div>
+      <div class="card-name">Substring Generation</div>
+      <div class="card-tag">All substrings and subsequences</div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">SubstringGeneration.java</div>
+        <div class="code-lang">java</div>
+      </div>
+      <div class="code">
+<pre><span class="cm">// All substrings: Contiguous sequences</span>
+<span class="cm">// "abc" → ["a", "ab", "abc", "b", "bc", "c"]</span>
+<span class="kw">public</span> <span class="tp">List</span>&lt;<span class="tp">String</span>&gt; <span class="fn">allSubstrings</span>(<span class="tp">String</span> s) {
+    <span class="tp">List</span>&lt;<span class="tp">String</span>&gt; result = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;();
+    <span class="kw">for</span> (<span class="tp">int</span> i = <span class="nm">0</span>; i &lt; s.<span class="fn">length</span>(); i++) {
+        <span class="kw">for</span> (<span class="tp">int</span> j = i + <span class="nm">1</span>; j &lt;= s.<span class="fn">length</span>(); j++) {
+            result.<span class="fn">add</span>(s.<span class="fn">substring</span>(i, j));
+        }
+    }
+    <span class="kw">return</span> result;  <span class="cm">// O(n²) substrings, O(n³) time with substring creation</span>
+}
+
+<span class="cm">// All subsequences: Pick or skip each character (order preserved)</span>
+<span class="cm">// "abc" → ["", "a", "b", "c", "ab", "ac", "bc", "abc"]</span>
+<span class="kw">public</span> <span class="tp">List</span>&lt;<span class="tp">String</span>&gt; <span class="fn">allSubsequences</span>(<span class="tp">String</span> s) {
+    <span class="tp">List</span>&lt;<span class="tp">String</span>&gt; result = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;();
+    <span class="fn">backtrack</span>(s, <span class="nm">0</span>, <span class="kw">new</span> <span class="tp">StringBuilder</span>(), result);
+    <span class="kw">return</span> result;
+}
+
+<span class="kw">private</span> <span class="tp">void</span> <span class="fn">backtrack</span>(<span class="tp">String</span> s, <span class="tp">int</span> index, <span class="tp">StringBuilder</span> current,
+                      <span class="tp">List</span>&lt;<span class="tp">String</span>&gt; result) {
+    <span class="kw">if</span> (index == s.<span class="fn">length</span>()) {
+        result.<span class="fn">add</span>(current.<span class="fn">toString</span>());
+        <span class="kw">return</span>;
+    }
+
+    <span class="cm">// Choice 1: Include current character</span>
+    current.<span class="fn">append</span>(s.<span class="fn">charAt</span>(index));
+    <span class="fn">backtrack</span>(s, index + <span class="nm">1</span>, current, result);
+    current.<span class="fn">deleteCharAt</span>(current.<span class="fn">length</span>() - <span class="nm">1</span>);
+
+    <span class="cm">// Choice 2: Exclude current character</span>
+    <span class="fn">backtrack</span>(s, index + <span class="nm">1</span>, current, result);
+}
+
+<span class="cm">// Letter Case Permutations: "a1b2" → ["a1b2","a1B2","A1b2","A1B2"]</span>
+<span class="kw">public</span> <span class="tp">List</span>&lt;<span class="tp">String</span>&gt; <span class="fn">letterCasePermutation</span>(<span class="tp">String</span> s) {
+    <span class="tp">List</span>&lt;<span class="tp">String</span>&gt; result = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;();
+    <span class="fn">backtrackCase</span>(s.<span class="fn">toCharArray</span>(), <span class="nm">0</span>, result);
+    <span class="kw">return</span> result;
+}
+
+<span class="kw">private</span> <span class="tp">void</span> <span class="fn">backtrackCase</span>(<span class="tp">char</span>[] chars, <span class="tp">int</span> index, <span class="tp">List</span>&lt;<span class="tp">String</span>&gt; result) {
+    <span class="kw">if</span> (index == chars.length) {
+        result.<span class="fn">add</span>(<span class="kw">new</span> <span class="tp">String</span>(chars));
+        <span class="kw">return</span>;
+    }
+
+    <span class="fn">backtrackCase</span>(chars, index + <span class="nm">1</span>, result);  <span class="cm">// Keep current case</span>
+
+    <span class="kw">if</span> (<span class="tp">Character</span>.<span class="fn">isLetter</span>(chars[index])) {
+        chars[index] ^= (<span class="nm">1</span> &lt;&lt; <span class="nm">5</span>);  <span class="cm">// Toggle case (XOR trick)</span>
+        <span class="fn">backtrackCase</span>(chars, index + <span class="nm">1</span>, result);
+        chars[index] ^= (<span class="nm">1</span> &lt;&lt; <span class="nm">5</span>);  <span class="cm">// Restore</span>
+    }
+}</pre>
+      </div>
+    </div>
+
+    <div class="tip">
+      <b>💡 SUBSTRING VS SUBSEQUENCE</b>
+      <ul>
+        <li><b>Substring</b>: Contiguous, O(n²) count, use nested loops</li>
+        <li><b>Subsequence</b>: Can skip chars, O(2ⁿ) count, use recursion</li>
+        <li>XOR trick for case toggle: <code>c ^= (1 &lt;&lt; 5)</code> or <code>c ^= 32</code></li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-top">
+    <div class="icon icon-violet">💡</div>
+    <div class="card-meta">
+      <div class="card-label">PRACTICE</div>
+      <div class="card-name">String Recursion Problems</div>
+      <div class="card-tag">Master string manipulation with recursion</div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <div class="note">
+      <b>STRING PERMUTATIONS & SUBSETS</b>
+      <div class="lc-list">
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#784</span>
+          <span class="lc-name">Letter Case Permutation ⭐⭐⭐</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#22</span>
+          <span class="lc-name">Generate Parentheses ⭐⭐⭐</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#17</span>
+          <span class="lc-name">Letter Combinations of a Phone Number ⭐⭐⭐</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#131</span>
+          <span class="lc-name">Palindrome Partitioning ⭐⭐⭐</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="note">
+      <b>STRING MATCHING & PATTERNS</b>
+      <div class="lc-list">
+        <div class="lc-item">
+          <span class="lc-badge lc-hard">HARD</span>
+          <span class="lc-num">#44</span>
+          <span class="lc-name">Wildcard Matching ⭐⭐</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-hard">HARD</span>
+          <span class="lc-num">#10</span>
+          <span class="lc-name">Regular Expression Matching ⭐⭐⭐</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#93</span>
+          <span class="lc-name">Restore IP Addresses ⭐⭐</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#241</span>
+          <span class="lc-name">Different Ways to Add Parentheses ⭐⭐</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="note">
+      <b>ADVANCED STRING RECURSION</b>
+      <div class="lc-list">
+        <div class="lc-item">
+          <span class="lc-badge lc-hard">HARD</span>
+          <span class="lc-num">#87</span>
+          <span class="lc-name">Scramble String ⭐</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#91</span>
+          <span class="lc-name">Decode Ways ⭐⭐⭐</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#394</span>
+          <span class="lc-name">Decode String ⭐⭐</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</div>
+
+<!-- SECTION 4: ARRAY PROBLEMS -->
+<div id="sec-4" class="section">
+
+<div class="card">
+  <div class="card-top">
+    <div class="icon icon-orange">🎯</div>
+    <div class="card-meta">
+      <div class="card-label">PATTERN</div>
+      <div class="card-name">Array Subsets & Partitions</div>
+      <div class="card-tag">Divide arrays into groups</div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">ArraySubsets.java</div>
+        <div class="code-lang">java</div>
+      </div>
+      <div class="code">
+<pre><span class="cm">// Generate all subsets of an array</span>
+<span class="kw">public</span> <span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; <span class="fn">subsets</span>(<span class="tp">int</span>[] nums) {
+    <span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; result = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;();
+    <span class="fn">backtrack</span>(nums, <span class="nm">0</span>, <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;(), result);
+    <span class="kw">return</span> result;
+}
+
+<span class="kw">private</span> <span class="tp">void</span> <span class="fn">backtrack</span>(<span class="tp">int</span>[] nums, <span class="tp">int</span> start, <span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt; current,
+                      <span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; result) {
+    result.<span class="fn">add</span>(<span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;(current));  <span class="cm">// Add at every level</span>
+
+    <span class="kw">for</span> (<span class="tp">int</span> i = start; i &lt; nums.length; i++) {
+        current.<span class="fn">add</span>(nums[i]);
+        <span class="fn">backtrack</span>(nums, i + <span class="nm">1</span>, current, result);
+        current.<span class="fn">remove</span>(current.<span class="fn">size</span>() - <span class="nm">1</span>);
+    }
+}
+
+<span class="cm">// Partition array into k equal sum subsets</span>
+<span class="cm">// [4,3,2,3,5,2,1], k=4 → true (can partition into 4 subsets of sum 5)</span>
+<span class="kw">public</span> <span class="tp">boolean</span> <span class="fn">canPartitionKSubsets</span>(<span class="tp">int</span>[] nums, <span class="tp">int</span> k) {
+    <span class="tp">int</span> sum = <span class="nm">0</span>;
+    <span class="kw">for</span> (<span class="tp">int</span> num : nums) sum += num;
+    <span class="kw">if</span> (sum % k != <span class="nm">0</span>) <span class="kw">return</span> <span class="kw">false</span>;  <span class="cm">// Can't divide evenly</span>
+
+    <span class="tp">int</span> target = sum / k;
+    <span class="tp">Arrays</span>.<span class="fn">sort</span>(nums);
+    <span class="fn">reverse</span>(nums);  <span class="cm">// Start with largest (pruning optimization)</span>
+
+    <span class="kw">return</span> <span class="fn">backtrack</span>(nums, <span class="kw">new</span> <span class="tp">int</span>[k], <span class="nm">0</span>, target);
+}
+
+<span class="kw">private</span> <span class="tp">boolean</span> <span class="fn">backtrack</span>(<span class="tp">int</span>[] nums, <span class="tp">int</span>[] buckets, <span class="tp">int</span> index, <span class="tp">int</span> target) {
+    <span class="kw">if</span> (index == nums.length) {
+        <span class="cm">// Check if all buckets equal target</span>
+        <span class="kw">for</span> (<span class="tp">int</span> bucket : buckets) {
+            <span class="kw">if</span> (bucket != target) <span class="kw">return</span> <span class="kw">false</span>;
+        }
+        <span class="kw">return</span> <span class="kw">true</span>;
+    }
+
+    <span class="kw">for</span> (<span class="tp">int</span> i = <span class="nm">0</span>; i &lt; buckets.length; i++) {
+        <span class="cm">// Pruning: skip if adding exceeds target</span>
+        <span class="kw">if</span> (buckets[i] + nums[index] &gt; target) <span class="kw">continue</span>;
+
+        buckets[i] += nums[index];  <span class="cm">// Choose</span>
+        <span class="kw">if</span> (<span class="fn">backtrack</span>(nums, buckets, index + <span class="nm">1</span>, target)) <span class="kw">return</span> <span class="kw">true</span>;  <span class="cm">// Explore</span>
+        buckets[i] -= nums[index];  <span class="cm">// Unchoose</span>
+
+        <span class="cm">// Pruning: if bucket was empty and failed, skip other empty buckets</span>
+        <span class="kw">if</span> (buckets[i] == <span class="nm">0</span>) <span class="kw">break</span>;
+    }
+
+    <span class="kw">return</span> <span class="kw">false</span>;
+}
+
+<span class="cm">// Partition Equal Subset Sum: [1,5,11,5] → true ([1,5,5] and [11])</span>
+<span class="kw">public</span> <span class="tp">boolean</span> <span class="fn">canPartition</span>(<span class="tp">int</span>[] nums) {
+    <span class="tp">int</span> sum = <span class="nm">0</span>;
+    <span class="kw">for</span> (<span class="tp">int</span> num : nums) sum += num;
+    <span class="kw">if</span> (sum % <span class="nm">2</span> != <span class="nm">0</span>) <span class="kw">return</span> <span class="kw">false</span>;  <span class="cm">// Odd sum can't be split equally</span>
+
+    <span class="kw">return</span> <span class="fn">backtrack</span>(nums, <span class="nm">0</span>, <span class="nm">0</span>, sum / <span class="nm">2</span>);
+}
+
+<span class="kw">private</span> <span class="tp">boolean</span> <span class="fn">backtrack</span>(<span class="tp">int</span>[] nums, <span class="tp">int</span> index, <span class="tp">int</span> currentSum, <span class="tp">int</span> target) {
+    <span class="kw">if</span> (currentSum == target) <span class="kw">return</span> <span class="kw">true</span>;
+    <span class="kw">if</span> (index == nums.length || currentSum &gt; target) <span class="kw">return</span> <span class="kw">false</span>;
+
+    <span class="cm">// Include current number</span>
+    <span class="kw">if</span> (<span class="fn">backtrack</span>(nums, index + <span class="nm">1</span>, currentSum + nums[index], target)) {
+        <span class="kw">return</span> <span class="kw">true</span>;
+    }
+
+    <span class="cm">// Exclude current number</span>
+    <span class="kw">return</span> <span class="fn">backtrack</span>(nums, index + <span class="nm">1</span>, currentSum, target);
+}</pre>
+      </div>
+    </div>
+
+    <div class="warn">
+      <span class="warn-t">⚠️ PERFORMANCE PITFALLS</span>
+      <ul>
+        <li>Sorting and starting with largest elements prunes search space</li>
+        <li>Skip empty buckets after failure (all empty buckets are equivalent)</li>
+        <li>Use DP memoization for overlapping subproblems</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-top">
+    <div class="icon icon-mint">🔢</div>
+    <div class="card-meta">
+      <div class="card-label">PATTERN</div>
+      <div class="card-name">Number Generation Problems</div>
+      <div class="card-tag">Generate valid numbers with constraints</div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">NumberGeneration.java</div>
+        <div class="code-lang">java</div>
+      </div>
+      <div class="code">
+<pre><span class="cm">// Generate all valid IP addresses from string</span>
+<span class="cm">// "25525511135" → ["255.255.11.135", "255.255.111.35"]</span>
+<span class="kw">public</span> <span class="tp">List</span>&lt;<span class="tp">String</span>&gt; <span class="fn">restoreIpAddresses</span>(<span class="tp">String</span> s) {
+    <span class="tp">List</span>&lt;<span class="tp">String</span>&gt; result = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;();
+    <span class="fn">backtrack</span>(s, <span class="nm">0</span>, <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;(), result);
+    <span class="kw">return</span> result;
+}
+
+<span class="kw">private</span> <span class="tp">void</span> <span class="fn">backtrack</span>(<span class="tp">String</span> s, <span class="tp">int</span> start, <span class="tp">List</span>&lt;<span class="tp">String</span>&gt; parts,
+                      <span class="tp">List</span>&lt;<span class="tp">String</span>&gt; result) {
+    <span class="kw">if</span> (parts.<span class="fn">size</span>() == <span class="nm">4</span>) {
+        <span class="kw">if</span> (start == s.<span class="fn">length</span>()) {  <span class="cm">// Used all characters</span>
+            result.<span class="fn">add</span>(<span class="tp">String</span>.<span class="fn">join</span>(<span class="st">"."</span>, parts));
+        }
+        <span class="kw">return</span>;
+    }
+
+    <span class="cm">// Try 1, 2, or 3 digits for current part</span>
+    <span class="kw">for</span> (<span class="tp">int</span> len = <span class="nm">1</span>; len &lt;= <span class="nm">3</span> && start + len &lt;= s.<span class="fn">length</span>(); len++) {
+        <span class="tp">String</span> part = s.<span class="fn">substring</span>(start, start + len);
+
+        <span class="cm">// Validate: no leading zeros (except "0"), value &lt;= 255</span>
+        <span class="kw">if</span> ((part.<span class="fn">startsWith</span>(<span class="st">"0"</span>) && part.<span class="fn">length</span>() &gt; <span class="nm">1</span>) ||
+            <span class="tp">Integer</span>.<span class="fn">parseInt</span>(part) &gt; <span class="nm">255</span>) {
+            <span class="kw">continue</span>;
+        }
+
+        parts.<span class="fn">add</span>(part);
+        <span class="fn">backtrack</span>(s, start + len, parts, result);
+        parts.<span class="fn">remove</span>(parts.<span class="fn">size</span>() - <span class="nm">1</span>);
+    }
+}
+
+<span class="cm">// Generate all numbers with unique digits: n=2 → [10..99] excluding 11,22..</span>
+<span class="kw">public</span> <span class="tp">int</span> <span class="fn">countNumbersWithUniqueDigits</span>(<span class="tp">int</span> n) {
+    <span class="kw">if</span> (n == <span class="nm">0</span>) <span class="kw">return</span> <span class="nm">1</span>;
+    <span class="tp">int</span> result = <span class="nm">10</span>;  <span class="cm">// n=1: [0..9]</span>
+    <span class="tp">int</span> uniqueDigits = <span class="nm">9</span>;
+    <span class="tp">int</span> availableDigits = <span class="nm">9</span>;
+
+    <span class="kw">for</span> (<span class="tp">int</span> i = <span class="nm">2</span>; i &lt;= n && availableDigits &gt; <span class="nm">0</span>; i++) {
+        uniqueDigits *= availableDigits;
+        result += uniqueDigits;
+        availableDigits--;
+    }
+
+    <span class="kw">return</span> result;
+}
+
+<span class="cm">// Generate combinations that sum to target with digit constraints</span>
+<span class="kw">public</span> <span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; <span class="fn">combinationSum3</span>(<span class="tp">int</span> k, <span class="tp">int</span> n) {
+    <span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; result = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;();
+    <span class="fn">backtrack</span>(k, n, <span class="nm">1</span>, <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;(), result);
+    <span class="kw">return</span> result;
+}
+
+<span class="kw">private</span> <span class="tp">void</span> <span class="fn">backtrack</span>(<span class="tp">int</span> k, <span class="tp">int</span> n, <span class="tp">int</span> start, <span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt; current,
+                      <span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; result) {
+    <span class="kw">if</span> (current.<span class="fn">size</span>() == k && n == <span class="nm">0</span>) {
+        result.<span class="fn">add</span>(<span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;(current));
+        <span class="kw">return</span>;
+    }
+    <span class="kw">if</span> (current.<span class="fn">size</span>() == k || n &lt; <span class="nm">0</span>) <span class="kw">return</span>;  <span class="cm">// Invalid</span>
+
+    <span class="kw">for</span> (<span class="tp">int</span> i = start; i &lt;= <span class="nm">9</span>; i++) {
+        current.<span class="fn">add</span>(i);
+        <span class="fn">backtrack</span>(k, n - i, i + <span class="nm">1</span>, current, result);
+        current.<span class="fn">remove</span>(current.<span class="fn">size</span>() - <span class="nm">1</span>);
+    }
+}</pre>
+      </div>
+    </div>
+
+    <div class="tip">
+      <b>💡 VALIDATION PATTERNS</b>
+      <ul>
+        <li><b>IP Addresses</b>: Check leading zeros, range [0-255], 4 parts</li>
+        <li><b>Unique Digits</b>: Combinatorics - 9 choices for first digit, then 9, 8, 7...</li>
+        <li><b>Sum Constraints</b>: Track remaining sum, prune when exceeded</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-top">
+    <div class="icon icon-gold">💡</div>
+    <div class="card-meta">
+      <div class="card-label">PRACTICE</div>
+      <div class="card-name">Array Recursion Problems</div>
+      <div class="card-tag">Master array manipulation with recursion</div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <div class="note">
+      <b>SUBSETS & PARTITIONS</b>
+      <div class="lc-list">
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#78</span>
+          <span class="lc-name">Subsets ⭐⭐⭐</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#90</span>
+          <span class="lc-name">Subsets II ⭐⭐</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#416</span>
+          <span class="lc-name">Partition Equal Subset Sum ⭐⭐⭐</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-hard">HARD</span>
+          <span class="lc-num">#698</span>
+          <span class="lc-name">Partition to K Equal Sum Subsets ⭐⭐</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="note">
+      <b>NUMBER GENERATION</b>
+      <div class="lc-list">
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#93</span>
+          <span class="lc-name">Restore IP Addresses ⭐⭐⭐</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#216</span>
+          <span class="lc-name">Combination Sum III ⭐⭐</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#357</span>
+          <span class="lc-name">Count Numbers with Unique Digits ⭐⭐</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="note">
+      <b>ARRAY MANIPULATION</b>
+      <div class="lc-list">
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#289</span>
+          <span class="lc-name">Game of Life ⭐⭐</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#667</span>
+          <span class="lc-name">Beautiful Arrangement II ⭐</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-hard">HARD</span>
+          <span class="lc-num">#1255</span>
+          <span class="lc-name">Maximum Score Words Formed by Letters ⭐</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</div>
+
+<!-- SECTION 5: TREE RECURSION -->
+<div id="sec-5" class="section">
+
+<div class="card">
+  <div class="card-top">
+    <div class="icon icon-teal">🌳</div>
+    <div class="card-meta">
+      <div class="card-label">PATTERN</div>
+      <div class="card-name">Tree DFS Patterns</div>
+      <div class="card-tag">Traverse and process tree nodes</div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">TreeTraversals.java</div>
+        <div class="code-lang">java</div>
+      </div>
+      <div class="code">
+<pre><span class="kw">class</span> TreeNode {
+    <span class="tp">int</span> val;
+    TreeNode left, right;
+    <span class="fn">TreeNode</span>(<span class="tp">int</span> val) { <span class="kw">this</span>.val = val; }
+}
+
+<span class="cm">// PREORDER: Root → Left → Right</span>
+<span class="kw">public</span> <span class="tp">void</span> <span class="fn">preorder</span>(TreeNode root) {
+    <span class="kw">if</span> (root == <span class="kw">null</span>) <span class="kw">return</span>;
+    <span class="fn">process</span>(root);              <span class="cm">// Process root first</span>
+    <span class="fn">preorder</span>(root.left);        <span class="cm">// Then left subtree</span>
+    <span class="fn">preorder</span>(root.right);       <span class="cm">// Then right subtree</span>
+}
+
+<span class="cm">// INORDER: Left → Root → Right (gives sorted order for BST)</span>
+<span class="kw">public</span> <span class="tp">void</span> <span class="fn">inorder</span>(TreeNode root) {
+    <span class="kw">if</span> (root == <span class="kw">null</span>) <span class="kw">return</span>;
+    <span class="fn">inorder</span>(root.left);         <span class="cm">// Left subtree first</span>
+    <span class="fn">process</span>(root);              <span class="cm">// Then process root</span>
+    <span class="fn">inorder</span>(root.right);        <span class="cm">// Then right subtree</span>
+}
+
+<span class="cm">// POSTORDER: Left → Right → Root</span>
+<span class="kw">public</span> <span class="tp">void</span> <span class="fn">postorder</span>(TreeNode root) {
+    <span class="kw">if</span> (root == <span class="kw">null</span>) <span class="kw">return</span>;
+    <span class="fn">postorder</span>(root.left);       <span class="cm">// Left subtree first</span>
+    <span class="fn">postorder</span>(root.right);      <span class="cm">// Then right subtree</span>
+    <span class="fn">process</span>(root);              <span class="cm">// Process root last</span>
+}
+
+<span class="cm">// Max Depth: Height of tree</span>
+<span class="kw">public</span> <span class="tp">int</span> <span class="fn">maxDepth</span>(TreeNode root) {
+    <span class="kw">if</span> (root == <span class="kw">null</span>) <span class="kw">return</span> <span class="nm">0</span>;
+    <span class="tp">int</span> leftDepth = <span class="fn">maxDepth</span>(root.left);
+    <span class="tp">int</span> rightDepth = <span class="fn">maxDepth</span>(root.right);
+    <span class="kw">return</span> <span class="nm">1</span> + <span class="tp">Math</span>.<span class="fn">max</span>(leftDepth, rightDepth);
+}
+
+<span class="cm">// Is Balanced: Left and right subtrees differ by at most 1</span>
+<span class="kw">public</span> <span class="tp">boolean</span> <span class="fn">isBalanced</span>(TreeNode root) {
+    <span class="kw">return</span> <span class="fn">checkHeight</span>(root) != <span class="nm">-1</span>;
+}
+
+<span class="kw">private</span> <span class="tp">int</span> <span class="fn">checkHeight</span>(TreeNode node) {
+    <span class="kw">if</span> (node == <span class="kw">null</span>) <span class="kw">return</span> <span class="nm">0</span>;
+
+    <span class="tp">int</span> leftHeight = <span class="fn">checkHeight</span>(node.left);
+    <span class="kw">if</span> (leftHeight == <span class="nm">-1</span>) <span class="kw">return</span> <span class="nm">-1</span>;  <span class="cm">// Left subtree unbalanced</span>
+
+    <span class="tp">int</span> rightHeight = <span class="fn">checkHeight</span>(node.right);
+    <span class="kw">if</span> (rightHeight == <span class="nm">-1</span>) <span class="kw">return</span> <span class="nm">-1</span>;  <span class="cm">// Right subtree unbalanced</span>
+
+    <span class="kw">if</span> (<span class="tp">Math</span>.<span class="fn">abs</span>(leftHeight - rightHeight) &gt; <span class="nm">1</span>) <span class="kw">return</span> <span class="nm">-1</span>;  <span class="cm">// Current node unbalanced</span>
+
+    <span class="kw">return</span> <span class="nm">1</span> + <span class="tp">Math</span>.<span class="fn">max</span>(leftHeight, rightHeight);
+}</pre>
+      </div>
+    </div>
+
+    <div class="note">
+      <b>🎯 TRAVERSAL CHEAT SHEET</b>
+      <ul>
+        <li><b>Preorder</b>: Root first - good for copying tree, prefix expressions</li>
+        <li><b>Inorder</b>: Left→Root→Right - BST gives sorted order</li>
+        <li><b>Postorder</b>: Children first - good for deletion, postfix expressions</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-top">
+    <div class="icon icon-sky">🛤️</div>
+    <div class="card-meta">
+      <div class="card-label">PATTERN</div>
+      <div class="card-name">Path Sum Problems</div>
+      <div class="card-tag">Find paths with specific properties</div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">PathSum.java</div>
+        <div class="code-lang">java</div>
+      </div>
+      <div class="code">
+<pre><span class="cm">// Path Sum I: Does root-to-leaf path exist with given sum?</span>
+<span class="kw">public</span> <span class="tp">boolean</span> <span class="fn">hasPathSum</span>(TreeNode root, <span class="tp">int</span> targetSum) {
+    <span class="kw">if</span> (root == <span class="kw">null</span>) <span class="kw">return</span> <span class="kw">false</span>;
+    <span class="kw">if</span> (root.left == <span class="kw">null</span> && root.right == <span class="kw">null</span>) {  <span class="cm">// Leaf node</span>
+        <span class="kw">return</span> targetSum == root.val;
+    }
+    <span class="tp">int</span> remaining = targetSum - root.val;
+    <span class="kw">return</span> <span class="fn">hasPathSum</span>(root.left, remaining) || <span class="fn">hasPathSum</span>(root.right, remaining);
+}
+
+<span class="cm">// Path Sum II: Find all root-to-leaf paths with given sum</span>
+<span class="kw">public</span> <span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; <span class="fn">pathSum</span>(TreeNode root, <span class="tp">int</span> targetSum) {
+    <span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; result = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;();
+    <span class="fn">backtrack</span>(root, targetSum, <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;(), result);
+    <span class="kw">return</span> result;
+}
+
+<span class="kw">private</span> <span class="tp">void</span> <span class="fn">backtrack</span>(TreeNode node, <span class="tp">int</span> remaining, <span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt; path,
+                      <span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt;&gt; result) {
+    <span class="kw">if</span> (node == <span class="kw">null</span>) <span class="kw">return</span>;
+
+    path.<span class="fn">add</span>(node.val);  <span class="cm">// Choose</span>
+
+    <span class="kw">if</span> (node.left == <span class="kw">null</span> && node.right == <span class="kw">null</span> && remaining == node.val) {
+        result.<span class="fn">add</span>(<span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;(path));  <span class="cm">// Found valid path</span>
+    }
+
+    <span class="fn">backtrack</span>(node.left, remaining - node.val, path, result);   <span class="cm">// Explore</span>
+    <span class="fn">backtrack</span>(node.right, remaining - node.val, path, result);
+
+    path.<span class="fn">remove</span>(path.<span class="fn">size</span>() - <span class="nm">1</span>);  <span class="cm">// Unchoose</span>
+}
+
+<span class="cm">// Path Sum III: Count all paths (not just root-to-leaf) with given sum</span>
+<span class="kw">public</span> <span class="tp">int</span> <span class="fn">pathSumIII</span>(TreeNode root, <span class="tp">int</span> targetSum) {
+    <span class="kw">if</span> (root == <span class="kw">null</span>) <span class="kw">return</span> <span class="nm">0</span>;
+
+    <span class="cm">// Paths starting from current node</span>
+    <span class="tp">int</span> pathsFromRoot = <span class="fn">countPaths</span>(root, targetSum);
+
+    <span class="cm">// Paths in left and right subtrees</span>
+    <span class="tp">int</span> pathsInLeft = <span class="fn">pathSumIII</span>(root.left, targetSum);
+    <span class="tp">int</span> pathsInRight = <span class="fn">pathSumIII</span>(root.right, targetSum);
+
+    <span class="kw">return</span> pathsFromRoot + pathsInLeft + pathsInRight;
+}
+
+<span class="kw">private</span> <span class="tp">int</span> <span class="fn">countPaths</span>(TreeNode node, <span class="tp">long</span> remaining) {
+    <span class="kw">if</span> (node == <span class="kw">null</span>) <span class="kw">return</span> <span class="nm">0</span>;
+
+    <span class="tp">int</span> count = (remaining == node.val) ? <span class="nm">1</span> : <span class="nm">0</span>;
+    count += <span class="fn">countPaths</span>(node.left, remaining - node.val);
+    count += <span class="fn">countPaths</span>(node.right, remaining - node.val);
+
+    <span class="kw">return</span> count;
+}
+
+<span class="cm">// Binary Tree Maximum Path Sum (can start/end anywhere)</span>
+<span class="kw">private</span> <span class="tp">int</span> maxSum = <span class="tp">Integer</span>.MIN_VALUE;
+
+<span class="kw">public</span> <span class="tp">int</span> <span class="fn">maxPathSum</span>(TreeNode root) {
+    <span class="fn">maxPathSumHelper</span>(root);
+    <span class="kw">return</span> maxSum;
+}
+
+<span class="kw">private</span> <span class="tp">int</span> <span class="fn">maxPathSumHelper</span>(TreeNode node) {
+    <span class="kw">if</span> (node == <span class="kw">null</span>) <span class="kw">return</span> <span class="nm">0</span>;
+
+    <span class="cm">// Get max path sum from left and right (ignore negative)</span>
+    <span class="tp">int</span> left = <span class="tp">Math</span>.<span class="fn">max</span>(<span class="nm">0</span>, <span class="fn">maxPathSumHelper</span>(node.left));
+    <span class="tp">int</span> right = <span class="tp">Math</span>.<span class="fn">max</span>(<span class="nm">0</span>, <span class="fn">maxPathSumHelper</span>(node.right));
+
+    <span class="cm">// Update global max (path through current node)</span>
+    maxSum = <span class="tp">Math</span>.<span class="fn">max</span>(maxSum, left + right + node.val);
+
+    <span class="cm">// Return max single path for parent</span>
+    <span class="kw">return</span> node.val + <span class="tp">Math</span>.<span class="fn">max</span>(left, right);
+}</pre>
+      </div>
+    </div>
+
+    <div class="tip">
+      <b>💡 PATH SUM PATTERNS</b>
+      <ul>
+        <li><b>Root-to-Leaf</b>: Check for leaf (<code>left==null && right==null</code>)</li>
+        <li><b>Any Path</b>: Try starting from each node, use prefix sum or recursion</li>
+        <li><b>Max Path</b>: Update global variable, return single path to parent</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-top">
+    <div class="icon icon-violet">🔄</div>
+    <div class="card-meta">
+      <div class="card-label">PATTERN</div>
+      <div class="card-name">Tree Construction</div>
+      <div class="card-tag">Build trees from traversals</div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">TreeConstruction.java</div>
+        <div class="code-lang">java</div>
+      </div>
+      <div class="code">
+<pre><span class="cm">// Build tree from Preorder and Inorder</span>
+<span class="cm">// Preorder: [3,9,20,15,7], Inorder: [9,3,15,20,7]</span>
+<span class="kw">public</span> TreeNode <span class="fn">buildTree</span>(<span class="tp">int</span>[] preorder, <span class="tp">int</span>[] inorder) {
+    <span class="tp">Map</span>&lt;<span class="tp">Integer</span>, <span class="tp">Integer</span>&gt; inorderMap = <span class="kw">new</span> <span class="tp">HashMap</span>&lt;&gt;();
+    <span class="kw">for</span> (<span class="tp">int</span> i = <span class="nm">0</span>; i &lt; inorder.length; i++) {
+        inorderMap.<span class="fn">put</span>(inorder[i], i);  <span class="cm">// Value → Index mapping</span>
+    }
+    <span class="kw">return</span> <span class="fn">build</span>(preorder, <span class="nm">0</span>, preorder.length - <span class="nm">1</span>, inorder, <span class="nm">0</span>, inorder.length - <span class="nm">1</span>, inorderMap);
+}
+
+<span class="kw">private</span> TreeNode <span class="fn">build</span>(<span class="tp">int</span>[] preorder, <span class="tp">int</span> preStart, <span class="tp">int</span> preEnd,
+                      <span class="tp">int</span>[] inorder, <span class="tp">int</span> inStart, <span class="tp">int</span> inEnd,
+                      <span class="tp">Map</span>&lt;<span class="tp">Integer</span>, <span class="tp">Integer</span>&gt; inorderMap) {
+    <span class="kw">if</span> (preStart &gt; preEnd || inStart &gt; inEnd) <span class="kw">return</span> <span class="kw">null</span>;
+
+    <span class="tp">int</span> rootVal = preorder[preStart];  <span class="cm">// First element in preorder is root</span>
+    TreeNode root = <span class="kw">new</span> <span class="fn">TreeNode</span>(rootVal);
+
+    <span class="tp">int</span> rootIndex = inorderMap.<span class="fn">get</span>(rootVal);  <span class="cm">// Find root in inorder</span>
+    <span class="tp">int</span> leftSize = rootIndex - inStart;  <span class="cm">// Size of left subtree</span>
+
+    <span class="cm">// Build left subtree</span>
+    root.left = <span class="fn">build</span>(preorder, preStart + <span class="nm">1</span>, preStart + leftSize,
+                     inorder, inStart, rootIndex - <span class="nm">1</span>, inorderMap);
+
+    <span class="cm">// Build right subtree</span>
+    root.right = <span class="fn">build</span>(preorder, preStart + leftSize + <span class="nm">1</span>, preEnd,
+                      inorder, rootIndex + <span class="nm">1</span>, inEnd, inorderMap);
+
+    <span class="kw">return</span> root;
+}
+
+<span class="cm">// Build tree from Inorder and Postorder</span>
+<span class="cm">// Inorder: [9,3,15,20,7], Postorder: [9,15,7,20,3]</span>
+<span class="kw">public</span> TreeNode <span class="fn">buildTree2</span>(<span class="tp">int</span>[] inorder, <span class="tp">int</span>[] postorder) {
+    <span class="tp">Map</span>&lt;<span class="tp">Integer</span>, <span class="tp">Integer</span>&gt; inorderMap = <span class="kw">new</span> <span class="tp">HashMap</span>&lt;&gt;();
+    <span class="kw">for</span> (<span class="tp">int</span> i = <span class="nm">0</span>; i &lt; inorder.length; i++) {
+        inorderMap.<span class="fn">put</span>(inorder[i], i);
+    }
+    <span class="kw">return</span> <span class="fn">build2</span>(postorder, <span class="nm">0</span>, postorder.length - <span class="nm">1</span>, inorder, <span class="nm">0</span>, inorder.length - <span class="nm">1</span>, inorderMap);
+}
+
+<span class="kw">private</span> TreeNode <span class="fn">build2</span>(<span class="tp">int</span>[] postorder, <span class="tp">int</span> postStart, <span class="tp">int</span> postEnd,
+                       <span class="tp">int</span>[] inorder, <span class="tp">int</span> inStart, <span class="tp">int</span> inEnd,
+                       <span class="tp">Map</span>&lt;<span class="tp">Integer</span>, <span class="tp">Integer</span>&gt; inorderMap) {
+    <span class="kw">if</span> (postStart &gt; postEnd || inStart &gt; inEnd) <span class="kw">return</span> <span class="kw">null</span>;
+
+    <span class="tp">int</span> rootVal = postorder[postEnd];  <span class="cm">// Last element in postorder is root</span>
+    TreeNode root = <span class="kw">new</span> <span class="fn">TreeNode</span>(rootVal);
+
+    <span class="tp">int</span> rootIndex = inorderMap.<span class="fn">get</span>(rootVal);
+    <span class="tp">int</span> leftSize = rootIndex - inStart;
+
+    root.left = <span class="fn">build2</span>(postorder, postStart, postStart + leftSize - <span class="nm">1</span>,
+                      inorder, inStart, rootIndex - <span class="nm">1</span>, inorderMap);
+
+    root.right = <span class="fn">build2</span>(postorder, postStart + leftSize, postEnd - <span class="nm">1</span>,
+                       inorder, rootIndex + <span class="nm">1</span>, inEnd, inorderMap);
+
+    <span class="kw">return</span> root;
+}</pre>
+      </div>
+    </div>
+
+    <div class="note">
+      <b>🎯 TREE CONSTRUCTION RULES</b>
+      <ul>
+        <li><b>Preorder + Inorder</b>: First of preorder = root, split inorder at root</li>
+        <li><b>Postorder + Inorder</b>: Last of postorder = root, split inorder at root</li>
+        <li><b>Preorder + Postorder</b>: Only possible for full binary trees</li>
+        <li>Use HashMap for O(1) root lookup in inorder array</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-top">
+    <div class="icon icon-gold">💡</div>
+    <div class="card-meta">
+      <div class="card-label">PRACTICE</div>
+      <div class="card-name">Tree Recursion Problems</div>
+      <div class="card-tag">Master tree patterns with recursion</div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <div class="note">
+      <b>TREE BASICS</b>
+      <div class="lc-list">
+        <div class="lc-item">
+          <span class="lc-badge lc-easy">EASY</span>
+          <span class="lc-num">#104</span>
+          <span class="lc-name">Maximum Depth of Binary Tree ⭐⭐⭐</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-easy">EASY</span>
+          <span class="lc-num">#110</span>
+          <span class="lc-name">Balanced Binary Tree ⭐⭐⭐</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-easy">EASY</span>
+          <span class="lc-num">#100</span>
+          <span class="lc-name">Same Tree ⭐⭐</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-easy">EASY</span>
+          <span class="lc-num">#226</span>
+          <span class="lc-name">Invert Binary Tree ⭐⭐⭐</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="note">
+      <b>PATH PROBLEMS</b>
+      <div class="lc-list">
+        <div class="lc-item">
+          <span class="lc-badge lc-easy">EASY</span>
+          <span class="lc-num">#112</span>
+          <span class="lc-name">Path Sum ⭐⭐⭐</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#113</span>
+          <span class="lc-name">Path Sum II ⭐⭐⭐</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#437</span>
+          <span class="lc-name">Path Sum III ⭐⭐⭐</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-hard">HARD</span>
+          <span class="lc-num">#124</span>
+          <span class="lc-name">Binary Tree Maximum Path Sum ⭐⭐⭐</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#543</span>
+          <span class="lc-name">Diameter of Binary Tree ⭐⭐</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="note">
+      <b>TREE CONSTRUCTION</b>
+      <div class="lc-list">
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#105</span>
+          <span class="lc-name">Construct Binary Tree from Preorder and Inorder ⭐⭐⭐</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#106</span>
+          <span class="lc-name">Construct Binary Tree from Inorder and Postorder ⭐⭐</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#108</span>
+          <span class="lc-name">Convert Sorted Array to Binary Search Tree ⭐⭐</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</div>
+
+<!-- SECTION 6: MEMOIZATION -->
+<div id="sec-6" class="section">
+
+<div class="card">
+  <div class="card-top">
+    <div class="icon icon-pink">💾</div>
+    <div class="card-meta">
+      <div class="card-label">CONCEPT</div>
+      <div class="card-name">What is Memoization?</div>
+      <div class="card-tag">Cache results to avoid redundant calculations</div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <div class="scen">
+      <div class="scen-t">📌 MEMOIZATION = RECURSION + CACHING</div>
+      <ul>
+        <li>Store results of expensive function calls</li>
+        <li>Return cached result when same inputs occur again</li>
+        <li>Converts O(2ⁿ) exponential time to O(n) or O(n²) polynomial time</li>
+      </ul>
+    </div>
+
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">FibonacciComparison.java</div>
+        <div class="code-lang">java</div>
+      </div>
+      <div class="code">
+<pre><span class="cm">// WITHOUT MEMOIZATION: O(2^n) - Recalculates same values</span>
+<span class="kw">public</span> <span class="tp">int</span> <span class="fn">fibSlow</span>(<span class="tp">int</span> n) {
+    <span class="kw">if</span> (n &lt;= <span class="nm">1</span>) <span class="kw">return</span> n;
+    <span class="kw">return</span> <span class="fn">fibSlow</span>(n - <span class="nm">1</span>) + <span class="fn">fibSlow</span>(n - <span class="nm">2</span>);
+}
+<span class="cm">// fib(5) calls fib(3) twice, fib(2) three times, etc.</span>
+
+<span class="cm">// WITH MEMOIZATION: O(n) - Cache results</span>
+<span class="kw">public</span> <span class="tp">int</span> <span class="fn">fibFast</span>(<span class="tp">int</span> n) {
+    <span class="tp">int</span>[] memo = <span class="kw">new</span> <span class="tp">int</span>[n + <span class="nm">1</span>];
+    <span class="tp">Arrays</span>.<span class="fn">fill</span>(memo, <span class="nm">-1</span>);  <span class="cm">// -1 indicates not computed</span>
+    <span class="kw">return</span> <span class="fn">fibMemo</span>(n, memo);
+}
+
+<span class="kw">private</span> <span class="tp">int</span> <span class="fn">fibMemo</span>(<span class="tp">int</span> n, <span class="tp">int</span>[] memo) {
+    <span class="kw">if</span> (n &lt;= <span class="nm">1</span>) <span class="kw">return</span> n;
+    <span class="kw">if</span> (memo[n] != <span class="nm">-1</span>) <span class="kw">return</span> memo[n];  <span class="cm">// Return cached result</span>
+
+    memo[n] = <span class="fn">fibMemo</span>(n - <span class="nm">1</span>, memo) + <span class="fn">fibMemo</span>(n - <span class="nm">2</span>, memo);
+    <span class="kw">return</span> memo[n];
+}
+
+<span class="cm">// Recursion Tree Visualization:
+//
+//         fib(5)
+//        /      \
+//     fib(4)   fib(3)  ← fib(3) computed twice
+//     /   \     /   \
+//  fib(3) fib(2) ...
+//  /   \
+// fib(2) fib(1)  ← fib(2) computed 3 times
+//
+// With memoization: Compute once, cache, reuse!</span></pre>
+      </div>
+    </div>
+
+    <div class="when">
+      <div class="when-t">⚡ WHEN TO USE MEMOIZATION</div>
+      <ul>
+        <li><b>Overlapping subproblems</b>: Same calculation repeated multiple times</li>
+        <li><b>Optimal substructure</b>: Solution built from sub-solutions</li>
+        <li><b>Pure functions</b>: Same input always produces same output</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-top">
+    <div class="icon icon-teal">🎯</div>
+    <div class="card-meta">
+      <div class="card-label">PATTERN</div>
+      <div class="card-name">1D Dynamic Programming</div>
+      <div class="card-tag">Single parameter problems</div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">ClimbingStairs.java</div>
+        <div class="code-lang">java</div>
+      </div>
+      <div class="code">
+<pre><span class="cm">// Climbing Stairs: n steps, can climb 1 or 2 steps at a time</span>
+<span class="kw">public</span> <span class="tp">int</span> <span class="fn">climbStairs</span>(<span class="tp">int</span> n) {
+    <span class="tp">int</span>[] memo = <span class="kw">new</span> <span class="tp">int</span>[n + <span class="nm">1</span>];
+    <span class="tp">Arrays</span>.<span class="fn">fill</span>(memo, <span class="nm">-1</span>);
+    <span class="kw">return</span> <span class="fn">climb</span>(n, memo);
+}
+
+<span class="kw">private</span> <span class="tp">int</span> <span class="fn">climb</span>(<span class="tp">int</span> n, <span class="tp">int</span>[] memo) {
+    <span class="kw">if</span> (n &lt;= <span class="nm">2</span>) <span class="kw">return</span> n;
+    <span class="kw">if</span> (memo[n] != <span class="nm">-1</span>) <span class="kw">return</span> memo[n];
+
+    memo[n] = <span class="fn">climb</span>(n - <span class="nm">1</span>, memo) + <span class="fn">climb</span>(n - <span class="nm">2</span>, memo);
+    <span class="kw">return</span> memo[n];
+}
+
+<span class="cm">// House Robber: Max money without robbing adjacent houses</span>
+<span class="kw">public</span> <span class="tp">int</span> <span class="fn">rob</span>(<span class="tp">int</span>[] nums) {
+    <span class="tp">int</span>[] memo = <span class="kw">new</span> <span class="tp">int</span>[nums.length];
+    <span class="tp">Arrays</span>.<span class="fn">fill</span>(memo, <span class="nm">-1</span>);
+    <span class="kw">return</span> <span class="fn">robFrom</span>(nums, <span class="nm">0</span>, memo);
+}
+
+<span class="kw">private</span> <span class="tp">int</span> <span class="fn">robFrom</span>(<span class="tp">int</span>[] nums, <span class="tp">int</span> index, <span class="tp">int</span>[] memo) {
+    <span class="kw">if</span> (index &gt;= nums.length) <span class="kw">return</span> <span class="nm">0</span>;
+    <span class="kw">if</span> (memo[index] != <span class="nm">-1</span>) <span class="kw">return</span> memo[index];
+
+    <span class="cm">// Choice 1: Rob this house, skip next</span>
+    <span class="tp">int</span> robCurrent = nums[index] + <span class="fn">robFrom</span>(nums, index + <span class="nm">2</span>, memo);
+
+    <span class="cm">// Choice 2: Skip this house</span>
+    <span class="tp">int</span> skipCurrent = <span class="fn">robFrom</span>(nums, index + <span class="nm">1</span>, memo);
+
+    memo[index] = <span class="tp">Math</span>.<span class="fn">max</span>(robCurrent, skipCurrent);
+    <span class="kw">return</span> memo[index];
+}
+
+<span class="cm">// Decode Ways: "226" → ["BBF", "BZ", "VF"] = 3 ways</span>
+<span class="kw">public</span> <span class="tp">int</span> <span class="fn">numDecodings</span>(<span class="tp">String</span> s) {
+    <span class="tp">int</span>[] memo = <span class="kw">new</span> <span class="tp">int</span>[s.<span class="fn">length</span>()];
+    <span class="tp">Arrays</span>.<span class="fn">fill</span>(memo, <span class="nm">-1</span>);
+    <span class="kw">return</span> <span class="fn">decode</span>(s, <span class="nm">0</span>, memo);
+}
+
+<span class="kw">private</span> <span class="tp">int</span> <span class="fn">decode</span>(<span class="tp">String</span> s, <span class="tp">int</span> index, <span class="tp">int</span>[] memo) {
+    <span class="kw">if</span> (index == s.<span class="fn">length</span>()) <span class="kw">return</span> <span class="nm">1</span>;  <span class="cm">// Found valid decoding</span>
+    <span class="kw">if</span> (s.<span class="fn">charAt</span>(index) == <span class="st">'0'</span>) <span class="kw">return</span> <span class="nm">0</span>;  <span class="cm">// Invalid</span>
+    <span class="kw">if</span> (memo[index] != <span class="nm">-1</span>) <span class="kw">return</span> memo[index];
+
+    <span class="tp">int</span> ways = <span class="fn">decode</span>(s, index + <span class="nm">1</span>, memo);  <span class="cm">// Take 1 digit</span>
+
+    <span class="kw">if</span> (index + <span class="nm">1</span> &lt; s.<span class="fn">length</span>()) {
+        <span class="tp">int</span> twoDigit = <span class="tp">Integer</span>.<span class="fn">parseInt</span>(s.<span class="fn">substring</span>(index, index + <span class="nm">2</span>));
+        <span class="kw">if</span> (twoDigit &lt;= <span class="nm">26</span>) {
+            ways += <span class="fn">decode</span>(s, index + <span class="nm">2</span>, memo);  <span class="cm">// Take 2 digits</span>
+        }
+    }
+
+    memo[index] = ways;
+    <span class="kw">return</span> ways;
+}</pre>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-top">
+    <div class="icon icon-sky">🎲</div>
+    <div class="card-meta">
+      <div class="card-label">PATTERN</div>
+      <div class="card-name">2D Dynamic Programming</div>
+      <div class="card-tag">Two parameter problems</div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">TwoDDP.java</div>
+        <div class="code-lang">java</div>
+      </div>
+      <div class="code">
+<pre><span class="cm">// Longest Common Subsequence: "abcde" and "ace" → 3 ("ace")</span>
+<span class="kw">public</span> <span class="tp">int</span> <span class="fn">longestCommonSubsequence</span>(<span class="tp">String</span> text1, <span class="tp">String</span> text2) {
+    <span class="tp">int</span>[][] memo = <span class="kw">new</span> <span class="tp">int</span>[text1.<span class="fn">length</span>()][text2.<span class="fn">length</span>()];
+    <span class="kw">for</span> (<span class="tp">int</span>[] row : memo) <span class="tp">Arrays</span>.<span class="fn">fill</span>(row, <span class="nm">-1</span>);
+    <span class="kw">return</span> <span class="fn">lcs</span>(text1, text2, <span class="nm">0</span>, <span class="nm">0</span>, memo);
+}
+
+<span class="kw">private</span> <span class="tp">int</span> <span class="fn">lcs</span>(<span class="tp">String</span> s1, <span class="tp">String</span> s2, <span class="tp">int</span> i, <span class="tp">int</span> j, <span class="tp">int</span>[][] memo) {
+    <span class="kw">if</span> (i == s1.<span class="fn">length</span>() || j == s2.<span class="fn">length</span>()) <span class="kw">return</span> <span class="nm">0</span>;
+    <span class="kw">if</span> (memo[i][j] != <span class="nm">-1</span>) <span class="kw">return</span> memo[i][j];
+
+    <span class="kw">if</span> (s1.<span class="fn">charAt</span>(i) == s2.<span class="fn">charAt</span>(j)) {
+        <span class="cm">// Characters match: include and move both pointers</span>
+        memo[i][j] = <span class="nm">1</span> + <span class="fn">lcs</span>(s1, s2, i + <span class="nm">1</span>, j + <span class="nm">1</span>, memo);
+    } <span class="kw">else</span> {
+        <span class="cm">// Don't match: try skipping from either string</span>
+        <span class="tp">int</span> skip1 = <span class="fn">lcs</span>(s1, s2, i + <span class="nm">1</span>, j, memo);
+        <span class="tp">int</span> skip2 = <span class="fn">lcs</span>(s1, s2, i, j + <span class="nm">1</span>, memo);
+        memo[i][j] = <span class="tp">Math</span>.<span class="fn">max</span>(skip1, skip2);
+    }
+
+    <span class="kw">return</span> memo[i][j];
+}
+
+<span class="cm">// Edit Distance: Min operations to convert word1 → word2</span>
+<span class="kw">public</span> <span class="tp">int</span> <span class="fn">minDistance</span>(<span class="tp">String</span> word1, <span class="tp">String</span> word2) {
+    <span class="tp">int</span>[][] memo = <span class="kw">new</span> <span class="tp">int</span>[word1.<span class="fn">length</span>()][word2.<span class="fn">length</span>()];
+    <span class="kw">for</span> (<span class="tp">int</span>[] row : memo) <span class="tp">Arrays</span>.<span class="fn">fill</span>(row, <span class="nm">-1</span>);
+    <span class="kw">return</span> <span class="fn">editDist</span>(word1, word2, <span class="nm">0</span>, <span class="nm">0</span>, memo);
+}
+
+<span class="kw">private</span> <span class="tp">int</span> <span class="fn">editDist</span>(<span class="tp">String</span> s1, <span class="tp">String</span> s2, <span class="tp">int</span> i, <span class="tp">int</span> j, <span class="tp">int</span>[][] memo) {
+    <span class="kw">if</span> (i == s1.<span class="fn">length</span>()) <span class="kw">return</span> s2.<span class="fn">length</span>() - j;  <span class="cm">// Insert remaining</span>
+    <span class="kw">if</span> (j == s2.<span class="fn">length</span>()) <span class="kw">return</span> s1.<span class="fn">length</span>() - i;  <span class="cm">// Delete remaining</span>
+    <span class="kw">if</span> (memo[i][j] != <span class="nm">-1</span>) <span class="kw">return</span> memo[i][j];
+
+    <span class="kw">if</span> (s1.<span class="fn">charAt</span>(i) == s2.<span class="fn">charAt</span>(j)) {
+        memo[i][j] = <span class="fn">editDist</span>(s1, s2, i + <span class="nm">1</span>, j + <span class="nm">1</span>, memo);  <span class="cm">// No operation</span>
+    } <span class="kw">else</span> {
+        <span class="tp">int</span> insert = <span class="fn">editDist</span>(s1, s2, i, j + <span class="nm">1</span>, memo);
+        <span class="tp">int</span> delete = <span class="fn">editDist</span>(s1, s2, i + <span class="nm">1</span>, j, memo);
+        <span class="tp">int</span> replace = <span class="fn">editDist</span>(s1, s2, i + <span class="nm">1</span>, j + <span class="nm">1</span>, memo);
+        memo[i][j] = <span class="nm">1</span> + <span class="tp">Math</span>.<span class="fn">min</span>(insert, <span class="tp">Math</span>.<span class="fn">min</span>(delete, replace));
+    }
+
+    <span class="kw">return</span> memo[i][j];
+}
+
+<span class="cm">// Unique Paths: Grid m×n, can only move right or down</span>
+<span class="kw">public</span> <span class="tp">int</span> <span class="fn">uniquePaths</span>(<span class="tp">int</span> m, <span class="tp">int</span> n) {
+    <span class="tp">int</span>[][] memo = <span class="kw">new</span> <span class="tp">int</span>[m][n];
+    <span class="kw">return</span> <span class="fn">paths</span>(<span class="nm">0</span>, <span class="nm">0</span>, m, n, memo);
+}
+
+<span class="kw">private</span> <span class="tp">int</span> <span class="fn">paths</span>(<span class="tp">int</span> row, <span class="tp">int</span> col, <span class="tp">int</span> m, <span class="tp">int</span> n, <span class="tp">int</span>[][] memo) {
+    <span class="kw">if</span> (row == m - <span class="nm">1</span> && col == n - <span class="nm">1</span>) <span class="kw">return</span> <span class="nm">1</span>;  <span class="cm">// Reached destination</span>
+    <span class="kw">if</span> (row &gt;= m || col &gt;= n) <span class="kw">return</span> <span class="nm">0</span>;  <span class="cm">// Out of bounds</span>
+    <span class="kw">if</span> (memo[row][col] != <span class="nm">0</span>) <span class="kw">return</span> memo[row][col];
+
+    memo[row][col] = <span class="fn">paths</span>(row + <span class="nm">1</span>, col, m, n, memo) +  <span class="cm">// Move down</span>
+                     <span class="fn">paths</span>(row, col + <span class="nm">1</span>, m, n, memo);    <span class="cm">// Move right</span>
+
+    <span class="kw">return</span> memo[row][col];
+}</pre>
+      </div>
+    </div>
+
+    <div class="tip">
+      <b>💡 MEMOIZATION TIPS</b>
+      <ul>
+        <li>Use <code>int[]</code> for 1 parameter, <code>int[][]</code> for 2, <code>HashMap</code> for complex states</li>
+        <li>Initialize with -1 or use visited array to detect uncomputed states</li>
+        <li>Always check cache before computing: <code>if (memo[i] != -1) return memo[i];</code></li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-top">
+    <div class="icon icon-gold">💡</div>
+    <div class="card-meta">
+      <div class="card-label">PRACTICE</div>
+      <div class="card-name">Memoization Problems</div>
+      <div class="card-tag">DP with recursion and caching</div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <div class="note">
+      <b>1D DYNAMIC PROGRAMMING</b>
+      <div class="lc-list">
+        <div class="lc-item">
+          <span class="lc-badge lc-easy">EASY</span>
+          <span class="lc-num">#70</span>
+          <span class="lc-name">Climbing Stairs ⭐⭐⭐</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#198</span>
+          <span class="lc-name">House Robber ⭐⭐⭐</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#213</span>
+          <span class="lc-name">House Robber II ⭐⭐</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#91</span>
+          <span class="lc-name">Decode Ways ⭐⭐⭐</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#139</span>
+          <span class="lc-name">Word Break ⭐⭐⭐</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="note">
+      <b>2D DYNAMIC PROGRAMMING</b>
+      <div class="lc-list">
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#1143</span>
+          <span class="lc-name">Longest Common Subsequence ⭐⭐⭐</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-hard">HARD</span>
+          <span class="lc-num">#72</span>
+          <span class="lc-name">Edit Distance ⭐⭐⭐</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#62</span>
+          <span class="lc-name">Unique Paths ⭐⭐⭐</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#63</span>
+          <span class="lc-name">Unique Paths II ⭐⭐</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-medium">MEDIUM</span>
+          <span class="lc-num">#5</span>
+          <span class="lc-name">Longest Palindromic Substring ⭐⭐</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="note">
+      <b>ADVANCED DP</b>
+      <div class="lc-list">
+        <div class="lc-item">
+          <span class="lc-badge lc-hard">HARD</span>
+          <span class="lc-num">#312</span>
+          <span class="lc-name">Burst Balloons ⭐⭐</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-hard">HARD</span>
+          <span class="lc-num">#329</span>
+          <span class="lc-name">Longest Increasing Path in Matrix ⭐⭐</span>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge lc-hard">HARD</span>
+          <span class="lc-num">#300</span>
+          <span class="lc-name">Longest Increasing Subsequence ⭐⭐⭐</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</div>
+
+<!-- SECTION 7: CHEAT SHEET -->
+<div id="sec-7" class="section">
+
+<div class="card">
+  <div class="card-top">
+    <div class="icon icon-teal">📋</div>
+    <div class="card-meta">
+      <div class="card-label">REFERENCE</div>
+      <div class="card-name">Recursion Templates</div>
+      <div class="card-tag">Quick reference for common patterns</div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <h3 style="color:var(--teal);margin-bottom:20px;font-size:16px">📌 Basic Recursion Template</h3>
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">basic-recursion.txt</div>
+        <div class="code-lang">pseudocode</div>
+      </div>
+      <div class="code">
+<pre>FUNCTION recurse(input):
+    // BASE CASE: When to stop
+    IF base_condition:
+        RETURN base_value
+
+    // RECURSIVE CASE: Break into smaller problem
+    smaller_result = recurse(reduced_input)
+
+    // COMBINE: Process and return
+    RETURN process(smaller_result)
+
+TIME: O(?)  |  SPACE: O(?) - Call stack depth</pre>
+      </div>
+    </div>
+
+    <h3 style="color:var(--sky);margin-bottom:20px;margin-top:30px;font-size:16px">📌 Backtracking Template</h3>
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">backtracking.txt</div>
+        <div class="code-lang">pseudocode</div>
+      </div>
+      <div class="code">
+<pre>FUNCTION backtrack(state, results):
+    // BASE CASE: Found valid solution
+    IF is_valid_solution(state):
+        results.add(state.copy())
+        RETURN
+
+    // TRY all possible choices
+    FOR EACH choice IN get_choices(state):
+        // 1. CHOOSE
+        state.add(choice)
+
+        // 2. EXPLORE
+        backtrack(state, results)
+
+        // 3. UNCHOOSE (backtrack)
+        state.remove(choice)
+
+TIME: O(b^d) where b=branching, d=depth  |  SPACE: O(d)</pre>
+      </div>
+    </div>
+
+    <h3 style="color:var(--violet);margin-bottom:20px;margin-top:30px;font-size:16px">📌 Permutations Template</h3>
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">permutations.txt</div>
+        <div class="code-lang">pseudocode</div>
+      </div>
+      <div class="code">
+<pre>FUNCTION permute(nums, current, used, results):
+    // BASE: All elements used
+    IF current.size() == nums.length:
+        results.add(current.copy())
+        RETURN
+
+    FOR i = 0 TO nums.length - 1:
+        IF used[i]:
+            CONTINUE  // Skip if already in current permutation
+
+        current.add(nums[i])
+        used[i] = TRUE
+        permute(nums, current, used, results)
+        current.remove_last()
+        used[i] = FALSE
+
+⚠️ For duplicates: Sort first, skip if nums[i]==nums[i-1] && !used[i-1]
+TIME: O(n! × n)  |  SPACE: O(n)</pre>
+      </div>
+    </div>
+
+    <h3 style="color:var(--gold);margin-bottom:20px;margin-top:30px;font-size:16px">📌 Combinations/Subsets Template</h3>
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">combinations.txt</div>
+        <div class="code-lang">pseudocode</div>
+      </div>
+      <div class="code">
+<pre>FUNCTION subsets(nums, start, current, results):
+    results.add(current.copy())  // ✨ Add at EVERY level
+
+    FOR i = start TO nums.length - 1:
+        current.add(nums[i])
+        subsets(nums, i + 1, current, results)  // i+1: No reuse
+        current.remove_last()
+
+VARIATIONS:
+- Combinations (k elements): Add only when current.size() == k
+- Combination Sum (reuse allowed): Pass i instead of i+1
+- Target sum: Track remaining, prune if exceeded
+
+TIME: O(2^n)  |  SPACE: O(n)</pre>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-top">
+    <div class="icon icon-sky">🌳</div>
+    <div class="card-meta">
+      <div class="card-label">REFERENCE</div>
+      <div class="card-name">Tree Recursion Templates</div>
+      <div class="card-tag">Common tree patterns</div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <h3 style="color:var(--teal);margin-bottom:20px;font-size:16px">📌 Tree DFS Template</h3>
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">tree-dfs.txt</div>
+        <div class="code-lang">pseudocode</div>
+      </div>
+      <div class="code">
+<pre>FUNCTION dfs(node):
+    IF node IS NULL:
+        RETURN base_value
+
+    // Process current node (optional)
+    process(node.val)
+
+    // Recurse on children
+    left_result = dfs(node.left)
+    right_result = dfs(node.right)
+
+    // Combine results
+    RETURN combine(node.val, left_result, right_result)
+
+EXAMPLES:
+- Max Depth: RETURN 1 + max(left_result, right_result)
+- Sum: RETURN node.val + left_result + right_result
+- Exists: RETURN left_result || right_result
+
+TIME: O(n)  |  SPACE: O(h) where h=height</pre>
+      </div>
+    </div>
+
+    <h3 style="color:var(--sky);margin-bottom:20px;margin-top:30px;font-size:16px">📌 Path Sum Template</h3>
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">path-sum.txt</div>
+        <div class="code-lang">pseudocode</div>
+      </div>
+      <div class="code">
+<pre>FUNCTION hasPathSum(node, target):
+    IF node IS NULL:
+        RETURN FALSE
+
+    // Leaf node: Check if sum matches
+    IF node.left IS NULL AND node.right IS NULL:
+        RETURN target == node.val
+
+    remaining = target - node.val
+    RETURN hasPathSum(node.left, remaining) OR
+           hasPathSum(node.right, remaining)
+
+💡 FOR COLLECTING ALL PATHS:
+   - Use backtracking with path list
+   - Add node before recursion
+   - Remove after recursion (backtrack)
+
+TIME: O(n)  |  SPACE: O(h)</pre>
+      </div>
+    </div>
+
+    <h3 style="color:var(--violet);margin-bottom:20px;margin-top:30px;font-size:16px">📌 Tree Construction Template</h3>
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">tree-construction.txt</div>
+        <div class="code-lang">pseudocode</div>
+      </div>
+      <div class="code">
+<pre>FUNCTION buildTree(preorder, inorder):
+    // Create map for O(1) inorder lookup
+    inorder_map = create_index_map(inorder)
+
+    FUNCTION build(pre_start, pre_end, in_start, in_end):
+        IF pre_start > pre_end:
+            RETURN NULL
+
+        root_val = preorder[pre_start]  // First in preorder
+        root_index = inorder_map[root_val]
+        left_size = root_index - in_start
+
+        root = NEW TreeNode(root_val)
+        root.left = build(pre_start+1, pre_start+left_size,
+                         in_start, root_index-1)
+        root.right = build(pre_start+left_size+1, pre_end,
+                          root_index+1, in_end)
+        RETURN root
+
+    RETURN build(0, len-1, 0, len-1)
+
+⚠️ Postorder: root = postorder[post_end] (last element)
+TIME: O(n)  |  SPACE: O(n)</pre>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-top">
+    <div class="icon icon-pink">💾</div>
+    <div class="card-meta">
+      <div class="card-label">REFERENCE</div>
+      <div class="card-name">Memoization Templates</div>
+      <div class="card-tag">DP with recursion</div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <h3 style="color:var(--teal);margin-bottom:20px;font-size:16px">📌 1D Memoization Template</h3>
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">1d-memo.txt</div>
+        <div class="code-lang">pseudocode</div>
+      </div>
+      <div class="code">
+<pre>FUNCTION solve(n):
+    memo = ARRAY of size n+1, fill with -1
+
+    FUNCTION helper(i):
+        // BASE CASE
+        IF i meets base condition:
+            RETURN base_value
+
+        // CHECK CACHE
+        IF memo[i] != -1:
+            RETURN memo[i]
+
+        // COMPUTE & CACHE
+        memo[i] = compute_from_subproblems(helper(i-1), helper(i-2), ...)
+        RETURN memo[i]
+
+    RETURN helper(n)
+
+EXAMPLES: Fibonacci, Climbing Stairs, House Robber
+TIME: O(n) - Each state computed once  |  SPACE: O(n)</pre>
+      </div>
+    </div>
+
+    <h3 style="color:var(--sky);margin-bottom:20px;margin-top:30px;font-size:16px">📌 2D Memoization Template</h3>
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">2d-memo.txt</div>
+        <div class="code-lang">pseudocode</div>
+      </div>
+      <div class="code">
+<pre>FUNCTION solve(s1, s2):
+    memo = 2D ARRAY [len1][len2], fill with -1
+
+    FUNCTION helper(i, j):
+        // BASE CASES
+        IF i OR j out of bounds:
+            RETURN base_value
+
+        // CHECK CACHE
+        IF memo[i][j] != -1:
+            RETURN memo[i][j]
+
+        // COMPUTE based on choices
+        IF s1[i] == s2[j]:
+            memo[i][j] = 1 + helper(i+1, j+1)  // Match
+        ELSE:
+            memo[i][j] = MAX(helper(i+1, j), helper(i, j+1))  // Skip one
+
+        RETURN memo[i][j]
+
+    RETURN helper(0, 0)
+
+EXAMPLES: LCS, Edit Distance, Unique Paths
+TIME: O(m×n)  |  SPACE: O(m×n)</pre>
+      </div>
+    </div>
+
+    <h3 style="color:var(--gold);margin-bottom:20px;margin-top:30px;font-size:16px">📌 HashMap Memoization (Complex State)</h3>
+    <div class="code">
+      <div class="code-head">
+        <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+        <div class="code-file">hashmap-memo.txt</div>
+        <div class="code-lang">pseudocode</div>
+      </div>
+      <div class="code">
+<pre>FUNCTION solve(state):
+    memo = HASHMAP&lt;State, Result&gt;
+
+    FUNCTION helper(complex_state):
+        // BASE CASE
+        IF base_condition(complex_state):
+            RETURN base_value
+
+        // CREATE KEY (serialize state)
+        key = state.toString()  // Or custom hash
+
+        // CHECK CACHE
+        IF memo.contains(key):
+            RETURN memo[key]
+
+        // COMPUTE
+        result = compute_from_subproblems(...)
+        memo[key] = result
+        RETURN result
+
+    RETURN helper(initial_state)
+
+💡 USE WHEN: State has multiple parameters or non-integer indices
+EXAMPLES: Regex Matching, Word Break with start index + remaining string
+TIME: Depends on states  |  SPACE: O(unique states)</pre>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-top">
+    <div class="icon icon-coral">⚡</div>
+    <div class="card-meta">
+      <div class="card-label">TIPS</div>
+      <div class="card-name">Recursion Best Practices</div>
+      <div class="card-tag">Pro tips for writing clean recursive code</div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <div class="tip">
+      <b>✨ DESIGN PRINCIPLES</b>
+      <ul>
+        <li><b>Trust the recursion</b>: Assume recursive calls work correctly, focus on base case and combination logic</li>
+        <li><b>Identify subproblems</b>: Ask "How can I make this input smaller?"</li>
+        <li><b>Define clear base cases</b>: Handle all edge cases explicitly</li>
+        <li><b>State modification</b>: Pass by value for simplicity, or use backtracking for efficiency</li>
+      </ul>
+    </div>
+
+    <div class="warn">
+      <span class="warn-t">⚠️ COMMON PITFALLS</span>
+      <ul>
+        <li><b>Missing base case</b>: Leads to infinite recursion and stack overflow</li>
+        <li><b>Wrong base case logic</b>: Off-by-one errors, returning wrong value</li>
+        <li><b>Not reducing input</b>: Passing same input → infinite recursion</li>
+        <li><b>Forgetting to backtrack</b>: In permutations/combinations, must undo choices</li>
+        <li><b>Deep copy vs shallow copy</b>: Use <code>new ArrayList&lt;&gt;(current)</code> when adding to results</li>
+        <li><b>Exponential without memo</b>: O(2ⁿ) becomes O(n) with caching</li>
+      </ul>
+    </div>
+
+    <div class="note">
+      <b>💡 OPTIMIZATION TECHNIQUES</b>
+      <ul>
+        <li><b>Memoization</b>: Cache results to avoid recomputation</li>
+        <li><b>Pruning</b>: Skip branches that can't lead to solution (e.g., sum exceeded)</li>
+        <li><b>Sorting</b>: Sort input to group duplicates and enable pruning</li>
+        <li><b>Early termination</b>: Return immediately when solution found</li>
+        <li><b>Space optimization</b>: Use iterative approach if call stack too deep</li>
+      </ul>
+    </div>
+
+    <div class="scen">
+      <div class="scen-t">🎯 PATTERN RECOGNITION</div>
+      <ul>
+        <li><b>"All possible"</b> → Backtracking (permutations, combinations, subsets)</li>
+        <li><b>"Optimal"</b> → Memoization/DP (max, min, count)</li>
+        <li><b>"Tree/Graph traversal"</b> → DFS recursion</li>
+        <li><b>"Divide input"</b> → Divide and conquer (merge sort, binary search)</li>
+        <li><b>"Process children first"</b> → Postorder recursion</li>
+        <li><b>"Overlapping subproblems"</b> → Add memoization</li>
+      </ul>
+    </div>
+
+    <div class="when">
+      <div class="when-t">⏱️ TIME COMPLEXITY PATTERNS</div>
+      <ul>
+        <li><b>Linear recursion</b>: T(n) = T(n-1) + O(1) → O(n)</li>
+        <li><b>Binary recursion</b>: T(n) = 2T(n-1) + O(1) → O(2ⁿ)</li>
+        <li><b>Divide & conquer</b>: T(n) = 2T(n/2) + O(n) → O(n log n)</li>
+        <li><b>With memoization</b>: O(2ⁿ) → O(n) or O(n²)</li>
+        <li><b>Tree recursion</b>: O(n) where n = nodes</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+</div>
+
+</div>
+
+<footer>
+  <p>Master recursion through practice • <a href="https://leetcode.com">LeetCode</a> • Keep exploring! 🚀</p>
+</footer>
+
+</div>
+
+<script>
+// Hamburger Menu Toggle
+const hamburgerBtn = document.getElementById('hamburgerBtn');
+const sidebar = document.getElementById('sidebar');
+const container = document.querySelector('.container');
+const bodyElement = document.body;
+
+hamburgerBtn.addEventListener('click', () => {
+  hamburgerBtn.classList.toggle('active');
+  sidebar.classList.toggle('open');
+  // Shift body to accommodate sidebar
+  if (sidebar.classList.contains('open')) {
+    bodyElement.style.paddingLeft = '310px'; // 90px + 280px - 60px overlap
+  } else {
+    bodyElement.style.paddingLeft = '90px';
+  }
+});
+
+// Close sidebar when clicking outside
+document.addEventListener('click', (e) => {
+  if (!sidebar.contains(e.target) && !hamburgerBtn.contains(e.target)) {
+    sidebar.classList.remove('open');
+    hamburgerBtn.classList.remove('active');
+    bodyElement.style.paddingLeft = '90px';
+  }
+});
+
+// Tab and Section Management
+function showSection(index, skipScroll = false) {
+  const sections = document.querySelectorAll('.section');
+  const navSectionTitles = document.querySelectorAll('.nav-section-title');
+  const allSubsections = document.querySelectorAll('.nav-subsections');
+
+  sections.forEach((sec, i) => {
+    sec.classList.toggle('active', i === index);
+  });
+
+  navSectionTitles.forEach((title, i) => {
+    title.classList.toggle('active', i === index);
+  });
+
+  allSubsections.forEach((subsections, i) => {
+    if (i === index) {
+      subsections.classList.add('open');
+    } else {
+      subsections.classList.remove('open');
+    }
+  });
+
+  // Only scroll to top if skipScroll is false
+  if (!skipScroll) {
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }
+}
+
+// Scroll to specific card within a section
+function scrollToCard(sectionIndex, cardIndex) {
+  // First, ensure we're on the right section WITHOUT scrolling to top
+  showSection(sectionIndex, true); // Pass true to skip scroll
+
+  // Wait longer for section to be fully rendered and visible
+  setTimeout(() => {
+    const sections = document.querySelectorAll('.section');
+    const targetSection = sections[sectionIndex];
+
+    if (targetSection && targetSection.classList.contains('active')) {
+      const cards = targetSection.querySelectorAll('.card');
+
+      if (cards[cardIndex]) {
+        // Get the card's position relative to the document
+        const card = cards[cardIndex];
+        const rect = card.getBoundingClientRect();
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        const cardPosition = rect.top + scrollTop;
+
+        // Scroll with appropriate offset (hamburger button + some padding)
+        window.scrollTo({
+          top: cardPosition - 100,
+          behavior: 'auto'
+        });
+
+        // Highlight the card briefly
+        card.style.transition = 'transform 0.3s ease';
+        card.style.transform = 'scale(1.02)';
+        setTimeout(() => {
+          card.style.transform = 'scale(1)';
+        }, 500);
+      }
+    }
+  }, 400); // Increased timeout for better reliability
+}
+
+// Subsection navigation active state
+document.querySelectorAll('.nav-subsection').forEach(item => {
+  item.addEventListener('click', function() {
+    document.querySelectorAll('.nav-subsection').forEach(s => s.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+// Initialize: Mark first section as active
+document.addEventListener('DOMContentLoaded', () => {
+  showSection(0);
+});
+</script>
+
+</body>
+</html>
