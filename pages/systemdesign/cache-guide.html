@@ -631,6 +631,7 @@ footer{text-align:center;padding:4rem 2rem;color:var(--muted);}
   <a href="#problems">Problems</a>
   <a href="#tools">Tools</a>
   <a href="#simulator">Simulator</a>
+  <a href="#spring">Spring Cache</a>
 </nav>
 
 <!-- ════════ SECTION 1: WHY CACHE ════════ -->
@@ -980,7 +981,8 @@ footer{text-align:center;padding:4rem 2rem;color:var(--muted);}
 
       <p class="prose">
         <span class="prose-line"><strong>Cache-Aside</strong> (Lazy Loading) is the most common pattern — the application checks the cache first, and on a miss, fetches from DB and populates the cache.</span>
-        <span class="prose-line"><strong>Read-Through</strong> delegates cache-miss handling to the cache itself — the app always talks only to the cache layer.</span>
+        <span class="prose-line"><strong>Read-Through</strong> delegates cache-miss handling to the cache itself — the app always talks only to the cache layer. This means, Cache layer has the fallback logic to query the DB. We need to provide the fallback method to query it. Check in Spring Cache section for more details</span>
+        <span class="prose-line"><strong>Example :  cache = Caffeine.newBuilder().maximumSize(1000).build(id -> userRepository.findById(id).orElse(null));</strong></span>
         <span class="prose-line">Key difference: in cache-aside the <em>app owns the cache logic</em>; in read-through the <em>cache library owns it</em>.</span>
       </p>
 
@@ -1845,6 +1847,640 @@ redis-cli --hotkeys
       </div>
     </div>
   </div>
+</div>
+</section>
+
+<!--
+  ══════════════════════════════════════════════════════════════
+  PASTE INSTRUCTION
+  ══════════════════════════════════════════════════════════════
+  1. NAV  → add this inside <nav> after the "Tools" link:
+             <a href="#spring">Spring Cache</a>
+
+  2. SECTION → paste this entire block just before the closing
+               </main> tag (or after the #tools section).
+  ══════════════════════════════════════════════════════════════
+-->
+
+<section id="spring">
+<div class="container">
+  <div class="sec-eye">// section_11</div>
+  <h2 class="sec-title">Spring Cache Abstraction</h2>
+  <p class="sec-sub">Spring's declarative caching layer — drop annotations on your service methods, plug in any backend (Redis, Caffeine, EhCache), and never write boilerplate cache logic again.</p>
+
+  <!-- ── CARD 1 — HOW IT WORKS ── -->
+  <div class="card">
+    <div class="card-stripe cyan"></div>
+    <div class="card-header">
+      <div class="card-icon" style="background:rgba(0,212,255,0.1);">🏗</div>
+      <div class="card-meta">
+        <h2>Architecture Overview</h2>
+        <div class="sub">Three layers: annotations → CacheManager → provider (Redis / Caffeine / EhCache)</div>
+      </div>
+    </div>
+    <div class="card-body">
+
+      <!-- SVG architecture diagram -->
+      <div class="diagram-wrap">
+        <svg width="100%" viewBox="0 0 720 200" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="sca" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M2 1L8 5L2 9" fill="none" stroke="rgba(0,212,255,0.6)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </marker>
+          </defs>
+          <style>
+            .scn{fill:#0f1420;stroke:rgba(99,179,255,0.15);stroke-width:0.5;}
+            .sct{fill:#e4eaf6;font-family:'Fira Code',monospace;font-size:11px;text-anchor:middle;dominant-baseline:central;}
+            .scs{fill:#6b7a99;font-family:'Fira Code',monospace;font-size:10px;text-anchor:middle;dominant-baseline:central;}
+          </style>
+
+          <!-- Caller -->
+          <rect class="scn" x="20" y="80" width="90" height="40" rx="6" style="stroke:rgba(0,212,255,0.4);"/>
+          <text class="sct" x="65" y="100" style="fill:#5bcefa;">Caller</text>
+
+          <!-- Spring AOP Proxy -->
+          <rect class="scn" x="150" y="60" width="130" height="80" rx="6" style="stroke:rgba(255,176,32,0.45);"/>
+          <text class="sct" x="215" y="93" style="fill:#ffb020;">Spring AOP</text>
+          <text class="scs" x="215" y="113" style="fill:#c9a55a;">CacheInterceptor</text>
+
+          <!-- CacheManager -->
+          <rect class="scn" x="330" y="60" width="120" height="80" rx="6" style="stroke:rgba(139,92,246,0.45);"/>
+          <text class="sct" x="390" y="93" style="fill:#c084fc;">CacheManager</text>
+          <text class="scs" x="390" y="113" style="fill:#9d79c9;">resolves Cache</text>
+
+          <!-- Provider boxes -->
+          <rect class="scn" x="510" y="20" width="100" height="36" rx="6" style="stroke:rgba(0,229,160,0.4);"/>
+          <text class="scs" x="560" y="38" style="fill:#00e5a0;">Redis</text>
+
+          <rect class="scn" x="510" y="82" width="100" height="36" rx="6" style="stroke:rgba(0,212,255,0.3);"/>
+          <text class="scs" x="560" y="100" style="fill:#5bcefa;">Caffeine</text>
+
+          <rect class="scn" x="510" y="144" width="100" height="36" rx="6" style="stroke:rgba(255,176,32,0.3);"/>
+          <text class="scs" x="560" y="162" style="fill:#ffb020;">EhCache</text>
+
+          <!-- Arrows -->
+          <line x1="110" y1="100" x2="150" y2="100" stroke="rgba(0,212,255,0.5)" stroke-width="1.2" marker-end="url(#sca)"/>
+          <line x1="280" y1="100" x2="330" y2="100" stroke="rgba(0,212,255,0.5)" stroke-width="1.2" marker-end="url(#sca)"/>
+          <line x1="450" y1="80" x2="510" y2="38" stroke="rgba(0,212,255,0.35)" stroke-width="1" marker-end="url(#sca)"/>
+          <line x1="450" y1="100" x2="510" y2="100" stroke="rgba(0,212,255,0.35)" stroke-width="1" marker-end="url(#sca)"/>
+          <line x1="450" y1="120" x2="510" y2="162" stroke="rgba(0,212,255,0.35)" stroke-width="1" marker-end="url(#sca)"/>
+
+          <!-- Labels -->
+          <text class="scs" x="130" y="90" style="fill:#5b6a85;">proxy</text>
+          <text class="scs" x="490" y="72" style="fill:#5b6a85;">provider</text>
+        </svg>
+      </div>
+
+      <p class="prose">
+        <span class="prose-line">Spring Cache is an <strong>abstraction layer</strong> — your code never talks to Redis or Caffeine directly.</span>
+        <span class="prose-line">When you annotate a method with <code style="font-size:12px;background:#0a1020;padding:1px 6px;border-radius:3px;color:#00e5a0;">@Cacheable</code>, Spring wraps it in an AOP proxy at startup.</span>
+        <span class="prose-line">On every call, the proxy asks <code style="font-size:12px;background:#0a1020;padding:1px 6px;border-radius:3px;color:#c084fc;">CacheManager</code> for the named cache, looks up the key, and only calls your real method on a miss.</span>
+        <span class="prose-line">Swapping Redis for Caffeine is a single dependency change — zero code changes in your service layer.</span>
+      </p>
+
+      <div class="hl hl-cyan">
+        <span class="hl-label">// key insight</span>
+        Spring Cache uses <strong>AOP proxies</strong> — so <strong>self-invocation bypasses the cache entirely</strong>.
+        If <code style="font-size:12px;background:rgba(0,0,0,0.3);padding:1px 6px;border-radius:3px;">serviceA.methodA()</code> calls <code style="font-size:12px;background:rgba(0,0,0,0.3);padding:1px 6px;border-radius:3px;">this.methodB()</code> internally,
+        <code style="font-size:12px;background:rgba(0,0,0,0.3);padding:1px 6px;border-radius:3px;">@Cacheable</code> on <code style="font-size:12px;background:rgba(0,0,0,0.3);padding:1px 6px;border-radius:3px;">methodB</code> will NOT trigger.
+        Always inject the bean and call it externally, or use <code style="font-size:12px;background:rgba(0,0,0,0.3);padding:1px 6px;border-radius:3px;">@EnableAspectJAutoProxy(exposeProxy=true)</code>.
+      </div>
+    </div>
+  </div>
+
+  <!-- ── CARD 2 — SETUP ── -->
+  <div class="card">
+    <div class="card-stripe green"></div>
+    <div class="card-header">
+      <div class="card-icon" style="background:rgba(0,229,160,0.1);">⚙️</div>
+      <div class="card-meta">
+        <h2>Setup &amp; Configuration</h2>
+        <div class="sub">Maven dependencies + Java config for Redis (prod) and Caffeine (local/test)</div>
+      </div>
+    </div>
+    <div class="card-body">
+
+      <p class="prose" style="margin-bottom:0.75rem;"><span class="prose-line"><strong>Step 1 — Add dependencies</strong> (choose one backend):</span></p>
+      <div class="code">
+<span class="c">&lt;!-- pom.xml — Spring Boot starter (always required) --&gt;</span>
+<span class="k">&lt;dependency&gt;</span>
+  <span class="s">&lt;groupId&gt;</span>org.springframework.boot<span class="s">&lt;/groupId&gt;</span>
+  <span class="s">&lt;artifactId&gt;</span>spring-boot-starter-cache<span class="s">&lt;/artifactId&gt;</span>
+<span class="k">&lt;/dependency&gt;</span>
+
+<span class="c">&lt;!-- Option A — Redis (distributed, prod-grade) --&gt;</span>
+<span class="k">&lt;dependency&gt;</span>
+  <span class="s">&lt;groupId&gt;</span>org.springframework.boot<span class="s">&lt;/groupId&gt;</span>
+  <span class="s">&lt;artifactId&gt;</span>spring-boot-starter-data-redis<span class="s">&lt;/artifactId&gt;</span>
+<span class="k">&lt;/dependency&gt;</span>
+
+<span class="c">&lt;!-- Option B — Caffeine (in-process, ultra-fast, for local/test) --&gt;</span>
+<span class="k">&lt;dependency&gt;</span>
+  <span class="s">&lt;groupId&gt;</span>com.github.ben-manes.caffeine<span class="s">&lt;/groupId&gt;</span>
+  <span class="s">&lt;artifactId&gt;</span>caffeine<span class="s">&lt;/artifactId&gt;</span>
+<span class="k">&lt;/dependency&gt;</span></div>
+
+      <p class="prose" style="margin:1rem 0 0.75rem;"><span class="prose-line"><strong>Step 2 — Enable caching</strong> on your main class or any <code style="font-size:12px;background:#0a1020;padding:1px 6px;border-radius:3px;color:#00e5a0;">@Configuration</code>:</span></p>
+      <div class="code">
+<span class="k">@SpringBootApplication</span>
+<span class="k">@EnableCaching</span>  <span class="c">// ← this is all you need to activate Spring's cache AOP</span>
+<span class="k">public class</span> <span class="fn">MyApplication</span> {
+  <span class="k">public static void</span> <span class="fn">main</span>(String[] args) {
+    SpringApplication.<span class="fn">run</span>(MyApplication.class, args);
+  }
+}</div>
+
+      <p class="prose" style="margin:1rem 0 0.75rem;"><span class="prose-line"><strong>Step 3A — Redis config</strong> (application.yml):</span></p>
+      <div class="code">
+<span class="c"># application.yml</span>
+spring:
+  cache:
+    type: redis
+  data:
+    redis:
+      host: localhost
+      port: 6379
+  cache:
+    redis:
+      time-to-live: 600000   <span class="c"># global TTL = 10 minutes (ms)</span>
+      cache-null-values: false</div>
+
+      <p class="prose" style="margin:1rem 0 0.75rem;"><span class="prose-line"><strong>Step 3B — Caffeine config</strong> (for local dev or high-throughput in-process cache):</span></p>
+      <div class="code">
+<span class="c"># application.yml</span>
+spring:
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=1000,expireAfterWrite=10m
+
+<span class="c">// Or programmatically — gives per-cache TTL control</span>
+<span class="k">@Configuration</span>
+<span class="k">public class</span> <span class="fn">CacheConfig</span> {
+
+  <span class="k">@Bean</span>
+  <span class="k">public</span> CacheManager <span class="fn">caffeineCacheManager</span>() {
+    CaffeineCacheManager mgr = <span class="k">new</span> <span class="fn">CaffeineCacheManager</span>();
+    mgr.<span class="fn">setCaffeine</span>(Caffeine.newBuilder()
+        .<span class="fn">maximumSize</span>(1_000)
+        .<span class="fn">expireAfterWrite</span>(10, TimeUnit.MINUTES)
+        .<span class="fn">recordStats</span>());        <span class="c">// enables hit/miss metrics</span>
+    <span class="k">return</span> mgr;
+  }
+}</div>
+    </div>
+  </div>
+
+  <!-- ── CARD 3 — CORE ANNOTATIONS ── -->
+  <div class="card">
+    <div class="card-stripe purple"></div>
+    <div class="card-header">
+      <div class="card-icon" style="background:rgba(139,92,246,0.1);">🏷</div>
+      <div class="card-meta">
+        <h2>Core Annotations</h2>
+        <div class="sub">@Cacheable · @CachePut · @CacheEvict · @Caching — the full API</div>
+      </div>
+    </div>
+    <div class="card-body">
+
+      <table class="tbl" style="margin-bottom:1.5rem;">
+        <thead>
+          <tr><th>Annotation</th><th>Behaviour</th><th>Triggers method?</th><th>Use when</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="color:var(--green);font-family:'Fira Code',monospace;">@Cacheable</td>
+            <td>Returns cached value on hit; calls method + stores result on miss</td>
+            <td style="color:var(--green);">Only on miss</td>
+            <td>Read-heavy getters</td>
+          </tr>
+          <tr>
+            <td style="color:var(--amber);font-family:'Fira Code',monospace;">@CachePut</td>
+            <td>Always calls method AND updates the cache with the return value</td>
+            <td style="color:var(--amber);">Always</td>
+            <td>Write/update methods</td>
+          </tr>
+          <tr>
+            <td style="color:var(--red);font-family:'Fira Code',monospace;">@CacheEvict</td>
+            <td>Removes one key or all entries from the named cache</td>
+            <td style="color:var(--green);">Always</td>
+            <td>Delete methods</td>
+          </tr>
+          <tr>
+            <td style="color:var(--cyan);font-family:'Fira Code',monospace;">@Caching</td>
+            <td>Groups multiple cache annotations on a single method</td>
+            <td style="color:var(--green);">Always</td>
+            <td>Complex invalidation rules</td>
+          </tr>
+          <tr>
+            <td style="color:var(--purple);font-family:'Fira Code',monospace;">@CacheConfig</td>
+            <td>Class-level default: sets cacheName for all methods in the class</td>
+            <td>—</td>
+            <td>Avoid repeating cache name</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="code">
+<span class="k">@Service</span>
+<span class="k">@CacheConfig</span>(cacheNames = <span class="s">"products"</span>)   <span class="c">// default cache for all methods below</span>
+<span class="k">public class</span> <span class="fn">ProductService</span> {
+
+  <span class="c">// ── @Cacheable ─────────────────────────────────────────────────────</span>
+  <span class="c">// Cache key = "products::42"  (cacheName + "::" + SpEL key)</span>
+  <span class="c">// Method is SKIPPED entirely on a cache hit.</span>
+  <span class="k">@Cacheable</span>(key = <span class="s">"#id"</span>)
+  <span class="k">public</span> Product <span class="fn">getProduct</span>(<span class="k">Long</span> id) {
+    <span class="k">return</span> repo.<span class="fn">findById</span>(id).<span class="fn">orElseThrow</span>();
+  }
+
+  <span class="c">// ── @Cacheable with condition + unless ─────────────────────────────</span>
+  <span class="c">// condition: evaluated BEFORE call — skip caching if price &lt; 100</span>
+  <span class="c">// unless:    evaluated AFTER  call — don't cache null returns</span>
+  <span class="k">@Cacheable</span>(key = <span class="s">"#id"</span>,
+             condition = <span class="s">"#id > 0"</span>,
+             unless = <span class="s">"#result == null"</span>)
+  <span class="k">public</span> Product <span class="fn">getProductConditional</span>(<span class="k">Long</span> id) {
+    <span class="k">return</span> repo.<span class="fn">findById</span>(id).<span class="fn">orElse</span>(<span class="k">null</span>);
+  }
+
+  <span class="c">// ── @CachePut ──────────────────────────────────────────────────────</span>
+  <span class="c">// ALWAYS runs the method. Result is written into cache.</span>
+  <span class="c">// Use after save/update so the cache stays fresh.</span>
+  <span class="k">@CachePut</span>(key = <span class="s">"#product.id"</span>)
+  <span class="k">public</span> Product <span class="fn">updateProduct</span>(Product product) {
+    <span class="k">return</span> repo.<span class="fn">save</span>(product);
+  }
+
+  <span class="c">// ── @CacheEvict — single key ────────────────────────────────────────</span>
+  <span class="k">@CacheEvict</span>(key = <span class="s">"#id"</span>)
+  <span class="k">public void</span> <span class="fn">deleteProduct</span>(<span class="k">Long</span> id) {
+    repo.<span class="fn">deleteById</span>(id);
+  }
+
+  <span class="c">// ── @CacheEvict — nuke the entire cache ─────────────────────────────</span>
+  <span class="c">// allEntries=true: removes every key in "products" cache</span>
+  <span class="c">// beforeInvocation=true: evict even if method throws an exception</span>
+  <span class="k">@CacheEvict</span>(allEntries = <span class="k">true</span>, beforeInvocation = <span class="k">true</span>)
+  <span class="k">public void</span> <span class="fn">clearProductCache</span>() { }
+
+  <span class="c">// ── @Caching — combine multiple operations ────────────────────────</span>
+  <span class="c">// Evict from "products" cache AND "product-summary" cache simultaneously</span>
+  <span class="k">@Caching</span>(evict = {
+    <span class="k">@CacheEvict</span>(cacheNames = <span class="s">"products"</span>,        key = <span class="s">"#id"</span>),
+    <span class="k">@CacheEvict</span>(cacheNames = <span class="s">"product-summary"</span>, key = <span class="s">"#id"</span>)
+  })
+  <span class="k">public void</span> <span class="fn">onProductDeleted</span>(<span class="k">Long</span> id) {
+    repo.<span class="fn">deleteById</span>(id);
+  }
+}</div>
+    </div>
+  </div>
+
+  <!-- ── CARD 4 — SPEL KEY EXPRESSIONS ── -->
+  <div class="card">
+    <div class="card-stripe amber"></div>
+    <div class="card-header">
+      <div class="card-icon" style="background:rgba(255,176,32,0.1);">🔑</div>
+      <div class="card-meta">
+        <h2>Cache Key Design with SpEL</h2>
+        <div class="sub">Spring Expression Language — how to build precise, collision-free cache keys</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <p class="prose">
+        <span class="prose-line">By default, Spring uses <strong>all method parameters</strong> as the key (via <code style="font-size:12px;background:#0a1020;padding:1px 6px;border-radius:3px;color:#ffb020;">SimpleKeyGenerator</code>).</span>
+        <span class="prose-line">For complex scenarios, the <code style="font-size:12px;background:#0a1020;padding:1px 6px;border-radius:3px;color:#ffb020;">key</code> attribute accepts full <strong>SpEL expressions</strong>.</span>
+      </p>
+
+      <table class="tbl" style="margin:1rem 0 1.5rem;">
+        <thead><tr><th>SpEL Expression</th><th>Result</th><th>Use case</th></tr></thead>
+        <tbody>
+          <tr><td style="font-family:'Fira Code',monospace;color:var(--cyan);">"#id"</td><td>Method param named <code>id</code></td><td>Simple getter by ID</td></tr>
+          <tr><td style="font-family:'Fira Code',monospace;color:var(--cyan);">"#user.id"</td><td>Field of a param object</td><td>Entity-based key</td></tr>
+          <tr><td style="font-family:'Fira Code',monospace;color:var(--cyan);">"#p0"</td><td>First param by position</td><td>No param name available</td></tr>
+          <tr><td style="font-family:'Fira Code',monospace;color:var(--cyan);">"'prefix:' + #id"</td><td>String concat</td><td>Namespaced keys</td></tr>
+          <tr><td style="font-family:'Fira Code',monospace;color:var(--cyan);">"#result.id"</td><td>Return value field (CachePut)</td><td>Key derived from result</td></tr>
+          <tr><td style="font-family:'Fira Code',monospace;color:var(--cyan);">"T(java.util.Objects).hash(#a,#b)"</td><td>Composite hash</td><td>Multi-param key</td></tr>
+        </tbody>
+      </table>
+
+      <div class="code">
+<span class="c">// ── Real-world key patterns ─────────────────────────────────────────</span>
+
+<span class="c">// 1. Composite key from multiple params (tenant-scoped data)</span>
+<span class="k">@Cacheable</span>(cacheNames = <span class="s">"orders"</span>,
+           key = <span class="s">"#tenantId + ':' + #orderId"</span>)
+<span class="k">public</span> Order <span class="fn">getOrder</span>(String tenantId, <span class="k">Long</span> orderId) { ... }
+<span class="c">// → stored as  orders::"acme:1042"</span>
+
+<span class="c">// 2. Custom KeyGenerator bean — used when SpEL isn't enough</span>
+<span class="k">@Bean</span>
+<span class="k">public</span> KeyGenerator <span class="fn">userAwareKeyGenerator</span>() {
+  <span class="k">return</span> (target, method, params) -> {
+    String userId = SecurityContextHolder.<span class="fn">getContext</span>()
+        .<span class="fn">getAuthentication</span>().<span class="fn">getName</span>();
+    <span class="k">return</span> userId + <span class="s">":"</span> + Arrays.<span class="fn">toString</span>(params);
+  };
+}
+
+<span class="k">@Cacheable</span>(cacheNames = <span class="s">"dashboard"</span>, keyGenerator = <span class="s">"userAwareKeyGenerator"</span>)
+<span class="k">public</span> DashboardDTO <span class="fn">getDashboard</span>(String period) { ... }
+
+<span class="c">// 3. Conditional caching — only cache premium users' data</span>
+<span class="k">@Cacheable</span>(cacheNames = <span class="s">"reports"</span>,
+           key = <span class="s">"#userId + ':' + #reportType"</span>,
+           condition = <span class="s">"@userService.isPremium(#userId)"</span>)
+<span class="k">public</span> Report <span class="fn">generateReport</span>(String userId, String reportType) { ... }</div>
+    </div>
+  </div>
+
+  <!-- ── CARD 5 — REDIS DEEP DIVE ── -->
+  <div class="card">
+    <div class="card-stripe red"></div>
+    <div class="card-header">
+      <div class="card-icon" style="background:rgba(255,77,109,0.1);">🔴</div>
+      <div class="card-meta">
+        <h2>Redis Backend — Production Config</h2>
+        <div class="sub">Per-cache TTLs, custom serialization (JSON not Java), key prefixes</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <p class="prose">
+        <span class="prose-line">The default Redis serializer uses <strong>Java serialization</strong> — opaque binary blobs that break if you rename a class.</span>
+        <span class="prose-line">In production, always override with <strong>Jackson JSON serialization</strong> so keys are human-readable in Redis CLI and survive class renames.</span>
+      </p>
+
+      <div class="code">
+<span class="k">@Configuration</span>
+<span class="k">@EnableCaching</span>
+<span class="k">public class</span> <span class="fn">RedisCacheConfig</span> {
+
+  <span class="k">@Bean</span>
+  <span class="k">public</span> RedisCacheManager <span class="fn">cacheManager</span>(RedisConnectionFactory cf) {
+
+    <span class="c">// ── Serialization: JSON, not Java binary ──────────────────────────</span>
+    ObjectMapper om = <span class="k">new</span> <span class="fn">ObjectMapper</span>()
+        .<span class="fn">activateDefaultTyping</span>(
+            LaissezFaireSubTypeValidator.instance,
+            ObjectMapper.DefaultTyping.NON_FINAL   <span class="c">// store type info for deserialization</span>
+        );
+    RedisSerializer&lt;Object&gt; jsonSerializer =
+        <span class="k">new</span> GenericJackson2JsonRedisSerializer(om);
+
+    <span class="c">// ── Default config: 10-min TTL, JSON values ───────────────────────</span>
+    RedisCacheConfiguration defaultCfg = RedisCacheConfiguration
+        .<span class="fn">defaultCacheConfig</span>()
+        .<span class="fn">entryTtl</span>(Duration.<span class="fn">ofMinutes</span>(10))
+        .<span class="fn">serializeValuesWith</span>(
+            RedisSerializationContext.SerializationPair
+                .<span class="fn">fromSerializer</span>(jsonSerializer))
+        .<span class="fn">prefixCacheNameWith</span>(<span class="s">"myapp::"</span>)   <span class="c">// → myapp::products::42</span>
+        .<span class="fn">disableCachingNullValues</span>();         <span class="c">// prevent null pollution</span>
+
+    <span class="c">// ── Per-cache TTL overrides ───────────────────────────────────────</span>
+    Map&lt;String, RedisCacheConfiguration&gt; overrides = Map.<span class="fn">of</span>(
+        <span class="s">"products"</span>,   defaultCfg.<span class="fn">entryTtl</span>(Duration.<span class="fn">ofHours</span>(1)),
+        <span class="s">"sessions"</span>,   defaultCfg.<span class="fn">entryTtl</span>(Duration.<span class="fn">ofMinutes</span>(30)),
+        <span class="s">"config"</span>,     defaultCfg.<span class="fn">entryTtl</span>(Duration.<span class="fn">ofHours</span>(24)),
+        <span class="s">"rate-limit"</span>, defaultCfg.<span class="fn">entryTtl</span>(Duration.<span class="fn">ofSeconds</span>(60))
+    );
+
+    <span class="k">return</span> RedisCacheManager
+        .<span class="fn">builder</span>(cf)
+        .<span class="fn">cacheDefaults</span>(defaultCfg)
+        .<span class="fn">withInitialCacheConfigurations</span>(overrides)
+        .<span class="fn">transactionAware</span>()    <span class="c">// only commit to Redis if DB tx commits</span>
+        .<span class="fn">build</span>();
+  }
+}</div>
+
+      <div class="hl hl-amber">
+        <span class="hl-label">// production checklist</span>
+        Always set <strong>prefixCacheNameWith</strong> to namespace keys (avoids collisions between services sharing one Redis).
+        <br>Always use <strong>JSON serialization</strong> — Java serialization silently breaks after refactoring.
+        <br>Always call <strong>disableCachingNullValues()</strong> — null results from DB cause "null storms" on cold start.
+        <br>Always set <strong>per-cache TTLs</strong> — one global TTL is almost always wrong.
+      </div>
+    </div>
+  </div>
+
+  <!-- ── CARD 6 — MULTI-LEVEL L1+L2 ── -->
+  <div class="card">
+    <div class="card-stripe multi"></div>
+    <div class="card-header">
+      <div class="card-icon" style="background:rgba(0,212,255,0.08);">⚡</div>
+      <div class="card-meta">
+        <h2>Two-Level Cache — Caffeine (L1) + Redis (L2)</h2>
+        <div class="sub">Sub-millisecond hits via in-process Caffeine; Redis as the shared fallback</div>
+      </div>
+    </div>
+    <div class="card-body">
+
+      <!-- L1/L2 flow diagram -->
+      <div class="diagram-wrap">
+        <svg width="100%" viewBox="0 0 720 130" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="la" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+              <path d="M2 1L8 5L2 9" fill="none" stroke="rgba(0,212,255,0.5)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </marker>
+            <marker id="lag" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+              <path d="M2 1L8 5L2 9" fill="none" stroke="rgba(0,229,160,0.6)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </marker>
+          </defs>
+          <style>
+            .ln{fill:#0f1420;stroke:rgba(99,179,255,0.15);stroke-width:0.5;}
+            .lt{fill:#e4eaf6;font-family:'Fira Code',monospace;font-size:11px;text-anchor:middle;dominant-baseline:central;}
+            .ls{fill:#6b7a99;font-family:'Fira Code',monospace;font-size:10px;text-anchor:middle;dominant-baseline:central;}
+          </style>
+          <!-- App -->
+          <rect class="ln" x="20" y="45" width="80" height="40" rx="6" style="stroke:rgba(0,212,255,0.4);"/>
+          <text class="lt" x="60" y="65" style="fill:#5bcefa;">App</text>
+          <!-- L1 Caffeine -->
+          <rect class="ln" x="150" y="30" width="110" height="68" rx="6" style="stroke:rgba(0,229,160,0.5);"/>
+          <text class="lt" x="205" y="57" style="fill:#00e5a0;">L1</text>
+          <text class="ls" x="205" y="76" style="fill:#50a57a;">Caffeine</text>
+          <text class="ls" x="205" y="90" style="fill:#3a6e54;">~0.1ms</text>
+          <!-- L2 Redis -->
+          <rect class="ln" x="320" y="30" width="110" height="68" rx="6" style="stroke:rgba(255,176,32,0.5);"/>
+          <text class="lt" x="375" y="57" style="fill:#ffb020;">L2</text>
+          <text class="ls" x="375" y="76" style="fill:#c9a55a;">Redis</text>
+          <text class="ls" x="375" y="90" style="fill:#9a7d3a;">~1–5ms</text>
+          <!-- DB -->
+          <rect class="ln" x="490" y="30" width="100" height="68" rx="6" style="stroke:rgba(255,77,109,0.4);"/>
+          <text class="lt" x="540" y="57" style="fill:#ff8fab;">DB</text>
+          <text class="ls" x="540" y="76" style="fill:#c96b80;">Postgres</text>
+          <text class="ls" x="540" y="90" style="fill:#9a4a5c;">~20ms</text>
+          <!-- Arrows -->
+          <line x1="100" y1="65" x2="150" y2="65" stroke="rgba(0,212,255,0.5)" stroke-width="1.2" marker-end="url(#la)"/>
+          <line x1="260" y1="65" x2="320" y2="65" stroke="rgba(255,176,32,0.4)" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#la)"/>
+          <line x1="430" y1="65" x2="490" y2="65" stroke="rgba(255,77,109,0.4)" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#la)"/>
+          <!-- Labels -->
+          <text class="ls" x="285" y="55">L1 miss</text>
+          <text class="ls" x="455" y="55">L2 miss</text>
+          <text class="ls" x="620" y="50" style="fill:#00e5a0;">hit →</text>
+          <text class="ls" x="617" y="65" style="fill:#00e5a0;">populate</text>
+          <text class="ls" x="622" y="80" style="fill:#00e5a0;">L1+L2</text>
+        </svg>
+      </div>
+
+      <div class="code">
+<span class="c">// Two-level cache using Spring's CompositeCacheManager</span>
+<span class="k">@Bean</span>
+<span class="k">public</span> CacheManager <span class="fn">compositeCacheManager</span>(
+    RedisConnectionFactory cf,
+    CaffeineCacheManager caffeineMgr) {
+
+  RedisCacheManager redisMgr = RedisCacheManager
+      .<span class="fn">builder</span>(cf)
+      .<span class="fn">cacheDefaults</span>(RedisCacheConfiguration.<span class="fn">defaultCacheConfig</span>()
+          .<span class="fn">entryTtl</span>(Duration.<span class="fn">ofMinutes</span>(30)))
+      .<span class="fn">build</span>();
+
+  <span class="c">// CompositeCacheManager tries each manager in order.</span>
+  <span class="c">// Caffeine first (L1) → Redis second (L2) → miss = call method.</span>
+  CompositeCacheManager composite = <span class="k">new</span> <span class="fn">CompositeCacheManager</span>(
+      caffeineMgr,   <span class="c">// L1 — in-process, ~0.1ms</span>
+      redisMgr       <span class="c">// L2 — distributed, ~1–5ms</span>
+  );
+  composite.<span class="fn">setFallbackToNoOpCache</span>(<span class="k">false</span>); <span class="c">// fail loudly if no cache resolves</span>
+  <span class="k">return</span> composite;
+}</div>
+
+      <div class="hl hl-cyan">
+        <span class="hl-label">// trade-off</span>
+        L1 (Caffeine) gives sub-millisecond reads but is <strong>per-JVM</strong> — each pod has its own copy.
+        <br>After a write, you must <strong>evict from both L1 and L2</strong> or you'll serve stale data from L1 while L2 is fresh.
+        <br>Use <strong>Redis pub/sub</strong> to broadcast L1 invalidation across all pods on write.
+      </div>
+    </div>
+  </div>
+
+  <!-- ── CARD 7 — GOTCHAS & BEST PRACTICES ── -->
+  <div class="card">
+    <div class="card-stripe amber"></div>
+    <div class="card-header">
+      <div class="card-icon" style="background:rgba(255,176,32,0.1);">⚠️</div>
+      <div class="card-meta">
+        <h2>Gotchas &amp; Best Practices</h2>
+        <div class="sub">The mistakes every Spring developer makes with @Cacheable — and how to avoid them</div>
+      </div>
+    </div>
+    <div class="card-body">
+
+      <div class="fstep">
+        <div class="fstep-n">1</div>
+        <div class="fstep-body">
+          <h4>Self-Invocation Bypass</h4>
+          <p>If method A calls method B <em>within the same bean</em>, B's <code style="font-size:12px;background:#0a1020;padding:1px 6px;border-radius:3px;color:#00e5a0;">@Cacheable</code> is silently skipped — the AOP proxy is not in the call path. Always inject the bean into itself (<code style="font-size:12px;background:#0a1020;padding:1px 6px;border-radius:3px;color:#00e5a0;">@Autowired MyService self</code>) or use <code style="font-size:12px;background:#0a1020;padding:1px 6px;border-radius:3px;color:#00e5a0;">ApplicationContext.getBean()</code>.</p>
+        </div>
+      </div>
+
+      <div class="fstep">
+        <div class="fstep-n">2</div>
+        <div class="fstep-body">
+          <h4>Caching Exceptions</h4>
+          <p>By default, if the method throws, nothing is cached — correct. But if you use <code style="font-size:12px;background:#0a1020;padding:1px 6px;border-radius:3px;color:#ffb020;">sync=true</code>, concurrent requests block on the first caller. If that caller throws, <strong>all waiting threads get the exception</strong>. Set <code style="font-size:12px;background:#0a1020;padding:1px 6px;border-radius:3px;color:#ffb020;">sync=true</code> only for truly expensive, idempotent calls.</p>
+        </div>
+      </div>
+
+      <div class="fstep">
+        <div class="fstep-n">3</div>
+        <div class="fstep-body">
+          <h4>Null Value Storms</h4>
+          <p>If a key doesn't exist in the DB, your method returns <code style="font-size:12px;background:#0a1020;padding:1px 6px;border-radius:3px;color:#ff4d6d;">null</code>. Without <code style="font-size:12px;background:#0a1020;padding:1px 6px;border-radius:3px;color:#ff4d6d;">unless="#result==null"</code>, Spring <em>caches the null</em> by default (unless you call <code style="font-size:12px;background:#0a1020;padding:1px 6px;border-radius:3px;color:#ff4d6d;">disableCachingNullValues()</code>). At scale, null results flood Redis with useless entries. Use Bloom filter pre-checks for IDs that may not exist.</p>
+        </div>
+      </div>
+
+      <div class="fstep">
+        <div class="fstep-n">4</div>
+        <div class="fstep-body">
+          <h4>@Transactional + @CacheEvict Ordering</h4>
+          <p>If a method is both <code style="font-size:12px;background:#0a1020;padding:1px 6px;border-radius:3px;color:#c084fc;">@Transactional</code> and <code style="font-size:12px;background:#0a1020;padding:1px 6px;border-radius:3px;color:#c084fc;">@CacheEvict</code>, the eviction runs <em>after</em> the method returns but <em>before</em> the transaction commits by default. A concurrent reader can re-populate the cache with stale data before the DB commit lands. Fix: use <code style="font-size:12px;background:#0a1020;padding:1px 6px;border-radius:3px;color:#c084fc;">transactionAware()</code> on <code style="font-size:12px;background:#0a1020;padding:1px 6px;border-radius:3px;color:#c084fc;">RedisCacheManager</code> so eviction is deferred until after TX commit.</p>
+        </div>
+      </div>
+
+      <div class="fstep">
+        <div class="fstep-n">5</div>
+        <div class="fstep-body">
+          <h4>Key Collisions Across Services</h4>
+          <p>Two microservices sharing one Redis instance with cache name <code style="font-size:12px;background:#0a1020;padding:1px 6px;border-radius:3px;color:#5bcefa;">"users"</code> will overwrite each other's entries. Always call <code style="font-size:12px;background:#0a1020;padding:1px 6px;border-radius:3px;color:#5bcefa;">prefixCacheNameWith("service-name::")</code> in <code style="font-size:12px;background:#0a1020;padding:1px 6px;border-radius:3px;color:#5bcefa;">RedisCacheConfiguration</code>.</p>
+        </div>
+      </div>
+
+      <div class="fstep">
+        <div class="fstep-n">6</div>
+        <div class="fstep-body">
+          <h4>Cache-Aside vs @Cacheable</h4>
+          <p><code style="font-size:12px;background:#0a1020;padding:1px 6px;border-radius:3px;color:#00e5a0;">@Cacheable</code> is the declarative form of the cache-aside pattern — they are the same strategy. The annotation simply removes the boilerplate of the if-cache-miss-then-load-and-store block from your code. Understanding this makes the annotation's behavior completely predictable.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── CARD 8 — TESTING ── -->
+  <div class="card">
+    <div class="card-stripe cyan"></div>
+    <div class="card-header">
+      <div class="card-icon" style="background:rgba(0,212,255,0.1);">🧪</div>
+      <div class="card-meta">
+        <h2>Testing Spring Cache</h2>
+        <div class="sub">Unit-test cache behaviour without Redis — using SimpleCacheManager</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="code">
+<span class="k">@SpringBootTest</span>
+<span class="k">@Import</span>(TestCacheConfig.class)   <span class="c">// override prod Redis with in-memory</span>
+<span class="k">class</span> <span class="fn">ProductServiceCacheTest</span> {
+
+  <span class="k">@Autowired</span> <span class="k">private</span> ProductService service;
+  <span class="k">@MockBean</span>  <span class="k">private</span> ProductRepository repo;
+  <span class="k">@Autowired</span> <span class="k">private</span> CacheManager cacheManager;
+
+  <span class="k">@Test</span>
+  <span class="k">void</span> <span class="fn">shouldReturnCachedResultOnSecondCall</span>() {
+    Product p = <span class="k">new</span> <span class="fn">Product</span>(1L, <span class="s">"Laptop"</span>);
+    Mockito.<span class="fn">when</span>(repo.<span class="fn">findById</span>(1L)).<span class="fn">thenReturn</span>(Optional.<span class="fn">of</span>(p));
+
+    service.<span class="fn">getProduct</span>(1L);   <span class="c">// miss  → calls repo</span>
+    service.<span class="fn">getProduct</span>(1L);   <span class="c">// hit   → serves from cache</span>
+
+    <span class="c">// repo should only have been called ONCE</span>
+    Mockito.<span class="fn">verify</span>(repo, Mockito.<span class="fn">times</span>(1)).<span class="fn">findById</span>(1L);
+  }
+
+  <span class="k">@Test</span>
+  <span class="k">void</span> <span class="fn">shouldEvictOnDelete</span>() {
+    <span class="c">// populate the cache manually</span>
+    Cache cache = cacheManager.<span class="fn">getCache</span>(<span class="s">"products"</span>);
+    cache.<span class="fn">put</span>(1L, <span class="k">new</span> <span class="fn">Product</span>(1L, <span class="s">"Laptop"</span>));
+
+    service.<span class="fn">deleteProduct</span>(1L);
+
+    <span class="c">// entry must be gone</span>
+    assertThat(cache.<span class="fn">get</span>(1L)).<span class="fn">isNull</span>();
+  }
+}
+
+<span class="c">// ── Test config: replace Redis with ConcurrentHashMap-backed cache ──</span>
+<span class="k">@TestConfiguration</span>
+<span class="k">class</span> <span class="fn">TestCacheConfig</span> {
+  <span class="k">@Bean</span>
+  <span class="k">@Primary</span>
+  <span class="k">public</span> CacheManager <span class="fn">testCacheManager</span>() {
+    SimpleCacheManager mgr = <span class="k">new</span> <span class="fn">SimpleCacheManager</span>();
+    mgr.<span class="fn">setCaches</span>(List.<span class="fn">of</span>(
+        <span class="k">new</span> <span class="fn">ConcurrentMapCache</span>(<span class="s">"products"</span>),
+        <span class="k">new</span> <span class="fn">ConcurrentMapCache</span>(<span class="s">"sessions"</span>)
+    ));
+    <span class="k">return</span> mgr;
+  }
+}</div>
+    </div>
+  </div>
+
 </div>
 </section>
 
