@@ -6,6 +6,9 @@
 <title>Caching — The Complete System Design Guide</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&family=Fira+Code:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
+  .prose, p, li, .card, .hl {
+  overflow: visible !important;
+}
 :root {
   --bg: #05080f;
   --bg2: #090d18;
@@ -208,22 +211,112 @@ section{padding:5rem 0;border-bottom:1px solid var(--border);}
 
 /* ── PROSE ── */
 .prose{
-  font-size:14px;color:#b0bdd6;line-height:1.85;margin-bottom:1.25rem;
+  font-size:14px;color:#b0bdd6;line-height:1.95;margin-bottom:1.25rem;
 }
 .prose strong{color:var(--text);font-weight:500;}
 .prose em{color:var(--cyan);font-style:italic;}
+.prose-line{display:block;padding:3px 0;}
+/* ── GLOSSARY TOOLTIPS ── */
+.term{
+  color:var(--cyan);
+  border-bottom:1px dashed rgba(0,212,255,0.45);
+  cursor:help;
+  position:relative;
+  display:inline-block;
+}
+.term-tooltip{
+  display:none;
+  position:absolute;
+  bottom:calc(100% + 8px);
+  left:50%;
+  transform:translateX(-50%);
+  background:#0d1525;
+  border:1px solid rgba(0,212,255,0.3);
+  border-radius:var(--r);
+  padding:10px 14px;
+  font-size:12px;
+  color:#b0bdd6;
+  width:270px;
+  line-height:1.65;
+  z-index:999;
+  box-shadow:0 8px 32px rgba(0,0,0,0.7);
+  pointer-events:none;
+  white-space:normal;
+}
+.term-tooltip::after{
+  content:'';
+  position:absolute;
+  top:100%;left:50%;
+  transform:translateX(-50%);
+  border:6px solid transparent;
+  border-top-color:rgba(0,212,255,0.3);
+}
+.term:hover .term-tooltip{display:block;}
+.term-label{
+  font-family:'Fira Code',monospace;
+  font-size:9px;letter-spacing:0.15em;text-transform:uppercase;
+  color:var(--cyan);display:block;margin-bottom:5px;
+}
+/* ── TTL DECAY SIMULATOR ── */
+.ttl-bar-wrap2{background:var(--surface2);border-radius:4px;height:14px;overflow:hidden;margin:4px 0;}
+.ttl-bar2{height:100%;border-radius:4px;transition:width 0.85s linear;display:flex;align-items:center;padding-left:8px;font-family:'Fira Code',monospace;font-size:9px;font-weight:500;color:rgba(0,0,0,0.8);}
+.ttl-key-row{display:grid;grid-template-columns:120px 1fr 64px 56px;align-items:center;gap:0.75rem;margin-bottom:10px;font-size:12px;}
+.ttl-key-label{font-family:'Fira Code',monospace;color:var(--muted);font-size:11px;}
+.ttl-time{font-family:'Fira Code',monospace;font-size:11px;color:var(--amber);}
+.ttl-state{font-family:'Fira Code',monospace;font-size:10px;text-align:right;}
+/* ── PENETRATION SIM ── */
+.pen-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin:1rem 0;}
+.pen-node{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:1rem;text-align:center;transition:all 0.3s;}
+.pen-node.pn-blocked{border-color:rgba(0,229,160,0.4);background:rgba(0,229,160,0.05);}
+.pen-node.pn-hit{border-color:rgba(0,229,160,0.4);background:rgba(0,229,160,0.08);}
+.pen-node.pn-miss{border-color:rgba(255,77,109,0.4);background:rgba(255,77,109,0.05);}
+.pen-count{font-family:'DM Serif Display',serif;font-size:2.2rem;color:var(--cyan);line-height:1;}
+.pen-label{font-size:11px;color:var(--muted);margin-top:4px;}
+/* ── HIT RATE SLIDER ── */
+.hr-slider-wrap{margin:1.5rem 0;}
+.hr-slider{width:100%;-webkit-appearance:none;height:4px;border-radius:2px;background:var(--surface2);outline:none;margin:1rem 0;cursor:pointer;}
+.hr-slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--cyan);cursor:pointer;box-shadow:0 0 0 3px rgba(0,212,255,0.2);}
+.hr-result{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:0.75rem;margin:1rem 0;}
+.hr-box{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:1rem;text-align:center;}
+.hr-val{font-family:'DM Serif Display',serif;font-size:1.6rem;line-height:1;margin-bottom:4px;}
+.hr-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;}
+/* ── WRITE STRATEGY ── */
+.ws-choice{display:flex;gap:0.75rem;flex-wrap:wrap;margin-bottom:1.25rem;}
+.ws-btn{padding:8px 18px;font-size:12px;font-family:'Fira Code',monospace;background:transparent;border:1px solid var(--border2);border-radius:100px;color:var(--muted);cursor:pointer;transition:all 0.2s;}
+.ws-btn:hover{color:var(--text);border-color:var(--border2);background:rgba(255,255,255,0.04);}
+.ws-btn.sel-wt{background:rgba(255,176,32,0.1);border-color:var(--amber);color:var(--amber);}
+.ws-btn.sel-wb{background:rgba(0,229,160,0.1);border-color:var(--green);color:var(--green);}
+.ws-btn.sel-wa{background:rgba(168,85,247,0.1);border-color:var(--purple);color:var(--purple);}
+.ws-flow-step{display:flex;align-items:center;gap:0.75rem;padding:10px 14px;border-radius:var(--r);margin-bottom:5px;font-size:12.5px;border:1px solid transparent;}
 
 /* ── CODE ── */
 .code{
-  background:rgba(0,0,0,0.4);
-  border:1px solid var(--border);
-  border-radius:var(--r);
-  padding:1.25rem;
+  background:#060b14;
+  border:1px solid rgba(0,212,255,0.1);
+  border-left:3px solid rgba(0,212,255,0.25);
+  border-radius:0 var(--r) var(--r) 0;
+  padding:1.5rem 1.5rem 1.5rem 1.75rem;
   font-family:'Fira Code',monospace;
-  font-size:12px;line-height:1.9;
-  overflow-x:auto;margin:1rem 0;
+  font-size:12.5px;line-height:2;
+  overflow-x:auto;margin:1.25rem 0;
   color:#8899bb;
+  tab-size:2;
+  white-space:pre;
 }
+.code-header{
+  display:flex;align-items:center;gap:0.75rem;
+  padding:8px 1.5rem;
+  background:rgba(0,212,255,0.04);
+  border:1px solid rgba(0,212,255,0.1);
+  border-bottom:none;
+  border-radius:var(--r) var(--r) 0 0;
+  font-family:'Fira Code',monospace;
+  font-size:10px;letter-spacing:0.1em;text-transform:uppercase;
+  color:var(--muted);
+  margin-top:1.25rem;
+}
+.code-header+.code{border-radius:0 0 var(--r) var(--r);margin-top:0;}
+.code-dot{width:8px;height:8px;border-radius:50%;}
 .k{color:#c792ea;}.s{color:#c3e88d;}.c{color:#3a4a6a;font-style:italic;}
 .n{color:#82aaff;}.num{color:var(--amber);}.fn{color:var(--cyan);}
 .kw{color:var(--green);}
@@ -557,7 +650,12 @@ footer{text-align:center;padding:4rem 2rem;color:var(--muted);}
       </div>
     </div>
     <div class="card-body">
-      <p class="prose">Every computer system has a <strong>storage hierarchy</strong>. The closer data is to the CPU, the faster it can be accessed — but the more expensive and smaller the storage. Caching exploits this by keeping <em>hot data</em> (frequently accessed) in a faster layer so expensive reads to slower layers happen rarely.</p>
+      <p class="prose">
+        <span class="prose-line">Every computer system has a <strong>storage hierarchy</strong> — different layers of memory, each faster but smaller and more expensive than the one below.</span>
+        <span class="prose-line">The closer data is to the CPU, the faster it can be accessed, but the more expensive and smaller the storage.</span>
+        <span class="prose-line">Caching exploits this by keeping <em>hot data</em> (frequently accessed) in a faster layer so expensive reads to slower layers happen rarely.</span>
+        <span class="prose-line">Think of it like keeping your most-used books on your desk vs the library — the desk is smaller, but lookup is instant.</span>
+      </p>
 
       <div class="lat-chart">
         <div class="lat-row"><div class="lat-name">L1 CPU cache</div><div class="lat-bar-wrap"><div class="lat-bar" style="width:1%;background:var(--cyan);"></div></div><div class="lat-val">0.5 ns</div></div>
@@ -573,7 +671,27 @@ footer{text-align:center;padding:4rem 2rem;color:var(--muted);}
 
       <div class="hl hl-cyan">
         <span class="hl-label">// key insight</span>
-        A Redis read is <strong>100× faster than a typical DB query</strong> and <strong>300× faster than a cold disk read</strong>. At 1M requests/second, the difference between cache hit and DB hit is the difference between 6 servers and 600 servers.
+        A Redis read is <strong>100× faster than a typical DB query</strong> and <strong>300× faster than a cold disk read</strong>.
+        <br>At 1M requests/second, the difference between cache hit and DB hit is the difference between 6 servers and 600 servers.
+      </div>
+
+      <!-- ── INTERACTIVE HIT RATE IMPACT CALCULATOR ── -->
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:1.75rem;margin:1.5rem 0;">
+        <div style="font-family:'Fira Code',monospace;font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:var(--cyan);margin-bottom:1rem;">// interactive: hit rate impact calculator</div>
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:6px;">
+          <span>Hit rate: <strong id="hr-display" style="color:var(--cyan);">90%</strong></span>
+          <span>Total requests/sec: <strong style="color:var(--amber);">1,000,000</strong></span>
+        </div>
+        <input type="range" class="hr-slider" id="hr-slider" min="50" max="99" value="90" oninput="updateHR(this.value)" style="width:100%;-webkit-appearance:none;height:4px;border-radius:2px;background:var(--surface2);outline:none;margin:1rem 0;cursor:pointer;">
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--dim);">
+          <span>50%</span><span>75%</span><span>99%</span>
+        </div>
+        <div class="hr-result" id="hr-result">
+          <div class="hr-box"><div class="hr-val" id="hr-db-queries" style="color:var(--red);">100K</div><div class="hr-label">DB queries/sec</div></div>
+          <div class="hr-box"><div class="hr-val" id="hr-cache-hits" style="color:var(--green);">900K</div><div class="hr-label">Cache hits/sec</div></div>
+          <div class="hr-box"><div class="hr-val" id="hr-servers" style="color:var(--amber);">~10</div><div class="hr-label">DB servers needed</div></div>
+          <div class="hr-box"><div class="hr-val" id="hr-saved" style="color:var(--cyan);">90%</div><div class="hr-label">DB load saved</div></div>
+        </div>
       </div>
 
       <div class="pc-grid">
@@ -625,7 +743,7 @@ footer{text-align:center;padding:4rem 2rem;color:var(--muted);}
       <div class="card-icon" style="background:rgba(0,212,255,0.08);">🗺</div>
       <div class="card-meta">
         <h2>Full-Stack Cache Architecture</h2>
-        <div class="sub">Where each cache layer lives — from the browser to the database</div>
+        <div class="sub">Where each cache layer lives — from the browser to the database. Hover underlined terms for definitions.</div>
       </div>
     </div>
     <div class="card-body">
@@ -741,15 +859,45 @@ footer{text-align:center;padding:4rem 2rem;color:var(--muted);}
         </svg>
       </div>
 
-      <div class="tbl-wrap" style="overflow-x:auto;">
+      <div class="hl hl-cyan" style="margin-top:1.5rem;">
+        <span class="hl-label">// quick-reference: new terms in this diagram</span>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:0.75rem;margin-top:0.75rem;">
+          <div style="background:rgba(0,0,0,0.2);border-radius:6px;padding:10px 14px;">
+            <div style="font-family:'Fira Code',monospace;font-size:10px;color:var(--cyan);margin-bottom:4px;">📡 CDN Edge Node</div>
+            <div style="font-size:12px;color:#9bb8d4;">A geographically distributed server (e.g. Mumbai, Tokyo) that caches your content close to users — cutting round-trip from 200ms → ~10ms. Provided by CloudFront, Akamai, Fastly.</div>
+          </div>
+          <div style="background:rgba(0,0,0,0.2);border-radius:6px;padding:10px 14px;">
+            <div style="font-family:'Fira Code',monospace;font-size:10px;color:var(--amber);margin-bottom:4px;">🌍 PoP (Point of Presence)</div>
+            <div style="font-size:12px;color:#9bb8d4;">A physical CDN datacenter location. CloudFront has 450+ globally. Your CDN cache lives in each PoP — users are automatically routed to the nearest one.</div>
+          </div>
+          <div style="background:rgba(0,0,0,0.2);border-radius:6px;padding:10px 14px;">
+            <div style="font-family:'Fira Code',monospace;font-size:10px;color:var(--green);margin-bottom:4px;">🐬 InnoDB Buffer Pool</div>
+            <div style="font-size:12px;color:#9bb8d4;">MySQL's internal RAM cache for frequently-read table data and indexes. When a page is read from disk, MySQL keeps it here — subsequent reads are ~10× faster. No configuration needed, just size it to ~70% of RAM.</div>
+          </div>
+          <div style="background:rgba(0,0,0,0.2);border-radius:6px;padding:10px 14px;">
+            <div style="font-family:'Fira Code',monospace;font-size:10px;color:var(--purple);margin-bottom:4px;">🏷 ETag (Entity Tag)</div>
+            <div style="font-size:12px;color:#9bb8d4;">An HTTP header that identifies a specific version of a cached resource. Browser sends it back on next request; if unchanged, server returns 304 Not Modified — zero bytes transferred.</div>
+          </div>
+          <div style="background:rgba(0,0,0,0.2);border-radius:6px;padding:10px 14px;">
+            <div style="font-family:'Fira Code',monospace;font-size:10px;color:var(--red);margin-bottom:4px;">⚖️ Load Balancer</div>
+            <div style="font-size:12px;color:#9bb8d4;">A server (HAProxy, Nginx, AWS ELB) that distributes incoming traffic evenly across multiple app servers so no single server gets overwhelmed. All caching in app servers must be distributed (Redis) since LB routes to any server.</div>
+          </div>
+          <div style="background:rgba(0,0,0,0.2);border-radius:6px;padding:10px 14px;">
+            <div style="font-family:'Fira Code',monospace;font-size:10px;color:var(--cyan);margin-bottom:4px;">⚡ In-Process (L1) Cache</div>
+            <div style="font-size:12px;color:#9bb8d4;">A cache living inside your app's JVM process (Caffeine/Guava). Zero network hop — sub-millisecond reads. Downside: not shared between multiple app server instances behind a load balancer.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tbl-wrap" style="overflow-x:auto;margin-top:1.5rem;">
       <table class="tbl">
         <thead><tr><th>#</th><th>Position</th><th>Technology</th><th>Latency</th><th>Scope</th><th>Best for</th></tr></thead>
         <tbody>
           <tr><td style="color:var(--green);">①</td><td>Browser cache</td><td>HTTP headers, localStorage, ServiceWorker</td><td style="color:var(--green);">0ms</td><td>Per user</td><td>Static assets, API responses with TTL</td></tr>
-          <tr><td style="color:var(--purple);">②</td><td>CDN edge</td><td>CloudFront, Fastly, Akamai</td><td style="color:var(--green);">&lt;5ms</td><td>Per PoP</td><td>Images, JS/CSS, cacheable API responses</td></tr>
+          <tr><td style="color:var(--purple);">②</td><td><span class="term">CDN edge<span class="term-tooltip"><span class="term-label">📡 CDN Edge Node</span>A server placed geographically close to users (e.g. Mumbai, Tokyo, London) by a Content Delivery Network like CloudFront or Akamai. Caches your content close to users so responses come from ~10ms away instead of your distant origin datacenter.</span></span></td><td>CloudFront, Fastly, Akamai</td><td style="color:var(--green);">&lt;5ms</td><td>Per <span class="term">PoP<span class="term-tooltip"><span class="term-label">🌍 Point of Presence</span>A physical CDN datacenter location. CloudFront has 450+ PoPs globally. Each PoP caches your content so users worldwide are within ~10ms of a cached response.</span></span></td><td>Images, JS/CSS, cacheable API responses</td></tr>
           <tr><td style="color:var(--amber);">③</td><td>In-process (L1)</td><td>Guava Cache, Caffeine, in-memory map</td><td style="color:var(--green);">&lt;0.1ms</td><td>Per server</td><td>Config, feature flags, hot computed data</td></tr>
           <tr><td style="color:var(--green);">④</td><td>Distributed (L2)</td><td>Redis, Memcached, DragonflyDB</td><td style="color:var(--green);">&lt;1ms</td><td>All servers</td><td>Sessions, user profiles, timelines, counters</td></tr>
-          <tr><td style="color:var(--blue);">⑤</td><td>DB buffer pool</td><td>InnoDB buffer, pg shared_buffers</td><td style="color:var(--amber);">1–5ms</td><td>Per DB</td><td>Frequently-read table pages (automatic)</td></tr>
+          <tr><td style="color:var(--blue);">⑤</td><td>DB buffer pool</td><td>InnoDB buffer, pg <span class="term">shared_buffers<span class="term-tooltip"><span class="term-label">🐘 shared_buffers</span>PostgreSQL's RAM cache for frequently-read table pages and index blocks. Typically set to 25% of system RAM. Subsequent reads of the same page are served from RAM instead of disk.</span></span></td><td style="color:var(--amber);">1–5ms</td><td>Per DB</td><td>Frequently-read table pages (automatic)</td></tr>
         </tbody>
       </table>
       </div>
@@ -830,6 +978,12 @@ footer{text-align:center;padding:4rem 2rem;color:var(--muted);}
         </svg>
       </div>
 
+      <p class="prose">
+        <span class="prose-line"><strong>Cache-Aside</strong> (Lazy Loading) is the most common pattern — the application checks the cache first, and on a miss, fetches from DB and populates the cache.</span>
+        <span class="prose-line"><strong>Read-Through</strong> delegates cache-miss handling to the cache itself — the app always talks only to the cache layer.</span>
+        <span class="prose-line">Key difference: in cache-aside the <em>app owns the cache logic</em>; in read-through the <em>cache library owns it</em>.</span>
+      </p>
+
       <div class="pc-grid">
         <div class="pc-box pc-pro">
           <h4>Cache-aside pros</h4>
@@ -872,6 +1026,24 @@ footer{text-align:center;padding:4rem 2rem;color:var(--muted);}
       </div>
     </div>
     <div class="card-body">
+      <p class="prose">
+        <span class="prose-line">Write strategies answer: <strong>when data is updated, what gets updated first — cache or database?</strong></span>
+        <span class="prose-line"><em>Write-through</em> updates both simultaneously (consistent but slower writes).</span>
+        <span class="prose-line"><em>Write-back</em> updates cache first and DB later asynchronously (fastest but risky if cache crashes).</span>
+        <span class="prose-line"><em>Write-around</em> skips cache entirely — prevents cache pollution from write-heavy data.</span>
+      </p>
+      <!-- ── WRITE STRATEGY INTERACTIVE ── -->
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:1.5rem;margin:1.25rem 0;">
+        <div style="font-family:'Fira Code',monospace;font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:var(--amber);margin-bottom:1rem;">// interactive: select a write strategy to trace the data flow</div>
+        <div class="ws-choice">
+          <button class="ws-btn sel-wt" onclick="selectWS('wt',this)">Write-Through</button>
+          <button class="ws-btn" onclick="selectWS('wb',this)">Write-Back</button>
+          <button class="ws-btn" onclick="selectWS('wa',this)">Write-Around</button>
+        </div>
+        <div id="ws-flow" style="margin:1rem 0;min-height:120px;"></div>
+        <div id="ws-desc" class="hl hl-amber" style="font-size:12.5px;margin-top:0;"></div>
+      </div>
+
       <div class="diagram-wrap">
         <svg width="100%" viewBox="0 0 720 290" xmlns="http://www.w3.org/2000/svg">
           <defs>
@@ -956,7 +1128,12 @@ footer{text-align:center;padding:4rem 2rem;color:var(--muted);}
       </div>
     </div>
     <div class="card-body">
-      <p class="prose">Eviction policy determines <strong>which entry gets removed</strong> when the cache is full and a new entry needs to be stored. The right choice depends entirely on your access pattern — is data accessed in bursts (LFU better), accessed recently (LRU better), or valid for a fixed time (TTL better)?</p>
+      <p class="prose">
+        <span class="prose-line">Eviction policy determines <strong>which entry gets removed</strong> when the cache is full and a new entry needs to be stored.</span>
+        <span class="prose-line">The right choice depends entirely on your <em>access pattern</em> — is data accessed in bursts (LFU better), accessed recently (LRU better), or valid for a fixed time (TTL better)?</span>
+        <span class="prose-line">Think of cache slots like parking spots: when the lot is full, you need a rule for who gets towed.</span>
+        <span class="prose-line">LRU tows the car that parked longest ago, LFU tows the least-used car, TTL tows any car whose meter expired.</span>
+      </p>
 
       <div class="scenario-grid">
         <div class="scenario">
@@ -997,9 +1174,27 @@ footer{text-align:center;padding:4rem 2rem;color:var(--muted);}
         </div>
       </div>
 
+      <!-- ── TTL DECAY LIVE SIMULATOR ── -->
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:1.5rem;margin:1.5rem 0;">
+        <div style="font-family:'Fira Code',monospace;font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:var(--cyan);margin-bottom:0.75rem;">// live: TTL decay simulator — watch keys expire in real time</div>
+        <div style="display:flex;gap:0.75rem;flex-wrap:wrap;margin-bottom:1.25rem;align-items:center;">
+          <button class="sim-btn" onclick="startTTL()">▶ Start</button>
+          <button class="sim-btn" onclick="pauseTTL()">⏸ Pause</button>
+          <button class="sim-btn" onclick="resetTTL()">↺ Reset</button>
+          <button class="sim-btn" onclick="touchTTLKey('user:1337')" style="color:var(--green);border-color:rgba(0,229,160,0.3);">Touch user:1337</button>
+          <span style="font-size:11px;color:var(--muted);font-family:'Fira Code',monospace;">'Touch' refreshes a key's TTL (simulates access)</span>
+        </div>
+        <div id="ttl-wrap"></div>
+        <div class="sim-log" id="ttl-log" style="height:80px;margin-top:0.75rem;">
+          <span class="log-info">// Press Start to watch keys decay — expired keys cause cache misses!</span>
+        </div>
+      </div>
+
       <div class="hl hl-amber">
         <span class="hl-label">// interview key point</span>
-        Redis uses <strong>approximated LRU</strong> by default (samples N random keys and evicts the least-recently used among them). This is cheaper than a true LRU doubly-linked list and performs nearly as well. Redis 4.0+ added <strong>allkeys-lfu</strong> for frequency-based eviction.
+        Redis uses <strong>approximated LRU</strong> by default (samples N random keys and evicts the least-recently used among them).
+        <br>This is cheaper than a true LRU doubly-linked list and performs nearly as well.
+        <br>Redis 4.0+ added <strong>allkeys-lfu</strong> for frequency-based eviction — better for workloads where some keys are permanently hot.
       </div>
 
       <table class="tbl">
@@ -1033,7 +1228,12 @@ footer{text-align:center;padding:4rem 2rem;color:var(--muted);}
       </div>
     </div>
     <div class="card-body">
-      <p class="prose">A popular key expires. Before any server can repopulate it, <strong>thousands of simultaneous requests all miss the cache</strong> and all send queries to the database. The DB is hit with N× its normal load, potentially collapsing under the pressure — and taking down the entire service.</p>
+      <p class="prose">
+        <span class="prose-line">A popular key expires.</span>
+        <span class="prose-line">Before any server can repopulate it, <strong>thousands of simultaneous requests all miss the cache</strong> and all send queries to the database.</span>
+        <span class="prose-line">The DB is hit with N× its normal load, potentially collapsing under pressure — and taking down the entire service.</span>
+        <span class="prose-line">This is the <em>thundering herd problem</em> — like a dam breaking and all water rushing through at once.</span>
+      </p>
 
       <div class="flow">
         <div class="fstep"><div class="fstep-n">1</div><div class="fstep-body"><h4>Key expires at T+0</h4><p>Redis key for "trending:global" expires after its TTL. 50,000 users are currently viewing trending topics.</p></div></div>
@@ -1148,9 +1348,36 @@ footer{text-align:center;padding:4rem 2rem;color:var(--muted);}
         </div>
       </div>
 
+      <!-- ── CACHE PENETRATION ATTACK DEMO ── -->
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:1.5rem;margin:1.5rem 0;">
+        <div style="font-family:'Fira Code',monospace;font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:var(--cyan);margin-bottom:0.75rem;">// interactive: cache penetration attack — with vs without Bloom filter</div>
+        <p style="font-size:12.5px;color:var(--muted);margin-bottom:1rem;line-height:1.7;">
+          <span style="display:block;">Attacker floods your system with fake user IDs that don't exist in the DB.</span>
+          <span style="display:block;">Without protection: every fake ID bypasses cache and hits the DB directly.</span>
+          <span style="display:block;">With Bloom filter: fake IDs are blocked at the gate — zero DB queries.</span>
+        </p>
+        <div style="display:flex;gap:0.75rem;flex-wrap:wrap;margin-bottom:1rem;">
+          <button class="sim-btn" onclick="penAttack(false)" style="color:var(--red);border-color:rgba(255,77,109,0.3);">🔴 Attack (no protection)</button>
+          <button class="sim-btn" onclick="penAttack(true)" style="color:var(--green);border-color:rgba(0,229,160,0.3);">🟢 Attack (with Bloom filter)</button>
+          <button class="sim-btn" onclick="penReset()">↺ Reset</button>
+        </div>
+        <div class="pen-grid">
+          <div class="pen-node" id="pen-bloom-node"><div class="pen-count" id="pen-blocked">0</div><div class="pen-label">Bloom filter blocks</div></div>
+          <div class="pen-node" id="pen-cache-node"><div class="pen-count" id="pen-cache-hits2">0</div><div class="pen-label">Cache lookups</div></div>
+          <div class="pen-node" id="pen-db-node"><div class="pen-count" id="pen-db-hits" style="color:var(--red);">0</div><div class="pen-label">DB queries (damage)</div></div>
+          <div class="pen-node" id="pen-saved-node"><div class="pen-count" id="pen-saved-hits" style="color:var(--green);">0</div><div class="pen-label">DB queries saved</div></div>
+        </div>
+        <div class="sim-log" id="pen-log" style="height:90px;margin-top:0.75rem;">
+          <span class="log-info">// Click an attack button to simulate cache penetration</span>
+        </div>
+      </div>
+
       <div class="hl hl-green">
         <span class="hl-label">// bloom filter — cache penetration defense</span>
-        A <strong>Bloom filter</strong> is a probabilistic data structure that answers "does key X possibly exist?" in O(1) with zero false negatives (if it says NO, the key definitely doesn't exist — skip the DB). At 1% false positive rate, a Bloom filter for 1 billion keys needs only ~1.2 GB of RAM vs TBs for the actual data. Twitter, LinkedIn, and Cassandra all use Bloom filters at scale.
+        A <strong>Bloom filter</strong> is a probabilistic data structure that answers "does key X possibly exist?" in O(1) with zero false negatives.
+        <br>If it says NO, the key definitely doesn't exist — skip the DB entirely.
+        <br>At 1% false positive rate, a Bloom filter for 1 billion keys needs only ~1.2 GB of RAM vs TBs for the actual data.
+        <br>Twitter, LinkedIn, and Cassandra all use Bloom filters at scale.
       </div>
 
       <div class="code">
@@ -1326,7 +1553,7 @@ redis-cli --hotkeys
         <div class="scenario" style="border-color:rgba(0,229,160,0.2);">
           <span class="scenario-icon">🌍</span>
           <h3>Geographic distribution</h3>
-          <p>CDN edge caches serve content from the nearest point-of-presence. A user in Mumbai shouldn't wait for a response from a US data center for static content.</p>
+          <p><span class="term">CDN edge caches<span class="term-tooltip"><span class="term-label">🌍 CDN Edge Cache</span>Copies of your content stored at CDN nodes close to users worldwide. A user in Hyderabad requesting a JS file gets it from a nearby server, not your US origin — cutting latency from 200ms to under 10ms.</span></span> serve content from the nearest point-of-presence. A user in Mumbai shouldn't wait for a response from a US data center for static content.</p>
           <span class="scenario-badge" style="background:rgba(0,229,160,0.1);border:1px solid rgba(0,229,160,0.2);color:var(--green);">Rule: multi-region users</span>
         </div>
         <div class="scenario" style="border-color:rgba(0,229,160,0.2);">
@@ -1393,7 +1620,12 @@ redis-cli --hotkeys
       </div>
     </div>
     <div class="card-body">
-      <p class="prose">Cache invalidation is hard because you must decide: <strong>when does cached data become too stale to serve?</strong> Too aggressive invalidation → high miss rate, defeats the purpose. Too lenient → users see wrong data. The right strategy depends on your consistency requirements.</p>
+      <p class="prose">
+        <span class="prose-line">Cache invalidation is hard because you must decide: <strong>when does cached data become too stale to serve?</strong></span>
+        <span class="prose-line">Too aggressive invalidation → high miss rate, defeats the purpose.</span>
+        <span class="prose-line">Too lenient → users see wrong data.</span>
+        <span class="prose-line">The right strategy depends on your consistency requirements and how often the underlying data actually changes.</span>
+      </p>
 
       <table class="tbl">
         <thead><tr><th>Strategy</th><th>How it works</th><th>Consistency</th><th>Complexity</th><th>Real-world use</th></tr></thead>
@@ -1409,7 +1641,7 @@ redis-cli --hotkeys
             <td style="color:var(--amber);">Event-driven invalidation</td>
             <td>On write → publish event → consumers delete cache keys</td>
             <td style="color:var(--green);">Near-instant</td>
-            <td style="color:var(--amber);">Medium (pub/sub infra)</td>
+            <td style="color:var(--amber);">Medium (<span class="term">pub/sub<span class="term-tooltip"><span class="term-label">📢 Pub/Sub</span>Publish-Subscribe: a service publishes "user 123 updated" to a channel; all subscriber services receive it and delete their cache entries for user 123. Redis has built-in pub/sub support.</span></span> infra)</td>
             <td>Twitter, Facebook, product catalogs</td>
           </tr>
           <tr>
@@ -1427,8 +1659,8 @@ redis-cli --hotkeys
             <td>Immutable URLs, CDN assets</td>
           </tr>
           <tr>
-            <td style="color:var(--amber);">CDC (Change Data Capture)</td>
-            <td>Monitor DB binlog → auto-invalidate on any change</td>
+            <td style="color:var(--amber);"><span class="term">CDC<span class="term-tooltip"><span class="term-label">🔄 Change Data Capture</span>Monitors the database's binary log (binlog) for any data changes. Tools like Debezium read the binlog and stream changes to Kafka — consumers then invalidate affected cache keys automatically, without app code changes.</span></span> (Change Data Capture)</td>
+            <td>Monitor DB <span class="term">binlog<span class="term-tooltip"><span class="term-label">📜 Binlog</span>Binary log — MySQL's append-only log of all write operations. CDC tools like Debezium tail this log to detect row changes and trigger downstream cache invalidation.</span></span> → auto-invalidate on any change</td>
             <td style="color:var(--green);">Near-instant</td>
             <td style="color:var(--red);">High (Debezium/Kafka)</td>
             <td>Large-scale systems needing strong consistency</td>
@@ -1468,8 +1700,8 @@ redis-cli --hotkeys
           <tr>
             <td style="color:var(--red);">Redis</td>
             <td>In-memory store</td>
-            <td>String, Hash, List, Set, Sorted Set, Stream, HLL</td>
-            <td style="color:var(--green);">Yes (RDB+AOF)</td>
+            <td>String, Hash, List, Set, Sorted Set, Stream, <span class="term">HLL<span class="term-tooltip"><span class="term-label">📊 HyperLogLog</span>HyperLogLog — a probabilistic data structure that estimates the count of unique items in a very large set using very little memory (~12KB). Redis HyperLogLog can count billions of unique visitors with ~0.81% error.</span></span></td>
+            <td style="color:var(--green);">Yes (<span class="term">RDB<span class="term-tooltip"><span class="term-label">💾 RDB Snapshot</span>Redis Database snapshot — periodically saves the entire dataset to disk as a compact binary file. Fast restart, but may lose data written since the last snapshot.</span></span>+<span class="term">AOF<span class="term-tooltip"><span class="term-label">📝 AOF</span>Append-Only File — logs every write command. On restart, Redis replays all commands to reconstruct data. More durable than RDB but larger files and slower startup.</span></span>)</td>
             <td style="color:var(--green);">Yes (Redis Cluster)</td>
             <td>Sessions, timelines, counters, leaderboards, pub/sub</td>
           </tr>
@@ -1503,7 +1735,7 @@ redis-cli --hotkeys
             <td>Map, Queue, List, Set + SQL</td>
             <td style="color:var(--green);">Yes</td>
             <td style="color:var(--green);">Yes (embedded)</td>
-            <td>Java ecosystems, distributed computing, JCache JSR-107</td>
+            <td>Java ecosystems, distributed computing, <span class="term">JCache<span class="term-tooltip"><span class="term-label">☕ JCache (JSR-107)</span>Java's standard caching API specification. Defines a common interface so your code can swap between Hazelcast, Caffeine, or Ehcache without changing application logic.</span></span> JSR-107</td>
           </tr>
           <tr>
             <td style="color:var(--cyan);">Caffeine</td>
@@ -1518,7 +1750,7 @@ redis-cli --hotkeys
             <td>CDN / Edge</td>
             <td>HTTP objects</td>
             <td style="color:var(--green);">Yes (edge)</td>
-            <td style="color:var(--green);">450+ PoPs</td>
+            <td style="color:var(--green);">450+ <span class="term">PoPs<span class="term-tooltip"><span class="term-label">🌍 Points of Presence</span>Physical CDN locations worldwide. CloudFront has 450+, meaning most users globally are within 10ms of a cached copy of your content.</span></span></td>
             <td>Static assets, API caching, geographic distribution</td>
           </tr>
         </tbody>
@@ -1713,6 +1945,241 @@ function resetSim() {
   const log = document.getElementById('sim-log');
   log.innerHTML = '<span class="log-info">// Cache reset. LRU simulator ready.</span>';
 }
+
+/* ═══════════════════════════════════════════
+   HIT RATE CALCULATOR
+═══════════════════════════════════════════ */
+function updateHR(val) {
+  const hr = parseInt(val);
+  const total = 1000000;
+  const hitCount = Math.round(total * hr / 100);
+  const dbQ = total - hitCount;
+  const servers = Math.max(1, Math.round(dbQ / 10000));
+
+  document.getElementById('hr-display').textContent = hr + '%';
+
+  const fmt = n => n >= 1000000 ? (n/1000000).toFixed(1) + 'M' : n >= 1000 ? Math.round(n/1000) + 'K' : n;
+  document.getElementById('hr-db-queries').textContent = fmt(dbQ);
+  document.getElementById('hr-cache-hits').textContent = fmt(hitCount);
+  document.getElementById('hr-servers').textContent = '~' + servers;
+  document.getElementById('hr-saved').textContent = hr + '%';
+
+  const dbEl = document.getElementById('hr-db-queries');
+  dbEl.style.color = hr >= 95 ? 'var(--green)' : hr >= 80 ? 'var(--amber)' : 'var(--red)';
+}
+
+/* ═══════════════════════════════════════════
+   WRITE STRATEGY SIMULATOR
+═══════════════════════════════════════════ */
+const wsStrategies = {
+  wt: {
+    color: 'var(--amber)',
+    cls: 'sel-wt',
+    steps: [
+      ['App', 'Application receives write request (e.g. updateUser)'],
+      ['→ Cache', 'Write to cache synchronously'],
+      ['→ DB', 'Write to database synchronously (both writes complete)'],
+      ['ACK ✓', 'Success only after BOTH writes complete']
+    ],
+    info: '<strong style="color:var(--amber);">Write-Through:</strong> Every write updates cache AND DB before returning. Every cached value is always consistent with DB.<br><br>✓ Strong consistency — cache never serves stale data<br>✗ Higher write latency (cache write + DB write)<br>→ Use for: financial data, orders, inventory, user accounts'
+  },
+  wb: {
+    color: 'var(--green)',
+    cls: 'sel-wb',
+    steps: [
+      ['App', 'Application receives write request'],
+      ['→ Cache', 'Write to cache immediately'],
+      ['ACK ✓', 'Success acknowledged immediately — fastest possible write'],
+      ['→ DB (async)', 'DB updated later via background job, queue, or batch']
+    ],
+    info: '<strong style="color:var(--green);">Write-Back (Write-Behind):</strong> Write to cache first, acknowledge immediately, flush to DB asynchronously.<br><br>✓ Extremely fast writes — no waiting for DB<br>✗ Data loss risk if cache crashes before DB flush<br>→ Use for: metrics, IoT telemetry, gaming leaderboards, analytics'
+  },
+  wa: {
+    color: 'var(--purple)',
+    cls: 'sel-wa',
+    steps: [
+      ['App', 'Application receives write request'],
+      ['→ DB (direct)', 'Write goes directly to database, bypassing cache entirely'],
+      ['ACK ✓', 'Success acknowledged after DB write'],
+      ['Cache (next read)', 'Cache populated lazily on the next read (cache-aside)']
+    ],
+    info: '<strong style="color:var(--purple);">Write-Around:</strong> Writes bypass cache entirely and go straight to DB. Cache is populated on subsequent reads only.<br><br>✓ No cache pollution from write-once or write-heavy data<br>✗ First read after a write will always be a cache miss<br>→ Use for: bulk imports, log data, write-once historical records'
+  }
+};
+
+let wsSelected = 'wt';
+
+window.selectWS = function(key, btn) {
+  wsSelected = key;
+  document.querySelectorAll('.ws-btn').forEach(b => b.className = 'ws-btn');
+  btn.className = 'ws-btn ' + wsStrategies[key].cls;
+  renderWS(key);
+}
+
+function renderWS(key) {
+  const d = wsStrategies[key];
+  const flow = document.getElementById('ws-flow');
+  if (!flow) return;
+  flow.innerHTML = d.steps.map((s, i) => `
+    <div class="ws-flow-step" style="border-color:${d.color}33;background:${d.color}0d;border:1px solid ${d.color}33;">
+      <span style="font-family:'Fira Code',monospace;font-size:12px;color:${d.color};min-width:130px;flex-shrink:0;">${s[0]}</span>
+      <span style="font-size:12px;color:var(--muted);">${s[1]}</span>
+    </div>
+  `).join('');
+  const desc = document.getElementById('ws-desc');
+  if (desc) {
+    desc.innerHTML = '<span class="hl-label">// selected strategy explanation</span>' + d.info;
+  }
+}
+
+/* ═══════════════════════════════════════════
+   TTL DECAY SIMULATOR
+═══════════════════════════════════════════ */
+const TTL_ENTRIES = [
+  {key:'user:1337',    baseTTL:30, ttl:30, color:'var(--cyan)'},
+  {key:'session:abc',  baseTTL:20, ttl:20, color:'var(--green)'},
+  {key:'config:flags', baseTTL:45, ttl:45, color:'var(--amber)'},
+  {key:'product:42',   baseTTL:15, ttl:15, color:'var(--purple)'},
+  {key:'trending:top', baseTTL:10, ttl:10, color:'var(--red)'},
+];
+let ttlTimer = null;
+let ttlRunning = false;
+
+function renderTTL() {
+  const wrap = document.getElementById('ttl-wrap');
+  if (!wrap) return;
+  wrap.innerHTML = TTL_ENTRIES.map(k => {
+    const pct = Math.max(0, (k.ttl / k.baseTTL) * 100);
+    const col = pct > 60 ? 'var(--green)' : pct > 25 ? 'var(--amber)' : pct > 0 ? 'var(--red)' : '#3a4460';
+    const stateHtml = k.ttl <= 0
+    ? `<span style="color:var(--red);font-family:'Fira Code',monospace;font-size:11px;">EXPIRED</span>`
+    : `<span style="color:var(--green);font-family:'Fira Code',monospace;font-size:11px;">LIVE</span>`;
+    return `
+      <div style="display:grid;grid-template-columns:120px 1fr 64px 60px;align-items:center;gap:0.75rem;margin-bottom:10px;">
+        <div style="font-family:'Fira Code',monospace;font-size:11px;color:var(--muted);">${k.key}</div>
+        <div style="background:var(--surface2);border-radius:4px;height:14px;overflow:hidden;">
+          <div style="width:${pct}%;height:100%;border-radius:4px;background:${col};transition:width 0.85s linear;display:flex;align-items:center;padding-left:6px;">
+            <span style="font-family:'Fira Code',monospace;font-size:9px;font-weight:500;color:rgba(0,0,0,0.7);">${k.ttl > 0 ? k.ttl + 's' : ''}</span>
+          </div>
+        </div>
+        <div style="font-family:'Fira Code',monospace;font-size:11px;color:var(--amber);">${k.ttl > 0 ? k.ttl + 's' : '0s'}</div>
+        <div>${stateHtml}</div>
+      </div>`;
+  }).join('');
+}
+
+function ttlAddLog(msg, cls) {
+  const log = document.getElementById('ttl-log');
+  if (!log) return;
+  const span = document.createElement('span');
+  span.className = cls || 'log-info';
+  span.textContent = msg;
+  log.appendChild(span);
+  log.scrollTop = log.scrollHeight;
+}
+
+function ttlTick() {
+  TTL_ENTRIES.forEach(k => {
+    if (k.ttl > 0) {
+      k.ttl -= 1;
+      if (k.ttl <= 0) {
+        ttlAddLog(`⚠ EXPIRED key="${k.key}" → next read = cache miss → DB hit!`, 'log-evict');
+      }
+    }
+  });
+  renderTTL();
+}
+
+function startTTL() {
+  if (ttlRunning) return;
+  ttlRunning = true;
+  ttlTimer = setInterval(ttlTick, 1000);
+  ttlAddLog('▶ Running — watch TTLs count down...', 'log-info');
+}
+function pauseTTL() {
+  clearInterval(ttlTimer); ttlRunning = false;
+  ttlAddLog('⏸ Paused.', 'log-info');
+}
+function resetTTL() {
+  clearInterval(ttlTimer); ttlRunning = false;
+  TTL_ENTRIES.forEach(k => { k.ttl = k.baseTTL; });
+  renderTTL();
+  document.getElementById('ttl-log').innerHTML = '<span class="log-info">// Reset. Press Start to watch keys decay.</span>';
+}
+function touchTTLKey(keyName) {
+  const k = TTL_ENTRIES.find(x => x.key === keyName);
+  if (k) {
+    k.ttl = k.baseTTL;
+    renderTTL();
+    ttlAddLog(`↻ TOUCHED key="${keyName}" → TTL refreshed to ${k.baseTTL}s`, 'log-hit');
+  }
+}
+
+/* ═══════════════════════════════════════════
+   CACHE PENETRATION SIMULATOR
+═══════════════════════════════════════════ */
+let penBlocked = 0, penCacheLookups = 0, penDBHits = 0, penSaved = 0;
+let penRunning = false;
+
+function penAddLog(msg, cls) {
+  const log = document.getElementById('pen-log');
+  if (!log) return;
+  const span = document.createElement('span');
+  span.className = cls || 'log-info';
+  span.textContent = msg;
+  log.appendChild(span);
+  log.scrollTop = log.scrollHeight;
+}
+
+function updatePenUI() {
+  document.getElementById('pen-blocked').textContent   = penBlocked;
+  document.getElementById('pen-cache-hits2').textContent = penCacheLookups;
+  document.getElementById('pen-db-hits').textContent   = penDBHits;
+  document.getElementById('pen-saved-hits').textContent = penSaved;
+
+  const dbNode = document.getElementById('pen-db-node');
+  if (dbNode) dbNode.className = 'pen-node' + (penDBHits > 0 ? ' pn-miss' : '');
+  const bloomNode = document.getElementById('pen-bloom-node');
+  if (bloomNode) bloomNode.className = 'pen-node' + (penBlocked > 0 ? ' pn-blocked' : '');
+}
+
+async function penAttack(withBloom) {
+  if (penRunning) return;
+  penRunning = true;
+  for (let i = 0; i < 20; i++) {
+    await new Promise(r => setTimeout(r, 130));
+    const fakeId = 'user:FAKE_' + Math.floor(Math.random() * 99999);
+    if (withBloom) {
+      penBlocked++;
+      penSaved++;
+      penAddLog(`🛡 BLOCKED  ${fakeId} — Bloom filter: "definitely not in DB"`, 'log-hit');
+    } else {
+      penCacheLookups++;
+      penAddLog(`⚡ CACHE MISS  ${fakeId} → DB lookup...`, 'log-miss');
+      await new Promise(r => setTimeout(r, 80));
+      penDBHits++;
+      penAddLog(`💥 DB QUERY  ${fakeId} → not found (wasted DB query!)`, 'log-evict');
+    }
+    updatePenUI();
+  }
+  penRunning = false;
+}
+
+function penReset() {
+  penBlocked = 0; penCacheLookups = 0; penDBHits = 0; penSaved = 0;
+  updatePenUI();
+  document.getElementById('pen-db-node').className = 'pen-node';
+  document.getElementById('pen-bloom-node').className = 'pen-node';
+  document.getElementById('pen-log').innerHTML = '<span class="log-info">// Click an attack button above to simulate cache penetration</span>';
+}
+
+/* ═══════════════════════════════════════════
+   INIT ON LOAD
+═══════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', () => {
+  renderWS('wt');
+  renderTTL();
+});
 </script>
 </body>
 </html>
