@@ -27,9 +27,9 @@ print("Reading index.html...")
 with open(INDEX_FILE, "r", encoding="utf-8") as f:
     html = f.read()
 
-print("Scanning pages directory (recursive)...")
+print("Scanning pages directory (ONLY nested folders)...")
 
-# 👉 folder → list of cards
+# folder → list of cards
 grouped_cards = defaultdict(list)
 
 for root, dirs, files in os.walk(SOURCE_DIR):
@@ -43,17 +43,19 @@ for root, dirs, files in os.walk(SOURCE_DIR):
         # relative path from "source"
         relative_path = os.path.relpath(full_path, "source")
 
-        # Decide folder
         parts = relative_path.split(os.sep)
 
-        if len(parts) == 2:
-            folder = "General"
-        else:
-            folder = parts[1].replace("-", " ").title()
+        # ✅ Only allow source/pages/<folder>/<file>.html
+        if len(parts) != 3:
+            continue
 
+        # folder name
+        folder = parts[1].replace("-", " ").title()
+
+        # title from file
         title = file.replace(".html", "").replace("-", " ").title()
 
-        # icon logic (same as yours)
+        # icon detection
         icon = "🪟"
         for key in icons:
             if key in file.lower():
