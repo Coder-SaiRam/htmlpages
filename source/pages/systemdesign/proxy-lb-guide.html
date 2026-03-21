@@ -1,0 +1,1554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Load Balancer · Forward & Reverse Proxy — The Complete Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f7f6f2;--bg2:#efefea;--surface:#ffffff;--surface2:#f9f8f5;
+  --border:#e4e2db;--border2:#cbc8bf;
+  --text:#18181a;--muted:#6b6a66;--dim:#a0a09c;
+  --blue:#1a4fd6;--blue-l:#eef2fd;--blue-b:#bfcef8;
+  --green:#0c6b3e;--green-l:#eaf6ef;--green-b:#9dd9bc;
+  --orange:#b84d08;--orange-l:#fef3ea;--orange-b:#f4bc84;
+  --red:#c0182b;--red-l:#fdeef0;--red-b:#f4a0ab;
+  --purple:#5e20b8;--purple-l:#f2eeff;--purple-b:#c8b0f8;
+  --teal:#0a6868;--teal-l:#eaf6f6;--teal-b:#9dd8d8;
+  --r:8px;--rl:12px;
+  --sh:0 1px 3px rgba(0,0,0,.07),0 1px 2px rgba(0,0,0,.04);
+  --sh2:0 4px 14px rgba(0,0,0,.09),0 2px 4px rgba(0,0,0,.05);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'Geist',sans-serif;font-size:14px;line-height:1.7;overflow-x:hidden;}
+
+/* grid bg on hero */
+.hero-bg{position:absolute;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:.6;pointer-events:none;}
+
+/* ── HERO ── */
+.hero{background:var(--surface);border-bottom:1px solid var(--border);padding:5rem 2rem 4rem;text-align:center;position:relative;overflow:hidden;}
+.hero-pill{display:inline-flex;align-items:center;gap:6px;padding:4px 13px;background:var(--blue-l);border:1px solid var(--blue-b);border-radius:100px;font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--blue);margin-bottom:1.75rem;position:relative;}
+.hero-pill::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--blue);animation:dot 2s ease-in-out infinite;}
+@keyframes dot{0%,100%{opacity:1;}50%{opacity:.25;}}
+.hero h1{font-family:'Instrument Serif',serif;font-size:clamp(3rem,7vw,6rem);line-height:1;letter-spacing:-.02em;margin-bottom:1.25rem;position:relative;}
+.hero h1 .w1{display:block;}
+.hero h1 .w2{display:block;font-style:italic;color:var(--blue);}
+.hero-sub{font-size:1rem;color:var(--muted);max-width:540px;margin:0 auto 2.5rem;position:relative;}
+.hero-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));max-width:660px;margin:0 auto;gap:1px;background:var(--border);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;position:relative;}
+.hs{background:var(--surface);padding:1.1rem .75rem;text-align:center;}
+.hs-v{font-family:'Instrument Serif',serif;font-size:1.7rem;color:var(--blue);line-height:1;margin-bottom:3px;}
+.hs-l{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;}
+
+/* ── NAV ── */
+nav{position:sticky;top:0;z-index:200;background:rgba(247,246,242,.95);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);height:48px;display:flex;align-items:center;padding:0 1.5rem;gap:2px;overflow-x:auto;scrollbar-width:none;}
+nav::-webkit-scrollbar{display:none;}
+.nav-logo{font-family:'Instrument Serif',serif;font-size:1.1rem;color:var(--blue);margin-right:1.25rem;white-space:nowrap;flex-shrink:0;}
+nav a{color:var(--muted);text-decoration:none;font-size:12px;padding:4px 11px;border-radius:100px;white-space:nowrap;transition:all .18s;flex-shrink:0;}
+nav a:hover{color:var(--text);background:var(--bg2);}
+nav a.active{color:var(--blue);background:var(--blue-l);}
+.progress-wrap{height:2px;background:var(--border);}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--teal));width:0%;transition:width .25s;}
+
+/* ── LAYOUT ── */
+.container{max-width:1080px;margin:0 auto;padding:0 2rem;position:relative;}
+section{padding:4rem 0;border-bottom:1px solid var(--border);}
+.sec-eye{font-family:'Geist Mono',monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--blue);margin-bottom:.5rem;}
+.sec-title{font-family:'Instrument Serif',serif;font-size:clamp(1.9rem,4vw,2.7rem);line-height:1.05;margin-bottom:.65rem;}
+.sec-sub{font-size:.95rem;color:var(--muted);max-width:620px;margin-bottom:2.5rem;line-height:1.8;}
+
+/* ── CARDS ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;margin-bottom:1.75rem;box-shadow:var(--sh);transition:box-shadow .2s,border-color .2s;}
+.card:hover{box-shadow:var(--sh2);border-color:var(--border2);}
+.card-stripe{height:3px;}
+.cs-blue{background:linear-gradient(90deg,var(--blue),#60a5fa);}
+.cs-green{background:linear-gradient(90deg,var(--green),var(--teal));}
+.cs-orange{background:linear-gradient(90deg,var(--orange),#f59e0b);}
+.cs-purple{background:linear-gradient(90deg,var(--purple),var(--blue));}
+.cs-red{background:linear-gradient(90deg,var(--red),var(--orange));}
+.cs-teal{background:linear-gradient(90deg,var(--teal),var(--green));}
+.cs-multi{background:linear-gradient(90deg,var(--blue),var(--teal),var(--green));}
+.card-header{display:flex;align-items:flex-start;gap:1rem;padding:1.5rem 1.75rem 1.25rem;border-bottom:1px solid var(--border);}
+.card-icon{width:42px;height:42px;border-radius:10px;display:grid;place-items:center;font-size:1.15rem;flex-shrink:0;}
+.card-meta h2{font-family:'Instrument Serif',serif;font-size:1.4rem;line-height:1.2;margin-bottom:3px;}
+.card-meta .sub{color:var(--muted);font-size:12px;}
+.card-body{padding:1.5rem 1.75rem;}
+
+/* ── PROSE ── */
+.prose{font-size:14px;color:#444;line-height:1.9;margin-bottom:1rem;}
+.prose strong{color:var(--text);font-weight:500;}
+.prose code{font-family:'Geist Mono',monospace;font-size:11.5px;background:var(--bg2);padding:1px 5px;border-radius:4px;color:var(--blue);border:1px solid var(--border);}
+
+/* ── CODE BLOCKS ── */
+.code{
+  background:#1a1b22;
+  border:1px solid #2e3044;
+  border-radius:var(--r);
+  padding:0;
+  font-family:'Geist Mono',monospace;
+  font-size:11.5px;
+  line-height:1;
+  overflow-x:auto;
+  margin:.9rem 0;
+  color:#a8b8cc;
+  counter-reset:line;
+  display:block;
+}
+.code-inner{
+  display:block;
+  padding:.25rem 0;
+  white-space:pre;
+}
+.cl{
+  display:block;
+  padding:0 1.1rem 0 0;
+  line-height:1.75;
+  white-space:pre;
+  position:relative;
+  padding-left:3.5rem;
+}
+.cl:hover{background:rgba(255,255,255,.04);}
+.cl::before{
+  content:counter(line);
+  counter-increment:line;
+  position:absolute;
+  left:0;
+  width:2.8rem;
+  text-align:right;
+  padding-right:.6rem;
+  color:#3a4060;
+  font-size:10.5px;
+  line-height:1.75;
+  user-select:none;
+  border-right:1px solid #2e3044;
+  background:#161720;
+}
+.cl.sep{
+  border-top:1px solid #2e3044;
+  margin-top:.1rem;
+  padding-top:.1rem;
+}
+.k{color:#c792ea;}.s{color:#c3e88d;}.c{color:#3a5070;font-style:italic;}.n{color:#82aaff;}.num{color:#f9c95e;}.fn{color:#80cbc4;}.kw{color:#89ddff;}
+
+/* ── TABLE ── */
+.tbl{width:100%;border-collapse:collapse;font-size:12.5px;margin:1rem 0;}
+.tbl th{font-family:'Geist Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:9px 13px;text-align:left;border-bottom:2px solid var(--border);background:var(--bg2);}
+.tbl td{padding:9px 13px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:top;}
+.tbl tr:last-child td{border-bottom:none;}
+.tbl tr:hover td{background:var(--bg2);}
+.tbl td.g{color:var(--green);font-weight:500;}.tbl td.r{color:var(--red);}.tbl td.b{color:var(--blue);font-weight:500;}.tbl td.o{color:var(--orange);}.tbl td.p{color:var(--purple);}
+
+/* ── PC GRID ── */
+.pcg{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:.85rem;margin:1rem 0;}
+.pcb{border-radius:var(--r);padding:1.1rem;font-size:13px;}
+.pro{background:var(--green-l);border:1px solid var(--green-b);}
+.con{background:var(--red-l);border:1px solid var(--red-b);}
+.note{background:var(--orange-l);border:1px solid var(--orange-b);}
+.tip{background:var(--blue-l);border:1px solid var(--blue-b);}
+.pcb h4{font-size:10px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:.6rem;font-weight:600;}
+.pro h4{color:var(--green);}.con h4{color:var(--red);}.note h4{color:var(--orange);}.tip h4{color:var(--blue);}
+.pcb ul{list-style:none;line-height:2.1;color:var(--text);}
+.pro li::before{content:'✓  ';color:var(--green);}.con li::before{content:'✗  ';color:var(--red);}
+.note li::before{content:'⇄  ';color:var(--orange);}.tip li::before{content:'→  ';color:var(--blue);}
+
+/* ── HIGHLIGHT BOXES ── */
+.hl{border-radius:var(--r);padding:1.1rem 1.4rem;margin:1rem 0;font-size:13.5px;line-height:1.8;}
+.hl-label{font-family:'Geist Mono',monospace;font-size:9px;letter-spacing:.18em;text-transform:uppercase;display:block;margin-bottom:.4rem;}
+.hl-blue{background:var(--blue-l);border:1px solid var(--blue-b);border-left:3px solid var(--blue);border-radius:0 var(--r) var(--r) 0;color:#2d4a8a;}
+.hl-blue .hl-label{color:var(--blue);}
+.hl-blue strong{color:var(--blue);}
+.hl-green{background:var(--green-l);border:1px solid var(--green-b);border-left:3px solid var(--green);border-radius:0 var(--r) var(--r) 0;color:#145c3a;}
+.hl-green .hl-label{color:var(--green);}
+.hl-green strong{color:var(--green);}
+.hl-orange{background:var(--orange-l);border:1px solid var(--orange-b);border-left:3px solid var(--orange);border-radius:0 var(--r) var(--r) 0;color:#7a3608;}
+.hl-orange .hl-label{color:var(--orange);}
+.hl-orange strong{color:var(--orange);}
+.hl-purple{background:var(--purple-l);border:1px solid var(--purple-b);border-left:3px solid var(--purple);border-radius:0 var(--r) var(--r) 0;color:#4a1a90;}
+.hl-purple .hl-label{color:var(--purple);}
+.hl-purple strong{color:var(--purple);}
+.hl-red{background:var(--red-l);border:1px solid var(--red-b);border-left:3px solid var(--red);border-radius:0 var(--r) var(--r) 0;color:#8a1020;}
+.hl-red .hl-label{color:var(--red);}
+.hl-red strong{color:var(--red);}
+
+/* ── IP PACKET STYLE ── */
+.packet{font-family:'Geist Mono',monospace;font-size:11px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:.75rem 1rem;margin:.5rem 0;display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
+.packet-field{padding:2px 8px;border-radius:4px;font-size:10.5px;}
+.pf-src{background:var(--blue-l);border:1px solid var(--blue-b);color:var(--blue);}
+.pf-dst{background:var(--orange-l);border:1px solid var(--orange-b);color:var(--orange);}
+.pf-port{background:var(--purple-l);border:1px solid var(--purple-b);color:var(--purple);}
+.pf-payload{background:var(--bg2);border:1px solid var(--border);color:var(--muted);}
+.pf-method{background:var(--green-l);border:1px solid var(--green-b);color:var(--green);}
+.pf-arrow{color:var(--dim);font-size:14px;}
+
+/* ── SERVER CHIP ── */
+.server-chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:6px;font-family:'Geist Mono',monospace;font-size:11px;border:1px solid;}
+.sc-green{background:var(--green-l);border-color:var(--green-b);color:var(--green);}
+.sc-blue{background:var(--blue-l);border-color:var(--blue-b);color:var(--blue);}
+.sc-orange{background:var(--orange-l);border-color:var(--orange-b);color:var(--orange);}
+.sc-red{background:var(--red-l);border-color:var(--red-b);color:var(--red);}
+.sc-purple{background:var(--purple-l);border-color:var(--purple-b);color:var(--purple);}
+.status-dot{width:7px;height:7px;border-radius:50%;}
+.sd-green{background:var(--green);}.sd-orange{background:var(--orange);}.sd-red{background:var(--red);}
+
+/* ── FLOW STEPS ── */
+.flow{display:flex;flex-direction:column;margin:1rem 0;}
+.fstep{display:flex;align-items:flex-start;gap:.9rem;padding:.9rem 1.1rem;background:var(--surface);border:1px solid var(--border);border-bottom:none;transition:background .15s;}
+.fstep:first-child{border-radius:var(--r) var(--r) 0 0;}
+.fstep:last-child{border-bottom:1px solid var(--border);border-radius:0 0 var(--r) var(--r);}
+.fstep:hover{background:var(--blue-l);}
+.fstep-n{width:24px;height:24px;border-radius:50%;background:var(--blue-l);border:1px solid var(--blue-b);display:grid;place-items:center;font-family:'Geist Mono',monospace;font-size:10px;color:var(--blue);flex-shrink:0;margin-top:2px;}
+.fstep-body h4{font-size:13px;font-weight:600;margin-bottom:2px;}
+.fstep-body p{font-size:12px;color:var(--muted);line-height:1.6;}
+
+/* ── DIAGRAM ── */
+.diagram{background:var(--surface2);border:1px solid var(--border);border-radius:var(--rl);padding:1.25rem 1rem;margin:1.25rem 0;overflow-x:auto;}
+
+/* ── SIMULATION WIDGET ── */
+.sim{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:1.5rem;margin:1.25rem 0;box-shadow:var(--sh);}
+.sim-title{font-size:11px;font-family:'Geist Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--blue);margin-bottom:1rem;}
+.sim-controls{display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:1rem;align-items:center;}
+.sim-btn{padding:7px 15px;font-size:12px;font-family:'Geist Mono',monospace;background:var(--surface);border:1px solid var(--border2);border-radius:var(--r);color:var(--text);cursor:pointer;transition:all .15s;}
+.sim-btn:hover{background:var(--blue-l);border-color:var(--blue-b);color:var(--blue);}
+.sim-btn.primary{background:var(--blue);border-color:var(--blue);color:#fff;}
+.sim-btn.primary:hover{background:#1340b8;}
+.sim-btn.active{background:var(--blue-l);border-color:var(--blue);color:var(--blue);}
+.sim-btn:disabled{opacity:.4;cursor:default;}
+.sim-servers{display:flex;gap:.75rem;flex-wrap:wrap;margin:.75rem 0;}
+.sim-server{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:.85rem 1rem;min-width:140px;font-size:12px;transition:all .25s;}
+.sim-server.hit{background:var(--green-l);border-color:var(--green-b);animation:serverHit .4s ease;}
+.sim-server.down{background:var(--red-l);border-color:var(--red-b);opacity:.65;}
+.sim-server h4{font-family:'Geist Mono',monospace;font-size:11px;font-weight:500;margin-bottom:.5rem;}
+@keyframes serverHit{0%,100%{transform:scale(1);}50%{transform:scale(1.04);}}
+.sim-bar-wrap{height:6px;background:var(--border);border-radius:3px;overflow:hidden;margin:.3rem 0;}
+.sim-bar{height:100%;border-radius:3px;transition:width .4s ease;}
+.sim-log{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:.9rem 1rem;font-family:'Geist Mono',monospace;font-size:11.5px;height:130px;overflow-y:auto;color:var(--muted);display:flex;flex-direction:column;gap:2px;}
+.log-ok{color:var(--green);}.log-err{color:var(--red);}.log-info{color:var(--blue);}.log-warn{color:var(--orange);}
+.sim-stats{display:flex;gap:1.25rem;flex-wrap:wrap;margin-top:.85rem;}
+.sim-stat{font-size:12px;color:var(--muted);}
+.sim-stat span{color:var(--text);font-weight:500;}
+.load-badge{font-family:'Geist Mono',monospace;font-size:10px;padding:1px 7px;border-radius:100px;border:1px solid;}
+
+/* ── SCENARIO COMPARISON ── */
+.scenario-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin:1.25rem 0;}
+.sc{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:1.25rem;transition:all .2s;box-shadow:var(--sh);}
+.sc:hover{box-shadow:var(--sh2);border-color:var(--border2);}
+.sc-icon{font-size:1.5rem;margin-bottom:.7rem;display:block;}
+.sc h3{font-size:13px;font-weight:600;margin-bottom:.4rem;}
+.sc p{font-size:12px;color:var(--muted);line-height:1.65;}
+.sc-badge{display:inline-block;margin-top:.65rem;padding:2px 9px;border-radius:100px;font-size:10px;font-family:'Geist Mono',monospace;}
+
+/* ── METRICS ── */
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:.7rem;margin:1rem 0;}
+.metric{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:.9rem;text-align:center;box-shadow:var(--sh);}
+.metric-v{font-family:'Instrument Serif',serif;font-size:1.7rem;color:var(--blue);line-height:1;margin-bottom:3px;}
+.metric-l{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;}
+
+footer{background:var(--surface);border-top:1px solid var(--border);text-align:center;padding:3.5rem 2rem;color:var(--muted);}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-pill">System Design · Networking Deep Dive</div>
+  <h1>
+    <span class="w1">Proxies &</span>
+    <span class="w2">Load Balancers</span>
+  </h1>
+  <p class="hero-sub">Complete end-to-end guide with real IP addresses, live traffic simulations, and every scenario that comes up in FAANG interviews.</p>
+  <div class="hero-stats">
+    <div class="hs"><div class="hs-v">3</div><div class="hs-l">Core concepts</div></div>
+    <div class="hs"><div class="hs-v">6</div><div class="hs-l">LB algorithms</div></div>
+    <div class="hs"><div class="hs-v">4</div><div class="hs-l">Live simulators</div></div>
+    <div class="hs"><div class="hs-v">IP</div><div class="hs-l">Real examples</div></div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav id="topnav">
+  <span class="nav-logo">Proxies & LB</span>
+  <a href="#concepts">Concepts</a>
+  <a href="#forward">Forward Proxy</a>
+  <a href="#reverse">Reverse Proxy</a>
+  <a href="#loadbalancer">Load Balancer</a>
+  <a href="#algorithms">Algorithms</a>
+  <a href="#layer4vs7">L4 vs L7</a>
+  <a href="#healthchecks">Health Checks</a>
+  <a href="#e2e">End-to-End</a>
+  <a href="#nginx">Nginx Config</a>
+  <a href="#simulator">Live Simulator</a>
+</nav>
+<div class="progress-wrap"><div class="progress-fill" id="pf"></div></div>
+
+<!-- ════════════════════════════════════
+     S1: CONCEPTS OVERVIEW
+═════════════════════════════════════════ -->
+<section id="concepts">
+<div class="container">
+  <div class="sec-eye">// section_01</div>
+  <h2 class="sec-title">The Three Concepts Explained</h2>
+  <p class="sec-sub">Forward proxy, reverse proxy, and load balancer are often confused. Here is exactly what each one is, who it serves, and where it lives in the network.</p>
+
+  <div class="card">
+    <div class="card-stripe cs-blue"></div>
+    <div class="card-header">
+      <div class="card-icon" style="background:var(--blue-l)">🗺</div>
+      <div class="card-meta"><h2>Side-by-side comparison</h2><div class="sub">Who is "in the middle" and whose identity is hidden?</div></div>
+    </div>
+    <div class="card-body">
+      <div class="pcg" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr));">
+        <div style="background:var(--blue-l);border:1px solid var(--blue-b);border-radius:var(--r);padding:1.2rem;">
+          <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--blue);margin-bottom:.5rem;font-weight:600;">Forward Proxy</div>
+          <div style="font-size:13px;margin-bottom:.5rem;color:var(--text);">Sits in front of the <strong>client</strong></div>
+          <div style="font-size:12px;color:#2d4a8a;line-height:1.7;">Client → <strong>Forward Proxy</strong> → Internet<br>Server sees the <strong>proxy's IP</strong>, not the client's.<br><br>Use: corporate firewalls, VPNs, anonymity, content filtering</div>
+        </div>
+        <div style="background:var(--green-l);border:1px solid var(--green-b);border-radius:var(--r);padding:1.2rem;">
+          <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--green);margin-bottom:.5rem;font-weight:600;">Reverse Proxy</div>
+          <div style="font-size:13px;margin-bottom:.5rem;color:var(--text);">Sits in front of the <strong>server</strong></div>
+          <div style="font-size:12px;color:#145c3a;line-height:1.7;">Client → <strong>Reverse Proxy</strong> → Server<br>Client sees the <strong>proxy's IP</strong>, not the server's.<br><br>Use: SSL termination, caching, hide server topology</div>
+        </div>
+        <div style="background:var(--orange-l);border:1px solid var(--orange-b);border-radius:var(--r);padding:1.2rem;">
+          <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--orange);margin-bottom:.5rem;font-weight:600;">Load Balancer</div>
+          <div style="font-size:13px;margin-bottom:.5rem;color:var(--text);">A <strong>specialised reverse proxy</strong></div>
+          <div style="font-size:12px;color:#7a3608;line-height:1.7;">Client → <strong>Load Balancer</strong> → Server 1/2/3<br>Distributes requests across multiple servers.<br><br>Use: scalability, high availability, zero-downtime deploys</div>
+        </div>
+      </div>
+
+      <div class="hl hl-blue" style="margin-top:1.25rem;">
+        <span class="hl-label">// the key mental model</span>
+        A <strong>forward proxy hides the client</strong> from the server. A <strong>reverse proxy hides the server</strong> from the client. A <strong>load balancer is a reverse proxy that distributes load</strong> across multiple servers. Every load balancer is a reverse proxy, but not every reverse proxy is a load balancer.
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ════════════════════════════════════
+     S2: FORWARD PROXY
+═════════════════════════════════════════ -->
+<section id="forward">
+<div class="container">
+  <div class="sec-eye">// section_02</div>
+  <h2 class="sec-title">Forward Proxy</h2>
+  <p class="sec-sub">Acts on behalf of the client — the server never knows who the real client is. Your company's internet filter is a forward proxy.</p>
+
+  <div class="card">
+    <div class="card-stripe cs-purple"></div>
+    <div class="card-header">
+      <div class="card-icon" style="background:var(--purple-l)">🕵</div>
+      <div class="card-meta"><h2>How a Forward Proxy Works — With Real IPs</h2><div class="sub">Step-by-step packet flow · DNS · IP masking · corporate use case</div></div>
+    </div>
+    <div class="card-body">
+      <p class="prose">In a forward proxy setup, the client is <strong>configured to route all outbound traffic through the proxy</strong>. The proxy makes the request on behalf of the client and returns the response. From the origin server's perspective, the connection came from the proxy IP, not the client's real IP.</p>
+
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:1.5rem;margin:1rem 0;">
+        <div style="font-size:11px;font-family:'Geist Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--purple);margin-bottom:1rem;">Network topology — corporate office example</div>
+        <div style="display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:.5rem;align-items:center;font-size:12px;overflow-x:auto;">
+          <div style="background:var(--blue-l);border:1px solid var(--blue-b);border-radius:var(--r);padding:.85rem;text-align:center;">
+            <div style="font-weight:600;color:var(--blue);margin-bottom:.3rem;">Employee Laptop</div>
+            <div style="font-family:'Geist Mono',monospace;font-size:11px;color:var(--muted);">Private IP:<br>192.168.1.45</div>
+          </div>
+          <div style="text-align:center;color:var(--dim);font-size:18px;padding:0 .25rem;">→</div>
+          <div style="background:var(--purple-l);border:1px solid var(--purple-b);border-radius:var(--r);padding:.85rem;text-align:center;">
+            <div style="font-weight:600;color:var(--purple);margin-bottom:.3rem;">Forward Proxy</div>
+            <div style="font-family:'Geist Mono',monospace;font-size:11px;color:var(--muted);">Corporate Squid<br>10.0.0.1 (internal)<br>203.0.113.50 (public)</div>
+          </div>
+          <div style="text-align:center;color:var(--dim);font-size:18px;padding:0 .25rem;">→</div>
+          <div style="background:var(--green-l);border:1px solid var(--green-b);border-radius:var(--r);padding:.85rem;text-align:center;">
+            <div style="font-weight:600;color:var(--green);margin-bottom:.3rem;">google.com</div>
+            <div style="font-family:'Geist Mono',monospace;font-size:11px;color:var(--muted);">172.217.16.46<br>Sees request FROM<br>203.0.113.50</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="font-size:11px;font-family:'Geist Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:1.25rem 0 .6rem;">Packet-level walkthrough</div>
+
+      <div class="flow">
+        <div class="fstep">
+          <div class="fstep-n">1</div>
+          <div class="fstep-body">
+            <h4>Client sends request to proxy</h4>
+            <p>The browser is configured with proxy 10.0.0.1:3128. It sends an HTTP CONNECT or GET request to the proxy, not directly to google.com.</p>
+            <div class="packet" style="margin-top:.5rem;">
+              <span class="packet-field pf-src">SRC: 192.168.1.45:54821</span>
+              <span class="pf-arrow">→</span>
+              <span class="packet-field pf-dst">DST: 10.0.0.1:3128</span>
+              <span class="packet-field pf-method">GET http://google.com/ HTTP/1.1</span>
+              <span class="packet-field pf-payload">Host: google.com</span>
+            </div>
+          </div>
+        </div>
+        <div class="fstep">
+          <div class="fstep-n">2</div>
+          <div class="fstep-body">
+            <h4>Proxy checks policy (allow/deny)</h4>
+            <p>Corporate proxy checks ACL rules. google.com → ALLOWED. youtube.com → BLOCKED (entertainment). Proxy logs: user 192.168.1.45 requested google.com at 14:23:07.</p>
+          </div>
+        </div>
+        <div class="fstep">
+          <div class="fstep-n">3</div>
+          <div class="fstep-body">
+            <h4>Proxy opens NEW connection to origin</h4>
+            <p>The proxy makes a fresh TCP connection to google.com. The original client TCP connection is separate. Google sees a connection from the proxy's public IP only.</p>
+            <div class="packet" style="margin-top:.5rem;">
+              <span class="packet-field pf-src">SRC: 203.0.113.50:41200</span>
+              <span class="pf-arrow">→</span>
+              <span class="packet-field pf-dst">DST: 172.217.16.46:443</span>
+              <span class="packet-field pf-method">GET / HTTP/1.1</span>
+              <span class="packet-field pf-payload">Host: google.com</span>
+            </div>
+          </div>
+        </div>
+        <div class="fstep">
+          <div class="fstep-n">4</div>
+          <div class="fstep-body">
+            <h4>Response flows back through proxy</h4>
+            <p>Google responds to the proxy. The proxy receives the response, optionally caches it, and forwards it back to the original client 192.168.1.45.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="pcg">
+        <div class="pcb pro">
+          <h4>Corporate use cases</h4>
+          <ul>
+            <li>Block social media during work hours</li>
+            <li>Log all employee internet activity</li>
+            <li>Scan downloads for malware</li>
+            <li>Cache frequently-visited pages</li>
+            <li>Single outbound IP for firewall rules</li>
+          </ul>
+        </div>
+        <div class="pcb pro">
+          <h4>Privacy / VPN use cases</h4>
+          <ul>
+            <li>Hide real IP from websites</li>
+            <li>Bypass geo-restricted content</li>
+            <li>Anonymise traffic (Tor is multi-hop proxy)</li>
+            <li>Access region-locked APIs</li>
+            <li>Security research anonymity</li>
+          </ul>
+        </div>
+        <div class="pcb note">
+          <h4>HTTPS and CONNECT tunnels</h4>
+          <ul>
+            <li>For HTTPS, browser sends HTTP CONNECT</li>
+            <li>Proxy creates TCP tunnel (doesn't decrypt)</li>
+            <li>TLS handshake happens end-to-end</li>
+            <li>SSL inspection: proxy is a MITM (corp only)</li>
+            <li>Requires installing corp CA cert on devices</li>
+          </ul>
+        </div>
+        <div class="pcb tip">
+          <h4>Real tools</h4>
+          <ul>
+            <li>Squid — most common, open source</li>
+            <li>Nginx (forward proxy mode)</li>
+            <li>Shadowsocks — encrypted proxy</li>
+            <li>SOCKS5 proxy — protocol-agnostic</li>
+            <li>Cloudflare WARP, VPNs</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="hl hl-orange">
+        <span class="hl-label">// HTTPS connect tunnel — what happens at the packet level</span>
+        Client: <code>CONNECT google.com:443 HTTP/1.1</code><br>
+        Proxy: <code>200 Connection Established</code><br>
+        After this, the proxy is a <strong>blind TCP pipe</strong>. The TLS handshake and all encrypted traffic passes through without the proxy seeing the plaintext. The proxy only knows the domain name from the CONNECT request — not the URL path, headers, or body.
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ════════════════════════════════════
+     S3: REVERSE PROXY
+═════════════════════════════════════════ -->
+<section id="reverse">
+<div class="container">
+  <div class="sec-eye">// section_03</div>
+  <h2 class="sec-title">Reverse Proxy</h2>
+  <p class="sec-sub">Sits in front of your servers — clients think they're talking to your app but they're actually talking to the proxy. Nginx and Cloudflare are reverse proxies.</p>
+
+  <div class="card">
+    <div class="card-stripe cs-green"></div>
+    <div class="card-header">
+      <div class="card-icon" style="background:var(--green-l)">🔀</div>
+      <div class="card-meta"><h2>Reverse Proxy — With Real IPs & Full Request Flow</h2><div class="sub">SSL termination · caching · compression · header rewriting · security</div></div>
+    </div>
+    <div class="card-body">
+      <p class="prose">A reverse proxy intercepts <strong>all inbound requests</strong> before they reach your application servers. Clients have no idea your real servers exist — they communicate only with the proxy's IP. This gives you a single, clean entry point where you can handle SSL, authentication, caching, rate limiting, and routing in one place.</p>
+
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:1.5rem;margin:1rem 0;">
+        <div style="font-size:11px;font-family:'Geist Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--green);margin-bottom:1rem;">Production topology — api.myapp.com example</div>
+        <div style="display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;font-size:12px;">
+          <div style="background:var(--blue-l);border:1px solid var(--blue-b);border-radius:var(--r);padding:.75rem 1rem;text-align:center;">
+            <div style="font-weight:600;color:var(--blue);">User Browser</div>
+            <div style="font-family:'Geist Mono',monospace;font-size:10.5px;color:var(--muted);">98.12.44.201</div>
+          </div>
+          <div style="color:var(--dim);font-size:16px;padding:0 .25rem;">→</div>
+          <div style="background:var(--surface);border:2px solid var(--green);border-radius:var(--r);padding:.75rem 1rem;text-align:center;">
+            <div style="font-weight:600;color:var(--green);">Nginx Reverse Proxy</div>
+            <div style="font-family:'Geist Mono',monospace;font-size:10.5px;color:var(--muted);">api.myapp.com → 52.10.8.3</div>
+            <div style="font-size:10px;color:var(--green);margin-top:.2rem;">SSL ends here ✓</div>
+          </div>
+          <div style="color:var(--dim);font-size:16px;padding:0 .25rem;">→</div>
+          <div style="display:flex;flex-direction:column;gap:.4rem;">
+            <div style="background:var(--orange-l);border:1px solid var(--orange-b);border-radius:var(--r);padding:.5rem .75rem;font-family:'Geist Mono',monospace;font-size:10.5px;color:var(--orange);">App Server 1 · 10.0.1.10:8080</div>
+            <div style="background:var(--orange-l);border:1px solid var(--orange-b);border-radius:var(--r);padding:.5rem .75rem;font-family:'Geist Mono',monospace;font-size:10.5px;color:var(--orange);">App Server 2 · 10.0.1.11:8080</div>
+            <div style="background:var(--orange-l);border:1px solid var(--orange-b);border-radius:var(--r);padding:.5rem .75rem;font-family:'Geist Mono',monospace;font-size:10.5px;color:var(--orange);">App Server 3 · 10.0.1.12:8080</div>
+          </div>
+        </div>
+        <div style="margin-top:.75rem;font-size:12px;color:var(--muted);font-style:italic;">App servers have private IPs only. They are NOT reachable from the internet. Only the proxy's IP (52.10.8.3) is public.</div>
+      </div>
+
+      <div style="font-size:11px;font-family:'Geist Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:1.25rem 0 .6rem;">Full request lifecycle — packet by packet</div>
+
+      <div class="flow">
+        <div class="fstep"><div class="fstep-n">1</div><div class="fstep-body">
+          <h4>Client sends HTTPS request</h4>
+          <p>DNS resolves api.myapp.com → 52.10.8.3. Client opens TLS connection to 52.10.8.3:443.</p>
+          <div class="packet" style="margin-top:.5rem;">
+            <span class="packet-field pf-src">SRC: 98.12.44.201:52300</span><span class="pf-arrow">→</span>
+            <span class="packet-field pf-dst">DST: 52.10.8.3:443</span>
+            <span class="packet-field pf-method">GET /api/users/42</span>
+            <span class="packet-field pf-payload">Authorization: Bearer eyJ...</span>
+          </div>
+        </div></div>
+        <div class="fstep"><div class="fstep-n">2</div><div class="fstep-body">
+          <h4>Proxy performs SSL termination</h4>
+          <p>The TLS session ends at the proxy. It decrypts the request using its TLS certificate. This is why you only need ONE SSL certificate on the proxy, not on every app server.</p>
+        </div></div>
+        <div class="fstep"><div class="fstep-n">3</div><div class="fstep-body">
+          <h4>Proxy modifies and forwards request</h4>
+          <p>Proxy adds X-Forwarded-For header so app servers know the real client IP. Sends request to one of the upstream app servers over plain HTTP on the internal network.</p>
+          <div class="packet" style="margin-top:.5rem;">
+            <span class="packet-field pf-src">SRC: 10.0.0.1:45010</span><span class="pf-arrow">→</span>
+            <span class="packet-field pf-dst">DST: 10.0.1.11:8080</span>
+            <span class="packet-field pf-method">GET /api/users/42 HTTP/1.1</span>
+            <span class="packet-field pf-payload">X-Forwarded-For: 98.12.44.201</span>
+            <span class="packet-field pf-payload">X-Real-IP: 98.12.44.201</span>
+          </div>
+        </div></div>
+        <div class="fstep"><div class="fstep-n">4</div><div class="fstep-body">
+          <h4>App server responds to proxy</h4>
+          <p>App server processes the request and responds. It doesn't know anything about TLS, SSL certificates, or the real client IP (unless reading X-Forwarded-For).</p>
+          <div class="packet" style="margin-top:.5rem;">
+            <span class="packet-field pf-src">SRC: 10.0.1.11:8080</span><span class="pf-arrow">→</span>
+            <span class="packet-field pf-dst">DST: 10.0.0.1:45010</span>
+            <span class="packet-field pf-method" style="background:var(--green-l);border-color:var(--green-b);color:var(--green);">200 OK</span>
+            <span class="packet-field pf-payload">{"id":42,"name":"Alice"}</span>
+          </div>
+        </div></div>
+        <div class="fstep"><div class="fstep-n">5</div><div class="fstep-body">
+          <h4>Proxy re-encrypts and returns to client</h4>
+          <p>Proxy may add response headers (CORS, security headers, cache-control). Re-encrypts with TLS and sends back to the original client over the still-open TLS session.</p>
+        </div></div>
+      </div>
+
+      <div class="scenario-grid" style="margin-top:1.25rem;">
+        <div class="sc">
+          <span class="sc-icon">🔐</span>
+          <h3>SSL Termination</h3>
+          <p>Handle TLS at the proxy, use plain HTTP internally. Only ONE certificate needed. Reduces CPU load on app servers. Internal traffic stays encrypted (mTLS) if needed.</p>
+          <span class="sc-badge" style="background:var(--green-l);border:1px solid var(--green-b);color:var(--green);">Most common use</span>
+        </div>
+        <div class="sc">
+          <span class="sc-icon">⚡</span>
+          <h3>Response Caching</h3>
+          <p>Proxy caches frequently-returned responses. <code>GET /api/products</code> served from cache — app server never receives the request. Nginx <code>proxy_cache_valid 200 10m</code>.</p>
+          <span class="sc-badge" style="background:var(--blue-l);border:1px solid var(--blue-b);color:var(--blue);">Performance</span>
+        </div>
+        <div class="sc">
+          <span class="sc-icon">🗜</span>
+          <h3>Gzip Compression</h3>
+          <p>Proxy compresses all responses before sending to client. A 500KB JSON response compresses to ~40KB. App servers don't need compression logic. <code>gzip on; gzip_types application/json</code></p>
+          <span class="sc-badge" style="background:var(--orange-l);border:1px solid var(--orange-b);color:var(--orange);">Bandwidth saving</span>
+        </div>
+        <div class="sc">
+          <span class="sc-icon">🛡</span>
+          <h3>Security Layer</h3>
+          <p>Block malicious IPs, rate limit at edge, apply WAF rules, strip sensitive headers. App servers are completely shielded — no public IP, no direct access possible.</p>
+          <span class="sc-badge" style="background:var(--red-l);border:1px solid var(--red-b);color:var(--red);">Security</span>
+        </div>
+        <div class="sc">
+          <span class="sc-icon">🔀</span>
+          <h3>Path-based Routing</h3>
+          <p><code>/api/*</code> → API servers. <code>/static/*</code> → S3/CDN. <code>/admin/*</code> → admin service. One domain, multiple backend services, split by URL prefix.</p>
+          <span class="sc-badge" style="background:var(--purple-l);border:1px solid var(--purple-b);color:var(--purple);">Microservices</span>
+        </div>
+        <div class="sc">
+          <span class="sc-icon">📊</span>
+          <h3>Observability</h3>
+          <p>Log every request: IP, method, URL, response code, duration. Emit metrics. One place to see all traffic. App servers don't need logging infrastructure.</p>
+          <span class="sc-badge" style="background:var(--teal-l);border:1px solid var(--teal-b);color:var(--teal);">Operations</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ════════════════════════════════════
+     S4: LOAD BALANCER
+═════════════════════════════════════════ -->
+<section id="loadbalancer">
+<div class="container">
+  <div class="sec-eye">// section_04</div>
+  <h2 class="sec-title">Load Balancer</h2>
+  <p class="sec-sub">A specialised reverse proxy that distributes requests across multiple servers — the foundation of horizontal scalability.</p>
+
+  <div class="card">
+    <div class="card-stripe cs-orange"></div>
+    <div class="card-header">
+      <div class="card-icon" style="background:var(--orange-l)">⚖</div>
+      <div class="card-meta"><h2>Complete Load Balancer Architecture With IPs</h2><div class="sub">Redundant LB pair · upstream pool · health checks · session persistence</div></div>
+    </div>
+    <div class="card-body">
+      <p class="prose">A load balancer sits between clients and a pool of backend servers. Every incoming request is <strong>routed to one server in the pool</strong> based on the chosen algorithm. When a server dies, the LB detects this via health checks and stops sending traffic to it. When a new server starts, the LB adds it automatically. The client always connects to the same single public IP — the LB's VIP (Virtual IP).</p>
+
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:1.5rem;margin:1rem 0;">
+        <div style="font-size:11px;font-family:'Geist Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--orange);margin-bottom:1rem;">Production HA setup — two-tier load balancing</div>
+        <div style="display:flex;flex-direction:column;gap:.75rem;">
+          <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;">
+            <div style="background:var(--blue-l);border:1px solid var(--blue-b);border-radius:var(--r);padding:.65rem .9rem;text-align:center;font-size:12px;">
+              <div style="font-weight:600;color:var(--blue);">Users</div>
+              <div style="font-family:'Geist Mono',monospace;font-size:10px;color:var(--muted);">N clients</div>
+            </div>
+            <div style="color:var(--dim);font-size:16px;">→</div>
+            <div style="background:var(--surface);border:2px solid var(--blue);border-radius:var(--r);padding:.65rem .9rem;text-align:center;font-size:12px;">
+              <div style="font-weight:600;color:var(--blue);">DNS / Anycast</div>
+              <div style="font-family:'Geist Mono',monospace;font-size:10px;color:var(--muted);">api.myapp.com<br>→ 52.10.8.3 (VIP)</div>
+            </div>
+            <div style="color:var(--dim);font-size:16px;">→</div>
+            <div style="display:flex;flex-direction:column;gap:.35rem;">
+              <div style="background:var(--purple-l);border:2px solid var(--purple);border-radius:var(--r);padding:.55rem .9rem;text-align:center;font-size:11px;">
+                <div style="font-weight:600;color:var(--purple);">LB Primary (ACTIVE)</div>
+                <div style="font-family:'Geist Mono',monospace;font-size:10px;color:var(--muted);">52.10.8.3 — HAProxy</div>
+              </div>
+              <div style="background:var(--purple-l);border:1px solid var(--purple-b);border-radius:var(--r);padding:.55rem .9rem;text-align:center;font-size:11px;">
+                <div style="font-weight:600;color:var(--purple);">LB Standby (PASSIVE)</div>
+                <div style="font-family:'Geist Mono',monospace;font-size:10px;color:var(--muted);">52.10.8.4 — VRRP failover</div>
+              </div>
+            </div>
+            <div style="color:var(--dim);font-size:16px;">→</div>
+            <div style="display:flex;flex-direction:column;gap:.35rem;">
+              <div class="server-chip sc-green"><div class="status-dot sd-green"></div>10.0.1.10:8080 (40%)</div>
+              <div class="server-chip sc-green"><div class="status-dot sd-green"></div>10.0.1.11:8080 (35%)</div>
+              <div class="server-chip sc-green"><div class="status-dot sd-green"></div>10.0.1.12:8080 (25%)</div>
+              <div class="server-chip sc-orange"><div class="status-dot sd-orange"></div>10.0.1.13:8080 (drain)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="hl hl-purple">
+        <span class="hl-label">// VIP and VRRP — how HA load balancers work</span>
+        The <strong>VIP (Virtual IP)</strong> 52.10.8.3 is not tied to a single physical machine. It floats between LB1 and LB2. <strong>VRRP (Virtual Router Redundancy Protocol)</strong> runs between LB1 and LB2. LB1 broadcasts heartbeats every second. If LB2 misses 3 heartbeats, it promotes itself to ACTIVE and takes over the VIP. This failover takes <strong>&lt;1 second</strong> — clients experience a brief pause but connections recover automatically.
+      </div>
+
+      <div class="metrics">
+        <div class="metric"><div class="metric-v">50K</div><div class="metric-l">Req/sec per LB</div></div>
+        <div class="metric"><div class="metric-v">&lt;1ms</div><div class="metric-l">LB added latency</div></div>
+        <div class="metric"><div class="metric-v">&lt;1s</div><div class="metric-l">VRRP failover</div></div>
+        <div class="metric"><div class="metric-v">10s</div><div class="metric-l">Health check detect</div></div>
+      </div>
+
+      <div class="pcg">
+        <div class="pcb pro">
+          <h4>Why use a load balancer</h4>
+          <ul>
+            <li>Scale horizontally — add servers freely</li>
+            <li>Zero-downtime rolling deploys</li>
+            <li>Auto-remove failed servers</li>
+            <li>SSL offloading from app servers</li>
+            <li>Single entry point for rate limiting</li>
+          </ul>
+        </div>
+        <div class="pcb note">
+          <h4>LB as a SPOF?</h4>
+          <ul>
+            <li>Without HA: yes — LB dies, everything dies</li>
+            <li>Fix: active-passive pair with VRRP</li>
+            <li>Fix: AWS ELB (multi-AZ by default)</li>
+            <li>Fix: Anycast DNS routes around failures</li>
+            <li>The LB pair itself has no SPOF above it</li>
+          </ul>
+        </div>
+        <div class="pcb tip">
+          <h4>Stateless is the golden rule</h4>
+          <ul>
+            <li>If servers hold session state → sticky sessions needed</li>
+            <li>Sticky sessions break horizontal scale</li>
+            <li>Solution: move sessions to Redis</li>
+            <li>Then any server can handle any request</li>
+            <li>This is the most important LB principle</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ════════════════════════════════════
+     S5: LB ALGORITHMS
+═════════════════════════════════════════ -->
+<section id="algorithms">
+<div class="container">
+  <div class="sec-eye">// section_05</div>
+  <h2 class="sec-title">Load Balancing Algorithms</h2>
+  <p class="sec-sub">Six algorithms — each optimised for a different traffic pattern. Choosing the wrong one causes hot servers and wasted capacity.</p>
+
+  <div class="card">
+    <div class="card-stripe cs-teal"></div>
+    <div class="card-header">
+      <div class="card-icon" style="background:var(--teal-l)">🎯</div>
+      <div class="card-meta"><h2>All 6 Algorithms — With Worked IP Examples</h2><div class="sub">Round-robin · weighted · least connections · IP hash · random · consistent hash</div></div>
+    </div>
+    <div class="card-body">
+
+      <!-- Round Robin -->
+      <div style="margin-bottom:1.5rem;">
+        <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem;">
+          <div style="background:var(--blue-l);border:1px solid var(--blue-b);border-radius:100px;padding:3px 12px;font-size:11px;font-family:'Geist Mono',monospace;color:var(--blue);font-weight:500;">Algorithm 1</div>
+          <div style="font-family:'Instrument Serif',serif;font-size:1.15rem;">Round Robin</div>
+        </div>
+        <p class="prose" style="margin-bottom:.75rem;">Each new request goes to the next server in sequence. Simple and perfectly even — but ignores server capacity and current load. Request 1 → S1, Request 2 → S2, Request 3 → S3, Request 4 → S1, and so on.</p>
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:1rem;overflow-x:auto;">
+          <div style="font-size:11px;font-family:'Geist Mono',monospace;color:var(--muted);margin-bottom:.6rem;">Request routing — 6 requests, 3 servers:</div>
+          <div style="display:flex;flex-direction:column;gap:.3rem;font-family:'Geist Mono',monospace;font-size:11.5px;">
+            <div style="display:flex;align-items:center;gap:.5rem;"><span style="color:var(--muted);min-width:60px;">Req #1</span><span style="color:var(--blue);">98.1.2.3:55001</span><span style="color:var(--dim);">→</span><span style="background:var(--blue-l);padding:1px 7px;border-radius:4px;color:var(--blue);">10.0.1.10 (S1)</span></div>
+            <div style="display:flex;align-items:center;gap:.5rem;"><span style="color:var(--muted);min-width:60px;">Req #2</span><span style="color:var(--blue);">102.5.6.7:44200</span><span style="color:var(--dim);">→</span><span style="background:var(--green-l);padding:1px 7px;border-radius:4px;color:var(--green);">10.0.1.11 (S2)</span></div>
+            <div style="display:flex;align-items:center;gap:.5rem;"><span style="color:var(--muted);min-width:60px;">Req #3</span><span style="color:var(--blue);">55.22.33.44:61000</span><span style="color:var(--dim);">→</span><span style="background:var(--orange-l);padding:1px 7px;border-radius:4px;color:var(--orange);">10.0.1.12 (S3)</span></div>
+            <div style="display:flex;align-items:center;gap:.5rem;"><span style="color:var(--muted);min-width:60px;">Req #4</span><span style="color:var(--blue);">77.8.9.10:50220</span><span style="color:var(--dim);">→</span><span style="background:var(--blue-l);padding:1px 7px;border-radius:4px;color:var(--blue);">10.0.1.10 (S1) ← wraps around</span></div>
+            <div style="display:flex;align-items:center;gap:.5rem;"><span style="color:var(--muted);min-width:60px;">Req #5</span><span style="color:var(--blue);">190.4.5.6:33410</span><span style="color:var(--dim);">→</span><span style="background:var(--green-l);padding:1px 7px;border-radius:4px;color:var(--green);">10.0.1.11 (S2)</span></div>
+            <div style="display:flex;align-items:center;gap:.5rem;"><span style="color:var(--muted);min-width:60px;">Req #6</span><span style="color:var(--blue);">12.3.4.5:28800</span><span style="color:var(--dim);">→</span><span style="background:var(--orange-l);padding:1px 7px;border-radius:4px;color:var(--orange);">10.0.1.12 (S3)</span></div>
+          </div>
+          <div style="margin-top:.6rem;font-size:11px;color:var(--dim);font-family:'Geist Mono',monospace;">Result: S1=2, S2=2, S3=2 requests — perfectly even ✓</div>
+        </div>
+        <div style="margin-top:.5rem;font-size:12px;color:var(--muted);"><span style="color:var(--green);font-weight:500;">Best for:</span> Homogeneous servers with similar request durations &nbsp;|&nbsp; <span style="color:var(--red);font-weight:500;">Problem:</span> S1 has 8GB RAM, S2 has 32GB — both get equal load</div>
+      </div>
+
+      <!-- Weighted Round Robin -->
+      <div style="margin-bottom:1.5rem;padding-top:1.25rem;border-top:1px solid var(--border);">
+        <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem;">
+          <div style="background:var(--green-l);border:1px solid var(--green-b);border-radius:100px;padding:3px 12px;font-size:11px;font-family:'Geist Mono',monospace;color:var(--green);font-weight:500;">Algorithm 2</div>
+          <div style="font-family:'Instrument Serif',serif;font-size:1.15rem;">Weighted Round Robin</div>
+        </div>
+        <p class="prose" style="margin-bottom:.75rem;">Assign a <strong>weight</strong> to each server proportional to its capacity. A server with weight 4 gets 4× more requests than a server with weight 1. Powerful for heterogeneous fleets where new high-capacity servers should serve more traffic.</p>
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:1rem;overflow-x:auto;">
+          <div style="font-size:11px;font-family:'Geist Mono',monospace;color:var(--muted);margin-bottom:.6rem;">10 requests, weights: S1=1, S2=2, S3=3 (total weight=6):</div>
+          <div style="display:flex;gap:.4rem;flex-wrap:wrap;font-family:'Geist Mono',monospace;font-size:11px;">
+            <span style="background:var(--blue-l);border:1px solid var(--blue-b);padding:2px 8px;border-radius:4px;color:var(--blue);">R1→S1</span>
+            <span style="background:var(--green-l);border:1px solid var(--green-b);padding:2px 8px;border-radius:4px;color:var(--green);">R2→S2</span>
+            <span style="background:var(--green-l);border:1px solid var(--green-b);padding:2px 8px;border-radius:4px;color:var(--green);">R3→S2</span>
+            <span style="background:var(--orange-l);border:1px solid var(--orange-b);padding:2px 8px;border-radius:4px;color:var(--orange);">R4→S3</span>
+            <span style="background:var(--orange-l);border:1px solid var(--orange-b);padding:2px 8px;border-radius:4px;color:var(--orange);">R5→S3</span>
+            <span style="background:var(--orange-l);border:1px solid var(--orange-b);padding:2px 8px;border-radius:4px;color:var(--orange);">R6→S3</span>
+            <span style="background:var(--blue-l);border:1px solid var(--blue-b);padding:2px 8px;border-radius:4px;color:var(--blue);">R7→S1</span>
+            <span style="background:var(--green-l);border:1px solid var(--green-b);padding:2px 8px;border-radius:4px;color:var(--green);">R8→S2</span>
+            <span style="background:var(--green-l);border:1px solid var(--green-b);padding:2px 8px;border-radius:4px;color:var(--green);">R9→S2</span>
+            <span style="background:var(--orange-l);border:1px solid var(--orange-b);padding:2px 8px;border-radius:4px;color:var(--orange);">R10→S3</span>
+          </div>
+          <div style="margin-top:.6rem;font-size:11px;color:var(--dim);font-family:'Geist Mono',monospace;">S1: 16.7% · S2: 33.3% · S3: 50% — proportional to capacity ✓</div>
+        </div>
+      </div>
+
+      <!-- Least Connections -->
+      <div style="margin-bottom:1.5rem;padding-top:1.25rem;border-top:1px solid var(--border);">
+        <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem;">
+          <div style="background:var(--orange-l);border:1px solid var(--orange-b);border-radius:100px;padding:3px 12px;font-size:11px;font-family:'Geist Mono',monospace;color:var(--orange);font-weight:500;">Algorithm 3</div>
+          <div style="font-family:'Instrument Serif',serif;font-size:1.15rem;">Least Connections</div>
+        </div>
+        <p class="prose" style="margin-bottom:.75rem;">Route each new request to the server with the <strong>fewest active connections</strong>. Ideal when requests have variable durations — long DB queries vs instant cache hits. Dynamically balances load in real time as connections open and close.</p>
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:1rem;overflow-x:auto;">
+          <div style="font-size:11px;font-family:'Geist Mono',monospace;color:var(--muted);margin-bottom:.6rem;">Current state — a slow DB query is holding connections on S1:</div>
+          <div style="display:flex;flex-direction:column;gap:.4rem;font-family:'Geist Mono',monospace;font-size:11.5px;">
+            <div style="display:flex;align-items:center;gap:.75rem;">
+              <span style="min-width:120px;color:var(--text);">S1 · 10.0.1.10</span>
+              <div style="flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden;"><div style="height:100%;width:80%;background:var(--red);border-radius:4px;"></div></div>
+              <span style="color:var(--red);min-width:50px;">80 conns</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:.75rem;">
+              <span style="min-width:120px;color:var(--text);">S2 · 10.0.1.11</span>
+              <div style="flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden;"><div style="height:100%;width:30%;background:var(--green);border-radius:4px;"></div></div>
+              <span style="color:var(--green);min-width:50px;">30 conns</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:.75rem;">
+              <span style="min-width:120px;color:var(--text);">S3 · 10.0.1.12</span>
+              <div style="flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden;"><div style="height:100%;width:15%;background:var(--green);border-radius:4px;"></div></div>
+              <span style="color:var(--green);min-width:50px;">15 conns</span>
+            </div>
+          </div>
+          <div style="margin-top:.75rem;padding:.6rem .8rem;background:var(--green-l);border:1px solid var(--green-b);border-radius:var(--r);font-size:11.5px;color:var(--green);">
+            → New request arrives. Round-robin would send to S1. Least-conn sends to <strong>S3 (15 connections)</strong> — the server with lightest load.
+          </div>
+        </div>
+      </div>
+
+      <!-- IP Hash -->
+      <div style="margin-bottom:1.5rem;padding-top:1.25rem;border-top:1px solid var(--border);">
+        <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem;">
+          <div style="background:var(--purple-l);border:1px solid var(--purple-b);border-radius:100px;padding:3px 12px;font-size:11px;font-family:'Geist Mono',monospace;color:var(--purple);font-weight:500;">Algorithm 4</div>
+          <div style="font-family:'Instrument Serif',serif;font-size:1.15rem;">IP Hash (Sticky Sessions)</div>
+        </div>
+        <p class="prose" style="margin-bottom:.75rem;"><code>hash(client_IP) % N</code> — the same client IP always maps to the same server. Creates "stickiness" without cookies. Required when servers hold in-memory session state. Problem: fails silently if a server dies (that client's session is lost) and causes imbalance behind NAT.</p>
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:1rem;overflow-x:auto;">
+          <div style="font-family:'Geist Mono',monospace;font-size:11px;display:flex;flex-direction:column;gap:.35rem;">
+            <div><span style="color:var(--muted);">hash(</span><span style="color:var(--blue);">98.12.44.201</span><span style="color:var(--muted);">) % 3 = </span><span style="color:var(--blue);font-weight:500;">1</span><span style="color:var(--muted);"> → always → </span><span style="background:var(--blue-l);padding:1px 7px;border-radius:4px;color:var(--blue);">10.0.1.10 (S1)</span></div>
+            <div><span style="color:var(--muted);">hash(</span><span style="color:var(--green);">142.250.80.100</span><span style="color:var(--muted);">) % 3 = </span><span style="color:var(--green);font-weight:500;">2</span><span style="color:var(--muted);"> → always → </span><span style="background:var(--green-l);padding:1px 7px;border-radius:4px;color:var(--green);">10.0.1.11 (S2)</span></div>
+            <div><span style="color:var(--muted);">hash(</span><span style="color:var(--orange);">203.45.67.89</span><span style="color:var(--muted);">) % 3 = </span><span style="color:var(--orange);font-weight:500;">0</span><span style="color:var(--muted);"> → always → </span><span style="background:var(--orange-l);padding:1px 7px;border-radius:4px;color:var(--orange);">10.0.1.12 (S3)</span></div>
+          </div>
+          <div style="margin-top:.5rem;font-size:11px;color:var(--red);font-family:'Geist Mono',monospace;">⚠ Problem: 50% of corporate clients behind NAT 10.0.0.1 → ALL hash to same server!</div>
+        </div>
+      </div>
+
+      <!-- Full algorithm comparison table -->
+      <div style="overflow-x:auto;">
+        <table class="tbl">
+          <thead><tr><th>Algorithm</th><th>State needed</th><th>Session sticky</th><th>Best for</th><th>Avoid when</th></tr></thead>
+          <tbody>
+            <tr><td class="b">Round-robin</td><td>Counter only</td><td class="r">No</td><td>Uniform servers, uniform requests</td><td>Variable request duration</td></tr>
+            <tr><td class="b">Weighted RR</td><td>Counter + weights</td><td class="r">No</td><td>Heterogeneous server fleet</td><td>Weights are hard to tune correctly</td></tr>
+            <tr><td class="b">Least connections</td><td>Active conn count</td><td class="r">No</td><td>Mixed fast/slow requests</td><td>Ultra-high throughput (counter overhead)</td></tr>
+            <tr><td class="b">IP hash</td><td>None (stateless)</td><td class="g">Yes</td><td>Stateful apps without Redis</td><td>NAT'd clients, uneven distribution</td></tr>
+            <tr><td class="b">Consistent hash</td><td>Ring data structure</td><td class="g">Yes</td><td>Cache affinity, CDN routing</td><td>Small server pools (ring imbalance)</td></tr>
+            <tr><td class="b">Random</td><td>None</td><td class="r">No</td><td>Simple use cases, surprisingly effective</td><td>When session affinity needed</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ════════════════════════════════════
+     S6: L4 vs L7
+═════════════════════════════════════════ -->
+<section id="layer4vs7">
+<div class="container">
+  <div class="sec-eye">// section_06</div>
+  <h2 class="sec-title">Layer 4 vs Layer 7 Load Balancing</h2>
+  <p class="sec-sub">L4 sees TCP packets. L7 sees the full HTTP request. Each is faster or more capable in different ways.</p>
+
+  <div class="card">
+    <div class="card-stripe cs-blue"></div>
+    <div class="card-header">
+      <div class="card-icon" style="background:var(--blue-l)">🧱</div>
+      <div class="card-meta"><h2>Deep Comparison With Packet-Level Examples</h2><div class="sub">When L4 is better · when L7 is essential · two-tier production setup</div></div>
+    </div>
+    <div class="card-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.25rem;">
+        <div style="background:var(--blue-l);border:1px solid var(--blue-b);border-radius:var(--rl);padding:1.25rem;">
+          <div style="font-size:11px;font-family:'Geist Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-bottom:.75rem;font-weight:600;">L4 — Transport Layer</div>
+          <div style="font-size:13px;line-height:1.8;color:#2d4a8a;">
+            <strong>Sees:</strong> SRC IP, DST IP, SRC port, DST port, TCP flags<br>
+            <strong>Cannot see:</strong> HTTP method, URL, headers, cookies<br><br>
+            Decision: <code style="font-family:'Geist Mono',monospace;font-size:11px;background:rgba(26,79,214,.1);padding:1px 5px;border-radius:3px;">hash(SRC_IP) % N</code> or round-robin on connections<br><br>
+            <strong>Speed:</strong> Wire-speed — millions of packets/sec<br>
+            <strong>Examples:</strong> HAProxy TCP mode, AWS NLB, LVS
+          </div>
+        </div>
+        <div style="background:var(--green-l);border:1px solid var(--green-b);border-radius:var(--rl);padding:1.25rem;">
+          <div style="font-size:11px;font-family:'Geist Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--green);margin-bottom:.75rem;font-weight:600;">L7 — Application Layer</div>
+          <div style="font-size:13px;line-height:1.8;color:#145c3a;">
+            <strong>Sees:</strong> Full HTTP request — method, URL, headers, body, cookies<br>
+            <strong>Can do:</strong> Path routing, header-based routing, A/B testing, auth<br><br>
+            Decision: <code style="font-family:'Geist Mono',monospace;font-size:11px;background:rgba(12,107,62,.1);padding:1px 5px;border-radius:3px;">if path.startsWith('/api') → api_pool</code><br><br>
+            <strong>Speed:</strong> ~100K requests/sec (parse + route overhead)<br>
+            <strong>Examples:</strong> Nginx, HAProxy HTTP, AWS ALB, Envoy
+          </div>
+        </div>
+      </div>
+
+      <div style="font-size:11px;font-family:'Geist Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:1.25rem 0 .6rem;">What each layer sees — same request, different views</div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1.25rem;">
+        <div>
+          <div style="font-size:11px;color:var(--blue);font-family:'Geist Mono',monospace;margin-bottom:.4rem;">L4 view (only TCP/IP headers):</div>
+          <div class="packet" style="flex-direction:column;gap:4px;font-size:11px;">
+            <div><span class="packet-field pf-src">SRC: 98.12.44.201:52300</span></div>
+            <div><span class="packet-field pf-dst">DST: 52.10.8.3:443</span></div>
+            <div><span class="packet-field pf-port">TCP SYN · Seq: 0x4a2f</span></div>
+            <div style="color:var(--red);font-size:10.5px;font-family:'Geist Mono',monospace;margin-top:2px;">✗ Cannot see: URL, method, headers, cookies</div>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--green);font-family:'Geist Mono',monospace;margin-bottom:.4rem;">L7 view (full HTTP request):</div>
+          <div class="packet" style="flex-direction:column;gap:4px;font-size:11px;">
+            <div><span class="packet-field pf-method">GET /api/products?cat=shoes</span></div>
+            <div><span class="packet-field pf-payload">Host: api.myapp.com</span></div>
+            <div><span class="packet-field pf-payload">Cookie: session=abc123; ab_group=B</span></div>
+            <div><span class="packet-field pf-payload">Authorization: Bearer eyJhbGci...</span></div>
+            <div style="color:var(--green);font-size:10.5px;font-family:'Geist Mono',monospace;margin-top:2px;">✓ Route: /api/* → api_pool · A/B: group B → new_backend</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="hl hl-orange">
+        <span class="hl-label">// production pattern: two-tier load balancing</span>
+        Large systems use <strong>L4 at the edge</strong> (handles millions of connections at wire speed, terminates DDoS) and <strong>L7 behind it</strong> (does smart routing, auth, A/B testing). Twitter, Facebook, and Netflix all use this two-tier pattern. L4 (HAProxy) → L7 (Envoy/Nginx) → application servers.
+      </div>
+
+      <div class="tbl-wrap" style="overflow-x:auto;">
+        <table class="tbl">
+          <thead><tr><th>Capability</th><th>L4 only</th><th>L7</th></tr></thead>
+          <tbody>
+            <tr><td>Raw throughput</td><td class="g">Wire-speed (millions/sec)</td><td class="o">~100K req/sec</td></tr>
+            <tr><td>Route by URL path</td><td class="r">No</td><td class="g">Yes — /api/* → API pool</td></tr>
+            <tr><td>Route by HTTP header</td><td class="r">No</td><td class="g">Yes — Host, Cookie, X-Feature</td></tr>
+            <tr><td>SSL termination</td><td class="r">Pass-through only</td><td class="g">Yes — full TLS offload</td></tr>
+            <tr><td>A/B testing</td><td class="r">No</td><td class="g">Yes — cookie-based routing</td></tr>
+            <tr><td>Request rewriting</td><td class="r">No</td><td class="g">Yes — modify URLs, headers</td></tr>
+            <tr><td>WebSocket support</td><td class="g">Transparent TCP passthrough</td><td class="g">Explicit upgrade support</td></tr>
+            <tr><td>DDoS resilience</td><td class="g">Handles SYN floods natively</td><td class="o">Needs help at L4 first</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ════════════════════════════════════
+     S7: HEALTH CHECKS
+═════════════════════════════════════════ -->
+<section id="healthchecks">
+<div class="container">
+  <div class="sec-eye">// section_07</div>
+  <h2 class="sec-title">Health Checks & Failure Handling</h2>
+  <p class="sec-sub">How the load balancer detects dead servers, drains connections gracefully, and restores traffic when a server recovers.</p>
+
+  <div class="card">
+    <div class="card-stripe cs-red"></div>
+    <div class="card-header">
+      <div class="card-icon" style="background:var(--red-l)">💓</div>
+      <div class="card-meta"><h2>Active Checks · Passive Checks · Circuit Breaker · Graceful Drain</h2><div class="sub">The exact state machine that governs server health transitions</div></div>
+    </div>
+    <div class="card-body">
+      <p class="prose">A load balancer only helps if it stops sending traffic to dead servers. <strong>Active health checks</strong> probe each server at regular intervals. <strong>Passive health checks</strong> watch real traffic responses — if a server returns 5xx errors, it's marked unhealthy. Most production systems use both.</p>
+
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:1.5rem;margin:1rem 0;">
+        <div style="font-size:11px;font-family:'Geist Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:1rem;">Server health state machine</div>
+        <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;font-size:12px;font-family:'Geist Mono',monospace;">
+          <div style="background:var(--green-l);border:2px solid var(--green);border-radius:var(--r);padding:.7rem 1rem;text-align:center;">
+            <div style="color:var(--green);font-weight:600;">HEALTHY</div>
+            <div style="font-size:10px;color:var(--muted);">Receiving traffic</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--red);">
+            <div style="font-size:11px;">3× fail</div>
+            <div style="font-size:16px;">→</div>
+          </div>
+          <div style="background:var(--orange-l);border:2px solid var(--orange);border-radius:var(--r);padding:.7rem 1rem;text-align:center;">
+            <div style="color:var(--orange);font-weight:600;">UNHEALTHY</div>
+            <div style="font-size:10px;color:var(--muted);">Traffic paused</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--green);">
+            <div style="font-size:11px;">2× pass</div>
+            <div style="font-size:16px;">→</div>
+          </div>
+          <div style="background:var(--teal-l);border:2px solid var(--teal);border-radius:var(--r);padding:.7rem 1rem;text-align:center;">
+            <div style="color:var(--teal);font-weight:600;">WARM UP</div>
+            <div style="font-size:10px;color:var(--muted);">5% of traffic</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--green);">
+            <div style="font-size:11px;">stable</div>
+            <div style="font-size:16px;">→</div>
+          </div>
+          <div style="background:var(--green-l);border:2px solid var(--green);border-radius:var(--r);padding:.7rem 1rem;text-align:center;">
+            <div style="color:var(--green);font-weight:600;">HEALTHY</div>
+            <div style="font-size:10px;color:var(--muted);">Full traffic</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="code"><div class="code-inner"><span class="cl"><span class="c"># Nginx upstream health check configuration</span></span>
+<span class="cl"></span>
+<span class="cl"><span class="kw">upstream</span> app_servers {</span>
+<span class="cl">    <span class="kw">least_conn</span>;                        <span class="c"># Algorithm: fewest active connections</span></span>
+<span class="cl"></span>
+<span class="cl">    server <span class="n">10.0.1.10</span>:<span class="num">8080</span> weight=<span class="num">3</span> max_fails=<span class="num">3</span> fail_timeout=<span class="num">30s</span>;</span>
+<span class="cl">    server <span class="n">10.0.1.11</span>:<span class="num">8080</span> weight=<span class="num">3</span> max_fails=<span class="num">3</span> fail_timeout=<span class="num">30s</span>;</span>
+<span class="cl">    server <span class="n">10.0.1.12</span>:<span class="num">8080</span> weight=<span class="num">3</span> max_fails=<span class="num">3</span> fail_timeout=<span class="num">30s</span>;</span>
+<span class="cl">    server <span class="n">10.0.1.13</span>:<span class="num">8080</span> backup;       <span class="c"># Only used if all primaries are down</span></span>
+<span class="cl">}</span>
+<span class="cl sep"></span>
+<span class="cl"><span class="c"># HAProxy active HTTP health check</span></span>
+<span class="cl"><span class="kw">backend</span> app_pool</span>
+<span class="cl">    <span class="kw">balance</span> leastconn</span>
+<span class="cl">    option httpchk <span class="s">GET /health HTTP/1.1\r\nHost:\ localhost</span></span>
+<span class="cl">    http-check expect status <span class="num">200</span>         <span class="c"># Must return 200 OK</span></span>
+<span class="cl">    default-server inter <span class="num">5s</span> fall <span class="num">3</span> rise <span class="num">2</span> <span class="c"># Every 5s · 3 fails=down · 2 pass=up</span></span>
+<span class="cl">    server s1 <span class="n">10.0.1.10</span>:<span class="num">8080</span> check</span>
+<span class="cl">    server s2 <span class="n">10.0.1.11</span>:<span class="num">8080</span> check</span>
+<span class="cl">    server s3 <span class="n">10.0.1.12</span>:<span class="num">8080</span> check</span></div></div>
+
+      <div class="flow">
+        <div class="fstep"><div class="fstep-n">1</div><div class="fstep-body"><h4>Active health check runs every 5 seconds</h4><p>LB sends <code>GET /health HTTP/1.1</code> to each server. Expects 200 OK within 2s. Your /health endpoint checks DB connection, Redis ping, disk space — returns 200 only if all dependencies are healthy.</p></div></div>
+        <div class="fstep"><div class="fstep-n">2</div><div class="fstep-body"><h4>Server 10.0.1.11 starts failing</h4><p>Health check gets a 503 at T+0, T+5, T+10. After 3 consecutive failures (fall=3), the server is marked DOWN. The LB stops routing new requests to it. Active connections are allowed to finish.</p></div></div>
+        <div class="fstep"><div class="fstep-n">3</div><div class="fstep-body"><h4>Traffic redistributes to remaining servers</h4><p>S1 and S3 now share all traffic. With least-conn, load distributes proportionally. The backup server 10.0.1.13 is NOT activated because 2 of 3 primary servers are still healthy.</p></div></div>
+        <div class="fstep"><div class="fstep-n">4</div><div class="fstep-body"><h4>Server recovers — gradual traffic restoration</h4><p>Health check passes 2× in a row (rise=2). Server re-enters rotation. LB starts sending a small percentage of traffic to verify stability before ramping up to full capacity.</p></div></div>
+        <div class="fstep"><div class="fstep-n">5</div><div class="fstep-body"><h4>Zero-downtime deploy — graceful drain</h4><p>Before deploying to S1: send DRAIN signal. LB stops sending new connections to S1 but lets active connections finish (connection draining). After all connections close (typically 30s), deploy, then re-enable.</p></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ════════════════════════════════════
+     S8: END-TO-END SCENARIO
+═════════════════════════════════════════ -->
+<section id="e2e">
+<div class="container">
+  <div class="sec-eye">// section_08 — The Big Picture</div>
+  <h2 class="sec-title">End-to-End Scenario</h2>
+  <p class="sec-sub">A complete request trace — user opens app.mycompany.com, every hop from browser to database and back, with every IP address shown.</p>
+
+  <div class="card">
+    <div class="card-stripe cs-multi"></div>
+    <div class="card-header">
+      <div class="card-icon" style="background:var(--blue-l)">🌍</div>
+      <div class="card-meta"><h2>Full Request Journey — 12 Hops</h2><div class="sub">Corporate employee accessing SaaS app — forward proxy + reverse proxy + load balancer all in one scenario</div></div>
+    </div>
+    <div class="card-body">
+      <div class="flow">
+        <div class="fstep" style="background:var(--blue-l);border-color:var(--blue-b);">
+          <div class="fstep-n" style="background:var(--blue-l);">1</div>
+          <div class="fstep-body">
+            <h4 style="color:var(--blue);">User types app.mycompany.com in Chrome</h4>
+            <p>Employee laptop IP: <code>192.168.10.55</code>. Browser is configured to use corporate proxy <code>10.1.0.1:3128</code>. Sends HTTP CONNECT to proxy.</p>
+            <div class="packet" style="margin-top:.4rem;font-size:11px;">
+              <span class="packet-field pf-src">SRC: 192.168.10.55</span><span class="pf-arrow">→</span>
+              <span class="packet-field pf-dst">DST: 10.1.0.1:3128 (Forward Proxy)</span>
+              <span class="packet-field pf-method">CONNECT app.mycompany.com:443 HTTP/1.1</span>
+            </div>
+          </div>
+        </div>
+        <div class="fstep">
+          <div class="fstep-n">2</div>
+          <div class="fstep-body">
+            <h4>Corporate forward proxy allows and tunnels</h4>
+            <p>Squid proxy: app.mycompany.com → ALLOWED (whitelist). Creates TCP tunnel. Replies <code>200 Connection Established</code>. Employee's TLS handshake now flows through the proxy tunnel to the internet.</p>
+          </div>
+        </div>
+        <div class="fstep">
+          <div class="fstep-n">3</div>
+          <div class="fstep-body">
+            <h4>DNS resolves app.mycompany.com → Cloudflare Anycast IP</h4>
+            <p>DNS query returns <code>104.26.15.200</code> — a Cloudflare IP. Because of Anycast routing, this routes to the nearest Cloudflare PoP (Mumbai datacenter for this user). The traffic never leaves the continent until it must.</p>
+          </div>
+        </div>
+        <div class="fstep" style="background:var(--purple-l);border-color:var(--purple-b);">
+          <div class="fstep-n" style="background:var(--purple-l);border-color:var(--purple-b);color:var(--purple);">4</div>
+          <div class="fstep-body">
+            <h4 style="color:var(--purple);">Cloudflare acts as reverse proxy (CDN edge)</h4>
+            <p>TLS terminates at Cloudflare. Serves from CDN cache if possible. Applies DDoS protection, WAF rules, rate limiting. For this dynamic API request: cache miss → forwards to origin.</p>
+            <div class="packet" style="margin-top:.4rem;font-size:11px;">
+              <span class="packet-field pf-src">SRC: 104.26.15.200 (Cloudflare)</span><span class="pf-arrow">→</span>
+              <span class="packet-field pf-dst">DST: 203.0.113.10:443 (Origin)</span>
+              <span class="packet-field pf-payload">CF-Connecting-IP: 203.0.113.50</span>
+              <span class="packet-field pf-payload">CF-Ray: 7f2a3b4c5d6e</span>
+            </div>
+          </div>
+        </div>
+        <div class="fstep" style="background:var(--orange-l);border-color:var(--orange-b);">
+          <div class="fstep-n" style="background:var(--orange-l);border-color:var(--orange-b);color:var(--orange);">5</div>
+          <div class="fstep-body">
+            <h4 style="color:var(--orange);">L4 Load Balancer (HAProxy) — AWS NLB</h4>
+            <p>Origin IP <code>203.0.113.10</code> is the NLB's VIP. L4 LB distributes based on least connections — routes to the L7 LB with fewest active TCP connections.</p>
+          </div>
+        </div>
+        <div class="fstep">
+          <div class="fstep-n">6</div>
+          <div class="fstep-body">
+            <h4>L7 Load Balancer (Nginx) — path routing</h4>
+            <p>Nginx reads the URL. <code>/api/*</code> → routes to api_pool. <code>/static/*</code> → routes to S3 via proxy_pass. <code>/admin/*</code> → routes to admin_pool + verifies admin JWT. All on private network <code>10.0.0.0/8</code>.</p>
+            <div class="packet" style="margin-top:.4rem;font-size:11px;">
+              <span class="packet-field pf-method">GET /api/v2/dashboard</span>
+              <span class="pf-arrow">→</span>
+              <span class="packet-field pf-dst">DST: 10.0.2.15:8080 (API Server)</span>
+              <span class="packet-field pf-payload">X-Forwarded-For: 192.168.10.55</span>
+              <span class="packet-field pf-payload">X-Real-IP: 192.168.10.55</span>
+            </div>
+          </div>
+        </div>
+        <div class="fstep">
+          <div class="fstep-n">7</div>
+          <div class="fstep-body">
+            <h4>API Server processes the request</h4>
+            <p>App server <code>10.0.2.15</code> receives plain HTTP. Reads JWT from Authorization header, validates against Redis token store. Queries PostgreSQL on <code>10.0.3.10:5432</code>. Returns JSON response.</p>
+          </div>
+        </div>
+        <div class="fstep">
+          <div class="fstep-n">8</div>
+          <div class="fstep-body">
+            <h4>Response travels back through every layer</h4>
+            <p>App → Nginx (adds security headers, gzip compresses) → HAProxy → Cloudflare (adds CF headers, caches for next request) → Forward Proxy (logs the response) → Employee browser.</p>
+            <div class="packet" style="margin-top:.4rem;font-size:11px;">
+              <span class="packet-field pf-method" style="background:var(--green-l);border-color:var(--green-b);color:var(--green);">200 OK</span>
+              <span class="packet-field pf-payload">Content-Encoding: gzip</span>
+              <span class="packet-field pf-payload">X-Response-Time: 42ms</span>
+              <span class="packet-field pf-payload">Strict-Transport-Security: max-age=31536000</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:1.25rem;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:1rem;overflow-x:auto;">
+        <div style="font-size:11px;font-family:'Geist Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:.75rem;">IP address summary — same request, different perspectives</div>
+        <table class="tbl" style="font-family:'Geist Mono',monospace;font-size:11px;">
+          <thead><tr><th>Layer</th><th>Sees source IP as</th><th>Routes to</th><th>Role</th></tr></thead>
+          <tbody>
+            <tr><td>Corporate Forward Proxy</td><td style="color:var(--blue);">192.168.10.55 (real client)</td><td>104.26.15.200</td><td>Policy + tunnel</td></tr>
+            <tr><td>Cloudflare Edge</td><td style="color:var(--blue);">203.0.113.50 (proxy public IP)</td><td>203.0.113.10</td><td>CDN + DDoS + TLS</td></tr>
+            <tr><td>HAProxy (L4)</td><td style="color:var(--blue);">104.26.15.200 (Cloudflare)</td><td>10.0.1.x</td><td>TCP load balance</td></tr>
+            <tr><td>Nginx (L7)</td><td style="color:var(--blue);">10.0.1.x (HAProxy)</td><td>10.0.2.15</td><td>HTTP route + SSL</td></tr>
+            <tr><td>App Server</td><td style="color:var(--blue);">10.0.0.1 (Nginx)</td><td>—</td><td>Reads X-Forwarded-For for real IP</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ════════════════════════════════════
+     S9: NGINX CONFIG
+═════════════════════════════════════════ -->
+<section id="nginx">
+<div class="container">
+  <div class="sec-eye">// section_09</div>
+  <h2 class="sec-title">Real Nginx Configuration</h2>
+  <p class="sec-sub">Production-grade Nginx configs covering every concept — reverse proxy, load balancer, caching, SSL, and path routing.</p>
+
+  <div class="card">
+    <div class="card-stripe cs-teal"></div>
+    <div class="card-header">
+      <div class="card-icon" style="background:var(--teal-l)">⚙</div>
+      <div class="card-meta"><h2>Annotated Production Nginx Config</h2><div class="sub">Every directive explained — copy-paste ready for your own system</div></div>
+    </div>
+    <div class="card-body">
+      <div class="code"><div class="code-inner"><span class="cl"><span class="c"># /etc/nginx/nginx.conf — production reverse proxy + load balancer</span></span>
+<span class="cl sep"></span>
+<span class="cl"><span class="kw">upstream</span> api_servers {</span>
+<span class="cl">    <span class="kw">least_conn</span>;                    <span class="c"># Route to server with fewest connections</span></span>
+<span class="cl"></span>
+<span class="cl">    server <span class="n">10.0.1.10</span>:<span class="num">8080</span> weight=<span class="num">3</span>;  <span class="c"># weight=3 → gets 3x more traffic</span></span>
+<span class="cl">    server <span class="n">10.0.1.11</span>:<span class="num">8080</span> weight=<span class="num">3</span>;</span>
+<span class="cl">    server <span class="n">10.0.1.12</span>:<span class="num">8080</span> weight=<span class="num">2</span>;  <span class="c"># slightly less capacity</span></span>
+<span class="cl">    server <span class="n">10.0.1.13</span>:<span class="num">8080</span> backup;    <span class="c"># Only used if ALL above are down</span></span>
+<span class="cl"></span>
+<span class="cl">    keepalive <span class="num">64</span>;                   <span class="c"># Reuse upstream connections (pool of 64)</span></span>
+<span class="cl">}</span>
+<span class="cl sep"></span>
+<span class="cl"><span class="kw">upstream</span> admin_servers {</span>
+<span class="cl">    <span class="kw">ip_hash</span>;                       <span class="c"># Admin needs sticky sessions</span></span>
+<span class="cl">    server <span class="n">10.0.2.10</span>:<span class="num">9000</span>;</span>
+<span class="cl">    server <span class="n">10.0.2.11</span>:<span class="num">9000</span>;</span>
+<span class="cl">}</span>
+<span class="cl sep"></span>
+<span class="cl"><span class="c"># Cache: 10MB key store, 1GB objects, evict after 10min idle</span></span>
+<span class="cl">proxy_cache_path /var/cache/nginx levels=<span class="num">1:2</span></span>
+<span class="cl">    keys_zone=api_cache:<span class="num">10m</span> max_size=<span class="num">1g</span></span>
+<span class="cl">    inactive=<span class="num">10m</span> use_temp_path=<span class="num">off</span>;</span>
+<span class="cl sep"></span>
+<span class="cl">server {</span>
+<span class="cl">    listen <span class="num">443</span> ssl http2;</span>
+<span class="cl">    server_name api.myapp.com;</span>
+<span class="cl"></span>
+<span class="cl">    <span class="c"># SSL — TLS terminates here; upstream receives plain HTTP</span></span>
+<span class="cl">    ssl_certificate     /etc/ssl/certs/myapp.crt;</span>
+<span class="cl">    ssl_certificate_key /etc/ssl/private/myapp.key;</span>
+<span class="cl">    ssl_protocols TLSv1.2 TLSv1.3;</span>
+<span class="cl">    ssl_ciphers ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-CHACHA20-POLY1305;</span>
+<span class="cl sep"></span>
+<span class="cl">    <span class="c"># Security headers (app servers don't need to set these)</span></span>
+<span class="cl">    add_header Strict-Transport-Security <span class="s">"max-age=31536000"</span> always;</span>
+<span class="cl">    add_header X-Frame-Options DENY always;</span>
+<span class="cl">    add_header X-Content-Type-Options nosniff always;</span>
+<span class="cl"></span>
+<span class="cl">    <span class="c"># Gzip all JSON/text before sending to client</span></span>
+<span class="cl">    gzip on;</span>
+<span class="cl">    gzip_types application/json text/plain text/css;</span>
+<span class="cl">    gzip_min_length <span class="num">1024</span>;</span>
+<span class="cl sep"></span>
+<span class="cl">    <span class="c"># ── PATH ROUTING ────────────────────────────────</span></span>
+<span class="cl"></span>
+<span class="cl">    location /api/ {</span>
+<span class="cl">        proxy_pass http://api_servers;    <span class="c"># Route to API pool</span></span>
+<span class="cl"></span>
+<span class="cl">        <span class="c"># Pass real client IP to app servers</span></span>
+<span class="cl">        proxy_set_header X-Real-IP         $remote_addr;</span>
+<span class="cl">        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;</span>
+<span class="cl">        proxy_set_header X-Forwarded-Proto $scheme;</span>
+<span class="cl">        proxy_set_header Host              $host;</span>
+<span class="cl"></span>
+<span class="cl">        <span class="c"># Cache GET requests for 60 seconds</span></span>
+<span class="cl">        proxy_cache api_cache;</span>
+<span class="cl">        proxy_cache_valid <span class="num">200</span> <span class="num">60s</span>;</span>
+<span class="cl">        proxy_cache_valid <span class="num">404</span> <span class="num">10s</span>;</span>
+<span class="cl">        proxy_cache_methods GET HEAD;</span>
+<span class="cl">        proxy_cache_key <span class="s">"$host$request_uri"</span>;</span>
+<span class="cl">        add_header X-Cache-Status $upstream_cache_status; <span class="c"># HIT/MISS/BYPASS</span></span>
+<span class="cl"></span>
+<span class="cl">        <span class="c"># Timeouts</span></span>
+<span class="cl">        proxy_connect_timeout <span class="num">5s</span>;</span>
+<span class="cl">        proxy_send_timeout    <span class="num">30s</span>;</span>
+<span class="cl">        proxy_read_timeout    <span class="num">30s</span>;</span>
+<span class="cl">    }</span>
+<span class="cl sep"></span>
+<span class="cl">    location /admin/ {</span>
+<span class="cl">        allow <span class="n">10.0.0.0/8</span>;             <span class="c"># Restrict to internal network only</span></span>
+<span class="cl">        deny all;</span>
+<span class="cl"></span>
+<span class="cl">        proxy_pass http://admin_servers;</span>
+<span class="cl">        proxy_set_header X-Real-IP $remote_addr;</span>
+<span class="cl">        proxy_set_header Host      $host;</span>
+<span class="cl">    }</span>
+<span class="cl sep"></span>
+<span class="cl">    location /static/ {</span>
+<span class="cl">        proxy_pass https://my-bucket.s3.amazonaws.com/;</span>
+<span class="cl">        proxy_cache api_cache;</span>
+<span class="cl">        proxy_cache_valid <span class="num">200</span> <span class="num">1d</span>;     <span class="c"># Cache static assets for 1 day</span></span>
+<span class="cl">        expires <span class="num">30d</span>;</span>
+<span class="cl">        add_header Cache-Control <span class="s">"public, immutable"</span>;</span>
+<span class="cl">    }</span>
+<span class="cl sep"></span>
+<span class="cl">    location /health {</span>
+<span class="cl">        access_log off;</span>
+<span class="cl">        return <span class="num">200</span> <span class="s">'{"status":"ok"}'</span>;</span>
+<span class="cl">        add_header Content-Type application/json;</span>
+<span class="cl">    }</span>
+<span class="cl">}</span>
+<span class="cl sep"></span>
+<span class="cl"><span class="c"># Redirect HTTP → HTTPS</span></span>
+<span class="cl">server {</span>
+<span class="cl">    listen <span class="num">80</span>;</span>
+<span class="cl">    server_name api.myapp.com;</span>
+<span class="cl">    return <span class="num">301</span> https://$host$request_uri;</span>
+<span class="cl">}</span></div></div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ════════════════════════════════════
+     S10: LIVE SIMULATOR
+═════════════════════════════════════════ -->
+<section id="simulator">
+<div class="container">
+  <div class="sec-eye">// section_10 — Interactive</div>
+  <h2 class="sec-title">Live Load Balancer Simulator</h2>
+  <p class="sec-sub">Send real requests, kill servers, watch the algorithm route around failures in real time.</p>
+
+  <div class="card">
+    <div class="card-stripe cs-blue"></div>
+    <div class="card-header">
+      <div class="card-icon" style="background:var(--blue-l)">▶</div>
+      <div class="card-meta"><h2>Interactive Load Balancer Playground</h2><div class="sub">Toggle algorithms · kill servers · watch live routing decisions with real IP simulation</div></div>
+    </div>
+    <div class="card-body">
+
+      <!-- Algorithm selector -->
+      <div style="margin-bottom:1rem;">
+        <div class="sim-title">Algorithm</div>
+        <div class="sim-controls">
+          <button class="sim-btn active" id="algo-rr" onclick="setAlgo('rr',this)">Round Robin</button>
+          <button class="sim-btn" id="algo-wrr" onclick="setAlgo('wrr',this)">Weighted RR</button>
+          <button class="sim-btn" id="algo-lc" onclick="setAlgo('lc',this)">Least Conn</button>
+          <button class="sim-btn" id="algo-iphash" onclick="setAlgo('iphash',this)">IP Hash</button>
+        </div>
+      </div>
+
+      <!-- Server pool -->
+      <div class="sim-title">Server pool (click to toggle down/up)</div>
+      <div class="sim-servers" id="server-pool">
+        <!-- populated by JS -->
+      </div>
+
+      <!-- Send requests -->
+      <div class="sim-controls" style="margin-top:.5rem;">
+        <button class="sim-btn primary" onclick="sendReq(1)">Send 1 Request</button>
+        <button class="sim-btn" onclick="sendReq(10)">Send 10</button>
+        <button class="sim-btn" onclick="sendReq(50)">Send 50</button>
+        <button class="sim-btn" onclick="autoFire()">Auto-fire ▶</button>
+        <button class="sim-btn" id="auto-stop-btn" onclick="stopAuto()" disabled>Stop ■</button>
+        <button class="sim-btn" onclick="resetSim()" style="margin-left:auto;color:var(--red);">Reset</button>
+      </div>
+
+      <!-- Log -->
+      <div class="sim-log" id="sim-log">
+        <span class="log-info">// Load balancer ready. Select algorithm and send requests.</span>
+      </div>
+
+      <!-- Stats -->
+      <div class="sim-stats">
+        <div class="sim-stat">requests: <span id="st-total">0</span></div>
+        <div class="sim-stat">routed: <span id="st-ok">0</span></div>
+        <div class="sim-stat">dropped: <span id="st-err">0</span></div>
+        <div class="sim-stat">algorithm: <span id="st-algo">round-robin</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Forward Proxy Simulator -->
+  <div class="card" style="margin-top:1.75rem;">
+    <div class="card-stripe cs-purple"></div>
+    <div class="card-header">
+      <div class="card-icon" style="background:var(--purple-l)">🕵</div>
+      <div class="card-meta"><h2>Forward Proxy Simulator</h2><div class="sub">See how the proxy hides your IP and enforces access policies</div></div>
+    </div>
+    <div class="card-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+        <div>
+          <div class="sim-title">Your client IP</div>
+          <div style="font-family:'Geist Mono',monospace;font-size:1.2rem;font-weight:600;color:var(--blue);padding:.5rem;background:var(--blue-l);border:1px solid var(--blue-b);border-radius:var(--r);" id="fp-client-ip">192.168.1.55</div>
+        </div>
+        <div>
+          <div class="sim-title">Proxy public IP</div>
+          <div style="font-family:'Geist Mono',monospace;font-size:1.2rem;font-weight:600;color:var(--purple);padding:.5rem;background:var(--purple-l);border:1px solid var(--purple-b);border-radius:var(--r);">203.0.113.50</div>
+        </div>
+      </div>
+      <div class="sim-title">Request a URL (proxy will allow or block)</div>
+      <div class="sim-controls">
+        <button class="sim-btn" onclick="fpRequest('google.com', true)">google.com ✓</button>
+        <button class="sim-btn" onclick="fpRequest('github.com', true)">github.com ✓</button>
+        <button class="sim-btn" onclick="fpRequest('youtube.com', false)">youtube.com ✗</button>
+        <button class="sim-btn" onclick="fpRequest('reddit.com', false)">reddit.com ✗</button>
+        <button class="sim-btn" onclick="fpRequest('instagram.com', false)">instagram.com ✗</button>
+        <button class="sim-btn" onclick="fpRequest('jira.mycompany.com', true)">jira.mycompany.com ✓</button>
+      </div>
+      <div class="sim-log" id="fp-log" style="height:100px;">
+        <span class="log-info">// Click a URL to simulate a proxied request.</span>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ════════════════════════════════════
+     CHEATSHEET
+═════════════════════════════════════════ -->
+<section id="cheatsheet" style="border-bottom:none;">
+<div class="container">
+  <div class="sec-eye">// quick reference</div>
+  <h2 class="sec-title">Interview Cheatsheet</h2>
+  <p class="sec-sub">The complete reference — every concept, every decision rule.</p>
+
+  <div class="card">
+    <div class="card-stripe cs-multi"></div>
+    <div class="card-body" style="padding-top:1.5rem;">
+      <div class="tbl-wrap" style="overflow-x:auto;"><table class="tbl">
+        <thead><tr><th>Question</th><th>Answer</th><th>Key reason</th></tr></thead>
+        <tbody>
+          <tr><td>Which hides the client?</td><td class="b">Forward proxy</td><td>Server sees proxy IP, not client IP</td></tr>
+          <tr><td>Which hides the server?</td><td class="b">Reverse proxy</td><td>Client sees proxy IP, not server IP</td></tr>
+          <tr><td>Is LB a type of proxy?</td><td class="g">Yes — a reverse proxy</td><td>All LBs are reverse proxies, not vice versa</td></tr>
+          <tr><td>L4 vs L7 — which is faster?</td><td class="b">L4</td><td>No HTTP parsing overhead, wire-speed TCP</td></tr>
+          <tr><td>L4 vs L7 — which is smarter?</td><td class="b">L7</td><td>Sees URLs, headers, cookies — can route by content</td></tr>
+          <tr><td>Best algorithm for variable request duration?</td><td class="b">Least connections</td><td>Dynamically avoids overloaded servers</td></tr>
+          <tr><td>Best algorithm for session persistence?</td><td class="b">IP hash</td><td>Same client IP always → same server</td></tr>
+          <tr><td>How to avoid LB as SPOF?</td><td class="b">Active-passive pair + VRRP</td><td>VIP floats between LBs, &lt;1s failover</td></tr>
+          <tr><td>How to do zero-downtime deploy?</td><td class="b">Connection draining</td><td>LB stops new requests to server, waits for active ones to finish</td></tr>
+          <tr><td>Where should SSL terminate?</td><td class="b">At the reverse proxy / LB</td><td>One cert, offloads app servers, internal is HTTP</td></tr>
+          <tr><td>Best way to handle sticky sessions?</td><td class="b">Move state to Redis instead</td><td>Stateless servers = true horizontal scale</td></tr>
+          <tr><td>What is X-Forwarded-For?</td><td class="b">The real client IP passed by proxy</td><td>Proxy IP is SRC, but this header carries original client IP</td></tr>
+          <tr><td>Forward proxy + HTTPS?</td><td class="b">HTTP CONNECT tunnel</td><td>Proxy is blind TCP pipe, TLS end-to-end</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </div>
+</div>
+</section>
+
+<footer>
+  <div style="font-family:'Instrument Serif',serif;font-size:2.2rem;color:var(--blue);margin-bottom:.5rem;">Proxies & Load Balancers</div>
+  <p style="font-style:italic;color:var(--muted);font-size:1rem;margin-bottom:.5rem;">Forward proxy · Reverse proxy · Load balancer · L4 vs L7 · Algorithms · Health checks</p>
+  <p style="font-family:'Geist Mono',monospace;font-size:10px;color:var(--dim);letter-spacing:.12em;">forward_proxy.hides(client) && reverse_proxy.hides(server) && load_balancer instanceof ReverseProxy</p>
+</footer>
+
+<script>
+/* ── PROGRESS BAR + NAV ── */
+const allNavLinks = document.querySelectorAll('nav a[href^="#"]');
+const allSections = document.querySelectorAll('section[id]');
+const pfill = document.getElementById('pf');
+window.addEventListener('scroll', () => {
+  const dh = document.documentElement.scrollHeight - window.innerHeight;
+  if (pfill && dh > 0) pfill.style.width = (window.scrollY / dh * 100) + '%';
+});
+new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      allNavLinks.forEach(l => l.classList.remove('active'));
+      const a = document.querySelector(`nav a[href="#${e.target.id}"]`);
+      if (a) { a.classList.add('active'); a.scrollIntoView({inline:'center',block:'nearest'}); }
+    }
+  });
+}, {threshold:0.2}).observe || allSections.forEach(s => {});
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      allNavLinks.forEach(l => l.classList.remove('active'));
+      const a = document.querySelector(`nav a[href="#${e.target.id}"]`);
+      if (a) { a.classList.add('active'); a.scrollIntoView({inline:'center',block:'nearest'}); }
+    }
+  });
+}, {threshold:0.25});
+allSections.forEach(s => io.observe(s));
+
+/* ── LOAD BALANCER SIMULATOR ── */
+const SERVERS = [
+  { id:'s1', ip:'10.0.1.10', name:'Server 1', weight:3, conns:0, reqs:0, alive:true },
+  { id:'s2', ip:'10.0.1.11', name:'Server 2', weight:3, conns:0, reqs:0, alive:true },
+  { id:'s3', ip:'10.0.1.12', name:'Server 3', weight:2, conns:0, reqs:0, alive:true },
+  { id:'s4', ip:'10.0.1.13', name:'Server 4', weight:1, conns:0, reqs:0, alive:true },
+];
+const CLIENT_IPS = ['98.12.44.201','142.250.80.3','45.67.89.10','203.44.55.66','178.12.3.4','91.234.56.78','52.11.22.33','8.8.4.4','173.194.0.1','104.18.2.3'];
+let algo = 'rr', rrIdx = 0, totalReqs = 0, okReqs = 0, errReqs = 0;
+let autoInterval = null;
+
+function renderServers() {
+  const pool = document.getElementById('server-pool');
+  pool.innerHTML = '';
+  SERVERS.forEach(s => {
+    const pct = Math.round((s.reqs / Math.max(totalReqs, 1)) * 100);
+    const el = document.createElement('div');
+    el.className = 'sim-server' + (s.alive ? '' : ' down');
+    el.id = 'srv-' + s.id;
+    const barColor = s.alive ? (pct > 60 ? '#c0182b' : pct > 35 ? '#b84d08' : '#0c6b3e') : '#999';
+    el.innerHTML = `
+      <h4 style="color:${s.alive?'var(--text)':'var(--dim)'};">${s.ip}</h4>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:.35rem;">${s.name} · w=${s.weight} · ${s.conns} conns</div>
+      <div class="sim-bar-wrap"><div class="sim-bar" style="width:${pct}%;background:${barColor};"></div></div>
+      <div style="font-size:11px;color:var(--muted);margin-top:.2rem;">${s.reqs} reqs (${pct}%)</div>
+      <div style="margin-top:.5rem;">
+        <span class="load-badge" style="background:${s.alive?'var(--green-l)':'var(--red-l)'};border-color:${s.alive?'var(--green-b)':'var(--red-b)'};color:${s.alive?'var(--green)':'var(--red)'};">${s.alive?'● HEALTHY':'● DOWN'}</span>
+      </div>`;
+    el.onclick = () => { s.alive = !s.alive; s.conns = 0; renderServers(); addLog(`${s.alive?'↑ Server':'↓ Server'} ${s.ip} ${s.alive?'restored':'taken down'}`, s.alive?'log-ok':'log-err'); };
+    pool.appendChild(el);
+  });
+  document.getElementById('st-total').textContent = totalReqs;
+  document.getElementById('st-ok').textContent = okReqs;
+  document.getElementById('st-err').textContent = errReqs;
+}
+
+function addLog(msg, cls) {
+  const log = document.getElementById('sim-log');
+  const span = document.createElement('span');
+  span.className = cls || '';
+  span.textContent = msg;
+  log.appendChild(span);
+  log.scrollTop = log.scrollHeight;
+}
+
+function pickServer(clientIP) {
+  const alive = SERVERS.filter(s => s.alive);
+  if (!alive.length) return null;
+  if (algo === 'rr') {
+    const s = alive[rrIdx % alive.length];
+    rrIdx++;
+    return s;
+  }
+  if (algo === 'wrr') {
+    const total = alive.reduce((a, s) => a + s.weight, 0);
+    let r = Math.random() * total;
+    for (const s of alive) { r -= s.weight; if (r <= 0) return s; }
+    return alive[0];
+  }
+  if (algo === 'lc') {
+    return alive.reduce((a, b) => a.conns <= b.conns ? a : b);
+  }
+  if (algo === 'iphash') {
+    const hash = clientIP.split('.').reduce((acc, oct) => acc + parseInt(oct), 0);
+    return alive[hash % alive.length];
+  }
+  return alive[0];
+}
+
+function sendReq(n) {
+  for (let i = 0; i < n; i++) {
+    setTimeout(() => {
+      const clientIP = CLIENT_IPS[Math.floor(Math.random() * CLIENT_IPS.length)];
+      totalReqs++;
+      const s = pickServer(clientIP);
+      if (!s) {
+        errReqs++;
+        addLog(`✗ ${clientIP} → NO HEALTHY SERVERS — 503`, 'log-err');
+      } else {
+        s.reqs++;
+        s.conns = Math.max(0, s.conns + (Math.random() > 0.7 ? 1 : 0));
+        okReqs++;
+        const el = document.getElementById('srv-' + s.id);
+        if (el) { el.classList.add('hit'); setTimeout(() => el.classList.remove('hit'), 400); }
+        addLog(`✓ ${clientIP} → ${s.ip} [${s.name}] (${s.reqs} total)`, 'log-ok');
+      }
+      renderServers();
+    }, i * (n > 10 ? 50 : 120));
+  }
+}
+
+function setAlgo(a, btn) {
+  algo = a; rrIdx = 0;
+  document.querySelectorAll('[id^="algo-"]').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const names = {rr:'round-robin', wrr:'weighted round-robin', lc:'least-connections', iphash:'ip-hash'};
+  document.getElementById('st-algo').textContent = names[a];
+  addLog(`// Algorithm changed to: ${names[a]}`, 'log-info');
+}
+
+let autoFiring = false;
+function autoFire() {
+  autoFiring = true;
+  document.getElementById('auto-stop-btn').disabled = false;
+  autoInterval = setInterval(() => sendReq(1), 300);
+  addLog('// Auto-fire started — 1 request every 300ms', 'log-info');
+}
+function stopAuto() {
+  clearInterval(autoInterval);
+  autoFiring = false;
+  document.getElementById('auto-stop-btn').disabled = true;
+  addLog('// Auto-fire stopped', 'log-info');
+}
+function resetSim() {
+  stopAuto();
+  totalReqs = 0; okReqs = 0; errReqs = 0; rrIdx = 0;
+  SERVERS.forEach(s => { s.reqs = 0; s.conns = 0; s.alive = true; });
+  document.getElementById('sim-log').innerHTML = '<span class="log-info">// Reset. Ready for new simulation.</span>';
+  renderServers();
+}
+
+/* ── FORWARD PROXY SIMULATOR ── */
+const FP_IPS = ['192.168.1.55','192.168.1.88','10.42.3.99','172.16.0.45','192.168.10.200'];
+let fpIdx = 0;
+function fpRequest(domain, allowed) {
+  const clientIP = FP_IPS[fpIdx % FP_IPS.length]; fpIdx++;
+  const log = document.getElementById('fp-log');
+  const ts = new Date().toTimeString().slice(0,8);
+  const addFpLog = (msg, cls) => {
+    const sp = document.createElement('span');
+    sp.className = cls || '';
+    sp.textContent = msg;
+    log.appendChild(sp);
+    log.scrollTop = log.scrollHeight;
+  };
+  addFpLog(`[${ts}] ${clientIP} → CONNECT ${domain}:443`, 'log-info');
+  setTimeout(() => {
+    if (allowed) {
+      addFpLog(`[${ts}] ✓ ALLOWED — policy: whitelist. Tunnel established.`, 'log-ok');
+      addFpLog(`[${ts}] Forwarding via 203.0.113.50 → ${domain} (client IP hidden)`, 'log-ok');
+    } else {
+      addFpLog(`[${ts}] ✗ BLOCKED — policy: social media / entertainment not permitted`, 'log-err');
+      addFpLog(`[${ts}] HTTP 403 returned to ${clientIP}. Access logged.`, 'log-err');
+    }
+  }, 200);
+}
+
+/* init */
+renderServers();
+</script>
+</body>
+</html>

@@ -1,0 +1,1413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>System Design Mastery</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --bg2: #111118;
+    --bg3: #18181f;
+    --surface: #1e1e28;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.13);
+    --text: #e8e6f0;
+    --muted: #8a8799;
+    --accent: #7c6fff;
+    --accent2: #ff6b9d;
+    --accent3: #00d4aa;
+    --accent4: #ffb347;
+    --accent5: #4fc3f7;
+    --radius: 12px;
+    --radius-lg: 18px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 15px;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* ── NOISE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.4;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 4rem 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(124,111,255,0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(124,111,255,0.06) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, black 40%, transparent 100%);
+  }
+
+  .hero-glow {
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(124,111,255,0.12) 0%, transparent 70%);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation: pulse 6s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
+    50% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border: 1px solid rgba(124,111,255,0.3);
+    border-radius: 100px;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: rgba(124,111,255,0.07);
+    margin-bottom: 2rem;
+    position: relative;
+  }
+
+  .badge::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: blink 2s ease-in-out infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.2; }
+  }
+
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(3rem, 8vw, 7rem);
+    font-weight: 800;
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    position: relative;
+    margin-bottom: 1.5rem;
+  }
+
+  .hero h1 .line1 { display: block; color: var(--text); }
+  .hero h1 .line2 {
+    display: block;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 50%, var(--accent3) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-sub {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    font-size: 1.25rem;
+    color: var(--muted);
+    max-width: 480px;
+    margin-bottom: 3rem;
+    position: relative;
+  }
+
+  .hero-stats {
+    display: flex;
+    gap: 2rem;
+    position: relative;
+  }
+
+  .hero-stat {
+    text-align: center;
+  }
+
+  .hero-stat .num {
+    font-family: 'Syne', sans-serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  .hero-stat .label {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(10,10,15,0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    height: 56px;
+    gap: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  nav::-webkit-scrollbar { display: none; }
+
+  nav a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    padding: 0 14px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+  }
+
+  nav a:hover, nav a.active {
+    color: var(--text);
+    border-bottom-color: var(--accent);
+  }
+
+  nav .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--text);
+    margin-right: 1rem;
+    padding: 0;
+    border: none;
+    white-space: nowrap;
+  }
+
+  /* ── SECTIONS ── */
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 2rem;
+  }
+
+  section {
+    padding: 5rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.6rem;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin-bottom: 1rem;
+  }
+
+  .section-desc {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    color: var(--muted);
+    font-size: 1.1rem;
+    max-width: 600px;
+    margin-bottom: 3rem;
+  }
+
+  /* ── TOPIC CARD ── */
+  .topic-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s;
+  }
+
+  .topic-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .topic-card:hover { border-color: var(--border2); }
+  .topic-card:hover::before { opacity: 1; }
+
+  .topic-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .topic-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 3.5rem;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--border2);
+    letter-spacing: -0.04em;
+    min-width: 60px;
+  }
+
+  .topic-meta h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.3rem;
+  }
+
+  .topic-meta .tagline {
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  .topic-body {
+    color: #c4c2d0;
+    font-size: 14px;
+    line-height: 1.8;
+    margin-bottom: 1.5rem;
+  }
+
+  /* ── SVG DIAGRAM BOX ── */
+  .diagram-box {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem 1rem;
+    margin: 1.5rem 0;
+    overflow-x: auto;
+  }
+
+  .diagram-box svg text { font-family: 'DM Mono', monospace !important; }
+
+  /* ── PROS/CONS ── */
+  .pros-cons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin: 1.5rem 0;
+  }
+
+  @media (max-width: 600px) { .pros-cons { grid-template-columns: 1fr; } }
+
+  .pros, .cons {
+    border-radius: var(--radius);
+    padding: 1.25rem;
+  }
+
+  .pros {
+    background: rgba(0,212,170,0.05);
+    border: 1px solid rgba(0,212,170,0.15);
+  }
+
+  .cons {
+    background: rgba(255,107,157,0.05);
+    border: 1px solid rgba(255,107,157,0.15);
+  }
+
+  .pros h4, .cons h4 {
+    font-family: 'Syne', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+  }
+
+  .pros h4 { color: var(--accent3); }
+  .cons h4 { color: var(--accent2); }
+
+  .pros ul, .cons ul {
+    list-style: none;
+    font-size: 13px;
+    line-height: 1.9;
+  }
+
+  .pros ul li::before { content: '✓  '; color: var(--accent3); }
+  .cons ul li::before { content: '✗  '; color: var(--accent2); }
+
+  /* ── REALWORLD BOX ── */
+  .realworld {
+    background: rgba(124,111,255,0.05);
+    border: 1px solid rgba(124,111,255,0.2);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 1.25rem 1.5rem;
+    margin: 1.5rem 0;
+    font-size: 13px;
+  }
+
+  .realworld .rw-label {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+  }
+
+  .realworld p { color: #b8b5cc; line-height: 1.8; }
+
+  .realworld strong { color: var(--text); }
+
+  /* ── CODE SNIPPET ── */
+  .code-block {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    font-size: 12px;
+    line-height: 1.8;
+    overflow-x: auto;
+    margin: 1rem 0;
+    color: #a8b3cf;
+  }
+
+  .code-block .k { color: #c792ea; }
+  .code-block .s { color: #c3e88d; }
+  .code-block .c { color: #546e7a; font-style: italic; }
+  .code-block .n { color: #82aaff; }
+  .code-block .num { color: var(--accent4); }
+
+  /* ── TAGS ── */
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 1rem 0;
+  }
+
+  .tag {
+    padding: 3px 10px;
+    border-radius: 100px;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .tag-purple { background: rgba(124,111,255,0.15); color: #a89fff; border: 1px solid rgba(124,111,255,0.2); }
+  .tag-green  { background: rgba(0,212,170,0.1);   color: #5eecd2; border: 1px solid rgba(0,212,170,0.2); }
+  .tag-orange { background: rgba(255,179,71,0.1);  color: #ffc97a; border: 1px solid rgba(255,179,71,0.2); }
+  .tag-pink   { background: rgba(255,107,157,0.1); color: #ff8fb5; border: 1px solid rgba(255,107,157,0.2); }
+  .tag-blue   { background: rgba(79,195,247,0.1);  color: #7dd6f8; border: 1px solid rgba(79,195,247,0.2); }
+
+  /* ── COMPARISON TABLE ── */
+  .compare-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin: 1.5rem 0;
+  }
+
+  .compare-table th {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border2);
+    background: var(--bg2);
+  }
+
+  .compare-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    color: #c4c2d0;
+    vertical-align: top;
+  }
+
+  .compare-table tr:last-child td { border-bottom: none; }
+  .compare-table tr:hover td { background: rgba(124,111,255,0.03); }
+
+  /* ── METRICS GRID ── */
+  .metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 1rem;
+    margin: 1.5rem 0;
+  }
+
+  .metric {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem;
+    text-align: center;
+  }
+
+  .metric .val {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 0.3rem;
+  }
+
+  .metric .mlabel {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  /* ── KEY INSIGHT ── */
+  .insight {
+    background: linear-gradient(135deg, rgba(124,111,255,0.08), rgba(255,107,157,0.05));
+    border: 1px solid rgba(124,111,255,0.2);
+    border-radius: var(--radius);
+    padding: 1.25rem 1.5rem;
+    margin: 1.5rem 0;
+    font-size: 13px;
+    color: #c4c2d0;
+    line-height: 1.8;
+  }
+
+  .insight::before {
+    content: '💡 KEY INSIGHT  ';
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--accent4);
+    font-weight: 600;
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+
+  /* ── INTERVIEW TIP ── */
+  .tip {
+    background: rgba(0,212,170,0.04);
+    border: 1px solid rgba(0,212,170,0.15);
+    border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+    font-size: 13px;
+    color: #b0e8df;
+    line-height: 1.8;
+    margin: 1rem 0;
+  }
+
+  .tip::before {
+    content: '🎯 INTERVIEW TIP  ';
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--accent3);
+    font-weight: 600;
+    display: block;
+    margin-bottom: 0.4rem;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--muted);
+    font-size: 12px;
+  }
+
+  /* ── ANIMATIONS ── */
+  .fade-in {
+    opacity: 0;
+    transform: translateY(24px);
+    animation: fadeIn 0.7s forwards;
+  }
+
+  @keyframes fadeIn {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .topic-card { animation: fadeIn 0.6s both; }
+  .topic-card:nth-child(1) { animation-delay: 0.05s; }
+  .topic-card:nth-child(2) { animation-delay: 0.10s; }
+  .topic-card:nth-child(3) { animation-delay: 0.15s; }
+  .topic-card:nth-child(4) { animation-delay: 0.20s; }
+  .topic-card:nth-child(5) { animation-delay: 0.25s; }
+  .topic-card:nth-child(6) { animation-delay: 0.30s; }
+
+  /* ── SVG COLOR HACKS FOR DARK BG ── */
+  .diagram-box svg .box { fill: #1e1e28 !important; stroke: rgba(255,255,255,0.12) !important; }
+  .diagram-box svg .arr { stroke: rgba(255,255,255,0.35) !important; }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="badge">Interview Prep</div>
+  <h1>
+    <span class="line1">System</span>
+    <span class="line2">Design</span>
+  </h1>
+  <p class="hero-sub">Everything you need to crack the interview — concepts, tradeoffs, real-world examples.</p>
+  <div class="hero-stats">
+    <div class="hero-stat"><div class="num">6</div><div class="label">Core Pillars</div></div>
+    <div class="hero-stat"><div class="num">∞</div><div class="label">Scale</div></div>
+    <div class="hero-stat"><div class="num">1</div><div class="label">Framework</div></div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <span class="logo">SysDes↗</span>
+  <a href="#overview">Overview</a>
+  <a href="#scalability">Scalability</a>
+  <a href="#caching">Caching</a>
+  <a href="#databases">Databases</a>
+  <a href="#cap">CAP Theorem</a>
+  <a href="#queues">Queues</a>
+  <a href="#framework">Framework</a>
+  <a href="#cheatsheet">Cheatsheet</a>
+</nav>
+
+<!-- OVERVIEW -->
+<section id="overview">
+  <div class="container">
+    <div class="section-eyebrow">Section 01</div>
+    <h2 class="section-title">The Big Picture</h2>
+    <p class="section-desc">Every system design question asks the same thing: how do you scale to millions without it collapsing?</p>
+
+    <div class="topic-card">
+      <div class="topic-header">
+        <div class="topic-num">00</div>
+        <div class="topic-meta">
+          <h2>Full System Architecture</h2>
+          <div class="tagline">How a request travels from your phone to a database and back</div>
+        </div>
+      </div>
+      <div class="topic-body">
+        When a user opens an app, a request flows through several layers: <strong>DNS</strong> resolves the domain to an IP, a <strong>CDN</strong> serves cached assets from the nearest edge node, a <strong>Load Balancer</strong> distributes traffic across servers, <strong>App Servers</strong> handle business logic, <strong>Cache</strong> answers common reads instantly, and the <strong>Database</strong> persists everything. Understanding this flow is the foundation of every design interview.
+      </div>
+
+      <div class="diagram-box">
+        <svg width="100%" viewBox="0 0 680 520" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="arr0" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M2 1L8 5L2 9" fill="none" stroke="#7c6fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </marker>
+          </defs>
+          <style>
+            .dn { fill: #1e1e28; stroke: rgba(255,255,255,0.12); stroke-width: 0.5; }
+            .dt { fill: #e8e6f0; font-family: 'DM Mono', monospace; font-size: 13px; text-anchor: middle; dominant-baseline: central; }
+            .ds { fill: #8a8799; font-family: 'DM Mono', monospace; font-size: 11px; text-anchor: middle; dominant-baseline: central; }
+            .da { stroke: rgba(124,111,255,0.5); stroke-width: 1.2; fill: none; }
+          </style>
+          <!-- Client -->
+          <rect class="dn" x="270" y="18" width="140" height="44" rx="8" style="stroke: rgba(124,111,255,0.4);"/>
+          <text class="dt" x="340" y="40">Client</text>
+          <line x1="340" y1="62" x2="340" y2="86" class="da" marker-end="url(#arr0)"/>
+          <!-- DNS -->
+          <rect class="dn" x="80" y="88" width="140" height="52" rx="8" style="stroke: rgba(0,212,170,0.3);"/>
+          <text class="dt" x="150" y="107" style="fill:#5eecd2;">DNS</text>
+          <text class="ds" x="150" y="126">Domain → IP</text>
+          <!-- CDN -->
+          <rect class="dn" x="460" y="88" width="150" height="52" rx="8" style="stroke: rgba(0,212,170,0.3);"/>
+          <text class="dt" x="535" y="107" style="fill:#5eecd2;">CDN</text>
+          <text class="ds" x="535" y="126">Edge caching</text>
+          <line x1="270" y1="100" x2="220" y2="114" class="da" marker-end="url(#arr0)"/>
+          <line x1="410" y1="114" x2="460" y2="114" class="da" marker-end="url(#arr0)"/>
+          <!-- Load Balancer -->
+          <rect class="dn" x="220" y="170" width="200" height="52" rx="8" style="stroke: rgba(124,111,255,0.5);"/>
+          <text class="dt" x="320" y="189" style="fill:#a89fff;">Load Balancer</text>
+          <text class="ds" x="320" y="208">Distributes requests</text>
+          <line x1="220" y1="140" x2="280" y2="170" class="da" marker-end="url(#arr0)"/>
+          <!-- App Servers -->
+          <rect class="dn" x="40" y="260" width="150" height="52" rx="8" style="stroke: rgba(79,195,247,0.3);"/>
+          <text class="dt" x="115" y="279" style="fill:#7dd6f8;">App Server 1</text>
+          <text class="ds" x="115" y="298">Stateless compute</text>
+          <rect class="dn" x="265" y="260" width="150" height="52" rx="8" style="stroke: rgba(79,195,247,0.3);"/>
+          <text class="dt" x="340" y="279" style="fill:#7dd6f8;">App Server 2</text>
+          <text class="ds" x="340" y="298">Stateless compute</text>
+          <rect class="dn" x="490" y="260" width="150" height="52" rx="8" style="stroke: rgba(79,195,247,0.3);"/>
+          <text class="dt" x="565" y="279" style="fill:#7dd6f8;">App Server 3</text>
+          <text class="ds" x="565" y="298">Stateless compute</text>
+          <line x1="300" y1="222" x2="190" y2="260" class="da" marker-end="url(#arr0)"/>
+          <line x1="320" y1="222" x2="340" y2="260" class="da" marker-end="url(#arr0)"/>
+          <line x1="340" y1="222" x2="490" y2="260" class="da" marker-end="url(#arr0)"/>
+          <!-- Cache + DB + Queue -->
+          <rect class="dn" x="40" y="364" width="150" height="52" rx="8" style="stroke: rgba(255,179,71,0.4);"/>
+          <text class="dt" x="115" y="383" style="fill:#ffc97a;">Cache</text>
+          <text class="ds" x="115" y="402">Redis / Memcached</text>
+          <rect class="dn" x="265" y="364" width="150" height="52" rx="8" style="stroke: rgba(255,107,157,0.4);"/>
+          <text class="dt" x="340" y="383" style="fill:#ff8fb5;">Database</text>
+          <text class="ds" x="340" y="402">SQL or NoSQL</text>
+          <rect class="dn" x="490" y="364" width="150" height="52" rx="8" style="stroke: rgba(0,212,170,0.3);"/>
+          <text class="dt" x="565" y="383" style="fill:#5eecd2;">Message Queue</text>
+          <text class="ds" x="565" y="402">Kafka / SQS</text>
+          <line x1="115" y1="312" x2="115" y2="364" class="da" marker-end="url(#arr0)"/>
+          <line x1="340" y1="312" x2="340" y2="364" class="da" marker-end="url(#arr0)"/>
+          <line x1="565" y1="312" x2="565" y2="364" class="da" marker-end="url(#arr0)"/>
+          <!-- DB Replicas -->
+          <rect class="dn" x="230" y="456" width="220" height="44" rx="8" style="stroke: rgba(255,107,157,0.3);"/>
+          <text class="dt" x="340" y="472" style="fill:#ff8fb5;">DB Replica / Shards</text>
+          <text class="ds" x="340" y="490">Read replicas, partitioning</text>
+          <line x1="340" y1="416" x2="340" y2="456" class="da" marker-end="url(#arr0)"/>
+        </svg>
+      </div>
+
+      <div class="realworld">
+        <div class="rw-label">Real-World Example — Instagram</div>
+        <p>When you open Instagram: your phone hits <strong>CloudFront (CDN)</strong> for your feed images, <strong>Route 53 (DNS)</strong> resolves api.instagram.com, an <strong>AWS ELB</strong> routes your request to one of thousands of app servers, <strong>Memcached</strong> serves your friend count, and <strong>Cassandra</strong> holds the post data. Your like triggers a <strong>Kafka event</strong> that fans out notifications asynchronously.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SCALABILITY -->
+<section id="scalability">
+  <div class="container">
+    <div class="section-eyebrow">Section 02</div>
+    <h2 class="section-title">Scalability</h2>
+    <p class="section-desc">Growing the system without rewriting it — the first question every interviewer asks.</p>
+
+    <div class="topic-card">
+      <div class="topic-header">
+        <div class="topic-num">01</div>
+        <div class="topic-meta">
+          <h2>Horizontal vs Vertical Scaling</h2>
+          <div class="tagline">The foundation of scalable architecture</div>
+        </div>
+      </div>
+      <div class="tags">
+        <span class="tag tag-purple">Load Balancing</span>
+        <span class="tag tag-green">Stateless Design</span>
+        <span class="tag tag-blue">Auto-scaling</span>
+      </div>
+      <div class="topic-body">
+        <strong>Vertical scaling</strong> (scale-up) means upgrading the machine — more CPU, more RAM. Simple but has a hard ceiling: there's only one machine, so it's a single point of failure, and the biggest cloud instances are exponentially expensive.<br><br>
+        <strong>Horizontal scaling</strong> (scale-out) adds more machines. Requires stateless servers (no session data stored locally) and a load balancer. The key insight: stateless means any server can handle any request, so you can spin up 1 or 1000 without changing code.
+      </div>
+
+      <div class="diagram-box">
+        <svg width="100%" viewBox="0 0 680 240" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="arr1" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M2 1L8 5L2 9" fill="none" stroke="#7c6fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </marker>
+          </defs>
+          <style>
+            .dn1 { fill: #1a1a24; stroke: rgba(255,255,255,0.1); stroke-width: 0.5; }
+            .dt1 { fill: #e8e6f0; font-family: 'DM Mono', monospace; font-size: 13px; text-anchor: middle; dominant-baseline: central; }
+            .ds1 { fill: #8a8799; font-family: 'DM Mono', monospace; font-size: 11px; text-anchor: middle; dominant-baseline: central; }
+            .da1 { stroke: rgba(124,111,255,0.4); stroke-width: 1.2; fill: none; }
+          </style>
+          <text class="dt1" x="170" y="20" style="fill:#ffc97a; font-size:12px; font-weight:600;">Vertical scaling</text>
+          <rect class="dn1" x="110" y="34" width="120" height="44" rx="8" style="stroke:rgba(255,179,71,0.4);"/>
+          <text class="dt1" x="170" y="53">Server</text>
+          <text class="ds1" x="170" y="69">4 CPU / 8GB</text>
+          <line x1="170" y1="78" x2="170" y2="98" class="da1" marker-end="url(#arr1)"/>
+          <rect class="dn1" x="95" y="100" width="150" height="44" rx="8" style="stroke:rgba(255,179,71,0.6);"/>
+          <text class="dt1" x="170" y="118" style="fill:#ffc97a;">Bigger server</text>
+          <text class="ds1" x="170" y="134">32 CPU / 256GB</text>
+          <text class="ds1" x="170" y="165" style="fill:#ff6b6b;">Hard ceiling — SPOF</text>
+          <text class="ds1" x="170" y="182" style="fill:#ff6b6b;">Exponentially expensive</text>
+          <!-- divider -->
+          <line x1="340" y1="10" x2="340" y2="220" stroke="rgba(255,255,255,0.06)" stroke-width="1" stroke-dasharray="4 4"/>
+          <!-- Horizontal -->
+          <text class="dt1" x="510" y="20" style="fill:#5eecd2; font-size:12px; font-weight:600;">Horizontal scaling</text>
+          <rect class="dn1" x="370" y="34" width="90" height="44" rx="8" style="stroke:rgba(0,212,170,0.3);"/>
+          <text class="dt1" x="415" y="56">Server</text>
+          <rect class="dn1" x="475" y="34" width="90" height="44" rx="8" style="stroke:rgba(0,212,170,0.3);"/>
+          <text class="dt1" x="520" y="56">Server</text>
+          <rect class="dn1" x="580" y="34" width="70" height="44" rx="8" style="stroke:rgba(0,212,170,0.3);"/>
+          <text class="dt1" x="615" y="56">+N</text>
+          <rect class="dn1" x="410" y="118" width="200" height="44" rx="8" style="stroke:rgba(124,111,255,0.5);"/>
+          <text class="dt1" x="510" y="133" style="fill:#a89fff;">Load Balancer</text>
+          <text class="ds1" x="510" y="151">Routes traffic evenly</text>
+          <line x1="460" y1="118" x2="420" y2="78" class="da1" marker-end="url(#arr1)"/>
+          <line x1="510" y1="118" x2="525" y2="78" class="da1" marker-end="url(#arr1)"/>
+          <line x1="555" y1="118" x2="610" y2="78" class="da1" marker-end="url(#arr1)"/>
+          <text class="ds1" x="510" y="185" style="fill:#5eecd2;">Infinite scale, fault-tolerant</text>
+          <text class="ds1" x="510" y="202" style="fill:#5eecd2;">Commodity hardware</text>
+        </svg>
+      </div>
+
+      <div class="pros-cons">
+        <div class="pros">
+          <h4>Horizontal Pros</h4>
+          <ul>
+            <li>No single point of failure</li>
+            <li>Near-infinite scale potential</li>
+            <li>Cheaper commodity hardware</li>
+            <li>Rolling deployments possible</li>
+            <li>Auto-scaling with cloud</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>Horizontal Cons</h4>
+          <ul>
+            <li>Requires stateless design</li>
+            <li>Network complexity increases</li>
+            <li>Distributed consistency harder</li>
+            <li>Data sharding challenges</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="realworld">
+        <div class="rw-label">Real-World — Netflix</div>
+        <p>Netflix runs <strong>100,000+ AWS EC2 instances</strong>. When a new season of Stranger Things drops, traffic spikes 10×. AWS Auto Scaling Groups spin up hundreds of new stateless streaming servers within minutes. No single server holds any user session — everything is pulled from a shared cache (EVCache, Netflix's Redis fork).</p>
+      </div>
+
+      <div class="tip">
+        Always say "stateless app servers" before adding a load balancer. Interviewers want to know you understand WHY horizontal scaling works — because no request depends on hitting the same server twice.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CACHING -->
+<section id="caching">
+  <div class="container">
+    <div class="section-eyebrow">Section 03</div>
+    <h2 class="section-title">Caching</h2>
+    <p class="section-desc">The single biggest performance win — serve data from memory, not disk.</p>
+
+    <div class="topic-card">
+      <div class="topic-header">
+        <div class="topic-num">02</div>
+        <div class="topic-meta">
+          <h2>Caching Strategies</h2>
+          <div class="tagline">Cache-aside, Write-through, Write-back — and when to use each</div>
+        </div>
+      </div>
+      <div class="tags">
+        <span class="tag tag-orange">Redis</span>
+        <span class="tag tag-blue">Memcached</span>
+        <span class="tag tag-purple">LRU / TTL</span>
+        <span class="tag tag-green">Cache Hit Rate</span>
+      </div>
+      <div class="topic-body">
+        A cache sits in front of your database and serves hot data from memory (microseconds) instead of disk (milliseconds). The <strong>cache hit rate</strong> — percentage of reads served from cache — is the key metric. A 99% hit rate means only 1% of reads touch the database. Three main strategies differ in when and how cache gets updated.
+      </div>
+
+      <div class="diagram-box">
+        <svg width="100%" viewBox="0 0 680 310" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="arr2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M2 1L8 5L2 9" fill="none" stroke="#7c6fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </marker>
+          </defs>
+          <style>
+            .dc { fill: #1a1a24; stroke: rgba(255,255,255,0.1); stroke-width: 0.5; }
+            .dtc { fill: #e8e6f0; font-family: 'DM Mono', monospace; font-size: 12px; text-anchor: middle; dominant-baseline: central; }
+            .dsc { fill: #8a8799; font-family: 'DM Mono', monospace; font-size: 11px; text-anchor: middle; dominant-baseline: central; }
+            .dac { stroke: rgba(124,111,255,0.4); stroke-width: 1; fill: none; }
+            .dasm { stroke: rgba(124,111,255,0.25); stroke-width: 1; fill: none; stroke-dasharray: 3 3; }
+          </style>
+          <!-- Cache aside -->
+          <text class="dtc" x="110" y="18" style="fill:#ffc97a;">Cache-aside</text>
+          <rect class="dc" x="40" y="28" width="140" height="36" rx="6" style="stroke:rgba(124,111,255,0.3);"/>
+          <text class="dtc" x="110" y="46">App checks cache</text>
+          <line x1="110" y1="64" x2="110" y2="84" class="dac" marker-end="url(#arr2)"/>
+          <rect class="dc" x="55" y="86" width="110" height="36" rx="6" style="stroke:rgba(255,179,71,0.4);"/>
+          <text class="dtc" x="110" y="104" style="fill:#ffc97a;">Cache</text>
+          <line x1="80" y1="122" x2="58" y2="146" class="dasm" marker-end="url(#arr2)"/>
+          <text class="dsc" x="46" y="144" style="fill:#ff8fb5;">miss</text>
+          <rect class="dc" x="40" y="150" width="140" height="36" rx="6" style="stroke:rgba(255,107,157,0.3);"/>
+          <text class="dtc" x="110" y="168" style="fill:#ff8fb5;">Database</text>
+          <text class="dsc" x="110" y="218">Lazy loading</text>
+          <text class="dsc" x="110" y="234">Most common</text>
+          <!-- dividers -->
+          <line x1="238" y1="10" x2="238" y2="250" stroke="rgba(255,255,255,0.05)" stroke-width="1" stroke-dasharray="4 4"/>
+          <line x1="462" y1="10" x2="462" y2="250" stroke="rgba(255,255,255,0.05)" stroke-width="1" stroke-dasharray="4 4"/>
+          <!-- Write-through -->
+          <text class="dtc" x="350" y="18" style="fill:#a89fff;">Write-through</text>
+          <rect class="dc" x="270" y="28" width="160" height="36" rx="6" style="stroke:rgba(124,111,255,0.3);"/>
+          <text class="dtc" x="350" y="46">App writes to cache</text>
+          <line x1="350" y1="64" x2="350" y2="84" class="dac" marker-end="url(#arr2)"/>
+          <rect class="dc" x="275" y="86" width="150" height="36" rx="6" style="stroke:rgba(255,179,71,0.4);"/>
+          <text class="dtc" x="350" y="104" style="fill:#ffc97a;">Cache updates</text>
+          <line x1="350" y1="122" x2="350" y2="142" class="dac" marker-end="url(#arr2)"/>
+          <rect class="dc" x="270" y="144" width="160" height="36" rx="6" style="stroke:rgba(255,107,157,0.3);"/>
+          <text class="dtc" x="350" y="162" style="fill:#ff8fb5;">DB updated too</text>
+          <text class="dsc" x="350" y="218" style="fill:#5eecd2;">Always consistent</text>
+          <text class="dsc" x="350" y="234">Higher write latency</text>
+          <!-- Write-back -->
+          <text class="dtc" x="570" y="18" style="fill:#7dd6f8;">Write-back</text>
+          <rect class="dc" x="482" y="28" width="175" height="36" rx="6" style="stroke:rgba(124,111,255,0.3);"/>
+          <text class="dtc" x="570" y="46">App writes to cache</text>
+          <line x1="570" y1="64" x2="570" y2="84" class="dac" marker-end="url(#arr2)"/>
+          <rect class="dc" x="482" y="86" width="175" height="36" rx="6" style="stroke:rgba(255,179,71,0.4);"/>
+          <text class="dtc" x="570" y="104" style="fill:#ffc97a;">Cache (async later)</text>
+          <line x1="570" y1="122" x2="570" y2="142" class="dasm" marker-end="url(#arr2)"/>
+          <rect class="dc" x="482" y="144" width="175" height="36" rx="6" style="stroke:rgba(255,107,157,0.3);"/>
+          <text class="dtc" x="570" y="162" style="fill:#ff8fb5;">DB written later</text>
+          <text class="dsc" x="570" y="218" style="fill:#5eecd2;">Fastest writes</text>
+          <text class="dsc" x="570" y="234" style="fill:#ff6b6b;">Risk of data loss</text>
+          <!-- Eviction -->
+          <rect class="dc" x="40" y="264" width="600" height="36" rx="8" style="stroke:rgba(124,111,255,0.35);"/>
+          <text class="dtc" x="340" y="282" style="fill:#a89fff;">Eviction policies: LRU (most common) · LFU · TTL expiry · FIFO</text>
+        </svg>
+      </div>
+
+      <div class="metrics">
+        <div class="metric"><div class="val">&lt;1ms</div><div class="mlabel">Redis read</div></div>
+        <div class="metric"><div class="val">10ms</div><div class="mlabel">DB SSD read</div></div>
+        <div class="metric"><div class="val">150ms</div><div class="mlabel">Cross-region</div></div>
+        <div class="metric"><div class="val">99%</div><div class="mlabel">Target hit rate</div></div>
+      </div>
+
+      <div class="pros-cons">
+        <div class="pros">
+          <h4>Caching Pros</h4>
+          <ul>
+            <li>Reduces DB load by 99%+</li>
+            <li>Sub-millisecond response times</li>
+            <li>Absorbs read traffic spikes</li>
+            <li>Reduces infrastructure cost</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>Caching Cons</h4>
+          <ul>
+            <li>Cache invalidation is hard</li>
+            <li>Stale data risk</li>
+            <li>Cache stampede on cold start</li>
+            <li>Extra infrastructure to manage</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="realworld">
+        <div class="rw-label">Real-World — Twitter</div>
+        <p>Twitter uses <strong>Twemcache</strong> (a fork of Memcached) and <strong>Redis</strong> extensively. Your home timeline is pre-computed and cached for active users — when someone you follow tweets, a <strong>fan-out service</strong> pushes the tweet ID into each follower's cached timeline. Lady Gaga has 50M followers, so Twitter uses a hybrid: cache for normal users, compute-on-read for celebrity tweets.</p>
+      </div>
+
+      <div class="insight">
+        The hardest problem in caching is invalidation — knowing when to remove stale data. The phrase "there are only two hard things in computer science: cache invalidation and naming things" is practically a meme in interviews. Always discuss your TTL strategy and how you handle stale reads.
+      </div>
+
+      <div class="tip">
+        When asked about caching, mention the <strong>cache stampede</strong> problem: when the cache expires, 10,000 requests simultaneously hit the DB. Solutions: staggered TTLs, mutex locks, or background refresh.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DATABASES -->
+<section id="databases">
+  <div class="container">
+    <div class="section-eyebrow">Section 04</div>
+    <h2 class="section-title">Databases</h2>
+    <p class="section-desc">SQL vs NoSQL is never about which is better — it's about which fits your access patterns.</p>
+
+    <div class="topic-card">
+      <div class="topic-header">
+        <div class="topic-num">03</div>
+        <div class="topic-meta">
+          <h2>SQL vs NoSQL + Sharding</h2>
+          <div class="tagline">Picking the right storage engine — and scaling it</div>
+        </div>
+      </div>
+      <div class="tags">
+        <span class="tag tag-blue">PostgreSQL</span>
+        <span class="tag tag-green">Cassandra</span>
+        <span class="tag tag-pink">MongoDB</span>
+        <span class="tag tag-orange">DynamoDB</span>
+        <span class="tag tag-purple">Sharding</span>
+      </div>
+      <div class="topic-body">
+        <strong>Relational (SQL)</strong> databases enforce ACID transactions and are exceptional at complex JOINs and structured data. <strong>NoSQL</strong> databases sacrifice strict consistency for horizontal scalability and flexible schemas. Neither is universally better — your read/write patterns and consistency requirements dictate the choice.
+      </div>
+
+      <div class="diagram-box">
+        <svg width="100%" viewBox="0 0 680 340" xmlns="http://www.w3.org/2000/svg">
+          <style>
+            .dd { fill: #1a1a24; stroke: rgba(255,255,255,0.1); stroke-width: 0.5; }
+            .dtd { fill: #e8e6f0; font-family: 'DM Mono', monospace; font-size: 13px; text-anchor: middle; dominant-baseline: central; }
+            .dsd { fill: #8a8799; font-family: 'DM Mono', monospace; font-size: 11px; text-anchor: middle; dominant-baseline: central; }
+          </style>
+          <rect class="dd" x="30" y="30" width="290" height="60" rx="8" style="stroke:rgba(79,195,247,0.4);"/>
+          <text class="dtd" x="175" y="52" style="fill:#7dd6f8;">Relational (SQL)</text>
+          <text class="dsd" x="175" y="72">PostgreSQL · MySQL · SQLite</text>
+          <rect class="dd" x="30" y="104" width="290" height="36" rx="6" style="stroke:rgba(79,195,247,0.2);"/>
+          <text class="dsd" x="175" y="122">ACID transactions, strong consistency</text>
+          <rect class="dd" x="30" y="150" width="290" height="36" rx="6" style="stroke:rgba(79,195,247,0.2);"/>
+          <text class="dsd" x="175" y="168">Complex queries with JOINs</text>
+          <rect class="dd" x="30" y="196" width="290" height="36" rx="6" style="stroke:rgba(79,195,247,0.2);"/>
+          <text class="dsd" x="175" y="214">Structured, well-defined schema</text>
+          <rect class="dd" x="30" y="242" width="290" height="36" rx="6" style="stroke:rgba(79,195,247,0.2);"/>
+          <text class="dsd" x="175" y="260">Vertical scaling primarily</text>
+          <text class="dsd" x="175" y="300" style="fill:#7dd6f8;">Best for: finance, orders, users</text>
+          <!-- divider -->
+          <line x1="340" y1="20" x2="340" y2="320" stroke="rgba(255,255,255,0.05)" stroke-width="1" stroke-dasharray="4 4"/>
+          <!-- NoSQL -->
+          <rect class="dd" x="360" y="30" width="290" height="60" rx="8" style="stroke:rgba(0,212,170,0.4);"/>
+          <text class="dtd" x="505" y="52" style="fill:#5eecd2;">Non-relational (NoSQL)</text>
+          <text class="dsd" x="505" y="72">MongoDB · Cassandra · DynamoDB</text>
+          <rect class="dd" x="360" y="104" width="290" height="36" rx="6" style="stroke:rgba(0,212,170,0.2);"/>
+          <text class="dsd" x="505" y="122">Eventual consistency, high availability</text>
+          <rect class="dd" x="360" y="150" width="290" height="36" rx="6" style="stroke:rgba(0,212,170,0.2);"/>
+          <text class="dsd" x="505" y="168">Horizontal sharding built-in</text>
+          <rect class="dd" x="360" y="196" width="290" height="36" rx="6" style="stroke:rgba(0,212,170,0.2);"/>
+          <text class="dsd" x="505" y="214">Flexible / schema-less documents</text>
+          <rect class="dd" x="360" y="242" width="290" height="36" rx="6" style="stroke:rgba(0,212,170,0.2);"/>
+          <text class="dsd" x="505" y="260">Designed for massive write scale</text>
+          <text class="dsd" x="505" y="300" style="fill:#5eecd2;">Best for: feeds, IoT, catalogs</text>
+        </svg>
+      </div>
+
+      <table class="compare-table">
+        <thead>
+          <tr><th>Feature</th><th>SQL (Postgres)</th><th>NoSQL (Cassandra)</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Consistency</td><td style="color:#5eecd2;">ACID — strong</td><td style="color:#ffc97a;">Eventual (tunable)</td></tr>
+          <tr><td>Schema</td><td>Fixed, structured</td><td>Flexible, dynamic</td></tr>
+          <tr><td>Joins</td><td style="color:#5eecd2;">Native, powerful</td><td style="color:#ff8fb5;">No — denormalize data</td></tr>
+          <tr><td>Write scale</td><td>Vertical + read replicas</td><td style="color:#5eecd2;">Linear horizontal scale</td></tr>
+          <tr><td>Best for</td><td>Orders, finance, auth</td><td>IoT, time-series, feeds</td></tr>
+          <tr><td>Examples</td><td>PostgreSQL, MySQL, SQLite</td><td>Cassandra, DynamoDB, MongoDB</td></tr>
+        </tbody>
+      </table>
+
+      <div class="insight">
+        <strong>Sharding</strong> splits your database horizontally — user IDs 0–10M on shard 1, 10M–20M on shard 2. The shard key choice is critical: a bad key (like user creation date) creates hot spots. A good key (like hashed user ID) distributes evenly. Resharding is painful — plan ahead.
+      </div>
+
+      <div class="pros-cons">
+        <div class="pros">
+          <h4>Read Replicas</h4>
+          <ul>
+            <li>Offload read traffic from primary</li>
+            <li>Zero downtime for read queries</li>
+            <li>Async replication = tiny lag</li>
+            <li>Geographic distribution</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>Replication Lag</h4>
+          <ul>
+            <li>Read-after-write inconsistency</li>
+            <li>"I just posted but can't see it"</li>
+            <li>Sticky sessions as workaround</li>
+            <li>Monitoring replication lag critical</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="realworld">
+        <div class="rw-label">Real-World — Uber</div>
+        <p>Uber migrated from <strong>PostgreSQL to MySQL</strong> then to <strong>Schemaless</strong> (their custom NoSQL on MySQL) for trips data. Their driver location updates — <strong>1 million writes/second</strong> — go into <strong>Apache Kafka → HBase</strong> (NoSQL). Financial trip data (exact fare, payment) stays in <strong>MySQL with ACID transactions</strong>. The split-brain approach: NoSQL for high-write telemetry, SQL for money.</p>
+      </div>
+
+      <div class="tip">
+        When asked "SQL or NoSQL?", never say NoSQL is more scalable. Say: "If I need ACID transactions and complex queries, SQL. If I need massive write throughput with flexible schema, NoSQL. For most systems I'd start with PostgreSQL and add NoSQL only when needed."
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CAP THEOREM -->
+<section id="cap">
+  <div class="container">
+    <div class="section-eyebrow">Section 05</div>
+    <h2 class="section-title">CAP Theorem</h2>
+    <p class="section-desc">The fundamental constraint of distributed systems — you can only guarantee two of three.</p>
+
+    <div class="topic-card">
+      <div class="topic-header">
+        <div class="topic-num">04</div>
+        <div class="topic-meta">
+          <h2>Consistency, Availability, Partition Tolerance</h2>
+          <div class="tagline">The theorem that shapes every distributed database decision</div>
+        </div>
+      </div>
+      <div class="tags">
+        <span class="tag tag-purple">CP Systems</span>
+        <span class="tag tag-green">AP Systems</span>
+        <span class="tag tag-orange">Network Partitions</span>
+      </div>
+      <div class="topic-body">
+        In any distributed system, network partitions (communication failures between nodes) are inevitable. When they happen, you must choose: do you return a potentially stale value (choose Availability), or do you block until you can guarantee the latest value (choose Consistency)? There is no system that can be both strongly consistent and always available during a partition.
+      </div>
+
+      <div class="diagram-box">
+        <svg width="100%" viewBox="0 0 680 320" xmlns="http://www.w3.org/2000/svg">
+          <style>
+            .cap { font-family: 'DM Mono', monospace; text-anchor: middle; dominant-baseline: central; }
+          </style>
+          <!-- Triangle -->
+          <polygon points="340,30 100,280 580,280" fill="none" stroke="rgba(124,111,255,0.2)" stroke-width="1"/>
+          <!-- Three vertices -->
+          <circle cx="340" cy="30" r="38" fill="rgba(124,111,255,0.12)" stroke="rgba(124,111,255,0.4)" stroke-width="1"/>
+          <text class="cap" x="340" y="22" style="fill:#a89fff; font-size:12px; font-weight:600;">C</text>
+          <text class="cap" x="340" y="38" style="fill:#8a8799; font-size:10px;">Consistency</text>
+          <circle cx="100" cy="280" r="42" fill="rgba(0,212,170,0.1)" stroke="rgba(0,212,170,0.4)" stroke-width="1"/>
+          <text class="cap" x="100" y="272" style="fill:#5eecd2; font-size:12px; font-weight:600;">A</text>
+          <text class="cap" x="100" y="288" style="fill:#8a8799; font-size:10px;">Availability</text>
+          <circle cx="580" cy="280" r="42" fill="rgba(255,179,71,0.1)" stroke="rgba(255,179,71,0.4)" stroke-width="1"/>
+          <text class="cap" x="580" y="272" style="fill:#ffc97a; font-size:12px; font-weight:600;">P</text>
+          <text class="cap" x="580" y="288" style="fill:#8a8799; font-size:10px;">Partition tol.</text>
+          <!-- DB labels on edges -->
+          <text class="cap" x="210" y="145" style="fill:#a89fff; font-size:11px;">CP</text>
+          <text class="cap" x="200" y="158" style="fill:#8a8799; font-size:10px;">HBase, ZooKeeper</text>
+          <text class="cap" x="200" y="171" style="fill:#8a8799; font-size:10px;">MongoDB*</text>
+          <text class="cap" x="470" y="145" style="fill:#5eecd2; font-size:11px;">AP</text>
+          <text class="cap" x="470" y="158" style="fill:#8a8799; font-size:10px;">Cassandra, CouchDB</text>
+          <text class="cap" x="470" y="171" style="fill:#8a8799; font-size:10px;">DynamoDB</text>
+          <text class="cap" x="340" y="265" style="fill:#ffc97a; font-size:11px;">CA (no partition)</text>
+          <text class="cap" x="340" y="278" style="fill:#8a8799; font-size:10px;">Traditional SQL (single node)</text>
+          <!-- Center note -->
+          <text class="cap" x="340" y="168" style="fill:#8a8799; font-size:11px; font-style:italic;">Pick any 2</text>
+          <text class="cap" x="340" y="182" style="fill:#8a8799; font-size:10px;">Partitions always happen</text>
+        </svg>
+      </div>
+
+      <div class="pros-cons">
+        <div class="pros">
+          <h4>CP (pick Consistency)</h4>
+          <ul>
+            <li>Every read gets latest data</li>
+            <li>No dirty reads possible</li>
+            <li>HBase, Zookeeper, Spanner</li>
+            <li>Banking, order management</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>AP (pick Availability)</h4>
+          <ul>
+            <li>Always responds (maybe stale)</li>
+            <li>Higher uptime, lower latency</li>
+            <li>Cassandra, DynamoDB, CouchDB</li>
+            <li>Social feeds, product catalog</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="realworld">
+        <div class="rw-label">Real-World — Amazon Shopping Cart</div>
+        <p>Amazon's Dynamo paper (2007) chose <strong>AP for the shopping cart</strong> — it's better to show a slightly stale cart than fail the request. If two updates conflict (you added on mobile, partner added on laptop), Dynamo uses <strong>vector clocks and last-write-wins</strong> to resolve conflicts. Amazon would rather lose a conflict than show a 503 error to a customer about to buy something.</p>
+      </div>
+
+      <div class="insight">
+        The modern framing is <strong>PACELC</strong> — extending CAP to cover the latency vs consistency tradeoff even when there's no partition. Most production systems tune consistency levels per-operation: "quorum reads" for strong consistency on payment confirmations, "eventual reads" for profile views.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MESSAGE QUEUES -->
+<section id="queues">
+  <div class="container">
+    <div class="section-eyebrow">Section 06</div>
+    <h2 class="section-title">Message Queues</h2>
+    <p class="section-desc">Decouple services, absorb traffic spikes, and enable async processing at scale.</p>
+
+    <div class="topic-card">
+      <div class="topic-header">
+        <div class="topic-num">05</div>
+        <div class="topic-meta">
+          <h2>Async Architecture with Queues</h2>
+          <div class="tagline">Kafka, RabbitMQ, SQS — when and why to introduce a queue</div>
+        </div>
+      </div>
+      <div class="tags">
+        <span class="tag tag-green">Kafka</span>
+        <span class="tag tag-orange">RabbitMQ</span>
+        <span class="tag tag-blue">AWS SQS</span>
+        <span class="tag tag-purple">Fan-out</span>
+      </div>
+      <div class="topic-body">
+        A message queue sits between a <strong>producer</strong> (publishes events) and one or more <strong>consumers</strong> (process them independently). The producer doesn't wait for consumers — it fires and forgets. This decoupling lets each service scale independently and protects downstream services from traffic bursts.
+      </div>
+
+      <div class="diagram-box">
+        <svg width="100%" viewBox="0 0 680 230" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="arr5" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M2 1L8 5L2 9" fill="none" stroke="#7c6fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </marker>
+          </defs>
+          <style>
+            .dq { fill: #1a1a24; stroke: rgba(255,255,255,0.1); stroke-width: 0.5; }
+            .dtq { fill: #e8e6f0; font-family: 'DM Mono', monospace; font-size: 12px; text-anchor: middle; dominant-baseline: central; }
+            .dsq { fill: #8a8799; font-family: 'DM Mono', monospace; font-size: 11px; text-anchor: middle; dominant-baseline: central; }
+            .daq { stroke: rgba(124,111,255,0.4); stroke-width: 1; fill: none; }
+          </style>
+          <!-- Without queue -->
+          <text class="dtq" x="175" y="16" style="fill:#ff8fb5; font-size:11px;">Without queue (tight coupling)</text>
+          <rect class="dq" x="20" y="28" width="130" height="44" rx="6" style="stroke:rgba(255,107,157,0.3);"/>
+          <text class="dtq" x="85" y="50">Order service</text>
+          <line x1="150" y1="50" x2="190" y2="50" class="daq" marker-end="url(#arr5)"/>
+          <rect class="dq" x="192" y="28" width="130" height="44" rx="6"/>
+          <text class="dtq" x="257" y="50">Email service</text>
+          <text class="dsq" x="160" y="96" style="fill:#ff6b6b;">Slow email = slow order</text>
+          <text class="dsq" x="160" y="112" style="fill:#ff6b6b;">Email down = order fails</text>
+          <!-- divider -->
+          <line x1="360" y1="10" x2="360" y2="200" stroke="rgba(255,255,255,0.05)" stroke-width="1" stroke-dasharray="4 4"/>
+          <!-- With queue -->
+          <text class="dtq" x="520" y="16" style="fill:#5eecd2; font-size:11px;">With queue (decoupled)</text>
+          <rect class="dq" x="370" y="28" width="120" height="44" rx="6" style="stroke:rgba(79,195,247,0.3);"/>
+          <text class="dtq" x="430" y="50" style="fill:#7dd6f8;">Order service</text>
+          <line x1="490" y1="50" x2="516" y2="50" class="daq" marker-end="url(#arr5)"/>
+          <rect class="dq" x="518" y="28" width="140" height="44" rx="6" style="stroke:rgba(124,111,255,0.5);"/>
+          <text class="dtq" x="588" y="43" style="fill:#a89fff;">Queue</text>
+          <text class="dsq" x="588" y="61">Kafka / SQS</text>
+          <line x1="555" y1="72" x2="490" y2="105" class="daq" marker-end="url(#arr5)"/>
+          <line x1="588" y1="72" x2="588" y2="105" class="daq" marker-end="url(#arr5)"/>
+          <line x1="620" y1="72" x2="660" y2="105" class="daq" marker-end="url(#arr5)"/>
+          <rect class="dq" x="440" y="107" width="100" height="34" rx="6" style="stroke:rgba(0,212,170,0.3);"/>
+          <text class="dsq" x="490" y="124" style="fill:#5eecd2;">Email</text>
+          <rect class="dq" x="548" y="107" width="100" height="34" rx="6" style="stroke:rgba(0,212,170,0.3);"/>
+          <text class="dsq" x="598" y="124" style="fill:#5eecd2;">SMS</text>
+          <rect class="dq" x="614" y="107" width="60" height="34" rx="6" style="stroke:rgba(0,212,170,0.3);"/>
+          <text class="dsq" x="644" y="124" style="fill:#5eecd2;">Push</text>
+          <text class="dsq" x="430" y="168" style="fill:#5eecd2;">Returns instantly</text>
+          <text class="dsq" x="580" y="168">Scale independently</text>
+        </svg>
+      </div>
+
+      <div class="pros-cons">
+        <div class="pros">
+          <h4>Message Queue Pros</h4>
+          <ul>
+            <li>Decouples producer from consumer</li>
+            <li>Absorbs write traffic bursts</li>
+            <li>Retry logic on consumer failure</li>
+            <li>Fan-out to multiple consumers</li>
+            <li>Event sourcing / audit trail</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>Message Queue Cons</h4>
+          <ul>
+            <li>Added infrastructure complexity</li>
+            <li>Message ordering hard at scale</li>
+            <li>Duplicate message handling needed</li>
+            <li>Eventual processing = no sync response</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="realworld">
+        <div class="rw-label">Real-World — LinkedIn (Kafka's birthplace)</div>
+        <p>LinkedIn invented <strong>Apache Kafka</strong> to handle their activity stream — every page view, profile view, connection request. At peak, Kafka at LinkedIn processes <strong>7 trillion messages/day</strong>. Each event is published once and consumed by multiple services in parallel: analytics pipeline, recommendation engine, notification service, activity feed — all independently, without coupling.</p>
+      </div>
+
+      <div class="tip">
+        Introduce a queue whenever you hear "async", "burst traffic", "decouple", or "at least once delivery". Also mention idempotency — since queues can deliver messages more than once, consumers must handle duplicates gracefully.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FRAMEWORK -->
+<section id="framework">
+  <div class="container">
+    <div class="section-eyebrow">Section 07</div>
+    <h2 class="section-title">Interview Framework</h2>
+    <p class="section-desc">Structure your answer and you're 80% of the way there before drawing a single box.</p>
+
+    <div class="topic-card">
+      <div class="topic-header">
+        <div class="topic-num">06</div>
+        <div class="topic-meta">
+          <h2>The 5-Step Answer Template</h2>
+          <div class="tagline">Used at Google, Meta, Amazon, and every FAANG interview</div>
+        </div>
+      </div>
+
+      <div class="diagram-box">
+        <svg width="100%" viewBox="0 0 680 390" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="arr6" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M2 1L8 5L2 9" fill="none" stroke="#7c6fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </marker>
+          </defs>
+          <style>
+            .df { fill: #1a1a24; stroke-width: 0.5; }
+            .dtf { fill: #e8e6f0; font-family: 'DM Mono', monospace; font-size: 13px; dominant-baseline: central; }
+            .dsf { fill: #8a8799; font-family: 'DM Mono', monospace; font-size: 11px; dominant-baseline: central; }
+            .daf { stroke: rgba(124,111,255,0.4); stroke-width: 1.2; fill: none; }
+          </style>
+          <!-- Step 1 -->
+          <rect class="df" x="80" y="18" width="520" height="52" rx="8" style="stroke:rgba(124,111,255,0.5);"/>
+          <text class="dtf" x="164" y="38" style="fill:#a89fff;">1. Clarify requirements</text>
+          <text class="dsf" x="164" y="58">How many users? Read or write heavy? Latency SLA? Global?</text>
+          <line x1="340" y1="70" x2="340" y2="90" class="daf" marker-end="url(#arr6)"/>
+          <!-- Step 2 -->
+          <rect class="df" x="80" y="92" width="520" height="52" rx="8" style="stroke:rgba(79,195,247,0.4);"/>
+          <text class="dtf" x="160" y="112" style="fill:#7dd6f8;">2. Estimate scale</text>
+          <text class="dsf" x="160" y="132">DAU × actions ÷ 86400 = QPS. Storage: rows × row_size</text>
+          <line x1="340" y1="144" x2="340" y2="164" class="daf" marker-end="url(#arr6)"/>
+          <!-- Step 3 -->
+          <rect class="df" x="80" y="166" width="520" height="52" rx="8" style="stroke:rgba(0,212,170,0.4);"/>
+          <text class="dtf" x="190" y="186" style="fill:#5eecd2;">3. High-level design</text>
+          <text class="dsf" x="190" y="206">Client → LB → App Servers → Cache → DB. Simple first.</text>
+          <line x1="340" y1="218" x2="340" y2="238" class="daf" marker-end="url(#arr6)"/>
+          <!-- Step 4 -->
+          <rect class="df" x="80" y="240" width="520" height="52" rx="8" style="stroke:rgba(255,107,157,0.4);"/>
+          <text class="dtf" x="186" y="260" style="fill:#ff8fb5;">4. Deep dive bottlenecks</text>
+          <text class="dsf" x="186" y="280">DB schema, sharding key, cache policy, APIs, failure modes</text>
+          <line x1="340" y1="292" x2="340" y2="312" class="daf" marker-end="url(#arr6)"/>
+          <!-- Step 5 -->
+          <rect class="df" x="80" y="314" width="520" height="52" rx="8" style="stroke:rgba(0,212,170,0.4);"/>
+          <text class="dtf" x="172" y="334" style="fill:#5eecd2;">5. Discuss tradeoffs</text>
+          <text class="dsf" x="172" y="354">No perfect answer. Show you know costs of each choice.</text>
+        </svg>
+      </div>
+
+      <div class="insight">
+        The framework is about managing time. You have 45 minutes. Spend 5 on requirements, 5 on estimation, 15 on high-level design, 15 on deep dive, and 5 on tradeoffs. Interviewers don't want a perfect answer — they want to see how you think through ambiguity.
+      </div>
+
+      <div class="realworld">
+        <div class="rw-label">Example — "Design a URL Shortener" (bit.ly)</div>
+        <p><strong>Clarify:</strong> 100M URLs/day, reads 10× writes, URLs never change. <strong>Estimate:</strong> 1000 writes/sec, 10K reads/sec. 100M × 365 × 5 years × 500 bytes = ~80TB. <strong>Design:</strong> API server → hash function (base62 7-char) → Redis cache → MySQL. <strong>Deep dive:</strong> hash collision handling, custom aliases, expiry. <strong>Tradeoff:</strong> MD5 vs counter vs random ID — counter is predictable, random needs collision check.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CHEATSHEET -->
+<section id="cheatsheet">
+  <div class="container">
+    <div class="section-eyebrow">Section 08</div>
+    <h2 class="section-title">Interview Cheatsheet</h2>
+    <p class="section-desc">Numbers and rules of thumb to recite naturally — not memorized, understood.</p>
+
+    <div class="topic-card">
+      <div class="topic-header">
+        <div class="topic-num">07</div>
+        <div class="topic-meta">
+          <h2>Back-of-envelope Estimation</h2>
+          <div class="tagline">The numbers every interviewer wants to hear you know cold</div>
+        </div>
+      </div>
+
+      <div class="metrics">
+        <div class="metric"><div class="val">1μs</div><div class="mlabel">L1 cache read</div></div>
+        <div class="metric"><div class="val">100μs</div><div class="mlabel">RAM read</div></div>
+        <div class="metric"><div class="val">1ms</div><div class="mlabel">Redis read</div></div>
+        <div class="metric"><div class="val">10ms</div><div class="mlabel">SSD DB read</div></div>
+        <div class="metric"><div class="val">100ms</div><div class="mlabel">HDD seek</div></div>
+        <div class="metric"><div class="val">150ms</div><div class="mlabel">Cross-continent</div></div>
+      </div>
+
+      <table class="compare-table">
+        <thead><tr><th>Concept</th><th>Rule of Thumb</th><th>When to apply</th></tr></thead>
+        <tbody>
+          <tr><td>QPS estimate</td><td style="color:#7dd6f8;">DAU × actions ÷ 86,400</td><td>Always — Step 2</td></tr>
+          <tr><td>Peak QPS</td><td style="color:#7dd6f8;">Avg QPS × 3</td><td>Sizing servers</td></tr>
+          <tr><td>Read replicas</td><td>Reads > 80% of traffic</td><td>DB scaling</td></tr>
+          <tr><td>Sharding trigger</td><td style="color:#ffc97a;">> 5TB or > 50K write QPS</td><td>Large scale DB</td></tr>
+          <tr><td>Cache trigger</td><td>Same data read > 100×/day</td><td>Hot data</td></tr>
+          <tr><td>CDN trigger</td><td>Static assets + global users</td><td>Media, web assets</td></tr>
+          <tr><td>Queue trigger</td><td>Any operation that can be async</td><td>Notifications, email, jobs</td></tr>
+          <tr><td>1 server capacity</td><td style="color:#5eecd2;">~1,000–10,000 QPS (varies)</td><td>Estimating fleet size</td></tr>
+        </tbody>
+      </table>
+
+      <div class="code-block">
+<span class="c">// Back-of-envelope: Twitter-scale system</span>
+<span class="k">const</span> <span class="n">DAU</span>       = <span class="num">300_000_000</span>;   <span class="c">// 300M daily active users</span>
+<span class="k">const</span> <span class="n">tweetsPerDay</span> = <span class="num">500_000_000</span>;  <span class="c">// 500M tweets/day</span>
+<span class="k">const</span> <span class="n">writeQPS</span>  = tweetsPerDay / <span class="num">86_400</span>;  <span class="c">// ~5,800 writes/sec</span>
+<span class="k">const</span> <span class="n">readQPS</span>   = writeQPS * <span class="num">100</span>;         <span class="c">// reads >> writes: 580K/sec</span>
+<span class="k">const</span> <span class="n">storage</span>  = tweetsPerDay * <span class="num">365</span> * <span class="num">5</span> * <span class="num">200</span>; <span class="c">// 5yr * 200B = ~182TB</span>
+<span class="c">// → Need sharding, caching, CDN for media, read replicas</span>
+      </div>
+
+      <div class="tip">
+        Always estimate before designing. If you say "10M QPS" casually and then propose a single PostgreSQL instance, the interviewer knows you're not thinking at scale. Numbers anchor your architecture choices — every decision should trace back to a real constraint you estimated.
+      </div>
+
+      <div class="realworld">
+        <div class="rw-label">Common Interview Questions — Top 5</div>
+        <p>
+          <strong>Design Twitter/X:</strong> fan-out, timeline generation, CDN for media.<br>
+          <strong>Design URL Shortener:</strong> hashing, base62, Redis cache, redirect logic.<br>
+          <strong>Design WhatsApp:</strong> WebSocket servers, message persistence, delivery receipts.<br>
+          <strong>Design YouTube:</strong> video encoding pipeline, CDN, adaptive bitrate.<br>
+          <strong>Design Rate Limiter:</strong> token bucket, Redis + sliding window, distributed coordination.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div style="font-family:'Syne',sans-serif; font-size:1.5rem; font-weight:700; margin-bottom:0.5rem; background: linear-gradient(135deg,#7c6fff,#ff6b9d); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">
+    System Design Mastery
+  </div>
+  <p style="font-family:'Instrument Serif',serif; font-style:italic; margin-bottom:0.5rem;">
+    The goal isn't a perfect answer — it's showing how you think.
+  </p>
+  <p style="font-size:11px; letter-spacing:0.08em; text-transform:uppercase; opacity:0.4;">
+    Scalability · Caching · Databases · CAP · Queues · Framework
+  </p>
+</footer>
+
+<script>
+  // Active nav highlighting
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('nav a[href^="#"]');
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        navLinks.forEach(l => l.classList.remove('active'));
+        const active = document.querySelector(`nav a[href="#${e.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { threshold: 0.3 });
+  sections.forEach(s => obs.observe(s));
+</script>
+</body>
+</html>

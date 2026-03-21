@@ -1,0 +1,1511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Storage Systems — The Complete System Design Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #080c14;
+  --bg2: #0c1018;
+  --surface: #111620;
+  --surface2: #161c28;
+  --border: rgba(120,160,255,0.07);
+  --border2: rgba(120,160,255,0.15);
+  --text: #dde4f0;
+  --muted: #64718f;
+  --dim: #323d52;
+  --orange: #ff8c42;
+  --orange2: #cc6820;
+  --teal: #00c9a7;
+  --blue: #4a9eff;
+  --violet: #9b6dff;
+  --rose: #ff5e8a;
+  --gold: #f0b429;
+  --lime: #84cc16;
+  --sky: #38bdf8;
+  --r: 8px;
+  --rl: 14px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Outfit',sans-serif;
+  font-size:14px;
+  line-height:1.7;
+  overflow-x:hidden;
+}
+
+/* dot matrix bg */
+body::before{
+  content:'';
+  position:fixed;inset:0;
+  background-image:radial-gradient(rgba(74,158,255,0.12) 1px, transparent 1px);
+  background-size:32px 32px;
+  pointer-events:none;z-index:0;
+  mask-image:radial-gradient(ellipse 100% 100% at 50% 0%, black 30%, transparent 80%);
+}
+
+/* ── HERO ── */
+.hero{
+  min-height:100vh;
+  display:flex;flex-direction:column;
+  justify-content:center;align-items:center;
+  text-align:center;padding:5rem 2rem 4rem;
+  position:relative;overflow:hidden;
+}
+.hero-orb{
+  position:absolute;
+  border-radius:50%;
+  pointer-events:none;
+}
+.hero-orb1{
+  width:500px;height:500px;
+  background:radial-gradient(circle,rgba(255,140,66,0.08) 0%,transparent 70%);
+  top:10%;left:10%;
+  animation:orbFloat 12s ease-in-out infinite;
+}
+.hero-orb2{
+  width:400px;height:400px;
+  background:radial-gradient(circle,rgba(74,158,255,0.07) 0%,transparent 70%);
+  top:20%;right:5%;
+  animation:orbFloat 10s ease-in-out infinite 2s;
+}
+@keyframes orbFloat{0%,100%{transform:translate(0,0);}50%{transform:translate(20px,-30px);}}
+
+.hero-eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:6px 16px;
+  border:1px solid rgba(255,140,66,0.3);
+  border-radius:100px;
+  font-size:11px;letter-spacing:0.14em;text-transform:uppercase;
+  color:var(--orange);background:rgba(255,140,66,0.06);
+  margin-bottom:2rem;position:relative;
+}
+.hero-eyebrow::before{
+  content:'';width:6px;height:6px;border-radius:50%;
+  background:var(--orange);
+  animation:blink 2s ease-in-out infinite;
+}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0.2;}}
+
+.hero h1{
+  font-family:'Playfair Display',serif;
+  font-size:clamp(3rem,8vw,7rem);
+  line-height:0.95;
+  letter-spacing:-0.02em;
+  margin-bottom:1.5rem;
+  position:relative;
+}
+.hero h1 .l1{display:block;color:var(--text);}
+.hero h1 .l2{display:block;color:var(--orange);font-style:italic;}
+.hero h1 .l3{
+  display:block;font-size:0.35em;
+  font-family:'IBM Plex Mono',monospace;
+  font-style:normal;letter-spacing:0.2em;
+  color:var(--muted);margin-top:0.5rem;
+}
+.hero-sub{
+  font-size:1rem;color:var(--muted);
+  max-width:560px;line-height:1.8;
+  margin-bottom:3rem;position:relative;
+}
+.hero-tiles{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
+  gap:1px;
+  background:var(--border);
+  border:1px solid var(--border);
+  border-radius:var(--rl);
+  overflow:hidden;
+  max-width:720px;
+  width:100%;
+  position:relative;
+}
+.hero-tile{
+  background:var(--bg2);
+  padding:1.25rem 1rem;
+  text-align:center;
+}
+.hero-tile-val{
+  font-family:'Playfair Display',serif;
+  font-size:1.8rem;color:var(--orange);line-height:1;
+  margin-bottom:4px;
+}
+.hero-tile-label{font-size:10px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;}
+
+/* ── NAV ── */
+nav{
+  position:sticky;top:0;z-index:200;
+  background:rgba(8,12,20,0.9);
+  backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--border);
+  height:50px;
+  display:flex;align-items:center;
+  padding:0 1.5rem;gap:2px;
+  overflow-x:auto;scrollbar-width:none;
+}
+nav::-webkit-scrollbar{display:none;}
+.nav-logo{
+  font-family:'Playfair Display',serif;
+  font-size:1.1rem;color:var(--orange);
+  margin-right:1.5rem;white-space:nowrap;flex-shrink:0;
+}
+nav a{
+  color:var(--muted);text-decoration:none;
+  font-size:12px;letter-spacing:0.04em;
+  padding:4px 12px;border-radius:100px;
+  white-space:nowrap;transition:all 0.2s;flex-shrink:0;
+}
+nav a:hover{color:var(--text);background:rgba(255,255,255,0.05);}
+nav a.active{color:var(--orange);background:rgba(255,140,66,0.1);}
+
+/* ── LAYOUT ── */
+.container{max-width:1100px;margin:0 auto;padding:0 2rem;position:relative;z-index:1;}
+section{padding:5rem 0;border-bottom:1px solid var(--border);}
+
+.sec-eye{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;letter-spacing:0.16em;text-transform:uppercase;
+  color:var(--orange);margin-bottom:0.5rem;
+}
+.sec-title{
+  font-family:'Playfair Display',serif;
+  font-size:clamp(2rem,4vw,3rem);
+  line-height:1.05;margin-bottom:0.75rem;
+}
+.sec-sub{font-size:1rem;color:var(--muted);max-width:620px;margin-bottom:3rem;line-height:1.8;}
+
+/* ── CARDS ── */
+.card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--rl);
+  overflow:hidden;
+  margin-bottom:2rem;
+  transition:border-color 0.3s;
+  position:relative;
+}
+.card:hover{border-color:var(--border2);}
+.card-top{height:2px;}
+.ct-orange{background:linear-gradient(90deg,var(--orange),var(--gold));}
+.ct-teal{background:linear-gradient(90deg,var(--teal),var(--sky));}
+.ct-violet{background:linear-gradient(90deg,var(--violet),var(--rose));}
+.ct-blue{background:linear-gradient(90deg,var(--blue),var(--teal));}
+.ct-rose{background:linear-gradient(90deg,var(--rose),var(--violet));}
+.ct-gold{background:linear-gradient(90deg,var(--gold),var(--lime));}
+.ct-lime{background:linear-gradient(90deg,var(--lime),var(--teal));}
+.ct-multi{background:linear-gradient(90deg,var(--orange),var(--teal),var(--violet),var(--rose));}
+
+.card-header{
+  display:flex;align-items:flex-start;gap:1rem;
+  padding:1.75rem 2rem 1.25rem;
+  border-bottom:1px solid var(--border);
+}
+.card-icon{
+  width:46px;height:46px;border-radius:10px;
+  display:grid;place-items:center;font-size:1.3rem;flex-shrink:0;
+}
+.card-meta h2{
+  font-family:'Playfair Display',serif;
+  font-size:1.5rem;line-height:1.2;margin-bottom:3px;
+}
+.card-meta .sub{color:var(--muted);font-size:12px;font-style:italic;}
+.card-body{padding:1.75rem 2rem;}
+
+/* ── PROSE ── */
+.prose{font-size:14px;color:#9aadca;line-height:1.85;margin-bottom:1.25rem;}
+.prose strong{color:var(--text);font-weight:500;}
+.prose em{color:var(--orange);font-style:italic;}
+
+/* ── CODE ── */
+.code{
+  background:rgba(0,0,0,0.5);
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  padding:1.25rem;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:12px;line-height:1.9;
+  overflow-x:auto;margin:1rem 0;color:#8899bb;
+}
+.k{color:#c792ea;}.s{color:#c3e88d;}.c{color:#2a3a52;font-style:italic;}
+.n{color:#82aaff;}.num{color:var(--gold);}.fn{color:var(--sky);}
+.kw{color:var(--teal);}
+
+/* ── PC GRID ── */
+.pc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin:1.25rem 0;}
+.pc-box{border-radius:var(--r);padding:1.25rem;font-size:13px;}
+.pc-pro{background:rgba(0,201,167,0.05);border:1px solid rgba(0,201,167,0.18);}
+.pc-con{background:rgba(255,94,138,0.05);border:1px solid rgba(255,94,138,0.18);}
+.pc-note{background:rgba(240,180,41,0.05);border:1px solid rgba(240,180,41,0.18);}
+.pc-tip{background:rgba(74,158,255,0.05);border:1px solid rgba(74,158,255,0.18);}
+.pc-box h4{font-size:10px;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:0.75rem;font-weight:500;}
+.pc-pro h4{color:var(--teal);}
+.pc-con h4{color:var(--rose);}
+.pc-note h4{color:var(--gold);}
+.pc-tip h4{color:var(--blue);}
+.pc-box ul{list-style:none;line-height:2.1;}
+.pc-pro li::before{content:'✓  ';color:var(--teal);}
+.pc-con li::before{content:'✗  ';color:var(--rose);}
+.pc-note li::before{content:'⇄  ';color:var(--gold);}
+.pc-tip li::before{content:'→  ';color:var(--blue);}
+
+/* ── HIGHLIGHT ── */
+.hl{border-radius:var(--r);padding:1.25rem 1.5rem;margin:1.25rem 0;font-size:13.5px;line-height:1.85;}
+.hl-label{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:0.2em;text-transform:uppercase;display:block;margin-bottom:0.5rem;opacity:0.65;}
+.hl-orange{background:rgba(255,140,66,0.05);border:1px solid rgba(255,140,66,0.2);border-left:3px solid var(--orange);border-radius:0 var(--r) var(--r) 0;color:#c09070;}
+.hl-orange strong{color:var(--orange);}
+.hl-teal{background:rgba(0,201,167,0.04);border:1px solid rgba(0,201,167,0.18);border-left:3px solid var(--teal);border-radius:0 var(--r) var(--r) 0;color:#70b0a0;}
+.hl-teal strong{color:var(--teal);}
+.hl-violet{background:rgba(155,109,255,0.05);border:1px solid rgba(155,109,255,0.18);border-left:3px solid var(--violet);border-radius:0 var(--r) var(--r) 0;color:#a090c0;}
+.hl-violet strong{color:var(--violet);}
+.hl-rose{background:rgba(255,94,138,0.04);border:1px solid rgba(255,94,138,0.18);border-left:3px solid var(--rose);border-radius:0 var(--r) var(--r) 0;color:#c08090;}
+.hl-rose strong{color:var(--rose);}
+.hl-gold{background:rgba(240,180,41,0.04);border:1px solid rgba(240,180,41,0.18);border-left:3px solid var(--gold);border-radius:0 var(--r) var(--r) 0;color:#b0a060;}
+.hl-gold strong{color:var(--gold);}
+
+/* ── TABLE ── */
+.tbl{width:100%;border-collapse:collapse;font-size:12.5px;margin:1.25rem 0;}
+.tbl th{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);padding:10px 14px;text-align:left;border-bottom:1px solid var(--border2);background:var(--bg2);}
+.tbl td{padding:10px 14px;border-bottom:1px solid var(--border);color:#9aadca;vertical-align:top;}
+.tbl tr:last-child td{border-bottom:none;}
+.tbl tr:hover td{background:rgba(255,140,66,0.03);}
+
+/* ── SCENARIO GRID ── */
+.sg{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin:1.5rem 0;}
+.sc{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:var(--rl);padding:1.25rem;
+  transition:border-color 0.25s,transform 0.25s;
+}
+.sc:hover{border-color:var(--border2);transform:translateY(-2px);}
+.sc-icon{font-size:1.6rem;margin-bottom:0.75rem;display:block;font-style:normal;}
+.sc h3{font-size:13px;font-weight:600;margin-bottom:0.5rem;color:var(--text);}
+.sc p{font-size:12px;color:var(--muted);line-height:1.65;}
+.sc-badge{display:inline-block;margin-top:0.75rem;padding:2px 10px;border-radius:100px;font-size:10px;font-family:'IBM Plex Mono',monospace;}
+
+/* ── FLOW STEPS ── */
+.flow{display:flex;flex-direction:column;gap:0;margin:1.25rem 0;}
+.fstep{display:flex;align-items:flex-start;gap:1rem;padding:1rem 1.25rem;background:var(--bg2);border:1px solid var(--border);border-bottom:none;transition:background 0.2s;}
+.fstep:first-child{border-radius:var(--r) var(--r) 0 0;}
+.fstep:last-child{border-bottom:1px solid var(--border);border-radius:0 0 var(--r) var(--r);}
+.fstep:hover{background:rgba(255,140,66,0.03);}
+.fstep-n{width:26px;height:26px;border-radius:50%;background:rgba(255,140,66,0.1);border:1px solid rgba(255,140,66,0.3);display:grid;place-items:center;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--orange);flex-shrink:0;margin-top:2px;}
+.fstep-body h4{font-size:13px;font-weight:500;margin-bottom:3px;}
+.fstep-body p{font-size:12px;color:var(--muted);line-height:1.6;}
+
+/* ── METRICS ── */
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(115px,1fr));gap:0.75rem;margin:1.25rem 0;}
+.metric{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:1rem;text-align:center;}
+.metric-val{font-family:'Playfair Display',serif;font-size:1.7rem;color:var(--orange);line-height:1;margin-bottom:4px;}
+.metric-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;}
+
+/* ── CHIPS ── */
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:1rem 0;}
+.chip{padding:4px 12px;border-radius:100px;font-family:'IBM Plex Mono',monospace;font-size:11px;}
+.chip-o{background:rgba(255,140,66,0.1);color:#d4905a;border:1px solid rgba(255,140,66,0.25);}
+.chip-t{background:rgba(0,201,167,0.08);color:#5cbcaa;border:1px solid rgba(0,201,167,0.2);}
+.chip-v{background:rgba(155,109,255,0.08);color:#a890d4;border:1px solid rgba(155,109,255,0.2);}
+.chip-b{background:rgba(74,158,255,0.08);color:#6898cc;border:1px solid rgba(74,158,255,0.2);}
+.chip-r{background:rgba(255,94,138,0.08);color:#c07890;border:1px solid rgba(255,94,138,0.2);}
+.chip-g{background:rgba(132,204,22,0.08);color:#88aa40;border:1px solid rgba(132,204,22,0.2);}
+
+/* ── DIAGRAM ── */
+.diagram-wrap{background:var(--bg);border:1px solid var(--border);border-radius:var(--rl);padding:1.5rem 1rem;margin:1.5rem 0;overflow-x:auto;}
+
+/* ── DECISION WIDGET ── */
+.decision-wrap{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:var(--rl);padding:1.75rem;margin:1.5rem 0;
+}
+.decision-title{
+  font-family:'Playfair Display',serif;font-size:1.1rem;
+  margin-bottom:1.25rem;color:var(--text);
+}
+.decision-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:0.75rem;margin-bottom:1.5rem;}
+.decision-btn{
+  padding:1rem;border-radius:var(--r);border:1px solid var(--border);
+  background:var(--surface);cursor:pointer;
+  transition:all 0.2s;text-align:center;
+}
+.decision-btn:hover{border-color:var(--border2);background:rgba(255,140,66,0.05);}
+.decision-btn.selected{border-color:var(--orange);background:rgba(255,140,66,0.08);}
+.decision-btn-icon{font-size:1.5rem;display:block;margin-bottom:6px;}
+.decision-btn-label{font-size:12px;color:var(--muted);}
+.decision-btn.selected .decision-btn-label{color:var(--orange);}
+.decision-result{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--r);padding:1.25rem;
+  font-size:13px;line-height:1.8;
+  min-height:80px;
+  transition:all 0.3s;
+}
+.decision-result h4{color:var(--orange);font-size:13px;font-weight:500;margin-bottom:0.5rem;}
+.decision-result p{color:#9aadca;}
+.decision-result code{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--teal);}
+
+/* ── LATENCY BARS ── */
+.lat-row{display:grid;grid-template-columns:140px 1fr 90px;align-items:center;gap:1rem;margin-bottom:10px;}
+.lat-name{font-size:12px;color:var(--muted);text-align:right;}
+.lat-bar-wrap{background:var(--surface2);border-radius:3px;height:7px;overflow:hidden;}
+.lat-bar{height:100%;border-radius:3px;}
+.lat-val{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text);}
+
+/* ── TABS ── */
+.tab-wrap{margin:1.5rem 0;}
+.tab-btns{display:flex;gap:4px;border-bottom:1px solid var(--border);margin-bottom:1.5rem;overflow-x:auto;}
+.tab-btn{
+  padding:8px 16px;font-size:12px;letter-spacing:0.04em;
+  background:transparent;border:none;cursor:pointer;
+  color:var(--muted);border-bottom:2px solid transparent;
+  white-space:nowrap;transition:all 0.2s;
+}
+.tab-btn:hover{color:var(--text);}
+.tab-btn.active{color:var(--orange);border-bottom-color:var(--orange);}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+
+/* ── INTERACTIVE STORAGE COST CALC ── */
+.calc-wrap{background:var(--surface2);border:1px solid var(--border);border-radius:var(--rl);padding:1.75rem;margin:1.5rem 0;}
+.calc-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;}
+@media(max-width:600px){.calc-row{grid-template-columns:1fr;}}
+.calc-group label{display:block;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;font-family:'IBM Plex Mono',monospace;}
+.calc-group input,
+.calc-group select{
+  width:100%;padding:10px 12px;
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--r);color:var(--text);font-size:14px;
+  font-family:'Outfit',sans-serif;
+}
+.calc-group input:focus,
+.calc-group select:focus{outline:none;border-color:rgba(255,140,66,0.4);}
+.calc-results{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:0.75rem;margin-top:1.25rem;}
+.calc-result{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:1rem;text-align:center;}
+.calc-result-val{font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--orange);line-height:1;margin-bottom:4px;}
+.calc-result-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;}
+
+/* ── COMPARISON TABLE HEADER COLORS ── */
+td.t-orange{color:var(--orange)!important;}
+td.t-teal{color:var(--teal)!important;}
+td.t-violet{color:var(--violet)!important;}
+td.t-rose{color:var(--rose)!important;}
+td.t-blue{color:var(--blue)!important;}
+td.t-gold{color:var(--gold)!important;}
+td.t-lime{color:var(--lime)!important;}
+td.t-sky{color:var(--sky)!important;}
+td.t-green{color:var(--lime)!important;}
+td.t-bad{color:var(--rose)!important;}
+td.t-good{color:var(--teal)!important;}
+td.t-mid{color:var(--gold)!important;}
+
+/* ── FOOTER ── */
+footer{text-align:center;padding:4rem 2rem;color:var(--muted);}
+
+/* ── ANIMS ── */
+.card{animation:slideUp 0.6s both;}
+@keyframes slideUp{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);}}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-orb hero-orb1"></div>
+  <div class="hero-orb hero-orb2"></div>
+  <div class="hero-eyebrow">System Design · Storage Deep Dive</div>
+  <h1>
+    <span class="l1">Storage</span>
+    <span class="l2">Systems</span>
+    <span class="l3">every type · every tradeoff · every use case</span>
+  </h1>
+  <p class="hero-sub">From S3 object storage to NVMe SSDs, from block devices to distributed file systems — the complete reference for choosing the right storage at every layer of your system.</p>
+  <div class="hero-tiles">
+    <div class="hero-tile"><div class="hero-tile-val">7</div><div class="hero-tile-label">Storage types</div></div>
+    <div class="hero-tile"><div class="hero-tile-val">99.9%</div><div class="hero-tile-label">S3 durability 11×9s</div></div>
+    <div class="hero-tile"><div class="hero-tile-val">1TB/s</div><div class="hero-tile-label">NVMe peak IOPS</div></div>
+    <div class="hero-tile"><div class="hero-tile-val">$0.023</div><div class="hero-tile-label">S3 per GB/mo</div></div>
+    <div class="hero-tile"><div class="hero-tile-val">10PB+</div><div class="hero-tile-label">HDFS deployments</div></div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">▣ Storage</div>
+  <a href="#taxonomy">Taxonomy</a>
+  <a href="#block">Block</a>
+  <a href="#file">File</a>
+  <a href="#object">Object (S3)</a>
+  <a href="#database-storage">DB Storage</a>
+  <a href="#distributed">Distributed FS</a>
+  <a href="#memory">In-Memory</a>
+  <a href="#timeseries">Time-Series</a>
+  <a href="#search">Search</a>
+  <a href="#decision">Decision Guide</a>
+  <a href="#calculator">Cost Calc</a>
+</nav>
+
+<!-- ══════════════════════════════════════════
+     SECTION 1: TAXONOMY
+══════════════════════════════════════════════ -->
+<section id="taxonomy">
+<div class="container">
+  <div class="sec-eye">// section_01</div>
+  <h2 class="sec-title">The Storage Taxonomy</h2>
+  <p class="sec-sub">There is no "best" storage — there are 7 fundamentally different storage paradigms, each optimised for a specific access pattern.</p>
+
+  <div class="card">
+    <div class="card-top ct-multi"></div>
+    <div class="card-header">
+      <div class="card-icon" style="background:rgba(255,140,66,0.1);">🗂</div>
+      <div class="card-meta">
+        <h2>Complete Storage Map</h2>
+        <div class="sub">Every storage system in production — where it lives and what it's for</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg width="100%" viewBox="0 0 720 600" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M2 1L8 5L2 9" fill="none" stroke="rgba(255,140,66,0.5)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </marker>
+          </defs>
+          <style>
+            .tn{fill:#111620;stroke:rgba(120,160,255,0.1);stroke-width:0.5;}
+            .tt{fill:#dde4f0;font-family:'IBM Plex Mono',monospace;font-size:11px;text-anchor:middle;dominant-baseline:central;}
+            .ts{fill:#64718f;font-family:'IBM Plex Mono',monospace;font-size:9.5px;text-anchor:middle;dominant-baseline:central;}
+          </style>
+
+          <!-- App -->
+          <rect class="tn" x="280" y="8" width="160" height="44" rx="8" style="stroke:rgba(255,140,66,0.5);"/>
+          <text class="tt" x="360" y="30" style="fill:#ff8c42;">Application</text>
+          <line x1="360" y1="52" x2="360" y2="72" stroke="rgba(255,140,66,0.4)" stroke-width="1" fill="none" marker-end="url(#arr)"/>
+
+          <!-- Three paths -->
+          <line x1="360" y1="92" x2="100" y2="122" stroke="rgba(255,140,66,0.3)" stroke-width="1" fill="none" marker-end="url(#arr)"/>
+          <line x1="360" y1="92" x2="360" y2="122" stroke="rgba(255,140,66,0.3)" stroke-width="1" fill="none" marker-end="url(#arr)"/>
+          <line x1="360" y1="92" x2="620" y2="122" stroke="rgba(255,140,66,0.3)" stroke-width="1" fill="none" marker-end="url(#arr)"/>
+
+          <rect class="tn" x="260" y="74" width="200" height="36" rx="6" style="stroke:rgba(255,140,66,0.3);"/>
+          <text class="tt" x="360" y="92">Storage type decision</text>
+
+          <!-- Block Storage column -->
+          <text class="tt" x="100" y="118" style="fill:#4a9eff;font-size:12px;">Block</text>
+          <rect class="tn" x="30" y="136" width="140" height="52" rx="7" style="stroke:rgba(74,158,255,0.4);"/>
+          <text class="tt" x="100" y="154" style="fill:#4a9eff;">AWS EBS</text>
+          <text class="ts" x="100" y="172">Attach to EC2, DB disks</text>
+          <rect class="tn" x="30" y="202" width="140" height="52" rx="7" style="stroke:rgba(74,158,255,0.3);"/>
+          <text class="tt" x="100" y="220" style="fill:#4a9eff;">SAN / iSCSI</text>
+          <text class="ts" x="100" y="238">Enterprise block storage</text>
+          <rect class="tn" x="30" y="268" width="140" height="52" rx="7" style="stroke:rgba(74,158,255,0.3);"/>
+          <text class="tt" x="100" y="286" style="fill:#4a9eff;">NVMe SSD</text>
+          <text class="ts" x="100" y="304">Local disk, ultra-fast</text>
+
+          <!-- File Storage column -->
+          <text class="tt" x="250" y="118" style="fill:#00c9a7;font-size:12px;">File</text>
+          <rect class="tn" x="178" y="136" width="144" height="52" rx="7" style="stroke:rgba(0,201,167,0.4);"/>
+          <text class="tt" x="250" y="154" style="fill:#00c9a7;">AWS EFS</text>
+          <text class="ts" x="250" y="172">Shared NFS, Lambda</text>
+          <rect class="tn" x="178" y="202" width="144" height="52" rx="7" style="stroke:rgba(0,201,167,0.3);"/>
+          <text class="tt" x="250" y="220" style="fill:#00c9a7;">NFS / CIFS</text>
+          <text class="ts" x="250" y="238">Network file shares</text>
+          <rect class="tn" x="178" y="268" width="144" height="52" rx="7" style="stroke:rgba(0,201,167,0.3);"/>
+          <text class="tt" x="250" y="286" style="fill:#00c9a7;">GlusterFS</text>
+          <text class="ts" x="250" y="304">Distributed POSIX FS</text>
+
+          <!-- Object Storage column -->
+          <text class="tt" x="410" y="118" style="fill:#ff8c42;font-size:12px;">Object</text>
+          <rect class="tn" x="342" y="136" width="136" height="52" rx="7" style="stroke:rgba(255,140,66,0.5);"/>
+          <text class="tt" x="410" y="154" style="fill:#ff8c42;">AWS S3</text>
+          <text class="ts" x="410" y="172">Infinite scale, HTTP API</text>
+          <rect class="tn" x="342" y="202" width="136" height="52" rx="7" style="stroke:rgba(255,140,66,0.3);"/>
+          <text class="tt" x="410" y="220" style="fill:#ff8c42;">GCS / Azure Blob</text>
+          <text class="ts" x="410" y="238">Multi-cloud equivalent</text>
+          <rect class="tn" x="342" y="268" width="136" height="52" rx="7" style="stroke:rgba(255,140,66,0.3);"/>
+          <text class="tt" x="410" y="286" style="fill:#ff8c42;">MinIO (self-hosted)</text>
+          <text class="ts" x="410" y="304">S3-compatible on-prem</text>
+
+          <!-- Distributed FS column -->
+          <text class="tt" x="590" y="118" style="fill:#9b6dff;font-size:12px;">Distributed</text>
+          <rect class="tn" x="520" y="136" width="148" height="52" rx="7" style="stroke:rgba(155,109,255,0.4);"/>
+          <text class="tt" x="594" y="154" style="fill:#9b6dff;">HDFS</text>
+          <text class="ts" x="594" y="172">Hadoop, MapReduce</text>
+          <rect class="tn" x="520" y="202" width="148" height="52" rx="7" style="stroke:rgba(155,109,255,0.3);"/>
+          <text class="tt" x="594" y="220" style="fill:#9b6dff;">Ceph</text>
+          <text class="ts" x="594" y="238">Block + object + file</text>
+          <rect class="tn" x="520" y="268" width="148" height="52" rx="7" style="stroke:rgba(155,109,255,0.3);"/>
+          <text class="tt" x="594" y="286" style="fill:#9b6dff;">Apache Ozone</text>
+          <text class="ts" x="594" y="304">HDFS successor</text>
+
+          <!-- Second row: specialised -->
+          <text class="ts" x="360" y="370" style="fill:#64718f;">── Specialised storage systems ──</text>
+
+          <rect class="tn" x="20" y="386" width="152" height="52" rx="7" style="stroke:rgba(255,94,138,0.35);"/>
+          <text class="tt" x="96" y="404" style="fill:#ff5e8a;">Time-Series DB</text>
+          <text class="ts" x="96" y="422">InfluxDB, TimescaleDB</text>
+
+          <rect class="tn" x="190" y="386" width="152" height="52" rx="7" style="stroke:rgba(240,180,41,0.35);"/>
+          <text class="tt" x="266" y="404" style="fill:#f0b429;">Search Engine</text>
+          <text class="ts" x="266" y="422">Elasticsearch, Solr</text>
+
+          <rect class="tn" x="360" y="386" width="152" height="52" rx="7" style="stroke:rgba(132,204,22,0.35);"/>
+          <text class="tt" x="436" y="404" style="fill:#84cc16;">Data Warehouse</text>
+          <text class="ts" x="436" y="422">Snowflake, BigQuery</text>
+
+          <rect class="tn" x="530" y="386" width="168" height="52" rx="7" style="stroke:rgba(56,189,248,0.35);"/>
+          <text class="tt" x="614" y="404" style="fill:#38bdf8;">Graph Database</text>
+          <text class="ts" x="614" y="422">Neo4j, Amazon Neptune</text>
+
+          <!-- In-memory row -->
+          <rect class="tn" x="100" y="458" width="180" height="52" rx="7" style="stroke:rgba(255,140,66,0.4);"/>
+          <text class="tt" x="190" y="476" style="fill:#ff8c42;">In-Memory Stores</text>
+          <text class="ts" x="190" y="494">Redis, Memcached, DragonflyDB</text>
+
+          <rect class="tn" x="310" y="458" width="180" height="52" rx="7" style="stroke:rgba(155,109,255,0.4);"/>
+          <text class="tt" x="400" y="476" style="fill:#9b6dff;">NewSQL Databases</text>
+          <text class="ts" x="400" y="494">CockroachDB, TiDB, Spanner</text>
+
+          <rect class="tn" x="520" y="458" width="180" height="52" rx="7" style="stroke:rgba(0,201,167,0.4);"/>
+          <text class="tt" x="610" y="476" style="fill:#00c9a7;">Vector Databases</text>
+          <text class="ts" x="610" y="494">Pinecone, Weaviate, pgvector</text>
+
+          <!-- bottom label -->
+          <text class="ts" x="360" y="548" style="fill:#323d52;">Access pattern → determines type → determines tool</text>
+        </svg>
+      </div>
+
+      <div class="hl hl-orange">
+        <span class="hl-label">// the one rule of storage selection</span>
+        <strong>Access pattern dictates storage type.</strong> The question is never "which database is fastest?" but "how will this data be written and read?" Sequential scans → columnar. Point lookups → key-value. Graph traversals → graph DB. Time windows → time-series. Random bytes → block. Unstructured files → object.
+      </div>
+
+      <div class="tbl-wrap" style="overflow-x:auto;">
+      <table class="tbl">
+        <thead><tr><th>Type</th><th>Unit</th><th>Access method</th><th>Latency</th><th>Scale</th><th>Cost/GB</th></tr></thead>
+        <tbody>
+          <tr><td class="t-blue">Block</td><td>Fixed blocks (512B–4KB)</td><td>OS file system</td><td class="t-good">&lt;1ms</td><td>TB scale</td><td class="t-bad">$0.10+/GB</td></tr>
+          <tr><td class="t-teal">File</td><td>Files + directories</td><td>POSIX filesystem</td><td class="t-mid">1–10ms</td><td>PB scale (NFS)</td><td class="t-mid">$0.08/GB</td></tr>
+          <tr><td class="t-orange">Object</td><td>Objects + metadata</td><td>HTTP REST API</td><td class="t-mid">5–100ms</td><td class="t-good">Unlimited</td><td class="t-good">$0.023/GB</td></tr>
+          <tr><td class="t-violet">Distributed FS</td><td>Files with replication</td><td>HDFS API / POSIX</td><td class="t-mid">10–50ms</td><td class="t-good">Exabyte scale</td><td class="t-good">~$0.01/GB</td></tr>
+          <tr><td class="t-rose">In-memory</td><td>Key-value / structures</td><td>TCP protocol</td><td class="t-good">&lt;1ms</td><td>TB (cluster)</td><td class="t-bad">$5–30/GB RAM</td></tr>
+          <tr><td class="t-gold">Time-series</td><td>(time, metric, value)</td><td>SQL-like query</td><td class="t-mid">1–10ms</td><td>PB scale</td><td class="t-mid">$0.03–0.10/GB</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SECTION 2: BLOCK STORAGE
+══════════════════════════════════════════════ -->
+<section id="block">
+<div class="container">
+  <div class="sec-eye">// section_02</div>
+  <h2 class="sec-title">Block Storage</h2>
+  <p class="sec-sub">Raw storage volumes attached to compute — the foundation of every database and operating system.</p>
+
+  <div class="card">
+    <div class="card-top ct-blue"></div>
+    <div class="card-header">
+      <div class="card-icon" style="background:rgba(74,158,255,0.1);">🧱</div>
+      <div class="card-meta">
+        <h2>Block Storage — AWS EBS, SAN, NVMe</h2>
+        <div class="sub">Fixed-size block devices presented as raw disks to the OS</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <p class="prose">Block storage presents storage as a sequence of fixed-size blocks (typically 512 bytes to 4KB). The OS formats the block device with a filesystem (ext4, XFS, NTFS) and manages file placement. The storage system has no concept of files — it just stores and retrieves raw blocks. This makes block storage <strong>the fastest possible storage layer</strong>, and the right choice whenever a database or OS needs direct disk control.</p>
+
+      <div class="chips">
+        <span class="chip chip-b">AWS EBS gp3</span>
+        <span class="chip chip-b">AWS EBS io2</span>
+        <span class="chip chip-b">Google Persistent Disk</span>
+        <span class="chip chip-b">Azure Managed Disks</span>
+        <span class="chip chip-t">NVMe SSD</span>
+        <span class="chip chip-v">SAN (iSCSI/FC)</span>
+      </div>
+
+      <div class="sg">
+        <div class="sc">
+          <span class="sc-icon">⚡</span>
+          <h3>AWS EBS gp3</h3>
+          <p>General purpose SSD. 3,000 IOPS baseline, up to 16,000 IOPS. 1GB–16TB. Detachable and re-attachable. Only one EC2 at a time (except Multi-Attach io2).</p>
+          <span class="sc-badge" style="background:rgba(74,158,255,0.1);border:1px solid rgba(74,158,255,0.25);color:var(--blue);">$0.08/GB-month</span>
+        </div>
+        <div class="sc">
+          <span class="sc-icon">🔥</span>
+          <h3>EBS io2 Block Express</h3>
+          <p>Provisioned IOPS for mission-critical workloads. Up to 256,000 IOPS, 4,000 MB/s throughput. Used for Oracle RAC, SAP HANA, high-transaction MySQL.</p>
+          <span class="sc-badge" style="background:rgba(74,158,255,0.1);border:1px solid rgba(74,158,255,0.25);color:var(--blue);">$0.125/GB-month</span>
+        </div>
+        <div class="sc">
+          <span class="sc-icon">💎</span>
+          <h3>NVMe SSD (local)</h3>
+          <p>Instance-attached NVMe. Lowest latency possible (&lt;100μs). Ephemeral — data lost on stop/terminate. Used for temp storage, caches, databases with own replication.</p>
+          <span class="sc-badge" style="background:rgba(0,201,167,0.1);border:1px solid rgba(0,201,167,0.25);color:var(--teal);">Included with instance</span>
+        </div>
+        <div class="sc">
+          <span class="sc-icon">🏢</span>
+          <h3>SAN (iSCSI / Fibre Channel)</h3>
+          <p>Enterprise shared storage fabric. Multiple hosts access the same LUNs. Used in data centres for Oracle RAC, VMware vSAN. High cost, high reliability.</p>
+          <span class="sc-badge" style="background:rgba(155,109,255,0.1);border:1px solid rgba(155,109,255,0.25);color:var(--violet);">On-premise</span>
+        </div>
+      </div>
+
+      <div class="pc-grid">
+        <div class="pc-box pc-pro">
+          <h4>Block storage pros</h4>
+          <ul>
+            <li>Lowest latency of any storage type</li>
+            <li>Full POSIX filesystem control</li>
+            <li>Best for transactional databases</li>
+            <li>Fine-grained IOPS provisioning</li>
+            <li>Snapshots for backups</li>
+          </ul>
+        </div>
+        <div class="pc-box pc-con">
+          <h4>Block storage cons</h4>
+          <ul>
+            <li>Tied to one server (usually)</li>
+            <li>Not horizontally scalable by default</li>
+            <li>More expensive than object storage</li>
+            <li>Requires capacity planning upfront</li>
+            <li>No built-in geo-replication</li>
+          </ul>
+        </div>
+        <div class="pc-box pc-tip">
+          <h4>Use block storage when</h4>
+          <ul>
+            <li>Running a relational database</li>
+            <li>Need &lt;1ms disk latency</li>
+            <li>OS needs to format the volume</li>
+            <li>Running VMs (VM images on EBS)</li>
+            <li>High-frequency trading, OLTP</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="hl hl-gold">
+        <span class="hl-label">// interview key numbers</span>
+        EBS gp3 baseline: <strong>3,000 IOPS / 125 MB/s</strong> — tunable to 16,000 IOPS / 1,000 MB/s independently of size (unlike gp2 where IOPS scaled with GB). NVMe local SSD: <strong>~500K–2M IOPS</strong>. A PostgreSQL instance on io2 can handle ~30,000 TPS. A 1TB EBS gp3 volume costs ~$80/month.
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SECTION 3: FILE STORAGE
+══════════════════════════════════════════════ -->
+<section id="file">
+<div class="container">
+  <div class="sec-eye">// section_03</div>
+  <h2 class="sec-title">File Storage</h2>
+  <p class="sec-sub">Shared file systems accessible by multiple servers simultaneously — the NFS model at cloud scale.</p>
+
+  <div class="card">
+    <div class="card-top ct-teal"></div>
+    <div class="card-header">
+      <div class="card-icon" style="background:rgba(0,201,167,0.1);">📁</div>
+      <div class="card-meta">
+        <h2>File Storage — AWS EFS, NFS, GlusterFS</h2>
+        <div class="sub">POSIX-compliant hierarchical file storage mounted by multiple compute nodes simultaneously</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <p class="prose">File storage exposes a <strong>shared filesystem</strong> over a network. Multiple servers mount the same filesystem simultaneously and see the same files. This is fundamentally different from block storage (which typically attaches to one server). File storage is the right choice when multiple compute nodes need to share files — shared configuration, model weights, user-uploaded content accessible by all app servers.</p>
+
+      <table class="tbl">
+        <thead><tr><th>Service</th><th>Protocol</th><th>Throughput</th><th>Latency</th><th>Use case</th><th>Cost</th></tr></thead>
+        <tbody>
+          <tr><td class="t-teal">AWS EFS</td><td>NFS v4.1</td><td>Up to 10 GB/s bursting</td><td class="t-mid">~1–2ms</td><td>Shared Lambda storage, EC2 clusters, CMS</td><td>$0.30/GB-month</td></tr>
+          <tr><td class="t-teal">AWS EFS IA</td><td>NFS v4.1</td><td>Same</td><td class="t-mid">~1–2ms</td><td>Infrequently accessed shared files</td><td>$0.025/GB-month</td></tr>
+          <tr><td class="t-teal">Azure Files</td><td>SMB 3.0 / NFS</td><td>Up to 300 MB/s</td><td class="t-mid">~2ms</td><td>Legacy SMB apps, Windows workloads</td><td>$0.06/GB-month</td></tr>
+          <tr><td class="t-teal">GCP Filestore</td><td>NFS v3</td><td>Up to 120 GB/s</td><td class="t-mid">~1ms</td><td>HPC, AI/ML training data</td><td>$0.20/GB-month</td></tr>
+          <tr><td class="t-teal">GlusterFS</td><td>POSIX/FUSE</td><td>Linear scale-out</td><td class="t-mid">~5ms</td><td>Self-managed distributed FS, Kubernetes PVs</td><td>Self-hosted</td></tr>
+        </tbody>
+      </table>
+
+      <div class="pc-grid">
+        <div class="pc-box pc-pro">
+          <h4>File storage pros</h4>
+          <ul>
+            <li>Multiple servers share same filesystem</li>
+            <li>Standard POSIX APIs (no code change)</li>
+            <li>Auto-scales capacity (EFS is elastic)</li>
+            <li>No capacity planning needed</li>
+            <li>Ideal for shared ML model weights</li>
+          </ul>
+        </div>
+        <div class="pc-box pc-con">
+          <h4>File storage cons</h4>
+          <ul>
+            <li>3–10× more expensive than object storage</li>
+            <li>Higher latency than block storage</li>
+            <li>Not suited for small random I/O</li>
+            <li>Locking semantics are complex in clusters</li>
+          </ul>
+        </div>
+        <div class="pc-box pc-note">
+          <h4>File vs Object tradeoff</h4>
+          <ul>
+            <li>File: need POSIX APIs, mount as disk</li>
+            <li>Object: need HTTP, arbitrary scale</li>
+            <li>File: shared across servers easily</li>
+            <li>Object: versioning built in, cheaper</li>
+            <li>File: for ML training data during job</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="hl hl-teal">
+        <span class="hl-label">// real-world use at scale</span>
+        Netflix uses <strong>AWS EFS</strong> to store and serve their encoding job scripts across hundreds of Lambda functions simultaneously. When a new movie file is uploaded, a fleet of Lambda workers all mount the same EFS volume to access shared FFmpeg binaries and encoding profiles. Without shared file storage, each Lambda would need to download these assets independently — wasting seconds and bandwidth on every invocation.
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SECTION 4: OBJECT STORAGE (S3)
+══════════════════════════════════════════════ -->
+<section id="object">
+<div class="container">
+  <div class="sec-eye">// section_04 — The Most Important One</div>
+  <h2 class="sec-title">Object Storage & Amazon S3</h2>
+  <p class="sec-sub">The most versatile storage system ever built — unlimited scale, 11 nines durability, and $0.023/GB.</p>
+
+  <div class="card">
+    <div class="card-top ct-orange"></div>
+    <div class="card-header">
+      <div class="card-icon" style="background:rgba(255,140,66,0.12);">🪣</div>
+      <div class="card-meta">
+        <h2>Amazon S3 — In Complete Depth</h2>
+        <div class="sub">S3 is not just a file store — it's a globally distributed, infinitely scalable object database with versioning, lifecycle policies, and event triggers</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <p class="prose">S3 stores data as <strong>objects</strong> — each object has a key (path-like string), a value (binary blob up to 5TB), and metadata (key-value pairs). Objects live in <strong>buckets</strong>. Unlike a filesystem, there is no true directory hierarchy — only key prefixes that look like paths. S3 is accessed entirely via HTTP REST API, making it accessible from anywhere with no special software.</p>
+
+      <div class="metrics">
+        <div class="metric"><div class="metric-val">11×9s</div><div class="metric-label">Durability (99.999999999%)</div></div>
+        <div class="metric"><div class="metric-val">5TB</div><div class="metric-label">Max object size</div></div>
+        <div class="metric"><div class="metric-val">∞</div><div class="metric-label">Objects per bucket</div></div>
+        <div class="metric"><div class="metric-val">3+ AZs</div><div class="metric-label">Data replicated across</div></div>
+        <div class="metric"><div class="metric-val">100ms</div><div class="metric-label">First byte latency</div></div>
+        <div class="metric"><div class="metric-val">$0.023</div><div class="metric-label">Per GB / month</div></div>
+      </div>
+
+      <div class="tab-wrap">
+        <div class="tab-btns">
+          <button class="tab-btn active" onclick="showTab(event,'s3-storage')">Storage Classes</button>
+          <button class="tab-btn" onclick="showTab(event,'s3-features')">Key Features</button>
+          <button class="tab-btn" onclick="showTab(event,'s3-patterns')">Design Patterns</button>
+          <button class="tab-btn" onclick="showTab(event,'s3-security')">Security</button>
+        </div>
+
+        <div id="s3-storage" class="tab-panel active">
+          <table class="tbl">
+            <thead><tr><th>Storage class</th><th>Retrieval</th><th>Min duration</th><th>Cost/GB-mo</th><th>Best for</th></tr></thead>
+            <tbody>
+              <tr><td class="t-orange">S3 Standard</td><td class="t-good">Milliseconds</td><td>None</td><td>$0.023</td><td>Frequently accessed data, static assets</td></tr>
+              <tr><td class="t-orange">S3 Intelligent-Tiering</td><td class="t-good">Milliseconds</td><td>None</td><td>$0.023 + monitoring fee</td><td>Unknown or changing access patterns</td></tr>
+              <tr><td class="t-orange">S3 Standard-IA</td><td class="t-good">Milliseconds</td><td>30 days</td><td>$0.0125</td><td>Backups, DR, accessed monthly</td></tr>
+              <tr><td class="t-orange">S3 One Zone-IA</td><td class="t-good">Milliseconds</td><td>30 days</td><td>$0.01</td><td>Reproducible data (can recreate if AZ fails)</td></tr>
+              <tr><td class="t-orange">S3 Glacier Instant</td><td class="t-good">Milliseconds</td><td>90 days</td><td>$0.004</td><td>Archives accessed quarterly</td></tr>
+              <tr><td class="t-orange">S3 Glacier Flexible</td><td class="t-mid">Minutes–hours</td><td>90 days</td><td>$0.0036</td><td>Long-term backup, compliance</td></tr>
+              <tr><td class="t-orange">S3 Glacier Deep Archive</td><td class="t-bad">12–48 hours</td><td>180 days</td><td>$0.00099</td><td>7–10 year compliance archives</td></tr>
+            </tbody>
+          </table>
+          <div class="hl hl-orange">
+            <span class="hl-label">// lifecycle automation</span>
+            S3 Lifecycle policies automate transitions: <strong>Standard → Standard-IA after 30 days → Glacier after 90 days → delete after 7 years</strong>. This single JSON policy rule can cut storage costs by 90% for log archives with zero application code changes.
+          </div>
+          <div class="code">
+<span class="c"># S3 Lifecycle policy — common cost optimisation</span>
+{
+  <span class="n">"Rules"</span>: [{
+    <span class="n">"ID"</span>: <span class="s">"logs-lifecycle"</span>,
+    <span class="n">"Status"</span>: <span class="s">"Enabled"</span>,
+    <span class="n">"Transitions"</span>: [
+      { <span class="n">"Days"</span>: <span class="num">30</span>,  <span class="n">"StorageClass"</span>: <span class="s">"STANDARD_IA"</span> },
+      { <span class="n">"Days"</span>: <span class="num">90</span>,  <span class="n">"StorageClass"</span>: <span class="s">"GLACIER"</span> },
+      { <span class="n">"Days"</span>: <span class="num">365</span>, <span class="n">"StorageClass"</span>: <span class="s">"DEEP_ARCHIVE"</span> }
+    ],
+    <span class="n">"Expiration"</span>: { <span class="n">"Days"</span>: <span class="num">2555</span> }  <span class="c">// 7 years, then delete</span>
+  }]
+}
+          </div>
+        </div>
+
+        <div id="s3-features" class="tab-panel">
+          <div class="sg">
+            <div class="sc">
+              <span class="sc-icon">📌</span>
+              <h3>Versioning</h3>
+              <p>Keep all versions of every object. Enables undelete, recovery from accidental overwrites. Each version has its own key + version ID. Cost: N× storage for N versions.</p>
+            </div>
+            <div class="sc">
+              <span class="sc-icon">🔐</span>
+              <h3>Pre-signed URLs</h3>
+              <p>Generate time-limited URLs that grant temporary access to private objects. Upload or download directly from client browser — bypasses your servers entirely. Critical for media uploads.</p>
+            </div>
+            <div class="sc">
+              <span class="sc-icon">⚡</span>
+              <h3>S3 Event Notifications</h3>
+              <p>Trigger Lambda, SQS, or SNS on object events (PUT, DELETE, etc.). Foundation of serverless data pipelines: upload image → trigger Lambda → resize → store back to S3.</p>
+            </div>
+            <div class="sc">
+              <span class="sc-icon">🌍</span>
+              <h3>S3 Cross-Region Replication</h3>
+              <p>Automatically replicate objects to a bucket in another region. Used for disaster recovery, global distribution of assets, compliance (data residency requirements).</p>
+            </div>
+            <div class="sc">
+              <span class="sc-icon">🔒</span>
+              <h3>S3 Object Lock</h3>
+              <p>WORM (Write Once Read Many) compliance. Objects cannot be deleted or overwritten for a fixed retention period. Required for SEC Rule 17a-4, FINRA, HIPAA compliance.</p>
+            </div>
+            <div class="sc">
+              <span class="sc-icon">📡</span>
+              <h3>S3 Select / Athena</h3>
+              <p>Query S3 objects with SQL without loading them entirely. S3 Select filters within a single object (CSV/JSON/Parquet). Athena queries entire data lakes. Pay per query TB scanned.</p>
+            </div>
+          </div>
+        </div>
+
+        <div id="s3-patterns" class="tab-panel">
+          <div class="flow">
+            <div class="fstep"><div class="fstep-n">1</div><div class="fstep-body"><h4>Static website hosting</h4><p>Host entire React/Next.js SPA from S3 + CloudFront. Zero server cost. Enable S3 static website hosting → configure index.html + error.html → point CloudFront distribution at S3 origin.</p></div></div>
+            <div class="fstep"><div class="fstep-n">2</div><div class="fstep-body"><h4>Data lake / analytics</h4><p>Store petabytes of raw data in Parquet or ORC format in S3. Query with Athena ($5/TB scanned) or Spark (EMR). No database required — S3 IS the data lake. Cost: $23/TB-month vs $1000+/TB for a data warehouse.</p></div></div>
+            <div class="fstep"><div class="fstep-n">3</div><div class="fstep-body"><h4>Media pipeline (the YouTube pattern)</h4><p>Client → pre-signed URL → direct upload to S3 → S3 Event → Lambda/SQS → transcoding workers → processed files stored in S3 → CloudFront serves to users. App servers never touch media bytes.</p></div></div>
+            <div class="fstep"><div class="fstep-n">4</div><div class="fstep-body"><h4>Backup & disaster recovery</h4><p>Automated snapshots, DB backups, log archives stored in S3. Lifecycle policy transitions to Glacier after 30 days. Cross-region replication for DR. 11 nines durability means you've effectively never lost a backup.</p></div></div>
+            <div class="fstep"><div class="fstep-n">5</div><div class="fstep-body"><h4>Distributed artifact store</h4><p>Docker image layers (ECR uses S3 under the hood), npm packages, Python wheels, Terraform state files, Kubernetes etcd backups — S3 is the universal artifact store for DevOps pipelines.</p></div></div>
+          </div>
+        </div>
+
+        <div id="s3-security" class="tab-panel">
+          <table class="tbl">
+            <thead><tr><th>Mechanism</th><th>What it controls</th><th>When to use</th></tr></thead>
+            <tbody>
+              <tr><td class="t-orange">Bucket Policy</td><td>JSON policy on the bucket — who can access, from which IPs, etc.</td><td>Public read for static sites; restrict to specific IAM roles</td></tr>
+              <tr><td class="t-orange">IAM Roles</td><td>Grant EC2/Lambda permission to read/write S3 without keys</td><td>All production workloads — never use static access keys</td></tr>
+              <tr><td class="t-orange">Pre-signed URLs</td><td>Time-limited access (GET or PUT) for specific objects</td><td>Client-side uploads, temporary download links</td></tr>
+              <tr><td class="t-orange">S3 Block Public Access</td><td>Account-level kill switch blocking all public access</td><td>Enable on all accounts — prevent accidental data exposure</td></tr>
+              <tr><td class="t-orange">SSE-S3 / SSE-KMS</td><td>Encryption at rest using S3-managed or KMS-managed keys</td><td>SSE-S3 for general; SSE-KMS for compliance + audit trail</td></tr>
+              <tr><td class="t-orange">S3 Object Lock</td><td>WORM protection — objects immutable for defined period</td><td>Compliance, regulatory retention, ransomware protection</td></tr>
+            </tbody>
+          </table>
+
+          <div class="hl hl-rose">
+            <span class="hl-label">// the most common S3 security mistake</span>
+            <strong>Misconfigured public buckets</strong> have exposed terabytes of private data (Capital One, GoDaddy, multiple government agencies). Best practice: enable <strong>S3 Block Public Access at the account level</strong>, use bucket policies that deny non-TLS requests, enable CloudTrail logging on all S3 data events, and use AWS Config to continuously audit for public buckets.
+          </div>
+        </div>
+      </div>
+
+      <div class="pc-grid">
+        <div class="pc-box pc-pro">
+          <h4>Object storage strengths</h4>
+          <ul>
+            <li>Virtually unlimited scale (no capacity planning)</li>
+            <li>11 nines durability (3× replication across AZs)</li>
+            <li>Built-in versioning, lifecycle, replication</li>
+            <li>Cheapest persistent storage ($0.023/GB)</li>
+            <li>HTTP API accessible from anywhere</li>
+            <li>Serverless — no infrastructure to manage</li>
+          </ul>
+        </div>
+        <div class="pc-box pc-con">
+          <h4>Object storage limitations</h4>
+          <ul>
+            <li>High latency (100ms+ first byte vs &lt;1ms disk)</li>
+            <li>No in-place updates (must overwrite object)</li>
+            <li>No POSIX filesystem semantics</li>
+            <li>Not suitable for frequently updated data</li>
+            <li>Eventual consistency (now strong in S3)</li>
+            <li>Egress costs add up at high bandwidth</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SECTION 5: DATABASE STORAGE ENGINES
+══════════════════════════════════════════════ -->
+<section id="database-storage">
+<div class="container">
+  <div class="sec-eye">// section_05</div>
+  <h2 class="sec-title">Database Storage Engines</h2>
+  <p class="sec-sub">The storage engine is what a database actually uses to persist data — and it determines everything about performance and capability.</p>
+
+  <div class="card">
+    <div class="card-top ct-violet"></div>
+    <div class="card-header">
+      <div class="card-icon" style="background:rgba(155,109,255,0.1);">💾</div>
+      <div class="card-meta">
+        <h2>Row vs Columnar vs LSM-Tree vs B-Tree</h2>
+        <div class="sub">The four storage engine designs that power every database in production</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="diagram-wrap">
+        <svg width="100%" viewBox="0 0 720 320" xmlns="http://www.w3.org/2000/svg">
+          <style>
+            .en{fill:#111620;stroke:rgba(120,160,255,0.1);stroke-width:0.5;}
+            .et{fill:#dde4f0;font-family:'IBM Plex Mono',monospace;font-size:11px;text-anchor:middle;dominant-baseline:central;}
+            .es{fill:#64718f;font-family:'IBM Plex Mono',monospace;font-size:10px;text-anchor:middle;dominant-baseline:central;}
+            .row-fill{fill:rgba(74,158,255,0.12);stroke:rgba(74,158,255,0.4);stroke-width:0.5;}
+            .col-fill{fill:rgba(0,201,167,0.12);stroke:rgba(0,201,167,0.4);stroke-width:0.5;}
+          </style>
+          <!-- Row storage -->
+          <text class="et" x="90" y="16" style="fill:#4a9eff;font-size:12px;">B-Tree Row Store</text>
+          <text class="es" x="90" y="32">(InnoDB, PostgreSQL)</text>
+          <!-- rows -->
+          <rect class="row-fill" x="10" y="44" width="160" height="20" rx="3"/>
+          <text class="es" x="90" y="54" style="fill:#82aaff;">id=1 | "Alice" | 28 | "NYC"</text>
+          <rect class="row-fill" x="10" y="68" width="160" height="20" rx="3"/>
+          <text class="es" x="90" y="78" style="fill:#82aaff;">id=2 | "Bob"   | 32 | "LA"</text>
+          <rect class="row-fill" x="10" y="92" width="160" height="20" rx="3"/>
+          <text class="es" x="90" y="102" style="fill:#82aaff;">id=3 | "Carol" | 25 | "SF"</text>
+          <text class="es" x="90" y="130" style="fill:#4a9eff;">✓ Fast: SELECT * WHERE id=2</text>
+          <text class="es" x="90" y="146" style="fill:#ff5e8a;">✗ Slow: AVG(age) — reads all rows</text>
+
+          <!-- Columnar -->
+          <text class="et" x="300" y="16" style="fill:#00c9a7;font-size:12px;">Columnar Store</text>
+          <text class="es" x="300" y="32">(Parquet, Redshift, BigQuery)</text>
+          <rect class="col-fill" x="208" y="44" width="46" height="80" rx="3"/>
+          <text class="es" x="231" y="60" style="fill:#5cbcaa;">id</text>
+          <text class="es" x="231" y="76">1</text>
+          <text class="es" x="231" y="92">2</text>
+          <text class="es" x="231" y="108">3</text>
+          <rect class="col-fill" x="260" y="44" width="60" height="80" rx="3"/>
+          <text class="es" x="290" y="60" style="fill:#5cbcaa;">name</text>
+          <text class="es" x="290" y="76">Alice</text>
+          <text class="es" x="290" y="92">Bob</text>
+          <text class="es" x="290" y="108">Carol</text>
+          <rect class="col-fill" x="326" y="44" width="44" height="80" rx="3"/>
+          <text class="es" x="348" y="60" style="fill:#5cbcaa;">age</text>
+          <text class="es" x="348" y="76">28</text>
+          <text class="es" x="348" y="92">32</text>
+          <text class="es" x="348" y="108">25</text>
+          <text class="es" x="300" y="130" style="fill:#00c9a7;">✓ Fast: AVG(age) — reads only age col</text>
+          <text class="es" x="300" y="146" style="fill:#ff5e8a;">✗ Slow: full row retrieval</text>
+
+          <!-- LSM Tree -->
+          <text class="et" x="530" y="16" style="fill:#9b6dff;font-size:12px;">LSM-Tree</text>
+          <text class="es" x="530" y="32">(Cassandra, RocksDB, LevelDB)</text>
+          <rect class="en" x="430" y="44" width="200" height="28" rx="4" style="stroke:rgba(155,109,255,0.5);"/>
+          <text class="et" x="530" y="58" style="fill:#9b6dff;">MemTable (RAM)</text>
+          <text class="es" x="530" y="72">recent writes buffered here</text>
+          <rect class="en" x="430" y="78" width="200" height="22" rx="4" style="stroke:rgba(155,109,255,0.35);"/>
+          <text class="es" x="530" y="89" style="fill:#9b6dff;">SSTable L0 (newest)</text>
+          <rect class="en" x="430" y="104" width="200" height="22" rx="4" style="stroke:rgba(155,109,255,0.25);"/>
+          <text class="es" x="530" y="115" style="fill:#7a5abf;">SSTable L1</text>
+          <rect class="en" x="430" y="130" width="200" height="22" rx="4" style="stroke:rgba(155,109,255,0.15);"/>
+          <text class="es" x="530" y="141" style="fill:#5a4a9f;">SSTable L2 (oldest)</text>
+          <text class="es" x="530" y="168" style="fill:#9b6dff;">✓ Fastest writes (append-only)</text>
+          <text class="es" x="530" y="184" style="fill:#ff5e8a;">✗ Reads need compaction / bloom filters</text>
+
+          <!-- B-Tree internals -->
+          <text class="et" x="90" y="200" style="fill:#f0b429;font-size:12px;">B-Tree internals</text>
+          <rect class="en" x="60" y="214" width="60" height="28" rx="4" style="stroke:rgba(240,180,41,0.5);"/>
+          <text class="es" x="90" y="228" style="fill:#f0b429;">Root</text>
+          <rect class="en" x="20" y="258" width="50" height="24" rx="4" style="stroke:rgba(240,180,41,0.3);"/>
+          <text class="es" x="45" y="270" style="fill:#c09040;">Leaf</text>
+          <rect class="en" x="80" y="258" width="50" height="24" rx="4" style="stroke:rgba(240,180,41,0.3);"/>
+          <text class="es" x="105" y="270" style="fill:#c09040;">Leaf</text>
+          <rect class="en" x="140" y="258" width="50" height="24" rx="4" style="stroke:rgba(240,180,41,0.3);"/>
+          <text class="es" x="165" y="270" style="fill:#c09040;">Leaf</text>
+          <line x1="90" y1="242" x2="45" y2="258" stroke="rgba(240,180,41,0.3)" stroke-width="0.8" fill="none"/>
+          <line x1="90" y1="242" x2="105" y2="258" stroke="rgba(240,180,41,0.3)" stroke-width="0.8" fill="none"/>
+          <line x1="90" y1="242" x2="165" y2="258" stroke="rgba(240,180,41,0.3)" stroke-width="0.8" fill="none"/>
+          <text class="es" x="90" y="302" style="fill:#f0b429;">O(log n) reads · balanced · page-aligned</text>
+        </svg>
+      </div>
+
+      <table class="tbl">
+        <thead><tr><th>Engine</th><th>Write perf</th><th>Read perf</th><th>Used by</th><th>Best for</th></tr></thead>
+        <tbody>
+          <tr><td class="t-blue">B-Tree (row)</td><td class="t-mid">Medium — random writes</td><td class="t-good">Excellent for point lookups</td><td>PostgreSQL, MySQL InnoDB</td><td>OLTP, transactional, random access</td></tr>
+          <tr><td class="t-teal">Columnar</td><td class="t-bad">Slow — immutable files</td><td class="t-good">Excellent for aggregations</td><td>Parquet, Redshift, BigQuery</td><td>OLAP, analytics, aggregations, data warehouse</td></tr>
+          <tr><td class="t-violet">LSM-Tree</td><td class="t-good">Excellent — append-only</td><td class="t-mid">Good with bloom filters</td><td>Cassandra, RocksDB, LevelDB</td><td>Write-heavy, time-series, log data</td></tr>
+          <tr><td class="t-orange">Hash map</td><td class="t-good">O(1) writes</td><td class="t-good">O(1) reads</td><td>Redis Hash, Memcached</td><td>Key-value, session store, cache</td></tr>
+          <tr><td class="t-gold">Heap file</td><td class="t-good">Fast — append only</td><td class="t-bad">Slow — full scan only</td><td>PostgreSQL TOAST, log files</td><td>Append-only logs, write-once archives</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SECTION 6: DISTRIBUTED FILE SYSTEMS
+══════════════════════════════════════════════ -->
+<section id="distributed">
+<div class="container">
+  <div class="sec-eye">// section_06</div>
+  <h2 class="sec-title">Distributed File Systems</h2>
+  <p class="sec-sub">HDFS, Ceph, GlusterFS — the infrastructure layer that powers big data processing at exabyte scale.</p>
+
+  <div class="card">
+    <div class="card-top ct-violet"></div>
+    <div class="card-header">
+      <div class="card-icon" style="background:rgba(155,109,255,0.1);">🕸</div>
+      <div class="card-meta">
+        <h2>HDFS, Ceph, GlusterFS — How They Work</h2>
+        <div class="sub">Commodity hardware scaled to exabytes through replication and distributed metadata</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <p class="prose">Distributed file systems split large files into <strong>blocks</strong> (HDFS default: 128MB), replicate each block across multiple nodes (default: 3×), and maintain a <strong>metadata server</strong> (NameNode in HDFS) that tracks which nodes hold which blocks. Reading a 1TB file means reading 8,000 blocks in parallel from hundreds of DataNodes — achieving aggregate throughput impossible from a single disk.</p>
+
+      <div class="sg">
+        <div class="sc">
+          <span class="sc-icon">🐘</span>
+          <h3>HDFS (Hadoop)</h3>
+          <p>The original distributed FS. 128MB blocks, 3× replication, central NameNode. Write-once-read-many. Deployed at Yahoo (200PB+), Facebook (hundreds of PB), LinkedIn. S3 is replacing it for new builds but existing deployments are massive.</p>
+          <span class="sc-badge" style="background:rgba(155,109,255,0.1);border:1px solid rgba(155,109,255,0.25);color:var(--violet);">Big data workloads</span>
+        </div>
+        <div class="sc">
+          <span class="sc-icon">🦑</span>
+          <h3>Ceph</h3>
+          <p>Swiss-army knife: object + block + file storage in one system. No single point of failure (unlike HDFS NameNode). Used by CERN (200PB), OpenStack clouds. Ceph RBD powers OpenStack Cinder block storage.</p>
+          <span class="sc-badge" style="background:rgba(155,109,255,0.1);border:1px solid rgba(155,109,255,0.25);color:var(--violet);">Multi-protocol</span>
+        </div>
+        <div class="sc">
+          <span class="sc-icon">🧊</span>
+          <h3>GlusterFS</h3>
+          <p>Peer-to-peer distributed FS. No central metadata server (like HDFS NameNode). Files distributed using DHT (Distributed Hash Table). Used for Kubernetes PersistentVolumes in on-premise clusters. Red Hat owns it.</p>
+          <span class="sc-badge" style="background:rgba(155,109,255,0.1);border:1px solid rgba(155,109,255,0.25);color:var(--violet);">Kubernetes friendly</span>
+        </div>
+        <div class="sc">
+          <span class="sc-icon">☁️</span>
+          <h3>Apache Ozone</h3>
+          <p>HDFS successor designed for the object storage era. S3-compatible API, scales to billions of objects (HDFS struggles with 500M+ files). Designed for cloud-native workloads. Used at Tencent at petabyte scale.</p>
+          <span class="sc-badge" style="background:rgba(155,109,255,0.1);border:1px solid rgba(155,109,255,0.25);color:var(--violet);">HDFS replacement</span>
+        </div>
+      </div>
+
+      <div class="hl hl-violet">
+        <span class="hl-label">// HDFS vs S3 — the modern choice</span>
+        The industry trend is <strong>"S3 as the data lake, Spark/Trino for compute"</strong> replacing on-premise HDFS. S3 separates storage from compute (Databricks, EMR, Athena can all query the same S3 data independently) while HDFS co-locates compute and storage. New architectures almost always choose S3. HDFS remains dominant only in existing large on-premise deployments.
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SECTION 7: IN-MEMORY STORAGE
+══════════════════════════════════════════════ -->
+<section id="memory">
+<div class="container">
+  <div class="sec-eye">// section_07</div>
+  <h2 class="sec-title">In-Memory Storage</h2>
+  <p class="sec-sub">When disk is too slow — storing data entirely in RAM for microsecond access.</p>
+
+  <div class="card">
+    <div class="card-top ct-orange"></div>
+    <div class="card-header">
+      <div class="card-icon" style="background:rgba(255,140,66,0.1);">⚡</div>
+      <div class="card-meta">
+        <h2>Redis, Memcached, VoltDB, SAP HANA</h2>
+        <div class="sub">Not just a cache — in-memory stores are first-class data systems</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <p class="prose">In-memory storage keeps the entire dataset in RAM. Reads and writes happen in microseconds — no disk I/O, no filesystem overhead. The tradeoff is cost (RAM is ~100× more expensive per GB than SSD) and volatility (RAM loses data on power loss). Modern systems address this with <strong>persistence mechanisms</strong> (Redis AOF/RDB) and <strong>clustering</strong> (Redis Cluster, Hazelcast) for both durability and scale.</p>
+
+      <table class="tbl">
+        <thead><tr><th>System</th><th>Data structures</th><th>Persistence</th><th>Cluster</th><th>Throughput</th><th>Primary use</th></tr></thead>
+        <tbody>
+          <tr><td class="t-orange">Redis 7</td><td>String, Hash, List, Set, ZSet, Stream, HLL, Geo</td><td class="t-good">RDB snapshots + AOF log</td><td class="t-good">Redis Cluster (sharding)</td><td>1M+ ops/sec</td><td>Cache, sessions, leaderboards, pub/sub, queues</td></tr>
+          <tr><td class="t-orange">Memcached</td><td>String only</td><td class="t-bad">No</td><td class="t-mid">Client-side sharding</td><td>1M+ ops/sec</td><td>Simple string cache, multi-threaded</td></tr>
+          <tr><td class="t-orange">DragonflyDB</td><td>All Redis types</td><td class="t-good">Yes</td><td class="t-good">Yes</td><td>25× Redis on same hw</td><td>Redis drop-in, multi-core optimised</td></tr>
+          <tr><td class="t-orange">VoltDB</td><td>Relational tables</td><td class="t-good">Yes + HA</td><td class="t-good">Yes</td><td>1M TPS</td><td>In-memory OLTP — financial real-time decisions</td></tr>
+          <tr><td class="t-orange">SAP HANA</td><td>Columnar + row tables</td><td class="t-good">Yes + standby</td><td class="t-good">Scale-out</td><td>Billion rows/sec scan</td><td>Real-time analytics on live transactional data</td></tr>
+        </tbody>
+      </table>
+
+      <div class="pc-grid">
+        <div class="pc-box pc-pro">
+          <h4>In-memory strengths</h4>
+          <ul>
+            <li>Sub-millisecond access (100μs typical)</li>
+            <li>Rich data structures in Redis</li>
+            <li>Atomic operations (INCR, MULTI/EXEC)</li>
+            <li>Pub/sub messaging built-in</li>
+            <li>Persistence options available</li>
+          </ul>
+        </div>
+        <div class="pc-box pc-con">
+          <h4>In-memory constraints</h4>
+          <ul>
+            <li>RAM is 50–100× more expensive than SSD</li>
+            <li>Data set limited by total RAM</li>
+            <li>Volatility risk without persistence config</li>
+            <li>Not a primary database for large datasets</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SECTION 8: TIME-SERIES STORAGE
+══════════════════════════════════════════════ -->
+<section id="timeseries">
+<div class="container">
+  <div class="sec-eye">// section_08</div>
+  <h2 class="sec-title">Time-Series Storage</h2>
+  <p class="sec-sub">Metrics, IoT sensor data, financial ticks — data that is fundamentally ordered by time requires purpose-built storage.</p>
+
+  <div class="card">
+    <div class="card-top ct-rose"></div>
+    <div class="card-header">
+      <div class="card-icon" style="background:rgba(255,94,138,0.1);">📈</div>
+      <div class="card-meta">
+        <h2>InfluxDB, TimescaleDB, Prometheus, Apache Druid</h2>
+        <div class="sub">Why general-purpose databases fail at time-series — and what purpose-built TSDB does differently</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <p class="prose">Time-series data has a unique write pattern: <strong>always appending new data</strong>, rarely updating the past. General-purpose databases struggle because every insert must maintain B-tree index ordering. Time-series databases exploit the temporal ordering to achieve <strong>10–100× better write throughput</strong> and <strong>90%+ compression</strong> through delta encoding and gorilla compression.</p>
+
+      <div class="sg">
+        <div class="sc">
+          <span class="sc-icon">📊</span>
+          <h3>InfluxDB</h3>
+          <p>Purpose-built TSDB. Line protocol ingestion. TSM (Time-Structured Merge Tree) storage engine. 10M+ writes/sec. Used for infrastructure metrics, IoT telemetry. InfluxDB Cloud (managed) or OSS.</p>
+          <span class="sc-badge" style="background:rgba(255,94,138,0.1);border:1px solid rgba(255,94,138,0.25);color:var(--rose);">Pure time-series</span>
+        </div>
+        <div class="sc">
+          <span class="sc-icon">⏱</span>
+          <h3>TimescaleDB</h3>
+          <p>PostgreSQL extension with automatic time-based partitioning (hypertables). Full SQL. Best of both worlds — TSDB performance + PostgreSQL ecosystem. 10–100× better than vanilla Postgres for time data.</p>
+          <span class="sc-badge" style="background:rgba(255,94,138,0.1);border:1px solid rgba(255,94,138,0.25);color:var(--rose);">PostgreSQL-based</span>
+        </div>
+        <div class="sc">
+          <span class="sc-icon">🔥</span>
+          <h3>Prometheus</h3>
+          <p>Monitoring-focused TSDB. Pull-based metrics collection. PromQL query language. 15-day default retention. Used with Grafana for infrastructure dashboards. Not designed for long-term storage (use Thanos/Cortex for that).</p>
+          <span class="sc-badge" style="background:rgba(255,94,138,0.1);border:1px solid rgba(255,94,138,0.25);color:var(--rose);">Monitoring/alerting</span>
+        </div>
+        <div class="sc">
+          <span class="sc-icon">🐉</span>
+          <h3>Apache Druid</h3>
+          <p>Real-time OLAP. Sub-second queries on billions of rows of time-series. Used for user behaviour analytics (clicks, events). Powers Airbnb analytics, Netflix dashboards. Pre-aggregates at ingestion time.</p>
+          <span class="sc-badge" style="background:rgba(255,94,138,0.1);border:1px solid rgba(255,94,138,0.25);color:var(--rose);">Real-time analytics</span>
+        </div>
+      </div>
+
+      <div class="hl hl-rose">
+        <span class="hl-label">// why TSDBs compress so well</span>
+        A CPU metric stored naively: <code>{"time": 1703001234, "cpu": 73.2}</code> = ~30 bytes. In InfluxDB with <strong>gorilla compression</strong>: the timestamp delta (say, 10 seconds from last) is stored as a varint (~2 bytes) and the float64 XOR delta (~3 bits for small changes) — achieving <strong>10–15 bytes per data point</strong> on average. A week of per-second CPU metrics shrinks from 2.5GB to under 200MB.
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SECTION 9: SEARCH STORAGE
+══════════════════════════════════════════════ -->
+<section id="search">
+<div class="container">
+  <div class="sec-eye">// section_09</div>
+  <h2 class="sec-title">Search & Analytics Storage</h2>
+  <p class="sec-sub">Elasticsearch, Solr, Meilisearch, OpenSearch — inverted indexes and the power of full-text search at scale.</p>
+
+  <div class="card">
+    <div class="card-top ct-gold"></div>
+    <div class="card-header">
+      <div class="card-icon" style="background:rgba(240,180,41,0.1);">🔍</div>
+      <div class="card-meta">
+        <h2>Search Engines & Vector Databases</h2>
+        <div class="sub">The inverted index is the most important data structure in modern information retrieval</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <p class="prose">A search engine stores an <strong>inverted index</strong> — mapping every word to every document containing it. "Alice" → [doc1, doc7, doc342]. A full-text query looks up the word in the index and gets document IDs instantly, rather than scanning every document. Elasticsearch stores this index in <strong>Lucene segments</strong> on disk, with recent data in RAM for near-real-time search.</p>
+
+      <table class="tbl">
+        <thead><tr><th>System</th><th>Strengths</th><th>Limitations</th><th>Scale</th><th>Best for</th></tr></thead>
+        <tbody>
+          <tr><td class="t-gold">Elasticsearch</td><td>Full-text + aggregations, distributed, REST API, Kibana</td><td>Memory-heavy, complex cluster ops, not ACID</td><td>Petabyte scale</td><td>Log analytics, app search, observability (ELK stack)</td></tr>
+          <tr><td class="t-gold">OpenSearch</td><td>Open-source ES fork (AWS), same API</td><td>Same as ES, slightly behind features</td><td>Petabyte scale</td><td>AWS-native workloads, open-source compliance</td></tr>
+          <tr><td class="t-gold">Solr</td><td>Mature, ZooKeeper-based clustering, faceted search</td><td>More complex than ES, less popular</td><td>PB scale</td><td>Enterprise search, e-commerce facets</td></tr>
+          <tr><td class="t-gold">Meilisearch</td><td>Typo-tolerant, easy setup, blazing fast</td><td>Limited analytics, smaller scale</td><td>GB–TB scale</td><td>Instant search UX for websites, small-medium scale</td></tr>
+          <tr><td class="t-gold">Pinecone / Weaviate</td><td>Vector similarity search, AI-native</td><td>Purpose-built for embeddings only</td><td>Billions of vectors</td><td>Semantic search, RAG pipelines, recommendation</td></tr>
+        </tbody>
+      </table>
+
+      <div class="hl hl-gold">
+        <span class="hl-label">// the vector database era</span>
+        Vector databases store high-dimensional float arrays (embeddings from LLMs). A semantic search like "find articles similar to this paragraph" is impossible with keyword search — but a vector DB computes <strong>cosine similarity</strong> between embedding vectors in milliseconds. Pinecone, Weaviate, Chroma, and pgvector (PostgreSQL extension) are the main options. Every RAG (Retrieval-Augmented Generation) pipeline needs one.
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SECTION 10: DECISION GUIDE
+══════════════════════════════════════════════ -->
+<section id="decision">
+<div class="container">
+  <div class="sec-eye">// section_10</div>
+  <h2 class="sec-title">Storage Decision Guide</h2>
+  <p class="sec-sub">Pick your workload type — get the exact storage recommendation with reasoning.</p>
+
+  <div class="card">
+    <div class="card-top ct-lime"></div>
+    <div class="card-header">
+      <div class="card-icon" style="background:rgba(132,204,22,0.1);">🎯</div>
+      <div class="card-meta">
+        <h2>Interactive Storage Selector</h2>
+        <div class="sub">Click your use case to get the recommended storage type and why</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="decision-wrap">
+        <div class="decision-title">What are you storing?</div>
+        <div class="decision-grid">
+          <div class="decision-btn" onclick="decide(this,'images-videos')">
+            <span class="decision-btn-icon">🖼</span>
+            <span class="decision-btn-label">Images / Videos / Files</span>
+          </div>
+          <div class="decision-btn" onclick="decide(this,'user-sessions')">
+            <span class="decision-btn-icon">🔑</span>
+            <span class="decision-btn-label">User sessions / Cache</span>
+          </div>
+          <div class="decision-btn" onclick="decide(this,'transactions')">
+            <span class="decision-btn-icon">💳</span>
+            <span class="decision-btn-label">Financial transactions</span>
+          </div>
+          <div class="decision-btn" onclick="decide(this,'logs-metrics')">
+            <span class="decision-btn-icon">📋</span>
+            <span class="decision-btn-label">Logs / Metrics / IoT</span>
+          </div>
+          <div class="decision-btn" onclick="decide(this,'user-posts')">
+            <span class="decision-btn-icon">💬</span>
+            <span class="decision-btn-label">User posts / Social feed</span>
+          </div>
+          <div class="decision-btn" onclick="decide(this,'analytics')">
+            <span class="decision-btn-icon">📊</span>
+            <span class="decision-btn-label">Analytics / Reports</span>
+          </div>
+          <div class="decision-btn" onclick="decide(this,'search')">
+            <span class="decision-btn-icon">🔍</span>
+            <span class="decision-btn-label">Full-text search</span>
+          </div>
+          <div class="decision-btn" onclick="decide(this,'ml-models')">
+            <span class="decision-btn-icon">🤖</span>
+            <span class="decision-btn-label">ML models / Artifacts</span>
+          </div>
+        </div>
+        <div class="decision-result" id="decision-result">
+          <p style="color:var(--dim);">Select a use case above to get the storage recommendation.</p>
+        </div>
+      </div>
+
+      <div class="hl hl-teal">
+        <span class="hl-label">// the master decision tree</span>
+        <strong>Need transactions + JOINs?</strong> → PostgreSQL/MySQL (B-Tree row store). <strong>Need massive write throughput?</strong> → Cassandra/DynamoDB (LSM-Tree). <strong>Need unlimited file storage?</strong> → S3 (object). <strong>Need sub-ms latency?</strong> → Redis (in-memory). <strong>Need analytics on billions of rows?</strong> → BigQuery/Redshift (columnar). <strong>Need full-text search?</strong> → Elasticsearch. <strong>Need shared filesystem?</strong> → EFS/NFS.
+      </div>
+
+      <table class="tbl">
+        <thead><tr><th>If you need...</th><th>Storage type</th><th>Specific tool</th><th>Avoid</th></tr></thead>
+        <tbody>
+          <tr><td>Store 100TB of images cheaply</td><td class="t-orange">Object</td><td>S3 Standard → S3-IA lifecycle</td><td>EBS (expensive), EFS (wrong fit)</td></tr>
+          <tr><td>ACID transactions, foreign keys</td><td class="t-blue">Block + RDBMS</td><td>PostgreSQL on EBS gp3</td><td>Cassandra (no ACID), S3 (no queries)</td></tr>
+          <tr><td>1M writes/sec (IoT telemetry)</td><td class="t-violet">LSM-Tree DB</td><td>Cassandra / InfluxDB</td><td>MySQL (write bottleneck), S3 (no queries)</td></tr>
+          <tr><td>Session cache, &lt;1ms reads</td><td class="t-orange">In-memory</td><td>Redis (cluster mode)</td><td>PostgreSQL (slow), DynamoDB (slow)</td></tr>
+          <tr><td>Run ML training job (10 workers)</td><td class="t-teal">File or Object</td><td>EFS (shared mount) or S3 + s3fs</td><td>EBS (one server only)</td></tr>
+          <tr><td>Serve 100M users' profile pages</td><td class="t-orange">Object + In-memory</td><td>S3 (avatars) + Redis (profile data) + RDS</td><td>Single DB (won't scale read traffic)</td></tr>
+          <tr><td>Build a search engine for your app</td><td class="t-gold">Inverted index</td><td>Elasticsearch or Meilisearch</td><td>LIKE queries in PostgreSQL (slow at scale)</td></tr>
+          <tr><td>Store 10 years of server logs cheaply</td><td class="t-orange">Object (archival)</td><td>S3 → Glacier Deep Archive lifecycle</td><td>EBS (expensive), self-hosted disk</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SECTION 11: COST CALCULATOR
+══════════════════════════════════════════════ -->
+<section id="calculator">
+<div class="container">
+  <div class="sec-eye">// section_11</div>
+  <h2 class="sec-title">Storage Cost Calculator</h2>
+  <p class="sec-sub">Estimate monthly storage costs across S3 tiers, EBS, and EFS to make cost-optimal decisions.</p>
+
+  <div class="card">
+    <div class="card-top ct-orange"></div>
+    <div class="card-header">
+      <div class="card-icon" style="background:rgba(255,140,66,0.1);">💰</div>
+      <div class="card-meta">
+        <h2>AWS Storage Cost Estimator</h2>
+        <div class="sub">Real AWS pricing — adjust storage size and access pattern to compare options</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="calc-wrap">
+        <div class="calc-row">
+          <div class="calc-group">
+            <label>Storage size (GB)</label>
+            <input type="number" id="calc-size" value="1000" min="1" oninput="calcCost()">
+          </div>
+          <div class="calc-group">
+            <label>GET requests per month (millions)</label>
+            <input type="number" id="calc-gets" value="10" min="0" oninput="calcCost()">
+          </div>
+          <div class="calc-group">
+            <label>PUT/POST requests per month (millions)</label>
+            <input type="number" id="calc-puts" value="1" min="0" oninput="calcCost()">
+          </div>
+          <div class="calc-group">
+            <label>Data transferred out (GB/mo)</label>
+            <input type="number" id="calc-egress" value="100" min="0" oninput="calcCost()">
+          </div>
+        </div>
+        <div class="calc-results" id="calc-results">
+          <!-- populated by JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<footer>
+  <div style="font-family:'Playfair Display',serif;font-size:2.5rem;color:var(--orange);margin-bottom:0.5rem;">▣ Storage Systems</div>
+  <p style="font-style:italic;color:var(--muted);font-size:1rem;margin-bottom:0.5rem;">Block · File · Object · Distributed · In-Memory · Time-Series · Search</p>
+  <p style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--dim);letter-spacing:0.12em;">access_pattern.determines(storage_type) — always</p>
+</footer>
+
+<script>
+/* NAV ACTIVE */
+const navLinks = document.querySelectorAll('nav a[href^="#"]');
+const sections = document.querySelectorAll('section[id]');
+const obs = new IntersectionObserver(e => {
+  e.forEach(en => {
+    if (en.isIntersecting) {
+      navLinks.forEach(l => l.classList.remove('active'));
+      const a = document.querySelector(`nav a[href="#${en.target.id}"]`);
+      if (a) { a.classList.add('active'); a.scrollIntoView({inline:'center',block:'nearest'}); }
+    }
+  });
+}, {threshold:0.25});
+sections.forEach(s => obs.observe(s));
+
+/* TABS */
+function showTab(e, id) {
+  const wrap = e.target.closest('.tab-wrap');
+  wrap.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  wrap.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  e.target.classList.add('active');
+  document.getElementById(id).classList.add('active');
+}
+
+/* DECISION GUIDE */
+const decisions = {
+  'images-videos': {
+    title: 'Use Object Storage (Amazon S3)',
+    text: 'Images and videos are unstructured binary blobs with no need for database queries. S3 provides unlimited capacity, 11-nines durability, built-in CDN integration (CloudFront), and lifecycle policies to automatically move older content to cheaper tiers. Cost: ~$0.023/GB/month. For global delivery, add CloudFront in front. For uploads, use pre-signed URLs so clients upload directly to S3 without hitting your servers.',
+    code: 'S3 Standard → CloudFront CDN → Pre-signed uploads'
+  },
+  'user-sessions': {
+    title: 'Use In-Memory Storage (Redis)',
+    text: 'Sessions are read on every authenticated request — often 100× per second per user. Sub-millisecond reads are essential. Redis stores sessions as Hash maps (user_id → fields). Set TTL equal to session timeout. Use Redis Cluster for high availability. Redis persistence (AOF) ensures sessions survive a Redis restart. Never store sessions in a relational DB — the connection overhead alone kills performance.',
+    code: 'Redis Hash: HMSET session:abc userId 123 role admin EX 3600'
+  },
+  'transactions': {
+    title: 'Use Relational DB on Block Storage (PostgreSQL + EBS io2)',
+    text: 'Financial transactions require ACID guarantees: Atomicity (either all or nothing), Consistency (constraints enforced), Isolation (no dirty reads), Durability (committed = permanent). PostgreSQL on EBS io2 gives you 99.999% durability with synchronous replication. Use read replicas for reporting. Shard by account_id if >5TB. Never use eventual-consistency stores for money.',
+    code: 'PostgreSQL (InnoDB/B-Tree) on EBS io2 → Read replicas → Point-in-time backup to S3'
+  },
+  'logs-metrics': {
+    title: 'Use Time-Series DB + Object Storage (InfluxDB / Prometheus → S3)',
+    text: 'Logs and metrics are append-only, time-ordered data with high ingest rates. InfluxDB uses a TSM (Time-Structured Merge Tree) designed for write-heavy time-series workloads — up to 10M writes/sec. Keep hot data (last 30 days) in InfluxDB. Archive cold data to S3 Parquet via lifecycle policies. Query cold data with Athena. Prometheus + Grafana for infrastructure metrics with short retention.',
+    code: 'Prometheus (hot, 15d) → Thanos (long-term, S3 backend) → Grafana dashboards'
+  },
+  'user-posts': {
+    title: 'Use Distributed NoSQL (Cassandra) + Object Storage (S3 for media)',
+    text: 'Social posts are write-heavy, need high availability, and are accessed by user_id + timestamp — a perfect Cassandra partition key. Cassandra\'s LSM-Tree gives exceptional write throughput. Post text in Cassandra (partition_key: user_id, clustering_key: created_at DESC). Media (images/videos) always in S3. Cache the last 800 posts per user in Redis for fast timeline reads.',
+    code: 'Cassandra (post text, LSM-Tree) + S3 (media) + Redis (timeline cache)'
+  },
+  'analytics': {
+    title: 'Use Columnar Store / Data Warehouse (BigQuery, Redshift, or S3 + Athena)',
+    text: 'Analytics queries aggregate millions of rows — SELECT AVG(revenue) by country, date. Columnar storage reads only the queried columns, not entire rows. BigQuery/Redshift achieve 10–100× faster analytics vs RDBMS. The modern pattern: store raw data as Parquet in S3 (cheap, ~$0.023/GB) → query with Athena ($5/TB scanned) or load to Redshift for complex joins. No servers to manage with Athena.',
+    code: 'Raw data → S3 Parquet → Athena SQL queries ($5/TB) or Redshift for complex analytics'
+  },
+  'search': {
+    title: 'Use Inverted Index Search Engine (Elasticsearch)',
+    text: 'Full-text search requires an inverted index — SQL LIKE queries perform a full table scan even with indexes. Elasticsearch replicates data from your primary DB (via Debezium CDC or application dual-write) into a search-optimised index. Supports typo tolerance, facets, geo search, and aggregations. For sub-second search on billions of documents, nothing beats Elasticsearch. OpenSearch is the open-source AWS alternative.',
+    code: 'Primary DB → Kafka CDC → Elasticsearch indexer → REST search API'
+  },
+  'ml-models': {
+    title: 'Use Object Storage (S3) as Model Registry + EFS for Training',
+    text: 'ML model artifacts (weights, checkpoints, configs) are binary files up to hundreds of GB. S3 is the universal model registry — MLflow, Weights & Biases, SageMaker all use S3 as the artifact backend. For training jobs that need shared data access across multiple GPU workers, mount EFS (NFS) so all workers see the same training dataset. Large dataset reads: store as Parquet in S3, use PyTorch DataLoader with s3fs.',
+    code: 'Training data: S3 Parquet | Shared weights: EFS | Model artifacts: S3 Model Registry'
+  }
+};
+
+function decide(el, key) {
+  document.querySelectorAll('.decision-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  const d = decisions[key];
+  document.getElementById('decision-result').innerHTML = `
+    <h4>${d.title}</h4>
+    <p>${d.text}</p>
+    <div style="margin-top:0.75rem;padding:0.6rem 0.9rem;background:rgba(0,0,0,0.3);border-radius:6px;">
+      <code style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#00c9a7;">${d.code}</code>
+    </div>
+  `;
+}
+
+/* COST CALCULATOR */
+function calcCost() {
+  const gb = parseFloat(document.getElementById('calc-size').value) || 0;
+  const gets = parseFloat(document.getElementById('calc-gets').value) || 0;
+  const puts = parseFloat(document.getElementById('calc-puts').value) || 0;
+  const egress = parseFloat(document.getElementById('calc-egress').value) || 0;
+
+  const egressCost = egress * 0.09; // first 10TB/mo
+  const putCost = puts * 0.005;     // per million PUTs
+  const getCost = gets * 0.0004;    // per million GETs
+
+  const costs = [
+    { label:'S3 Standard', val: (gb*0.023) + egressCost + putCost + getCost, color: 'var(--orange)' },
+    { label:'S3 Standard-IA', val: (gb*0.0125) + egressCost + putCost + getCost + (gets*0.001), color:'#cc7030' },
+    { label:'S3 Glacier Instant', val: (gb*0.004) + egressCost + putCost + (gets*0.01), color:'#aa5010' },
+    { label:'EBS gp3 (1TB min)', val: Math.max(gb,1)*0.08 + egressCost, color:'var(--blue)' },
+    { label:'AWS EFS', val: gb*0.30 + egressCost, color:'var(--teal)' },
+    { label:'CloudFront (+S3)', val: (gb*0.023) + (egress*0.0085) + getCost, color:'var(--violet)' },
+  ];
+
+  const res = document.getElementById('calc-results');
+  res.innerHTML = costs.map(c => `
+    <div class="calc-result">
+      <div class="calc-result-val" style="color:${c.color}">$${c.val.toFixed(2)}</div>
+      <div class="calc-result-label">${c.label}</div>
+    </div>
+  `).join('');
+}
+calcCost();
+</script>
+</body>
+</html>

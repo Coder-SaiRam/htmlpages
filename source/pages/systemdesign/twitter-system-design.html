@@ -1,0 +1,1707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Twitter System Design — In Depth</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #0f0f12;
+  --ink2: #16161c;
+  --ink3: #1d1d26;
+  --surface: #222230;
+  --border: rgba(255,255,255,0.06);
+  --border2: rgba(255,255,255,0.12);
+  --text: #e2e0ee;
+  --muted: #7a7890;
+  --dim: #4a4860;
+  --twitter: #1d9bf0;
+  --gold: #f4c430;
+  --rose: #ff5f87;
+  --mint: #00e5a0;
+  --lavender: #9d8fff;
+  --sky: #5bcefa;
+  --amber: #ffb347;
+  --r: 10px;
+  --rl: 16px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--ink);
+  color:var(--text);
+  font-family:'JetBrains Mono',monospace;
+  font-size:14px;
+  line-height:1.7;
+  overflow-x:hidden;
+}
+
+/* ── SCANLINE TEXTURE ── */
+body::after{
+  content:'';
+  position:fixed;inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px);
+  pointer-events:none;z-index:9999;
+}
+
+/* ── HERO ── */
+.hero{
+  min-height:100vh;
+  display:grid;
+  place-items:center;
+  text-align:center;
+  padding:4rem 2rem;
+  position:relative;
+  overflow:hidden;
+}
+.hero-bg{
+  position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 60% 50% at 20% 50%, rgba(29,155,240,0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 60% at 80% 30%, rgba(157,143,255,0.06) 0%, transparent 60%);
+}
+.hero-lines{
+  position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(29,155,240,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(29,155,240,0.04) 1px, transparent 1px);
+  background-size:80px 80px;
+  mask-image:radial-gradient(ellipse 70% 70% at 50% 50%, black, transparent);
+}
+.hero-bird{
+  font-size:4rem;
+  margin-bottom:1rem;
+  position:relative;
+  animation:float 4s ease-in-out infinite;
+}
+@keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
+.hero h1{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(4rem,12vw,10rem);
+  letter-spacing:0.04em;
+  line-height:0.9;
+  position:relative;
+  margin-bottom:1.5rem;
+}
+.hero h1 .t1{display:block;color:var(--twitter);}
+.hero h1 .t2{display:block;color:var(--text);opacity:0.9;}
+.hero h1 .t3{
+  display:block;
+  font-size:0.38em;
+  letter-spacing:0.2em;
+  color:var(--muted);
+  font-family:'JetBrains Mono',monospace;
+  font-weight:300;
+  margin-top:0.5rem;
+}
+.hero-stats{
+  display:flex;
+  gap:3rem;
+  justify-content:center;
+  margin-top:2rem;
+  flex-wrap:wrap;
+}
+.hstat{text-align:center;}
+.hstat .n{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:2.8rem;
+  color:var(--twitter);
+  line-height:1;
+}
+.hstat .l{font-size:10px;color:var(--muted);letter-spacing:0.15em;text-transform:uppercase;}
+
+/* ── NAV ── */
+nav{
+  position:sticky;top:0;z-index:200;
+  background:rgba(15,15,18,0.9);
+  backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--border);
+  height:52px;
+  display:flex;align-items:center;
+  padding:0 1.5rem;
+  gap:2px;
+  overflow-x:auto;
+  scrollbar-width:none;
+}
+nav::-webkit-scrollbar{display:none;}
+.nav-logo{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:1.3rem;
+  color:var(--twitter);
+  letter-spacing:0.06em;
+  margin-right:1.5rem;
+  white-space:nowrap;
+  flex-shrink:0;
+}
+nav a{
+  color:var(--muted);
+  text-decoration:none;
+  font-size:11px;
+  letter-spacing:0.06em;
+  padding:4px 10px;
+  border-radius:100px;
+  white-space:nowrap;
+  transition:all 0.2s;
+  flex-shrink:0;
+}
+nav a:hover{color:var(--text);background:rgba(255,255,255,0.05);}
+nav a.active{color:var(--twitter);background:rgba(29,155,240,0.1);}
+
+/* ── LAYOUT ── */
+.container{max-width:1140px;margin:0 auto;padding:0 2rem;}
+section{padding:5rem 0;border-bottom:1px solid var(--border);}
+
+.sec-eye{
+  font-size:10px;letter-spacing:0.2em;text-transform:uppercase;
+  color:var(--twitter);margin-bottom:0.5rem;
+}
+.sec-title{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(2.5rem,5vw,4rem);
+  letter-spacing:0.04em;
+  line-height:1;
+  margin-bottom:0.75rem;
+}
+.sec-sub{
+  font-family:'Crimson Pro',serif;
+  font-style:italic;
+  font-size:1.2rem;
+  color:var(--muted);
+  max-width:640px;
+  margin-bottom:3rem;
+}
+
+/* ── COMPONENT CARD ── */
+.comp-card{
+  background:var(--ink2);
+  border:1px solid var(--border);
+  border-radius:var(--rl);
+  overflow:hidden;
+  margin-bottom:2.5rem;
+  transition:border-color 0.3s;
+  position:relative;
+}
+.comp-card:hover{border-color:var(--border2);}
+.comp-accent{
+  height:3px;
+  background:linear-gradient(90deg, var(--twitter), var(--lavender));
+}
+.comp-accent.gold{background:linear-gradient(90deg, var(--gold), var(--amber));}
+.comp-accent.mint{background:linear-gradient(90deg, var(--mint), var(--sky));}
+.comp-accent.rose{background:linear-gradient(90deg, var(--rose), var(--amber));}
+.comp-accent.lavender{background:linear-gradient(90deg, var(--lavender), var(--twitter));}
+.comp-accent.sky{background:linear-gradient(90deg, var(--sky), var(--mint));}
+.comp-accent.amber{background:linear-gradient(90deg, var(--amber), var(--gold));}
+
+.comp-header{
+  display:flex;align-items:flex-start;gap:1.25rem;
+  padding:2rem 2rem 1.5rem;
+  border-bottom:1px solid var(--border);
+}
+.comp-icon{
+  width:52px;height:52px;
+  border-radius:12px;
+  display:grid;place-items:center;
+  font-size:1.5rem;
+  flex-shrink:0;
+}
+.comp-meta h2{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:1.8rem;
+  letter-spacing:0.04em;
+  line-height:1.1;
+  margin-bottom:4px;
+}
+.comp-meta .subtitle{color:var(--muted);font-size:12px;}
+
+.comp-body{padding:1.75rem 2rem;}
+
+/* ── SECTION WITHIN CARD ── */
+.inner-section{
+  margin-bottom:1.75rem;
+}
+.inner-title{
+  font-size:10px;letter-spacing:0.18em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:0.75rem;
+  display:flex;align-items:center;gap:8px;
+}
+.inner-title::after{
+  content:'';flex:1;height:1px;background:var(--border);
+}
+
+/* ── TEXT ── */
+.body-text{
+  font-family:'Crimson Pro',serif;
+  font-size:1.05rem;
+  line-height:1.85;
+  color:#c8c6dc;
+  margin-bottom:1rem;
+}
+.body-text strong{color:var(--text);}
+
+/* ── DIAGRAM ── */
+.diagram{
+  background:var(--ink);
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  padding:1.5rem 1rem;
+  margin:1.25rem 0;
+  overflow-x:auto;
+}
+
+/* ── PROS / CONS / TRADEOFFS ── */
+.pct-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:1rem;
+  margin:1.25rem 0;
+}
+.pct-box{
+  border-radius:var(--r);
+  padding:1.25rem;
+  font-size:13px;
+}
+.pct-pros{background:rgba(0,229,160,0.05);border:1px solid rgba(0,229,160,0.15);}
+.pct-cons{background:rgba(255,95,135,0.05);border:1px solid rgba(255,95,135,0.15);}
+.pct-tradeoff{background:rgba(244,196,48,0.05);border:1px solid rgba(244,196,48,0.15);}
+.pct-box h4{
+  font-size:9px;letter-spacing:0.18em;text-transform:uppercase;
+  margin-bottom:0.75rem;font-weight:500;
+}
+.pct-pros h4{color:var(--mint);}
+.pct-cons h4{color:var(--rose);}
+.pct-tradeoff h4{color:var(--gold);}
+.pct-box ul{list-style:none;line-height:2;}
+.pct-pros li::before{content:'✓  ';color:var(--mint);}
+.pct-cons li::before{content:'✗  ';color:var(--rose);}
+.pct-tradeoff li::before{content:'⇄  ';color:var(--gold);}
+
+/* ── REAL WORLD ── */
+.rw{
+  background:rgba(29,155,240,0.05);
+  border:1px solid rgba(29,155,240,0.2);
+  border-left:3px solid var(--twitter);
+  border-radius:0 var(--r) var(--r) 0;
+  padding:1.25rem 1.5rem;
+  margin:1.25rem 0;
+}
+.rw-eye{font-size:9px;letter-spacing:0.18em;text-transform:uppercase;color:var(--twitter);margin-bottom:0.5rem;}
+.rw p{
+  font-family:'Crimson Pro',serif;
+  font-size:1rem;color:#a8c8e8;line-height:1.8;
+}
+.rw strong{color:var(--sky);}
+
+/* ── INSIGHT / TIP ── */
+.insight{
+  background:rgba(157,143,255,0.06);
+  border:1px solid rgba(157,143,255,0.2);
+  border-radius:var(--r);
+  padding:1.25rem 1.5rem;
+  margin:1.25rem 0;
+  font-family:'Crimson Pro',serif;
+  font-size:1rem;
+  color:#c0b8f0;
+  line-height:1.8;
+}
+.insight::before{
+  content:'◈ KEY INSIGHT';
+  display:block;font-family:'JetBrains Mono',monospace;
+  font-size:9px;letter-spacing:0.18em;color:var(--lavender);margin-bottom:0.5rem;
+}
+.tip{
+  background:rgba(0,229,160,0.04);
+  border:1px solid rgba(0,229,160,0.15);
+  border-radius:var(--r);
+  padding:1.1rem 1.4rem;
+  margin:1rem 0;
+  font-size:12px;color:#9ee8d4;line-height:1.8;
+}
+.tip::before{
+  content:'▶ INTERVIEW TIP';
+  display:block;font-size:9px;letter-spacing:0.18em;
+  color:var(--mint);margin-bottom:0.4rem;
+}
+.warn{
+  background:rgba(255,179,71,0.05);
+  border:1px solid rgba(255,179,71,0.2);
+  border-radius:var(--r);
+  padding:1.1rem 1.4rem;
+  margin:1rem 0;
+  font-size:12px;color:#f0d08a;line-height:1.8;
+}
+.warn::before{
+  content:'⚠ BOTTLENECK';
+  display:block;font-size:9px;letter-spacing:0.18em;
+  color:var(--amber);margin-bottom:0.4rem;
+}
+
+/* ── CODE ── */
+.code{
+  background:rgba(0,0,0,0.4);
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  padding:1.25rem;
+  font-size:12px;line-height:1.9;
+  overflow-x:auto;margin:1rem 0;
+  color:#9aaccc;
+}
+.k{color:#c792ea;}.s{color:#c3e88d;}.c{color:#546e7a;font-style:italic;}
+.n{color:#82aaff;}.num{color:var(--amber);}
+.fn{color:var(--sky);}
+
+/* ── METRIC CHIPS ── */
+.chips{display:flex;flex-wrap:wrap;gap:0.5rem;margin:1rem 0;}
+.chip{
+  padding:4px 12px;border-radius:100px;font-size:11px;
+  font-family:'JetBrains Mono',monospace;
+}
+.chip-blue{background:rgba(29,155,240,0.12);color:#5bcefa;border:1px solid rgba(29,155,240,0.25);}
+.chip-mint{background:rgba(0,229,160,0.1);color:#5eecd2;border:1px solid rgba(0,229,160,0.2);}
+.chip-gold{background:rgba(244,196,48,0.1);color:#f4d060;border:1px solid rgba(244,196,48,0.2);}
+.chip-rose{background:rgba(255,95,135,0.1);color:#ff8fb5;border:1px solid rgba(255,95,135,0.2);}
+.chip-lav{background:rgba(157,143,255,0.1);color:#b8aeff;border:1px solid rgba(157,143,255,0.2);}
+
+/* ── NUMBERS ROW ── */
+.nums{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:0.75rem;margin:1.25rem 0;}
+.num-card{
+  background:var(--ink);border:1px solid var(--border);
+  border-radius:var(--r);padding:1rem;text-align:center;
+}
+.num-card .v{
+  font-family:'Bebas Neue',sans-serif;font-size:2rem;
+  color:var(--twitter);line-height:1;margin-bottom:3px;
+}
+.num-card .l{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;}
+
+/* ── TABLE ── */
+.tbl{width:100%;border-collapse:collapse;font-size:12px;margin:1.25rem 0;}
+.tbl th{
+  font-size:9px;letter-spacing:0.15em;text-transform:uppercase;
+  color:var(--muted);padding:10px 14px;text-align:left;
+  border-bottom:1px solid var(--border2);background:var(--ink);
+}
+.tbl td{padding:10px 14px;border-bottom:1px solid var(--border);color:#c4c2d0;vertical-align:top;}
+.tbl tr:last-child td{border-bottom:none;}
+.tbl tr:hover td{background:rgba(29,155,240,0.03);}
+
+/* ── FLOW STEP ── */
+.flow{display:flex;flex-direction:column;gap:0;margin:1.25rem 0;}
+.fstep{
+  display:flex;align-items:flex-start;gap:1rem;
+  padding:1rem 1.25rem;
+  background:var(--ink);
+  border:1px solid var(--border);
+  border-bottom:none;
+  transition:background 0.2s;
+}
+.fstep:first-child{border-radius:var(--r) var(--r) 0 0;}
+.fstep:last-child{border-bottom:1px solid var(--border);border-radius:0 0 var(--r) var(--r);}
+.fstep:hover{background:rgba(29,155,240,0.04);}
+.fstep-num{
+  width:28px;height:28px;border-radius:50%;
+  background:rgba(29,155,240,0.15);border:1px solid rgba(29,155,240,0.3);
+  display:grid;place-items:center;
+  font-family:'Bebas Neue',sans-serif;font-size:1rem;color:var(--twitter);
+  flex-shrink:0;margin-top:2px;
+}
+.fstep-body h4{font-size:13px;font-weight:500;margin-bottom:3px;color:var(--text);}
+.fstep-body p{font-size:12px;color:var(--muted);line-height:1.6;}
+
+/* ── FOOTER ── */
+footer{text-align:center;padding:4rem 2rem;color:var(--muted);}
+
+/* ── ANIMATIONS ── */
+.comp-card{animation:slideUp 0.6s both;}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+.comp-card:nth-child(1){animation-delay:0.05s;}
+.comp-card:nth-child(2){animation-delay:0.10s;}
+.comp-card:nth-child(3){animation-delay:0.15s;}
+.comp-card:nth-child(4){animation-delay:0.20s;}
+.comp-card:nth-child(5){animation-delay:0.25s;}
+.comp-card:nth-child(6){animation-delay:0.30s;}
+.comp-card:nth-child(7){animation-delay:0.35s;}
+.comp-card:nth-child(8){animation-delay:0.40s;}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-lines"></div>
+  <div class="hero-bird">𝕏</div>
+  <h1>
+    <span class="t1">TWITTER</span>
+    <span class="t2">SYSTEM DESIGN</span>
+    <span class="t3">every component · every tradeoff · every reason</span>
+  </h1>
+  <div class="hero-stats">
+    <div class="hstat"><div class="n">500M</div><div class="l">Tweets / day</div></div>
+    <div class="hstat"><div class="n">350M</div><div class="l">Monthly users</div></div>
+    <div class="hstat"><div class="n">6K</div><div class="l">Tweets / sec</div></div>
+    <div class="hstat"><div class="n">200B</div><div class="l">Timeline reads/day</div></div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">𝕏 SYS</div>
+  <a href="#requirements">Requirements</a>
+  <a href="#estimation">Estimation</a>
+  <a href="#highlevel">Architecture</a>
+  <a href="#dns-lb">DNS & LB</a>
+  <a href="#appservers">App Servers</a>
+  <a href="#fanout">Fan-out</a>
+  <a href="#timeline">Timeline</a>
+  <a href="#database">Database</a>
+  <a href="#cache">Cache</a>
+  <a href="#media">Media/CDN</a>
+  <a href="#search">Search</a>
+  <a href="#notifications">Notifications</a>
+  <a href="#queue">Kafka</a>
+  <a href="#tradeoffs">Tradeoffs</a>
+</nav>
+
+<!-- ════════════════════════════════════════════
+     SECTION 1: REQUIREMENTS
+═══════════════════════════════════════════════ -->
+<section id="requirements">
+<div class="container">
+  <div class="sec-eye">Step 01</div>
+  <h2 class="sec-title">Requirements & Scope</h2>
+  <p class="sec-sub">Before drawing a single box, you define what you are and aren't building.</p>
+
+  <div class="comp-card">
+    <div class="comp-accent"></div>
+    <div class="comp-header">
+      <div class="comp-icon" style="background:rgba(29,155,240,0.12);">📋</div>
+      <div class="comp-meta">
+        <h2>Functional & Non-Functional</h2>
+        <div class="subtitle">The contract that shapes every architectural decision downstream</div>
+      </div>
+    </div>
+    <div class="comp-body">
+      <div class="inner-section">
+        <div class="inner-title">Functional requirements (what it must do)</div>
+        <div class="flow">
+          <div class="fstep"><div class="fstep-num">1</div><div class="fstep-body"><h4>Post a tweet</h4><p>Up to 280 characters of text, optionally with images/videos/polls. Must persist durably and be visible to followers.</p></div></div>
+          <div class="fstep"><div class="fstep-num">2</div><div class="fstep-body"><h4>Follow / unfollow users</h4><p>Directed social graph. User A follows User B means User B's tweets appear in A's timeline. Not necessarily mutual.</p></div></div>
+          <div class="fstep"><div class="fstep-num">3</div><div class="fstep-body"><h4>Home timeline</h4><p>Chronological (or ranked) feed of tweets from all accounts the user follows. Must load in under 200ms.</p></div></div>
+          <div class="fstep"><div class="fstep-num">4</div><div class="fstep-body"><h4>User profile / tweet timeline</h4><p>Show all tweets by a specific user in reverse chronological order.</p></div></div>
+          <div class="fstep"><div class="fstep-num">5</div><div class="fstep-body"><h4>Like, Retweet, Reply</h4><p>Engagement actions that update counts, fan-out to followers, and generate notifications.</p></div></div>
+          <div class="fstep"><div class="fstep-num">6</div><div class="fstep-body"><h4>Search tweets & users</h4><p>Full-text search across tweet content. Hashtag lookup. User discovery.</p></div></div>
+          <div class="fstep"><div class="fstep-num">7</div><div class="fstep-body"><h4>Trending topics</h4><p>Real-time aggregation of hashtag/keyword velocity across all tweets.</p></div></div>
+          <div class="fstep"><div class="fstep-num">8</div><div class="fstep-body"><h4>Notifications</h4><p>Push/in-app alerts for likes, retweets, replies, follows, mentions.</p></div></div>
+        </div>
+      </div>
+      <div class="inner-section">
+        <div class="inner-title">Non-functional requirements (quality attributes)</div>
+        <div class="nums">
+          <div class="num-card"><div class="v">&lt;200ms</div><div class="l">Timeline load</div></div>
+          <div class="num-card"><div class="v">99.99%</div><div class="l">Uptime SLA</div></div>
+          <div class="num-card"><div class="v">~0s</div><div class="l">Write visible lag</div></div>
+          <div class="num-card"><div class="v">10:1</div><div class="l">Read:Write ratio</div></div>
+          <div class="num-card"><div class="v">Eventual</div><div class="l">Consistency model</div></div>
+        </div>
+      </div>
+      <div class="insight">
+        The read-heavy nature (10:1 or even 100:1 for celebrity accounts) dictates the entire architecture. Almost every design decision — fan-out on write, aggressive caching, CDN — exists because reads dwarf writes and must be blazing fast.
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ════════════════════════════════════════════
+     SECTION 2: ESTIMATION
+═══════════════════════════════════════════════ -->
+<section id="estimation">
+<div class="container">
+  <div class="sec-eye">Step 02</div>
+  <h2 class="sec-title">Scale Estimation</h2>
+  <p class="sec-sub">Back-of-envelope math that justifies every infrastructure choice.</p>
+
+  <div class="comp-card">
+    <div class="comp-accent gold"></div>
+    <div class="comp-header">
+      <div class="comp-icon" style="background:rgba(244,196,48,0.1);">🧮</div>
+      <div class="comp-meta">
+        <h2>Numbers That Drive Design</h2>
+        <div class="subtitle">Every architectural choice traces back to a real constraint you estimate here</div>
+      </div>
+    </div>
+    <div class="comp-body">
+      <div class="code">
+<span class="c">// ── USER SCALE ──</span>
+<span class="k">const</span> <span class="n">DAU</span>             = <span class="num">200_000_000</span>;  <span class="c">// 200M daily active users</span>
+<span class="k">const</span> <span class="n">MAU</span>             = <span class="num">350_000_000</span>;  <span class="c">// 350M monthly active users</span>
+
+<span class="c">// ── WRITES ──</span>
+<span class="k">const</span> <span class="n">tweetsPerDay</span>    = <span class="num">500_000_000</span>;  <span class="c">// 500M tweets/day</span>
+<span class="k">const</span> <span class="n">writeQPS</span>        = <span class="num">500_000_000</span> / <span class="num">86_400</span>;  <span class="c">// ≈ 5,787 writes/sec</span>
+<span class="k">const</span> <span class="n">peakWriteQPS</span>    = writeQPS * <span class="num">3</span>;            <span class="c">// ≈ 17,361 at peak</span>
+
+<span class="c">// ── READS (timeline is the killer) ──</span>
+<span class="k">const</span> <span class="n">timelineReadsDay</span> = <span class="num">200_000_000_000</span>;  <span class="c">// 200B timeline reads/day</span>
+<span class="k">const</span> <span class="n">readQPS</span>          = <span class="num">200_000_000_000</span> / <span class="num">86_400</span>;  <span class="c">// ≈ 2.3M reads/sec</span>
+
+<span class="c">// ── STORAGE ──</span>
+<span class="k">const</span> <span class="n">tweetSizeBytes</span>   = <span class="num">300</span>;   <span class="c">// text + metadata</span>
+<span class="k">const</span> <span class="n">mediaPerTweet</span>    = <span class="num">0.2</span>;   <span class="c">// 20% tweets have media</span>
+<span class="k">const</span> <span class="n">avgMediaSize</span>     = <span class="num">1_000_000</span>;  <span class="c">// 1MB average</span>
+<span class="k">const</span> <span class="n">textStorageDay</span>  = tweetsPerDay * tweetSizeBytes;  <span class="c">// ≈ 150GB/day</span>
+<span class="k">const</span> <span class="n">mediaStorageDay</span> = tweetsPerDay * mediaPerTweet * avgMediaSize; <span class="c">// ≈ 100TB/day</span>
+<span class="k">const</span> <span class="n">textStorage5yr</span>  = textStorageDay * <span class="num">365</span> * <span class="num">5</span>;  <span class="c">// ≈ 274TB text in 5 years</span>
+
+<span class="c">// ── BANDWIDTH ──</span>
+<span class="k">const</span> <span class="n">ingressGbps</span>     = (mediaStorageDay / <span class="num">86_400</span>) * <span class="num">8</span> / <span class="num">1e9</span>; <span class="c">// ≈ 9.3 Gbps incoming</span>
+<span class="c">// Egress is 10–100× ingress for a read-heavy system → ~100–930 Gbps out</span>
+      </div>
+
+      <div class="pct-grid">
+        <div class="pct-box pct-tradeoff">
+          <h4>Key Conclusions</h4>
+          <ul>
+            <li>Need sharding (text DB > 274TB)</li>
+            <li>Read cache essential (2.3M read QPS)</li>
+            <li>Object store for media (100TB/day)</li>
+            <li>CDN mandatory for bandwidth</li>
+            <li>Fan-out must be async</li>
+          </ul>
+        </div>
+        <div class="pct-box pct-pros">
+          <h4>What these numbers unlock</h4>
+          <ul>
+            <li>Justify multiple DB shards</li>
+            <li>Justify Redis cluster (not single node)</li>
+            <li>Justify dedicated media pipeline</li>
+            <li>Justify Kafka for async fan-out</li>
+            <li>Size the CDN cache footprint</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ════════════════════════════════════════════
+     SECTION 3: HIGH-LEVEL ARCHITECTURE
+═══════════════════════════════════════════════ -->
+<section id="highlevel">
+<div class="container">
+  <div class="sec-eye">Step 03</div>
+  <h2 class="sec-title">High-Level Architecture</h2>
+  <p class="sec-sub">The full system at a glance — before deep-diving each component.</p>
+
+  <div class="comp-card">
+    <div class="comp-accent mint"></div>
+    <div class="comp-header">
+      <div class="comp-icon" style="background:rgba(0,229,160,0.1);">🗺</div>
+      <div class="comp-meta">
+        <h2>Complete System Diagram</h2>
+        <div class="subtitle">Every box is a real Twitter subsystem — not a placeholder</div>
+      </div>
+    </div>
+    <div class="comp-body">
+      <div class="diagram">
+        <svg width="100%" viewBox="0 0 700 680" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="am" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M2 1L8 5L2 9" fill="none" stroke="#1d9bf0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </marker>
+            <marker id="am2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M2 1L8 5L2 9" fill="none" stroke="rgba(157,143,255,0.6)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </marker>
+          </defs>
+          <style>
+            .n{fill:#1d1d26;stroke:rgba(255,255,255,0.1);stroke-width:0.5;}
+            .nt{fill:#e2e0ee;font-family:'JetBrains Mono',monospace;font-size:12px;text-anchor:middle;dominant-baseline:central;}
+            .ns{fill:#7a7890;font-family:'JetBrains Mono',monospace;font-size:10px;text-anchor:middle;dominant-baseline:central;}
+            .al{stroke:rgba(29,155,240,0.45);stroke-width:1;fill:none;}
+            .al2{stroke:rgba(157,143,255,0.3);stroke-width:1;fill:none;stroke-dasharray:4 3;}
+          </style>
+
+          <!-- Client -->
+          <rect class="n" x="290" y="10" width="120" height="44" rx="8" style="stroke:rgba(29,155,240,0.5);"/>
+          <text class="nt" x="350" y="32" style="fill:#5bcefa;">Client</text>
+          <line x1="350" y1="54" x2="350" y2="76" class="al" marker-end="url(#am)"/>
+
+          <!-- DNS + CDN -->
+          <rect class="n" x="100" y="78" width="120" height="44" rx="7" style="stroke:rgba(0,229,160,0.3);"/>
+          <text class="nt" x="160" y="94" style="fill:#5eecd2;">DNS</text>
+          <text class="ns" x="160" y="110">Route53</text>
+          <rect class="n" x="480" y="78" width="120" height="44" rx="7" style="stroke:rgba(0,229,160,0.3);"/>
+          <text class="nt" x="540" y="94" style="fill:#5eecd2;">CDN</text>
+          <text class="ns" x="540" y="110">CloudFront</text>
+          <line x1="290" y1="88" x2="220" y2="100" class="al" marker-end="url(#am)"/>
+          <line x1="410" y1="100" x2="480" y2="100" class="al" marker-end="url(#am)"/>
+
+          <!-- Load Balancer -->
+          <rect class="n" x="260" y="152" width="180" height="44" rx="8" style="stroke:rgba(157,143,255,0.4);"/>
+          <text class="nt" x="350" y="168" style="fill:#b8aeff;">Load Balancer</text>
+          <text class="ns" x="350" y="184">HAProxy / AWS ELB</text>
+          <line x1="220" y1="122" x2="300" y2="152" class="al" marker-end="url(#am)"/>
+
+          <!-- API Gateway -->
+          <rect class="n" x="260" y="224" width="180" height="44" rx="8" style="stroke:rgba(29,155,240,0.35);"/>
+          <text class="nt" x="350" y="240" style="fill:#5bcefa;">API Gateway</text>
+          <text class="ns" x="350" y="256">Auth · Rate limit · Route</text>
+          <line x1="350" y1="196" x2="350" y2="224" class="al" marker-end="url(#am)"/>
+
+          <!-- Microservices row -->
+          <rect class="n" x="20" y="302" width="120" height="52" rx="7" style="stroke:rgba(29,155,240,0.3);"/>
+          <text class="nt" x="80" y="320" style="fill:#5bcefa;">Tweet</text>
+          <text class="ns" x="80" y="338">Service</text>
+          <rect class="n" x="160" y="302" width="120" height="52" rx="7" style="stroke:rgba(29,155,240,0.3);"/>
+          <text class="nt" x="220" y="320" style="fill:#5bcefa;">Timeline</text>
+          <text class="ns" x="220" y="338">Service</text>
+          <rect class="n" x="300" y="302" width="110" height="52" rx="7" style="stroke:rgba(29,155,240,0.3);"/>
+          <text class="nt" x="355" y="320" style="fill:#5bcefa;">User</text>
+          <text class="ns" x="355" y="338">Service</text>
+          <rect class="n" x="430" y="302" width="120" height="52" rx="7" style="stroke:rgba(29,155,240,0.3);"/>
+          <text class="nt" x="490" y="320" style="fill:#5bcefa;">Search</text>
+          <text class="ns" x="490" y="338">Service</text>
+          <rect class="n" x="568" y="302" width="120" height="52" rx="7" style="stroke:rgba(29,155,240,0.3);"/>
+          <text class="nt" x="628" y="320" style="fill:#5bcefa;">Notif.</text>
+          <text class="ns" x="628" y="338">Service</text>
+          <line x1="290" y1="262" x2="150" y2="302" class="al" marker-end="url(#am)"/>
+          <line x1="320" y1="262" x2="240" y2="302" class="al" marker-end="url(#am)"/>
+          <line x1="350" y1="268" x2="355" y2="302" class="al" marker-end="url(#am)"/>
+          <line x1="380" y1="262" x2="470" y2="302" class="al" marker-end="url(#am)"/>
+          <line x1="410" y1="258" x2="595" y2="302" class="al" marker-end="url(#am)"/>
+
+          <!-- Kafka -->
+          <rect class="n" x="220" y="390" width="250" height="44" rx="8" style="stroke:rgba(244,196,48,0.4);"/>
+          <text class="nt" x="345" y="406" style="fill:#f4d060;">Kafka Event Bus</text>
+          <text class="ns" x="345" y="422">Async fan-out · decoupling</text>
+          <line x1="80" y1="354" x2="270" y2="390" class="al" marker-end="url(#am)"/>
+          <line x1="220" y1="354" x2="310" y2="390" class="al" marker-end="url(#am)"/>
+
+          <!-- Data stores row -->
+          <rect class="n" x="20" y="474" width="130" height="52" rx="7" style="stroke:rgba(255,95,135,0.35);"/>
+          <text class="nt" x="85" y="492" style="fill:#ff8fb5;">MySQL</text>
+          <text class="ns" x="85" y="510">Tweets DB</text>
+          <rect class="n" x="170" y="474" width="130" height="52" rx="7" style="stroke:rgba(255,95,135,0.35);"/>
+          <text class="nt" x="235" y="492" style="fill:#ff8fb5;">Cassandra</text>
+          <text class="ns" x="235" y="510">Timeline store</text>
+          <rect class="n" x="320" y="474" width="130" height="52" rx="7" style="stroke:rgba(255,179,71,0.4);"/>
+          <text class="nt" x="385" y="492" style="fill:#ffc97a;">Redis</text>
+          <text class="ns" x="385" y="510">Cache / sessions</text>
+          <rect class="n" x="470" y="474" width="130" height="52" rx="7" style="stroke:rgba(91,206,250,0.3);"/>
+          <text class="nt" x="535" y="492" style="fill:#5bcefa;">Elasticsearch</text>
+          <text class="ns" x="535" y="510">Full-text search</text>
+          <rect class="n" x="620" y="474" width="70" height="52" rx="7" style="stroke:rgba(0,229,160,0.3);"/>
+          <text class="nt" x="655" y="492" style="fill:#5eecd2;">S3</text>
+          <text class="ns" x="655" y="510">Media</text>
+          <line x1="295" y1="434" x2="150" y2="474" class="al" marker-end="url(#am)"/>
+          <line x1="330" y1="434" x2="270" y2="474" class="al" marker-end="url(#am)"/>
+          <line x1="370" y1="434" x2="395" y2="474" class="al" marker-end="url(#am)"/>
+          <line x1="400" y1="434" x2="510" y2="474" class="al" marker-end="url(#am)"/>
+          <line x1="430" y1="434" x2="650" y2="474" class="al" marker-end="url(#am)"/>
+
+          <!-- Fan-out service -->
+          <rect class="n" x="220" y="562" width="250" height="44" rx="8" style="stroke:rgba(157,143,255,0.35);"/>
+          <text class="nt" x="345" y="578" style="fill:#b8aeff;">Fan-out Service</text>
+          <text class="ns" x="345" y="594">Pushes tweet IDs to timelines</text>
+          <line x1="345" y1="462" x2="345" y2="562" class="al2" marker-end="url(#am2)"/>
+
+          <!-- Graph DB -->
+          <rect class="n" x="50" y="618" width="160" height="44" rx="7" style="stroke:rgba(244,196,48,0.3);"/>
+          <text class="nt" x="130" y="634" style="fill:#f4d060;">Social Graph</text>
+          <text class="ns" x="130" y="650">FlockDB (followers)</text>
+          <line x1="235" y1="562" x2="200" y2="618" class="al" marker-end="url(#am)"/>
+
+          <!-- Push workers -->
+          <rect class="n" x="460" y="618" width="180" height="44" rx="7" style="stroke:rgba(0,229,160,0.3);"/>
+          <text class="nt" x="550" y="634" style="fill:#5eecd2;">Push Workers</text>
+          <text class="ns" x="550" y="650">FCM / APNs / WebSocket</text>
+          <line x1="420" y1="562" x2="480" y2="618" class="al" marker-end="url(#am)"/>
+        </svg>
+      </div>
+      <div class="body-text">
+        Read from left→right, top→bottom: A client request hits <strong>DNS</strong> (Route53), the <strong>CDN</strong> serves static assets, the <strong>Load Balancer</strong> routes to the <strong>API Gateway</strong>, which authenticates and forwards to the appropriate <strong>Microservice</strong>. Write events are published to <strong>Kafka</strong> and asynchronously processed by the <strong>Fan-out Service</strong>, which pushes tweet IDs into follower timelines in <strong>Cassandra</strong>. The social graph lives in <strong>FlockDB</strong> and push notifications leave through <strong>FCM/APNs</strong>.
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ════════════════════════════════════════════
+     SECTION 4: DNS & LOAD BALANCER
+═══════════════════════════════════════════════ -->
+<section id="dns-lb">
+<div class="container">
+  <div class="sec-eye">Component 01</div>
+  <h2 class="sec-title">DNS & Load Balancer</h2>
+  <p class="sec-sub">The front door of the entire system — gets the request to the right datacenter.</p>
+
+  <div class="comp-card">
+    <div class="comp-accent sky"></div>
+    <div class="comp-header">
+      <div class="comp-icon" style="background:rgba(91,206,250,0.1);">🌐</div>
+      <div class="comp-meta">
+        <h2>DNS — Route 53 + GeoDNS</h2>
+        <div class="subtitle">Resolves twitter.com → nearest datacenter IP</div>
+      </div>
+    </div>
+    <div class="comp-body">
+      <div class="body-text">
+        DNS is the internet's phone book. When you type <strong>twitter.com</strong>, your browser queries Route 53 which returns the IP of the nearest Twitter datacenter. Twitter uses <strong>GeoDNS</strong> — a user in Mumbai gets routed to the Asia-Pacific datacenter, a user in New York gets the US-East IP. This alone cuts latency by 100–200ms before a single byte of application code runs.
+      </div>
+      <div class="body-text">
+        Twitter uses <strong>Anycast routing</strong> — multiple datacenters advertise the same IP prefix. BGP routing automatically selects the topologically closest datacenter. During a regional outage, BGP withdraws those routes and traffic automatically shifts to the next-best datacenter within seconds.
+      </div>
+      <div class="pct-grid">
+        <div class="pct-box pct-pros">
+          <h4>Benefits</h4>
+          <ul>
+            <li>Geographic load distribution</li>
+            <li>Automatic failover via BGP</li>
+            <li>Reduces network hops</li>
+            <li>DNS TTL controls failover speed</li>
+            <li>Zero application-layer changes</li>
+          </ul>
+        </div>
+        <div class="pct-box pct-cons">
+          <h4>Limitations</h4>
+          <ul>
+            <li>DNS TTL causes stale caching (30s–5min)</li>
+            <li>Doesn't account for server load</li>
+            <li>Resolver location ≠ user location</li>
+            <li>Propagation delay during changes</li>
+          </ul>
+        </div>
+        <div class="pct-box pct-tradeoff">
+          <h4>Key Tradeoffs</h4>
+          <ul>
+            <li>Low TTL = faster failover but more DNS queries</li>
+            <li>High TTL = stale during incidents</li>
+            <li>Twitter uses 60s TTL as balance</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="comp-card">
+    <div class="comp-accent sky"></div>
+    <div class="comp-header">
+      <div class="comp-icon" style="background:rgba(91,206,250,0.1);">⚖️</div>
+      <div class="comp-meta">
+        <h2>Load Balancer — Layer 4 & Layer 7</h2>
+        <div class="subtitle">HAProxy for L4, Nginx/Envoy for L7 — distributes across thousands of app servers</div>
+      </div>
+    </div>
+    <div class="comp-body">
+      <div class="body-text">
+        Twitter runs a <strong>two-tier load balancing</strong> architecture. <strong>L4 load balancers</strong> (HAProxy) operate at the TCP level — they see IP packets and use consistent hashing to distribute connections. <strong>L7 load balancers</strong> (Nginx/Envoy) operate at HTTP — they can route based on URL path, headers, or method, enabling traffic splitting between services (e.g., /api/timeline → Timeline Service, /api/tweet → Tweet Service).
+      </div>
+      <div class="diagram">
+        <svg width="100%" viewBox="0 0 700 220" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="alb" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M2 1L8 5L2 9" fill="none" stroke="#1d9bf0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </marker>
+          </defs>
+          <style>
+            .lb{fill:#1d1d26;stroke:rgba(255,255,255,0.1);stroke-width:0.5;}
+            .lt{fill:#e2e0ee;font-family:'JetBrains Mono',monospace;font-size:12px;text-anchor:middle;dominant-baseline:central;}
+            .ls{fill:#7a7890;font-family:'JetBrains Mono',monospace;font-size:10px;text-anchor:middle;dominant-baseline:central;}
+            .la{stroke:rgba(29,155,240,0.4);stroke-width:1;fill:none;}
+          </style>
+          <!-- Clients -->
+          <rect class="lb" x="10" y="80" width="80" height="36" rx="6" style="stroke:rgba(91,206,250,0.3);"/>
+          <text class="lt" x="50" y="98" style="fill:#5bcefa;">Clients</text>
+          <!-- L4 LB -->
+          <rect class="lb" x="130" y="68" width="130" height="60" rx="8" style="stroke:rgba(157,143,255,0.4);"/>
+          <text class="lt" x="195" y="88" style="fill:#b8aeff;">L4 LB</text>
+          <text class="ls" x="195" y="106">HAProxy · TCP</text>
+          <text class="ls" x="195" y="120">Consistent hash</text>
+          <!-- L7 LB -->
+          <rect class="lb" x="310" y="68" width="150" height="60" rx="8" style="stroke:rgba(29,155,240,0.4);"/>
+          <text class="lt" x="385" y="88" style="fill:#5bcefa;">L7 LB</text>
+          <text class="ls" x="385" y="106">Nginx / Envoy</text>
+          <text class="ls" x="385" y="120">URL-based routing</text>
+          <!-- App servers -->
+          <rect class="lb" x="510" y="20" width="110" height="36" rx="6" style="stroke:rgba(29,155,240,0.25);"/>
+          <text class="ls" x="565" y="38" style="fill:#5bcefa;">Tweet service ×N</text>
+          <rect class="lb" x="510" y="70" width="110" height="36" rx="6" style="stroke:rgba(29,155,240,0.25);"/>
+          <text class="ls" x="565" y="88" style="fill:#5bcefa;">Timeline svc ×N</text>
+          <rect class="lb" x="510" y="120" width="110" height="36" rx="6" style="stroke:rgba(29,155,240,0.25);"/>
+          <text class="ls" x="565" y="138" style="fill:#5bcefa;">User svc ×N</text>
+          <rect class="lb" x="510" y="170" width="110" height="36" rx="6" style="stroke:rgba(29,155,240,0.25);"/>
+          <text class="ls" x="565" y="188" style="fill:#5bcefa;">Search svc ×N</text>
+          <line x1="90" y1="98" x2="130" y2="98" class="la" marker-end="url(#alb)"/>
+          <line x1="260" y1="98" x2="310" y2="98" class="la" marker-end="url(#alb)"/>
+          <line x1="460" y1="85" x2="510" y2="38" class="la" marker-end="url(#alb)"/>
+          <line x1="460" y1="90" x2="510" y2="88" class="la" marker-end="url(#alb)"/>
+          <line x1="460" y1="98" x2="510" y2="135" class="la" marker-end="url(#alb)"/>
+          <line x1="460" y1="105" x2="510" y2="185" class="la" marker-end="url(#alb)"/>
+        </svg>
+      </div>
+      <div class="pct-grid">
+        <div class="pct-box pct-pros">
+          <h4>Benefits</h4>
+          <ul>
+            <li>Horizontal scale across N servers</li>
+            <li>Health checks auto-remove dead nodes</li>
+            <li>SSL termination at LB (offload servers)</li>
+            <li>Rate limiting at the edge</li>
+            <li>A/B testing via weighted routing</li>
+          </ul>
+        </div>
+        <div class="pct-box pct-cons">
+          <h4>Drawbacks</h4>
+          <ul>
+            <li>LB itself can be a bottleneck</li>
+            <li>Need redundant LBs (active-passive)</li>
+            <li>Sticky sessions complicate stateless design</li>
+            <li>Extra network hop per request</li>
+          </ul>
+        </div>
+        <div class="pct-box pct-tradeoff">
+          <h4>Algorithms used</h4>
+          <ul>
+            <li>Round-robin for uniform servers</li>
+            <li>Least connections for variable load</li>
+            <li>Consistent hashing for cache locality</li>
+            <li>IP hash for session affinity</li>
+          </ul>
+        </div>
+      </div>
+      <div class="rw">
+        <div class="rw-eye">Twitter Reality</div>
+        <p>Twitter's load balancers handle <strong>~30 billion requests/day</strong>. They run redundant LB pairs in active-passive mode — if the active LB dies, the passive takes over via <strong>VRRP</strong> (Virtual Router Redundancy Protocol) with sub-second failover. The LB layer also does DDoS mitigation — connection rate limits, SYN cookie protection, and anycast black-holing for attack traffic.</p>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ════════════════════════════════════════════
+     SECTION 5: API GATEWAY & APP SERVERS
+═══════════════════════════════════════════════ -->
+<section id="appservers">
+<div class="container">
+  <div class="sec-eye">Component 02</div>
+  <h2 class="sec-title">API Gateway & App Servers</h2>
+  <p class="sec-sub">Authentication, rate limiting, and the microservices that own each domain.</p>
+
+  <div class="comp-card">
+    <div class="comp-accent"></div>
+    <div class="comp-header">
+      <div class="comp-icon" style="background:rgba(29,155,240,0.1);">🔒</div>
+      <div class="comp-meta">
+        <h2>API Gateway</h2>
+        <div class="subtitle">Single entry point — auth, rate limiting, routing, observability</div>
+      </div>
+    </div>
+    <div class="comp-body">
+      <div class="body-text">
+        The API Gateway is the <strong>bouncer and router</strong> for all API traffic. Every request must pass through it. It validates <strong>OAuth 2.0 tokens</strong> (Twitter uses Bearer tokens), enforces <strong>rate limits per user/app</strong> (Twitter API v2: 500K tweets/month for basic apps), routes to the correct microservice, and emits distributed traces for observability.
+      </div>
+      <div class="chips">
+        <span class="chip chip-blue">OAuth 2.0 Bearer tokens</span>
+        <span class="chip chip-rose">Rate limiting: token bucket</span>
+        <span class="chip chip-mint">JWT validation</span>
+        <span class="chip chip-gold">Request tracing (OpenTelemetry)</span>
+        <span class="chip chip-lav">Circuit breaker</span>
+      </div>
+      <div class="pct-grid">
+        <div class="pct-box pct-pros">
+          <h4>Benefits</h4>
+          <ul>
+            <li>Single auth enforcement point</li>
+            <li>API versioning (v1/v2) isolation</li>
+            <li>Request/response transformation</li>
+            <li>Circuit breaking prevents cascade failures</li>
+            <li>Centralized rate limiting</li>
+          </ul>
+        </div>
+        <div class="pct-box pct-cons">
+          <h4>Drawbacks</h4>
+          <ul>
+            <li>Single point of failure if not HA</li>
+            <li>Adds ~1–5ms latency per request</li>
+            <li>Gateway becomes a complex monolith</li>
+            <li>Versioning can get messy at scale</li>
+          </ul>
+        </div>
+      </div>
+      <div class="warn">
+        Rate limiting uses a <strong>token bucket algorithm</strong> per (user_id, endpoint) stored in Redis. Each endpoint has a bucket with a max capacity and a refill rate. When a user exceeds their limit, the API returns HTTP 429 with a Retry-After header. Without this, a single viral tweet would let bots scrape millions of requests.
+      </div>
+
+      <div class="inner-section" style="margin-top:1.5rem;">
+        <div class="inner-title">Microservice decomposition</div>
+        <table class="tbl">
+          <thead><tr><th>Service</th><th>Owns</th><th>Primary DB</th><th>Scale challenge</th></tr></thead>
+          <tbody>
+            <tr><td style="color:#5bcefa;">Tweet Service</td><td>Create, delete, fetch tweets</td><td>MySQL (sharded)</td><td>6K writes/sec → sharding by tweet_id</td></tr>
+            <tr><td style="color:#5bcefa;">Timeline Service</td><td>Build & serve home timelines</td><td>Cassandra + Redis</td><td>2.3M reads/sec → pre-computed timelines</td></tr>
+            <tr><td style="color:#5bcefa;">User Service</td><td>Profiles, auth, settings</td><td>MySQL + Redis</td><td>Profile reads very cacheable</td></tr>
+            <tr><td style="color:#5bcefa;">Social Graph Svc</td><td>Follow/unfollow, follower lists</td><td>FlockDB (MySQL + sharding)</td><td>Lady Gaga: 50M followers</td></tr>
+            <tr><td style="color:#5bcefa;">Search Service</td><td>Full-text tweet/user search</td><td>Elasticsearch cluster</td><td>Real-time indexing + typo tolerance</td></tr>
+            <tr><td style="color:#5bcefa;">Notification Svc</td><td>Push, email, in-app alerts</td><td>Cassandra + Kafka</td><td>Fanout at celebrity scale</td></tr>
+            <tr><td style="color:#5bcefa;">Trending Service</td><td>Trending topics, hashtags</td><td>Redis Sorted Sets</td><td>Real-time aggregation of counts</td></tr>
+            <tr><td style="color:#5bcefa;">Media Service</td><td>Image/video upload/transcode</td><td>S3 + CDN</td><td>100TB/day ingress</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="insight">
+        Microservices give Twitter <strong>independent deployability</strong> — the Search team can deploy without coordinating with the Timeline team. But they introduce network latency between services. Twitter uses <strong>gRPC with Finagle</strong> (their open-source RPC framework) for internal service communication, which is faster than HTTP/1.1 JSON by ~30–40%.
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ════════════════════════════════════════════
+     SECTION 6: FAN-OUT SERVICE
+═══════════════════════════════════════════════ -->
+<section id="fanout">
+<div class="container">
+  <div class="sec-eye">Component 03 — The Hard Problem</div>
+  <h2 class="sec-title">Fan-out Service</h2>
+  <p class="sec-sub">The most complex piece of Twitter's architecture — distributing one tweet to 300M timelines.</p>
+
+  <div class="comp-card">
+    <div class="comp-accent rose"></div>
+    <div class="comp-header">
+      <div class="comp-icon" style="background:rgba(255,95,135,0.1);">📢</div>
+      <div class="comp-meta">
+        <h2>Fan-out on Write vs Fan-out on Read</h2>
+        <div class="subtitle">The fundamental architectural dilemma — Twitter does both, and here's why</div>
+      </div>
+    </div>
+    <div class="comp-body">
+      <div class="body-text">
+        When Katy Perry (100M followers) posts a tweet, Twitter must somehow make that tweet appear in 100 million people's home timelines. There are two pure approaches — and Twitter uses a <strong>hybrid</strong> of both.
+      </div>
+      <div class="diagram">
+        <svg width="100%" viewBox="0 0 700 300" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="afo" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M2 1L8 5L2 9" fill="none" stroke="#ff5f87" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </marker>
+            <marker id="afo2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M2 1L8 5L2 9" fill="none" stroke="#1d9bf0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </marker>
+          </defs>
+          <style>
+            .fon{fill:#1d1d26;stroke:rgba(255,255,255,0.1);stroke-width:0.5;}
+            .fot{fill:#e2e0ee;font-family:'JetBrains Mono',monospace;font-size:12px;text-anchor:middle;dominant-baseline:central;}
+            .fos{fill:#7a7890;font-family:'JetBrains Mono',monospace;font-size:10px;text-anchor:middle;dominant-baseline:central;}
+          </style>
+          <!-- Fan-out on Write -->
+          <text class="fot" x="175" y="18" style="fill:#ff5f87;">Fan-out on Write (push)</text>
+          <rect class="fon" x="100" y="30" width="150" height="44" rx="8" style="stroke:rgba(255,95,135,0.4);"/>
+          <text class="fot" x="175" y="50" style="fill:#ff8fb5;">User posts tweet</text>
+          <line x1="175" y1="74" x2="120" y2="110" stroke="rgba(255,95,135,0.4)" stroke-width="1" fill="none" marker-end="url(#afo)"/>
+          <line x1="175" y1="74" x2="175" y2="110" stroke="rgba(255,95,135,0.4)" stroke-width="1" fill="none" marker-end="url(#afo)"/>
+          <line x1="175" y1="74" x2="230" y2="110" stroke="rgba(255,95,135,0.4)" stroke-width="1" fill="none" marker-end="url(#afo)"/>
+          <rect class="fon" x="60" y="112" width="90" height="32" rx="6"/>
+          <text class="fos" x="105" y="128">User A TL</text>
+          <rect class="fon" x="130" y="112" width="90" height="32" rx="6"/>
+          <text class="fos" x="175" y="128">User B TL</text>
+          <rect class="fon" x="200" y="112" width="90" height="32" rx="6"/>
+          <text class="fos" x="245" y="128">User C TL</text>
+          <text class="fos" x="175" y="168" style="fill:#5eecd2;">✓ Read is instant (pre-built)</text>
+          <text class="fos" x="175" y="184" style="fill:#ff6b6b;">✗ Write is slow for 100M followers</text>
+          <text class="fos" x="175" y="200" style="fill:#ff6b6b;">✗ Huge write amplification</text>
+
+          <!-- divider -->
+          <line x1="350" y1="10" x2="350" y2="290" stroke="rgba(255,255,255,0.05)" stroke-width="1" stroke-dasharray="4 4"/>
+
+          <!-- Fan-out on Read -->
+          <text class="fot" x="525" y="18" style="fill:#5bcefa;">Fan-out on Read (pull)</text>
+          <rect class="fon" x="450" y="30" width="150" height="44" rx="8" style="stroke:rgba(29,155,240,0.4);"/>
+          <text class="fot" x="525" y="50" style="fill:#5bcefa;">User reads timeline</text>
+          <line x1="525" y1="74" x2="470" y2="110" stroke="rgba(29,155,240,0.4)" stroke-width="1" fill="none" marker-end="url(#afo2)"/>
+          <line x1="525" y1="74" x2="525" y2="110" stroke="rgba(29,155,240,0.4)" stroke-width="1" fill="none" marker-end="url(#afo2)"/>
+          <line x1="525" y1="74" x2="580" y2="110" stroke="rgba(29,155,240,0.4)" stroke-width="1" fill="none" marker-end="url(#afo2)"/>
+          <rect class="fon" x="410" y="112" width="90" height="32" rx="6"/>
+          <text class="fos" x="455" y="128">Fetch A's tweets</text>
+          <rect class="fon" x="480" y="112" width="90" height="32" rx="6"/>
+          <text class="fos" x="525" y="128">Fetch B's tweets</text>
+          <rect class="fon" x="550" y="112" width="90" height="32" rx="6"/>
+          <text class="fos" x="595" y="128">Fetch C's tweets</text>
+          <rect class="fon" x="440" y="160" width="170" height="32" rx="6" style="stroke:rgba(29,155,240,0.3);"/>
+          <text class="fos" x="525" y="176">Merge + sort + paginate</text>
+          <text class="fos" x="525" y="210" style="fill:#5eecd2;">✓ Write is simple (just store once)</text>
+          <text class="fos" x="525" y="226" style="fill:#ff6b6b;">✗ Read is slow (N DB queries)</text>
+          <text class="fos" x="525" y="242" style="fill:#ff6b6b;">✗ Can't cache easily</text>
+          <!-- Hybrid label -->
+          <text class="fot" x="350" y="275" text-anchor="middle" style="fill:#f4d060;">Twitter uses HYBRID: push for normal users, pull for celebrities</text>
+        </svg>
+      </div>
+
+      <div class="body-text">
+        Twitter's <strong>hybrid approach</strong>: For regular users (≤50K followers), tweet IDs are pushed into each follower's cached timeline on Cassandra immediately (fan-out on write). For <strong>celebrities</strong> (Katy Perry, Obama), their tweets are NOT pre-distributed — instead, when a follower opens their timeline, the system fetches the celebrity's recent tweets and merges them on the fly (fan-out on read). This avoids writing Katy Perry's tweet into 100M rows.
+      </div>
+      <div class="pct-grid">
+        <div class="pct-box pct-pros">
+          <h4>Fan-out on Write Pros</h4>
+          <ul>
+            <li>Timeline reads are O(1) — pre-built</li>
+            <li>No N queries at read time</li>
+            <li>Read latency is predictable</li>
+            <li>Works for majority of users</li>
+          </ul>
+        </div>
+        <div class="pct-box pct-cons">
+          <h4>Fan-out on Write Cons</h4>
+          <ul>
+            <li>Massive write amplification</li>
+            <li>Lady Gaga tweet = 50M DB writes</li>
+            <li>Celebrity tweets stall the pipeline</li>
+            <li>Kafka lag during viral moments</li>
+          </ul>
+        </div>
+        <div class="pct-box pct-tradeoff">
+          <h4>Why Hybrid?</h4>
+          <ul>
+            <li>95% of users: &lt;50K followers → push</li>
+            <li>5% celebrity accounts → pull</li>
+            <li>Keeps write amplification bounded</li>
+            <li>Read latency still fast for both paths</li>
+          </ul>
+        </div>
+      </div>
+      <div class="rw">
+        <div class="rw-eye">Twitter Engineering Blog — the Katy Perry Problem</div>
+        <p>Twitter's engineers call this the <strong>"thundering herd" problem</strong>. When Katy Perry's account went viral in 2013, their fan-out workers couldn't keep up — timelines were showing tweets 5 minutes late. The hybrid solution (celebrity threshold at ~50K followers) was their fix. The fan-out service reads the social graph from <strong>FlockDB</strong>, batches follower IDs into groups of 100, and writes tweet_id references into each follower's Cassandra timeline row — all asynchronously via <strong>Kafka workers</strong>.</p>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ════════════════════════════════════════════
+     SECTION 7: TIMELINE SERVICE
+═══════════════════════════════════════════════ -->
+<section id="timeline">
+<div class="container">
+  <div class="sec-eye">Component 04</div>
+  <h2 class="sec-title">Timeline Service</h2>
+  <p class="sec-sub">How 200 billion timelines per day get built and served in under 200ms.</p>
+
+  <div class="comp-card">
+    <div class="comp-accent lavender"></div>
+    <div class="comp-header">
+      <div class="comp-icon" style="background:rgba(157,143,255,0.1);">📜</div>
+      <div class="comp-meta">
+        <h2>Home Timeline Architecture</h2>
+        <div class="subtitle">Cassandra timeline store + Redis cache + celebrity merge</div>
+      </div>
+    </div>
+    <div class="comp-body">
+      <div class="body-text">
+        A user's home timeline is essentially a <strong>sorted list of tweet_ids</strong>. It's stored in Cassandra as a column family: row key = user_id, columns = (timestamp, tweet_id). The most recent 800 tweet_ids per user are cached in Redis. When you open Twitter, the timeline service: (1) fetches the cached tweet IDs from Redis, (2) fetches any un-cached celebrity tweets from their profile, (3) merges and sorts everything, (4) hydrates the tweet_ids into full tweet objects by fetching from the Tweet service or Memcached.
+      </div>
+
+      <div class="flow">
+        <div class="fstep"><div class="fstep-num">1</div><div class="fstep-body"><h4>Redis cache lookup</h4><p>Check if user_id's timeline is cached. Returns up to 800 tweet_ids. Cache hit: ~0.5ms. If miss, fall back to Cassandra.</p></div></div>
+        <div class="fstep"><div class="fstep-num">2</div><div class="fstep-body"><h4>Celebrity tweet merge</h4><p>For each celebrity the user follows (determined by FlockDB), fetch their last N tweets. Done in parallel with step 1.</p></div></div>
+        <div class="fstep"><div class="fstep-num">3</div><div class="fstep-body"><h4>Merge + sort by timestamp</h4><p>Combine the pre-built timeline IDs with the freshly-fetched celebrity tweet IDs. Sort by timestamp descending. Top 20 are the first page.</p></div></div>
+        <div class="fstep"><div class="fstep-num">4</div><div class="fstep-body"><h4>Hydrate tweet IDs → full objects</h4><p>Batch-fetch tweet content, user info, like/retweet counts from Memcached (or MySQL if cache miss). Typically 1 round-trip via pipelined Redis/Memcached.</p></div></div>
+        <div class="fstep"><div class="fstep-num">5</div><div class="fstep-body"><h4>Return ranked timeline</h4><p>Apply ML ranking (engagement signals, recency, relationship strength) and return the final JSON payload. Total target: &lt;200ms end-to-end.</p></div></div>
+      </div>
+
+      <div class="pct-grid">
+        <div class="pct-box pct-pros">
+          <h4>Cassandra Timeline Store</h4>
+          <ul>
+            <li>Linear horizontal scaling</li>
+            <li>Tunable consistency (quorum reads)</li>
+            <li>Excellent for time-series data</li>
+            <li>Multi-datacenter replication built-in</li>
+            <li>High write throughput natively</li>
+          </ul>
+        </div>
+        <div class="pct-box pct-cons">
+          <h4>Cassandra Limitations</h4>
+          <ul>
+            <li>No JOINs — data must be pre-modeled</li>
+            <li>Read performance degrades with tombstones</li>
+            <li>Complex data modeling required</li>
+            <li>Compaction pauses can cause latency spikes</li>
+          </ul>
+        </div>
+        <div class="pct-box pct-tradeoff">
+          <h4>Consistency choice</h4>
+          <ul>
+            <li>Write: quorum (majority of nodes)</li>
+            <li>Read: local quorum (fast)</li>
+            <li>Replication factor: 3 per DC</li>
+            <li>Eventual → timeline can be seconds stale</li>
+          </ul>
+        </div>
+      </div>
+      <div class="rw">
+        <div class="rw-eye">Twitter Timeline Engineering</div>
+        <p>Twitter calls their timeline storage <strong>"Manhattan"</strong> (a custom distributed key-value store built on top of MySQL at first, now purpose-built). Each timeline is stored as a list of up to <strong>800 tweet IDs</strong>. When the list exceeds 800, old entries are trimmed. If a user scrolls to older tweets, the system does a real-time query to Cassandra. The Redis layer holds timelines for <strong>active users only</strong> — accounts inactive for 30+ days are evicted from cache, saving enormous memory.</p>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ════════════════════════════════════════════
+     SECTION 8: DATABASE LAYER
+═══════════════════════════════════════════════ -->
+<section id="database">
+<div class="container">
+  <div class="sec-eye">Component 05</div>
+  <h2 class="sec-title">Database Layer</h2>
+  <p class="sec-sub">Multiple databases, each chosen for its specific access pattern — no one-size-fits-all.</p>
+
+  <div class="comp-card">
+    <div class="comp-accent rose"></div>
+    <div class="comp-header">
+      <div class="comp-icon" style="background:rgba(255,95,135,0.1);">🗄️</div>
+      <div class="comp-meta">
+        <h2>MySQL (Sharded) — Tweet & User Store</h2>
+        <div class="subtitle">The source of truth for tweets, users, and relationships</div>
+      </div>
+    </div>
+    <div class="comp-body">
+      <div class="body-text">
+        Tweet and user data is stored in <strong>sharded MySQL</strong>. Twitter historically chose MySQL for its ACID guarantees (tweets must never be lost or duplicated), mature tooling, and their engineers' familiarity. A single MySQL instance can handle ~5,000 writes/sec — insufficient for 6,000 tweets/sec — so the data is sharded.
+      </div>
+      <div class="body-text">
+        <strong>Sharding strategy:</strong> Tweet table sharded by <strong>tweet_id</strong> (a Snowflake ID). User table sharded by <strong>user_id</strong>. The shard key is embedded in the ID itself — the high bits of the Snowflake ID contain the datacenter ID and worker ID, so routing to the right shard requires zero external lookup.
+      </div>
+
+      <div class="diagram">
+        <svg width="100%" viewBox="0 0 700 200" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="adb" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M2 1L8 5L2 9" fill="none" stroke="#ff5f87" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </marker>
+          </defs>
+          <style>
+            .db{fill:#1d1d26;stroke:rgba(255,255,255,0.1);stroke-width:0.5;}
+            .dbt{fill:#e2e0ee;font-family:'JetBrains Mono',monospace;font-size:12px;text-anchor:middle;dominant-baseline:central;}
+            .dbs{fill:#7a7890;font-family:'JetBrains Mono',monospace;font-size:10px;text-anchor:middle;dominant-baseline:central;}
+            .dba{stroke:rgba(255,95,135,0.4);stroke-width:1;fill:none;}
+          </style>
+          <!-- Shard router -->
+          <rect class="db" x="250" y="10" width="200" height="44" rx="8" style="stroke:rgba(255,95,135,0.5);"/>
+          <text class="dbt" x="350" y="28" style="fill:#ff8fb5;">Shard Router</text>
+          <text class="dbs" x="350" y="44">tweet_id % num_shards</text>
+          <!-- Shards -->
+          <rect class="db" x="20" y="104" width="130" height="52" rx="7" style="stroke:rgba(255,95,135,0.3);"/>
+          <text class="dbt" x="85" y="122" style="fill:#ff8fb5;">Shard 0</text>
+          <text class="dbs" x="85" y="140">Primary + 2 replicas</text>
+          <rect class="db" x="170" y="104" width="130" height="52" rx="7" style="stroke:rgba(255,95,135,0.3);"/>
+          <text class="dbt" x="235" y="122" style="fill:#ff8fb5;">Shard 1</text>
+          <text class="dbs" x="235" y="140">Primary + 2 replicas</text>
+          <rect class="db" x="320" y="104" width="130" height="52" rx="7" style="stroke:rgba(255,95,135,0.3);"/>
+          <text class="dbt" x="385" y="122" style="fill:#ff8fb5;">Shard 2</text>
+          <text class="dbs" x="385" y="140">Primary + 2 replicas</text>
+          <rect class="db" x="470" y="104" width="130" height="52" rx="7" style="stroke:rgba(255,95,135,0.3);"/>
+          <text class="dbt" x="535" y="122" style="fill:#ff8fb5;">Shard N</text>
+          <text class="dbs" x="535" y="140">Primary + 2 replicas</text>
+          <text class="dbs" x="620" y="130">...</text>
+          <line x1="310" y1="54" x2="200" y2="104" class="dba" marker-end="url(#adb)"/>
+          <line x1="335" y1="54" x2="285" y2="104" class="dba" marker-end="url(#adb)"/>
+          <line x1="365" y1="54" x2="395" y2="104" class="dba" marker-end="url(#adb)"/>
+          <line x1="390" y1="54" x2="530" y2="104" class="dba" marker-end="url(#adb)"/>
+          <!-- Snowflake ID label -->
+          <text class="dbs" x="350" y="185">Snowflake ID: 41 bits timestamp | 10 bits worker | 12 bits sequence</text>
+        </svg>
+      </div>
+
+      <div class="pct-grid">
+        <div class="pct-box pct-pros">
+          <h4>MySQL Sharding Pros</h4>
+          <ul>
+            <li>ACID guarantees on tweet writes</li>
+            <li>Horizontal scale via sharding</li>
+            <li>Read replicas for read scale-out</li>
+            <li>Snowflake IDs enable shard-local writes</li>
+            <li>Battle-tested at web scale</li>
+          </ul>
+        </div>
+        <div class="pct-box pct-cons">
+          <h4>MySQL Sharding Cons</h4>
+          <ul>
+            <li>Cross-shard joins are impossible</li>
+            <li>Re-sharding is painful operation</li>
+            <li>Hot shards if key distribution is uneven</li>
+            <li>Schema changes require careful migration</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="code">
+<span class="c">-- Snowflake tweet_id: 64 bits total</span>
+<span class="c">-- [1 unused][41 timestamp ms][10 worker ID][12 sequence]</span>
+<span class="n">shard_id</span> = <span class="fn">tweet_id</span> >> (<span class="num">10</span> + <span class="num">12</span>) & <span class="num">0x3FF</span>  <span class="c">-- top 10 bits = worker = shard</span>
+
+<span class="c">-- Schema (simplified)</span>
+<span class="k">CREATE TABLE</span> <span class="n">tweets</span> (
+  <span class="n">tweet_id</span>   BIGINT    PRIMARY KEY,   <span class="c">-- Snowflake ID</span>
+  <span class="n">user_id</span>    BIGINT    NOT NULL,
+  <span class="n">content</span>    TEXT,
+  <span class="n">created_at</span> TIMESTAMP DEFAULT NOW(),
+  <span class="n">media_ids</span>  JSON,
+  <span class="k">INDEX</span> (<span class="n">user_id</span>, <span class="n">created_at</span>)       <span class="c">-- for profile timeline</span>
+) ENGINE=InnoDB;
+      </div>
+
+      <div class="rw">
+        <div class="rw-eye">FlockDB — Social Graph Database</div>
+        <p>Twitter built <strong>FlockDB</strong>, a distributed graph database (open-sourced in 2010) for storing follower/following relationships. It's built on top of MySQL with custom sharding. The core schema is just: (source_id, destination_id, position). FlockDB is optimized for two operations: <strong>"give me all followers of user X"</strong> and <strong>"give me all users that X follows"</strong>. These queries happen on every timeline build — billions of times per day.</p>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ════════════════════════════════════════════
+     SECTION 9: CACHE LAYER
+═══════════════════════════════════════════════ -->
+<section id="cache">
+<div class="container">
+  <div class="sec-eye">Component 06</div>
+  <h2 class="sec-title">Caching Layer</h2>
+  <p class="sec-sub">Without caching, 2.3M read QPS would obliterate any database. Cache is what makes Twitter possible.</p>
+
+  <div class="comp-card">
+    <div class="comp-accent amber"></div>
+    <div class="comp-header">
+      <div class="comp-icon" style="background:rgba(255,179,71,0.1);">⚡</div>
+      <div class="comp-meta">
+        <h2>Twemcache + Redis — Multi-Tier Cache</h2>
+        <div class="subtitle">Twitter's custom Memcached fork + Redis for complex data structures</div>
+      </div>
+    </div>
+    <div class="comp-body">
+      <div class="body-text">
+        Twitter uses <strong>Twemcache</strong> (their Memcached fork with better eviction policies) for object caching — tweet objects, user profiles, like counts. <strong>Redis</strong> is used for data structures that need more than simple get/set: sorted sets for timelines, sets for follower lists, atomic counters for like/retweet counts, and pub/sub for real-time notifications.
+      </div>
+      <table class="tbl">
+        <thead><tr><th>Cache Layer</th><th>Technology</th><th>What's stored</th><th>Eviction</th></tr></thead>
+        <tbody>
+          <tr><td style="color:#ffc97a;">L1 — Object cache</td><td>Twemcache (cluster)</td><td>Full tweet JSON, user profiles</td><td>LRU + custom hotness score</td></tr>
+          <tr><td style="color:#ffc97a;">L2 — Timeline cache</td><td>Redis Cluster</td><td>List of 800 tweet_ids per active user</td><td>LRU + inactive user eviction (30d)</td></tr>
+          <tr><td style="color:#ffc97a;">L3 — Counter cache</td><td>Redis (atomic INCR)</td><td>Like counts, retweet counts, follower counts</td><td>Write-through to DB every N ops</td></tr>
+          <tr><td style="color:#ffc97a;">L4 — Session cache</td><td>Redis</td><td>Auth tokens, user sessions</td><td>TTL-based expiry</td></tr>
+          <tr><td style="color:#ffc97a;">L5 — Trending cache</td><td>Redis Sorted Sets</td><td>Hashtag scores (ZINCRBY)</td><td>Sliding window TTL</td></tr>
+        </tbody>
+      </table>
+
+      <div class="pct-grid">
+        <div class="pct-box pct-pros">
+          <h4>Cache Benefits</h4>
+          <ul>
+            <li>Absorbs 99%+ of read traffic</li>
+            <li>Sub-millisecond response times</li>
+            <li>Counters are atomic (no race conditions)</li>
+            <li>Redis cluster auto-shards data</li>
+            <li>Reduces DB cost dramatically</li>
+          </ul>
+        </div>
+        <div class="pct-box pct-cons">
+          <h4>Cache Challenges</h4>
+          <ul>
+            <li>Cache invalidation on tweet delete</li>
+            <li>Counter drift (cache vs DB discrepancy)</li>
+            <li>Cold start problem (cache stampede)</li>
+            <li>Hot keys — celebrity user_ids overwhelm one shard</li>
+          </ul>
+        </div>
+        <div class="pct-box pct-tradeoff">
+          <h4>Hot Key Problem</h4>
+          <ul>
+            <li>Katy Perry's profile on one Redis node</li>
+            <li>Millions of reads/sec to that node</li>
+            <li>Fix: local in-process cache on app servers</li>
+            <li>Fix: read from any of N replica shards</li>
+          </ul>
+        </div>
+      </div>
+      <div class="warn">
+        The <strong>cache stampede</strong>: when a cache key expires, thousands of app servers simultaneously miss the cache and hammer the DB with the same query. Twitter's solution: <strong>probabilistic early expiry</strong> — slightly before the TTL expires, a random subset of servers regenerates the cache proactively, preventing the simultaneous expiry.
+      </div>
+      <div class="rw">
+        <div class="rw-eye">Twemcache — Twitter's Memcached fork</div>
+        <p>Twitter open-sourced <strong>Twemcache</strong> after modifying Memcached to support <strong>per-item TTLs with jitter</strong> (preventing mass simultaneous evictions), a <strong>DECR floor at 0</strong> (counters can't go negative), and <strong>automatic slab rebalancing</strong> for more efficient memory use. Their Memcached cluster serves over <strong>30 billion requests/day</strong> with a hit rate above 95%.</p>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ════════════════════════════════════════════
+     SECTION 10: MEDIA & CDN
+═══════════════════════════════════════════════ -->
+<section id="media">
+<div class="container">
+  <div class="sec-eye">Component 07</div>
+  <h2 class="sec-title">Media Storage & CDN</h2>
+  <p class="sec-sub">100TB of images and videos per day — stored, transcoded, and served globally.</p>
+
+  <div class="comp-card">
+    <div class="comp-accent mint"></div>
+    <div class="comp-header">
+      <div class="comp-icon" style="background:rgba(0,229,160,0.1);">🎬</div>
+      <div class="comp-meta">
+        <h2>S3 + Video Pipeline + CloudFront CDN</h2>
+        <div class="subtitle">Upload → transcode → store → serve from edge, globally</div>
+      </div>
+    </div>
+    <div class="comp-body">
+      <div class="body-text">
+        When you upload a photo or video: the client uploads directly to S3 via a <strong>pre-signed URL</strong> (bypassing app servers entirely — saves bandwidth). An <strong>S3 event trigger</strong> fires a Lambda/worker that kicks off the <strong>media processing pipeline</strong>: images are resized into multiple resolutions (thumb, small, medium, large, orig), videos are transcoded into multiple bitrates (360p, 480p, 720p, 1080p) using <strong>FFmpeg workers</strong> on Kubernetes. Processed media is stored back in S3 and served via <strong>CloudFront CDN</strong> from 450+ edge locations worldwide.
+      </div>
+      <div class="flow">
+        <div class="fstep"><div class="fstep-num">1</div><div class="fstep-body"><h4>Client requests pre-signed S3 URL</h4><p>App server generates a time-limited URL signed with AWS credentials. Client uploads directly to S3. App server never touches the bytes.</p></div></div>
+        <div class="fstep"><div class="fstep-num">2</div><div class="fstep-body"><h4>S3 event → Media Processing Queue</h4><p>S3 ObjectCreated event fires to SQS/Kafka. Workers pick up the job and begin transcoding. Videos are processed in parallel by multiple workers.</p></div></div>
+        <div class="fstep"><div class="fstep-num">3</div><div class="fstep-body"><h4>Image resizing</h4><p>Original image is resized to 4 standard sizes using ImageMagick/Sharp. Twitter also strips EXIF data (privacy) and runs AI content moderation.</p></div></div>
+        <div class="fstep"><div class="fstep-num">4</div><div class="fstep-body"><h4>Video transcoding (HLS/DASH)</h4><p>FFmpeg produces multiple bitrate renditions. Master HLS playlist allows adaptive bitrate streaming — browser picks quality based on network speed.</p></div></div>
+        <div class="fstep"><div class="fstep-num">5</div><div class="fstep-body"><h4>Store → CDN → serve</h4><p>Processed files stored in S3. CloudFront serves from nearest edge. Cache-Control: max-age=31536000 (1 year immutable, since URLs contain content hash).</p></div></div>
+      </div>
+      <div class="pct-grid">
+        <div class="pct-box pct-pros">
+          <h4>CDN Benefits</h4>
+          <ul>
+            <li>Serves from 450+ PoPs globally</li>
+            <li>Reduces origin bandwidth by 99%</li>
+            <li>Absorbs DDoS at edge</li>
+            <li>Immutable URLs → infinite cache TTL</li>
+            <li>HTTP/2 multiplexing reduces RTT</li>
+          </ul>
+        </div>
+        <div class="pct-box pct-cons">
+          <h4>CDN Tradeoffs</h4>
+          <ul>
+            <li>Cache invalidation is hard</li>
+            <li>Cold region misses go to origin</li>
+            <li>Cost increases with egress volume</li>
+            <li>Long-tail content rarely cached</li>
+          </ul>
+        </div>
+      </div>
+      <div class="rw">
+        <div class="rw-eye">Twitter Media Numbers</div>
+        <p>Twitter serves over <strong>1.6 billion media items per day</strong> via CDN. Their video pipeline processes videos up to <strong>512MB</strong> and 2:20 minutes. Using <strong>adaptive bitrate streaming (HLS)</strong>, a user on a 3G connection automatically gets 360p while a fiber user gets 1080p — same URL, different quality segments served by the CDN based on bandwidth estimation.</p>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ════════════════════════════════════════════
+     SECTION 11: SEARCH
+═══════════════════════════════════════════════ -->
+<section id="search">
+<div class="container">
+  <div class="sec-eye">Component 08</div>
+  <h2 class="sec-title">Search Service</h2>
+  <p class="sec-sub">Real-time indexing of 500M tweets per day with sub-second query response.</p>
+
+  <div class="comp-card">
+    <div class="comp-accent sky"></div>
+    <div class="comp-header">
+      <div class="comp-icon" style="background:rgba(91,206,250,0.1);">🔍</div>
+      <div class="comp-meta">
+        <h2>Elasticsearch + Real-Time Indexing</h2>
+        <div class="subtitle">Tweets searchable within seconds of posting</div>
+      </div>
+    </div>
+    <div class="comp-body">
+      <div class="body-text">
+        Twitter's search is particularly hard because tweets must be searchable <strong>within seconds</strong> of being posted (real-time search). A tweet about a breaking earthquake should appear in search immediately. Traditional search engines batch-index — Twitter needed a streaming indexing pipeline.
+      </div>
+      <div class="body-text">
+        Architecture: Tweets flow through <strong>Kafka</strong> to a fleet of <strong>Elasticsearch indexing workers</strong> that parse, tokenize, and write to the Elasticsearch cluster. Twitter built a custom inverted index on top of Lucene (the engine powering Elasticsearch) called <strong>Earlybird</strong> — designed for real-time append-only indexing and optimized for Twitter's unique query patterns (recency-ranked results, hashtag queries).
+      </div>
+      <div class="pct-grid">
+        <div class="pct-box pct-pros">
+          <h4>Elasticsearch Pros</h4>
+          <ul>
+            <li>Full-text search with relevance scoring</li>
+            <li>Horizontal sharding out of the box</li>
+            <li>Aggregations for trending topics</li>
+            <li>Near real-time indexing (&lt;1s)</li>
+            <li>Fuzzy matching / typo tolerance</li>
+          </ul>
+        </div>
+        <div class="pct-box pct-cons">
+          <h4>Elasticsearch Cons</h4>
+          <ul>
+            <li>Not ACID — indexing can lag</li>
+            <li>Memory intensive (inverted index in RAM)</li>
+            <li>Re-indexing at scale is expensive</li>
+            <li>Split-brain risk in ES cluster</li>
+          </ul>
+        </div>
+        <div class="pct-box pct-tradeoff">
+          <h4>Why Earlybird?</h4>
+          <ul>
+            <li>Standard Lucene: rebuild index for updates</li>
+            <li>Earlybird: append-only in-memory index</li>
+            <li>Tweets never update (immutable)</li>
+            <li>Perfect fit for Lucene's segment model</li>
+          </ul>
+        </div>
+      </div>
+      <div class="rw">
+        <div class="rw-eye">Twitter Search — Earlybird Architecture</div>
+        <p>Twitter's <strong>Earlybird</strong> (open-sourced as part of Apache Lucene work) keeps recent tweets in a <strong>RAM-resident inverted index</strong>. Older tweets are compacted into immutable on-disk segments. A search query fans out across all Earlybird shards in parallel, each returning its top-K results, which are then merged and re-ranked by a <strong>blending service</strong> that considers recency, engagement, user authority, and personal relevance signals.</p>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ════════════════════════════════════════════
+     SECTION 12: NOTIFICATIONS
+═══════════════════════════════════════════════ -->
+<section id="notifications">
+<div class="container">
+  <div class="sec-eye">Component 09</div>
+  <h2 class="sec-title">Notification Service</h2>
+  <p class="sec-sub">Delivering billions of push notifications per day — without spamming users or crashing devices.</p>
+
+  <div class="comp-card">
+    <div class="comp-accent lavender"></div>
+    <div class="comp-header">
+      <div class="comp-icon" style="background:rgba(157,143,255,0.1);">🔔</div>
+      <div class="comp-meta">
+        <h2>Push, WebSocket & Email Delivery</h2>
+        <div class="subtitle">FCM → Android · APNs → iOS · WebSocket → web · SES → email</div>
+      </div>
+    </div>
+    <div class="comp-body">
+      <div class="body-text">
+        Every like, retweet, reply, follow, and mention generates a notification. At Twitter's scale, this is a <strong>fan-out problem</strong>: Lady Gaga's tweet liked by 1M people = 1M notification events, each potentially triggering a push to the original poster. The notification service consumes events from Kafka, applies <strong>throttling and deduplication rules</strong>, and dispatches to FCM (Android), APNs (iOS), WebSocket (web), or email (SES).
+      </div>
+      <div class="pct-grid">
+        <div class="pct-box pct-pros">
+          <h4>Benefits</h4>
+          <ul>
+            <li>Async delivery — no user-facing latency</li>
+            <li>Deduplication prevents notification storms</li>
+            <li>Rate limiting per user (max 1 notif/min)</li>
+            <li>Retry logic for delivery failures</li>
+          </ul>
+        </div>
+        <div class="pct-box pct-cons">
+          <h4>Challenges</h4>
+          <ul>
+            <li>Delivery receipts unreliable (FCM/APNs)</li>
+            <li>Millions of stale device tokens</li>
+            <li>Notification thundering herd on viral events</li>
+            <li>Per-user preference management at scale</li>
+          </ul>
+        </div>
+        <div class="pct-box pct-tradeoff">
+          <h4>Throttling tradeoff</h4>
+          <ul>
+            <li>Too many notifs → user turns them off</li>
+            <li>Too few → user misses important events</li>
+            <li>ML model predicts optimal notification timing</li>
+            <li>Batching: "You have 30 new likes"</li>
+          </ul>
+        </div>
+      </div>
+      <div class="rw">
+        <div class="rw-eye">Notification at Celebrity Scale</div>
+        <p>When a celebrity gets <strong>100K likes on a tweet in 1 minute</strong>, naively sending 100K individual push notifications is catastrophic — it would crash their phone. Twitter's notification service <strong>rate-limits per recipient</strong>: if you receive more than N notifications of the same type in a time window, they're <strong>batched into a summary</strong>: "Barack Obama: 45K people liked your tweet". The Kafka consumer for notifications uses a <strong>sliding window counter in Redis</strong> to track notification frequency per user.</p>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ════════════════════════════════════════════
+     SECTION 13: KAFKA
+═══════════════════════════════════════════════ -->
+<section id="queue">
+<div class="container">
+  <div class="sec-eye">Component 10 — The Nervous System</div>
+  <h2 class="sec-title">Kafka Event Bus</h2>
+  <p class="sec-sub">Every async operation in Twitter flows through Kafka — the backbone of the entire system.</p>
+
+  <div class="comp-card">
+    <div class="comp-accent gold"></div>
+    <div class="comp-header">
+      <div class="comp-icon" style="background:rgba(244,196,48,0.1);">⚡</div>
+      <div class="comp-meta">
+        <h2>Apache Kafka — Distributed Event Streaming</h2>
+        <div class="subtitle">Fan-out, analytics, notifications, search indexing — all via Kafka topics</div>
+      </div>
+    </div>
+    <div class="comp-body">
+      <div class="body-text">
+        Kafka is the central nervous system of Twitter's backend. Every significant action — tweet posted, user followed, tweet liked — publishes an event to a Kafka topic. Multiple consumer groups read from the same topics independently: the fan-out service, the search indexer, the notification service, the analytics pipeline, the trending service. <strong>No service knows about another service</strong> — they only know about Kafka topics.
+      </div>
+      <div class="diagram">
+        <svg width="100%" viewBox="0 0 700 260" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="akf" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M2 1L8 5L2 9" fill="none" stroke="#f4c430" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </marker>
+          </defs>
+          <style>
+            .kf{fill:#1d1d26;stroke:rgba(255,255,255,0.1);stroke-width:0.5;}
+            .kt{fill:#e2e0ee;font-family:'JetBrains Mono',monospace;font-size:12px;text-anchor:middle;dominant-baseline:central;}
+            .ks{fill:#7a7890;font-family:'JetBrains Mono',monospace;font-size:10px;text-anchor:middle;dominant-baseline:central;}
+            .ka{stroke:rgba(244,196,48,0.45);stroke-width:1;fill:none;}
+          </style>
+          <!-- Producers -->
+          <rect class="kf" x="10" y="50" width="100" height="36" rx="6" style="stroke:rgba(29,155,240,0.3);"/>
+          <text class="ks" x="60" y="68" style="fill:#5bcefa;">Tweet svc</text>
+          <rect class="kf" x="10" y="100" width="100" height="36" rx="6" style="stroke:rgba(29,155,240,0.3);"/>
+          <text class="ks" x="60" y="118" style="fill:#5bcefa;">Like / RT svc</text>
+          <rect class="kf" x="10" y="150" width="100" height="36" rx="6" style="stroke:rgba(29,155,240,0.3);"/>
+          <text class="ks" x="60" y="168" style="fill:#5bcefa;">Follow svc</text>
+          <rect class="kf" x="10" y="200" width="100" height="36" rx="6" style="stroke:rgba(29,155,240,0.3);"/>
+          <text class="ks" x="60" y="218" style="fill:#5bcefa;">Media svc</text>
+          <!-- Kafka box -->
+          <rect class="kf" x="160" y="30" width="200" height="200" rx="10" style="stroke:rgba(244,196,48,0.4);"/>
+          <text class="kt" x="260" y="58" style="fill:#f4d060;">Kafka Cluster</text>
+          <rect class="kf" x="175" y="72" width="170" height="26" rx="4" style="stroke:rgba(244,196,48,0.2);"/>
+          <text class="ks" x="260" y="85">topic: tweets</text>
+          <rect class="kf" x="175" y="106" width="170" height="26" rx="4" style="stroke:rgba(244,196,48,0.2);"/>
+          <text class="ks" x="260" y="119">topic: engagements</text>
+          <rect class="kf" x="175" y="140" width="170" height="26" rx="4" style="stroke:rgba(244,196,48,0.2);"/>
+          <text class="ks" x="260" y="153">topic: social_graph</text>
+          <rect class="kf" x="175" y="174" width="170" height="26" rx="4" style="stroke:rgba(244,196,48,0.2);"/>
+          <text class="ks" x="260" y="187">topic: media_events</text>
+          <text class="ks" x="260" y="220">3× replication · 7-day retention</text>
+          <!-- Lines to Kafka -->
+          <line x1="110" y1="68" x2="160" y2="85" class="ka" marker-end="url(#akf)"/>
+          <line x1="110" y1="118" x2="160" y2="119" class="ka" marker-end="url(#akf)"/>
+          <line x1="110" y1="168" x2="160" y2="153" class="ka" marker-end="url(#akf)"/>
+          <line x1="110" y1="218" x2="160" y2="187" class="ka" marker-end="url(#akf)"/>
+          <!-- Consumers -->
+          <rect class="kf" x="410" y="30" width="120" height="36" rx="6" style="stroke:rgba(157,143,255,0.3);"/>
+          <text class="ks" x="470" y="48" style="fill:#b8aeff;">Fan-out svc</text>
+          <rect class="kf" x="410" y="78" width="120" height="36" rx="6" style="stroke:rgba(157,143,255,0.3);"/>
+          <text class="ks" x="470" y="96" style="fill:#b8aeff;">Search indexer</text>
+          <rect class="kf" x="410" y="126" width="120" height="36" rx="6" style="stroke:rgba(157,143,255,0.3);"/>
+          <text class="ks" x="470" y="144" style="fill:#b8aeff;">Notification svc</text>
+          <rect class="kf" x="410" y="174" width="120" height="36" rx="6" style="stroke:rgba(157,143,255,0.3);"/>
+          <text class="ks" x="470" y="192" style="fill:#b8aeff;">Analytics pipeline</text>
+          <rect class="kf" x="555" y="78" width="120" height="36" rx="6" style="stroke:rgba(157,143,255,0.3);"/>
+          <text class="ks" x="615" y="96" style="fill:#b8aeff;">Trending svc</text>
+          <rect class="kf" x="555" y="126" width="120" height="36" rx="6" style="stroke:rgba(157,143,255,0.3);"/>
+          <text class="ks" x="615" y="144" style="fill:#b8aeff;">Spam detection</text>
+          <line x1="360" y1="85" x2="410" y2="48" class="ka" marker-end="url(#akf)"/>
+          <line x1="360" y1="119" x2="410" y2="96" class="ka" marker-end="url(#akf)"/>
+          <line x1="360" y1="153" x2="410" y2="144" class="ka" marker-end="url(#akf)"/>
+          <line x1="360" y1="187" x2="410" y2="192" class="ka" marker-end="url(#akf)"/>
+          <line x1="530" y1="96" x2="555" y2="96" class="ka" marker-end="url(#akf)"/>
+          <line x1="530" y1="119" x2="555" y2="135" class="ka" marker-end="url(#akf)"/>
+        </svg>
+      </div>
+      <div class="pct-grid">
+        <div class="pct-box pct-pros">
+          <h4>Kafka Benefits</h4>
+          <ul>
+            <li>Producers decouple from consumers</li>
+            <li>Multiple independent consumer groups</li>
+            <li>7-day message retention (replay ability)</li>
+            <li>Millions of messages/sec throughput</li>
+            <li>Built-in partitioning for parallelism</li>
+            <li>Consumer offset control (reprocess from any point)</li>
+          </ul>
+        </div>
+        <div class="pct-box pct-cons">
+          <h4>Kafka Tradeoffs</h4>
+          <ul>
+            <li>Messages are eventually processed (async)</li>
+            <li>Ordering only within a partition</li>
+            <li>Consumer lag during spike events</li>
+            <li>Complex ops: ZooKeeper/KRaft management</li>
+            <li>At-least-once delivery → idempotent consumers required</li>
+          </ul>
+        </div>
+      </div>
+      <div class="rw">
+        <div class="rw-eye">Kafka at Twitter Scale</div>
+        <p>Twitter runs <strong>hundreds of Kafka topics</strong> across multiple clusters. The <strong>"tweets" topic</strong> alone handles over 6,000 messages/second baseline, spiking to 30,000+ during major events (New Year's Eve, World Cup goals, breaking news). Kafka's <strong>replication factor of 3</strong> means each message is written to 3 brokers before acknowledgment — a broker can die and no data is lost. Consumer groups process messages in parallel: 50 fan-out workers each reading a different partition, giving 50× parallelism on a single topic.</p>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ════════════════════════════════════════════
+     SECTION 14: MASTER TRADEOFFS TABLE
+═══════════════════════════════════════════════ -->
+<section id="tradeoffs">
+<div class="container">
+  <div class="sec-eye">Final Analysis</div>
+  <h2 class="sec-title">Master Tradeoff Table</h2>
+  <p class="sec-sub">Every major architectural decision — and the exact reasoning behind it.</p>
+
+  <div class="comp-card">
+    <div class="comp-accent"></div>
+    <div class="comp-header">
+      <div class="comp-icon" style="background:rgba(29,155,240,0.1);">⚖️</div>
+      <div class="comp-meta">
+        <h2>Decision → Reason → Tradeoff</h2>
+        <div class="subtitle">The "why" behind every box in the architecture diagram</div>
+      </div>
+    </div>
+    <div class="comp-body">
+      <table class="tbl">
+        <thead><tr><th>Decision</th><th>Why Twitter chose it</th><th>What was sacrificed</th></tr></thead>
+        <tbody>
+          <tr><td style="color:#5bcefa;">MySQL over Postgres</td><td>In-house expertise, proven sharding tooling, InnoDB ACID guarantees</td><td>Richer query features (Postgres arrays, JSONB, etc.)</td></tr>
+          <tr><td style="color:#5bcefa;">Cassandra for timelines</td><td>Linear horizontal scale, multi-DC replication, time-series access pattern perfect fit</td><td>No JOINs, complex data modeling, eventual consistency</td></tr>
+          <tr><td style="color:#5bcefa;">Fan-out on write (hybrid)</td><td>Timeline reads are 100× more frequent than writes — optimize for reads</td><td>Write amplification (N writes per tweet posted)</td></tr>
+          <tr><td style="color:#5bcefa;">Kafka for async events</td><td>Decoupling allows services to evolve independently; replay ability</td><td>Eventual processing — timeline may lag seconds</td></tr>
+          <tr><td style="color:#5bcefa;">Microservices</td><td>Independent deployment, team autonomy, separate scaling per service</td><td>Network latency between services, distributed tracing complexity</td></tr>
+          <tr><td style="color:#5bcefa;">CDN for media</td><td>100TB/day can't be served from origin — must distribute globally</td><td>Cache invalidation complexity, egress costs</td></tr>
+          <tr><td style="color:#5bcefa;">Snowflake IDs</td><td>Time-ordered, globally unique, embeds shard info — no coordination needed</td><td>IDs reveal posting time; worker IDs expose datacenter info</td></tr>
+          <tr><td style="color:#5bcefa;">Eventual consistency</td><td>At 200B reads/day, strong consistency would require synchronous replication — too slow</td><td>Timeline can show slightly stale data (&lt;seconds)</td></tr>
+          <tr><td style="color:#5bcefa;">Redis for counters</td><td>Atomic INCR operations, sub-ms, avoids DB write on every like</td><td>Counter drift risk; need periodic sync to MySQL</td></tr>
+          <tr><td style="color:#5bcefa;">Pre-signed S3 URLs</td><td>App servers don't handle media bytes — saves 100TB/day bandwidth on app fleet</td><td>Client must make 2 API calls (get URL, then upload to S3)</td></tr>
+          <tr><td style="color:#5bcefa;">Celebrity threshold (50K followers)</td><td>Bounds maximum write amplification per tweet to manageable fan-out</td><td>Celebrity tweets have slightly higher read latency (merged on read)</td></tr>
+          <tr><td style="color:#5bcefa;">Earlybird for search</td><td>Standard Lucene can't index in real-time; Earlybird uses append-only RAM index</td><td>Higher memory usage; tweets only in "real-time" index for ~7 days</td></tr>
+        </tbody>
+      </table>
+
+      <div class="insight">
+        The deepest insight about Twitter's architecture: <strong>almost every decision is a consequence of the 10:1 read-to-write ratio</strong>. Fan-out on write, aggressive caching, pre-built timelines, CDN, read replicas — all exist to make reads fast. Twitter accepted write complexity (fan-out workers, multiple DB writes per tweet, Kafka lag) to keep read latency under 200ms.
+      </div>
+      <div class="tip">
+        In your interview: after designing the system, proactively say "the biggest tradeoff in this design is X". For Twitter, say: "I chose fan-out on write because the 10:1 read ratio means optimizing reads is worth the write amplification — but for celebrity accounts with millions of followers, I'd switch to fan-out on read to avoid Kafka consumer lag."
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<footer>
+  <div style="font-family:'Bebas Neue',sans-serif;font-size:3rem;letter-spacing:0.06em;color:var(--twitter);margin-bottom:0.5rem;">TWITTER SYSTEM DESIGN</div>
+  <p style="font-family:'Crimson Pro',serif;font-style:italic;font-size:1.1rem;color:var(--muted);margin-bottom:0.5rem;">14 components · every tradeoff · every reason</p>
+  <p style="font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--dim);">DNS · LB · API Gateway · Fan-out · Timeline · MySQL · Cassandra · Redis · Kafka · CDN · Search · Notifications</p>
+</footer>
+
+<script>
+const navLinks = document.querySelectorAll('nav a[href^="#"]');
+const sections = document.querySelectorAll('section[id]');
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      navLinks.forEach(l => l.classList.remove('active'));
+      const a = document.querySelector(`nav a[href="#${e.target.id}"]`);
+      if (a) { a.classList.add('active'); a.scrollIntoView({inline:'center',block:'nearest'}); }
+    }
+  });
+}, {threshold: 0.25});
+sections.forEach(s => obs.observe(s));
+</script>
+</body>
+</html>

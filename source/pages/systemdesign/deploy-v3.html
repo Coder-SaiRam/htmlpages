@@ -1,0 +1,1414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deployment Strategies — From Local Dev to Production</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,700;1,400&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#060810;--bg2:#0b0e18;--surf:#0f1420;--surf2:#141928;
+  --bd:rgba(80,120,255,.09);--bd2:rgba(80,120,255,.18);
+  --tx:#d8e2f8;--mu:#566480;--dim:#2a3448;
+  --bl:#4080ff;--bl-l:rgba(64,128,255,.1);--bl-b:rgba(64,128,255,.3);
+  --gn:#00cc7a;--gn-l:rgba(0,204,122,.08);--gn-b:rgba(0,204,122,.3);
+  --or:#f07830;--or-l:rgba(240,120,48,.08);--or-b:rgba(240,120,48,.3);
+  --rd:#ff3d5a;--rd-l:rgba(255,61,90,.08);--rd-b:rgba(255,61,90,.3);
+  --pu:#9060ff;--pu-l:rgba(144,96,255,.08);--pu-b:rgba(144,96,255,.3);
+  --tl:#00b8b0;--tl-l:rgba(0,184,176,.08);--tl-b:rgba(0,184,176,.3);
+  --am:#f0aa20;--am-l:rgba(240,170,32,.08);--am-b:rgba(240,170,32,.3);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--tx);font-family:'Inter',sans-serif;font-size:14px;line-height:1.7;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 50% at 50% -5%,rgba(64,128,255,.08),transparent 60%);pointer-events:none;z-index:0;}
+
+/* HERO */
+.hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:5rem 2rem 4rem;position:relative;overflow:hidden;}
+.hero-stripe{position:absolute;left:0;right:0;top:0;height:3px;background:linear-gradient(90deg,var(--bl),var(--tl),var(--gn));}
+.hero-badge{display:inline-flex;align-items:center;gap:7px;padding:5px 14px;background:var(--gn-l);border:1px solid var(--gn-b);border-radius:100px;font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--gn);margin-bottom:1.75rem;}
+.hero-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--gn);animation:blink 2s ease-in-out infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.hero h1{font-size:clamp(2.8rem,7vw,6rem);font-weight:700;line-height:.95;letter-spacing:-.03em;margin-bottom:1.25rem;}
+.hero h1 .a{display:block}
+.hero h1 .b{display:block;font-family:'Playfair Display',serif;font-style:italic;font-weight:400;color:var(--bl)}
+.hero-sub{font-size:1rem;color:var(--mu);max-width:500px;margin:0 auto 2.5rem;line-height:1.8}
+.hero-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(105px,1fr));max-width:600px;margin:0 auto;gap:1px;background:var(--bd);border:1px solid var(--bd);border-radius:12px;overflow:hidden}
+.hg{background:var(--bg2);padding:1rem .75rem;text-align:center}
+.hg-v{font-size:1.6rem;font-weight:700;color:var(--bl);line-height:1;margin-bottom:3px}
+.hg-l{font-size:10px;color:var(--mu);text-transform:uppercase;letter-spacing:.1em}
+
+/* NAV */
+nav{position:sticky;top:0;z-index:200;background:rgba(6,8,16,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--bd);height:48px;display:flex;align-items:center;padding:0 1.5rem;gap:2px;overflow-x:auto;scrollbar-width:none}
+nav::-webkit-scrollbar{display:none}
+.nav-logo{font-weight:600;font-size:.95rem;color:var(--bl);margin-right:1.25rem;white-space:nowrap;flex-shrink:0}
+nav a{color:var(--mu);text-decoration:none;font-size:12px;padding:4px 10px;border-radius:100px;white-space:nowrap;transition:all .18s;flex-shrink:0}
+nav a:hover{color:var(--tx);background:rgba(255,255,255,.05)}
+nav a.active{color:var(--bl);background:var(--bl-l)}
+.pbar{height:2px;background:var(--bd)}
+.pfill{height:100%;background:linear-gradient(90deg,var(--bl),var(--gn));width:0%;transition:width .2s}
+
+/* LAYOUT */
+.container{max-width:1060px;margin:0 auto;padding:0 2rem;position:relative;z-index:1}
+section{padding:4rem 0;border-bottom:1px solid var(--bd)}
+.sec-eye{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--bl);margin-bottom:.5rem}
+.sec-title{font-size:clamp(1.8rem,4vw,2.6rem);font-weight:700;letter-spacing:-.025em;line-height:1.05;margin-bottom:.6rem}
+.sec-sub{font-size:.95rem;color:var(--mu);max-width:640px;margin-bottom:2.5rem;line-height:1.85}
+
+/* CARD */
+.card{background:var(--surf);border:1px solid var(--bd);border-radius:12px;overflow:hidden;margin-bottom:1.75rem;transition:border-color .25s}
+.card:hover{border-color:var(--bd2)}
+.cbar{height:2px}
+.c-bl{background:linear-gradient(90deg,var(--bl),#80c0ff)}
+.c-gn{background:linear-gradient(90deg,var(--gn),var(--tl))}
+.c-or{background:linear-gradient(90deg,var(--or),var(--am))}
+.c-pu{background:linear-gradient(90deg,var(--pu),var(--bl))}
+.c-rd{background:linear-gradient(90deg,var(--rd),var(--or))}
+.c-tl{background:linear-gradient(90deg,var(--tl),var(--gn))}
+.c-am{background:linear-gradient(90deg,var(--am),var(--or))}
+.c-mu{background:linear-gradient(90deg,var(--bl),var(--tl),var(--gn))}
+.card-hd{display:flex;align-items:flex-start;gap:1rem;padding:1.5rem 1.75rem 1.25rem;border-bottom:1px solid var(--bd)}
+.card-ico{width:42px;height:42px;border-radius:10px;display:grid;place-items:center;font-size:1.1rem;flex-shrink:0}
+.card-meta h2{font-size:1.3rem;font-weight:600;letter-spacing:-.015em;line-height:1.2;margin-bottom:3px}
+.card-meta .csub{color:var(--mu);font-size:12px;font-style:italic}
+.card-body{padding:1.5rem 1.75rem}
+
+/* TYPOGRAPHY */
+.prose{font-size:14px;color:#8aa0c0;line-height:1.9;margin-bottom:1rem}
+.prose strong{color:var(--tx);font-weight:500}
+.prose em{color:var(--bl);font-style:italic}
+.prose code{font-family:'JetBrains Mono',monospace;font-size:11.5px;background:rgba(64,128,255,.1);padding:1px 5px;border-radius:4px;color:var(--tl);border:1px solid var(--bd)}
+
+/* CODE BLOCK */
+.cw{background:#0d0f18;border:1px solid #1a2035;border-radius:8px;overflow:hidden;margin:1rem 0}
+.ch{display:flex;align-items:center;justify-content:space-between;padding:.5rem 1rem;background:#0a0c14;border-bottom:1px solid #1a2035}
+.clang{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#2e3d5a;font-family:'JetBrains Mono',monospace}
+.cdots{display:flex;gap:5px}
+.cdot{width:9px;height:9px;border-radius:50%}
+.cb{counter-reset:ln;padding:.5rem 0;overflow-x:auto}
+.ln{display:block;counter-increment:ln;padding:0 1rem 0 0;padding-left:3.2rem;line-height:1.8;white-space:pre;position:relative;color:#7888a8;transition:background .1s}
+.ln:hover{background:rgba(255,255,255,.025)}
+.ln::before{content:counter(ln);position:absolute;left:0;width:2.6rem;text-align:right;padding-right:.55rem;color:#202840;font-size:10.5px;line-height:1.8;user-select:none;border-right:1px solid #1a2035;background:#0a0c14}
+.ln.sep{border-top:1px solid #1a2035}
+.ln.mt{margin-top:.25rem}
+.k{color:#c792ea}.kw{color:#89ddff}.s{color:#c3e88d}.c{color:#2e3d5a;font-style:italic}.n{color:#82aaff}.num{color:#f9c95e}.fn{color:#80cbc4}
+
+/* HIGHLIGHT */
+.hl{border-radius:8px;padding:1.1rem 1.4rem;margin:1rem 0;font-size:13.5px;line-height:1.85}
+.hl-label{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.18em;text-transform:uppercase;display:block;margin-bottom:.4rem}
+.hl-bl{background:var(--bl-l);border:1px solid var(--bl-b);border-left:3px solid var(--bl);border-radius:0 8px 8px 0;color:#5878a8}.hl-bl .hl-label{color:var(--bl)}.hl-bl strong{color:var(--bl)}
+.hl-gn{background:var(--gn-l);border:1px solid var(--gn-b);border-left:3px solid var(--gn);border-radius:0 8px 8px 0;color:#3a9068}.hl-gn .hl-label{color:var(--gn)}.hl-gn strong{color:var(--gn)}
+.hl-or{background:var(--or-l);border:1px solid var(--or-b);border-left:3px solid var(--or);border-radius:0 8px 8px 0;color:#906040}.hl-or .hl-label{color:var(--or)}.hl-or strong{color:var(--or)}
+.hl-rd{background:var(--rd-l);border:1px solid var(--rd-b);border-left:3px solid var(--rd);border-radius:0 8px 8px 0;color:#904050}.hl-rd .hl-label{color:var(--rd)}.hl-rd strong{color:var(--rd)}
+.hl-am{background:var(--am-l);border:1px solid var(--am-b);border-left:3px solid var(--am);border-radius:0 8px 8px 0;color:#907030}.hl-am .hl-label{color:var(--am)}.hl-am strong{color:var(--am)}
+.hl-pu{background:var(--pu-l);border:1px solid var(--pu-b);border-left:3px solid var(--pu);border-radius:0 8px 8px 0;color:#7060b0}.hl-pu .hl-label{color:var(--pu)}.hl-pu strong{color:var(--pu)}
+
+/* TABLE */
+.ts{overflow-x:auto}
+.tbl{width:100%;border-collapse:collapse;font-size:12.5px;margin:1rem 0}
+.tbl th{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--mu);padding:9px 13px;text-align:left;border-bottom:2px solid var(--bd2);background:var(--bg2);white-space:nowrap}
+.tbl td{padding:9px 13px;border-bottom:1px solid var(--bd);vertical-align:top;line-height:1.6;color:#7888a8}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:rgba(64,128,255,.03)}
+.g{color:var(--gn)!important;font-weight:500}.r{color:var(--rd)!important}.b{color:var(--bl)!important;font-weight:500}.o{color:var(--or)!important}.p{color:var(--pu)!important;font-weight:500}.t{color:var(--tl)!important;font-weight:500}.y{color:var(--am)!important}
+
+/* PCGRID */
+.pcg{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:.85rem;margin:1rem 0}
+.pcb{border-radius:8px;padding:1.1rem;font-size:13px}
+.pro{background:var(--gn-l);border:1px solid var(--gn-b)}.con{background:var(--rd-l);border:1px solid var(--rd-b)}.note{background:var(--or-l);border:1px solid var(--or-b)}.tip{background:var(--bl-l);border:1px solid var(--bl-b)}
+.pcb h4{font-size:10px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:.7rem;font-weight:600}
+.pro h4{color:var(--gn)}.con h4{color:var(--rd)}.note h4{color:var(--or)}.tip h4{color:var(--bl)}
+.pcb ul{list-style:none}.pcb li{padding:.3rem 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:12.5px;line-height:1.6;color:var(--tx)}
+.pcb li:last-child{border-bottom:none}
+
+/* FLOW STEPS */
+.flow{display:flex;flex-direction:column;margin:1rem 0}
+.fstep{display:flex;align-items:flex-start;gap:.9rem;padding:.9rem 1.1rem;background:var(--bg2);border:1px solid var(--bd);border-bottom:none;transition:background .15s}
+.fstep:first-child{border-radius:8px 8px 0 0}.fstep:last-child{border-bottom:1px solid var(--bd);border-radius:0 0 8px 8px}
+.fstep:hover{background:rgba(64,128,255,.04)}
+.fn{width:26px;height:26px;border-radius:50%;background:var(--bl-l);border:1px solid var(--bl-b);display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--bl);flex-shrink:0;margin-top:2px;font-weight:500}
+.fb h4{font-size:13px;font-weight:600;margin-bottom:3px}
+.fb p{font-size:12.5px;color:var(--mu);line-height:1.65}
+
+/* ===== SIMULATION STYLES ===== */
+.sim{background:var(--bg2);border:1px solid var(--bd);border-radius:12px;padding:1.5rem;margin:1.25rem 0}
+.sim-title{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--mu);margin-bottom:1rem}
+
+/* CI Pipeline */
+.ci-stages{display:flex;gap:6px;flex-wrap:wrap;margin:.75rem 0}
+.ci-stage{flex:1;min-width:80px;background:var(--surf2);border:1px solid var(--bd);border-radius:8px;padding:.6rem .5rem;text-align:center;transition:all .3s;position:relative}
+.ci-stage .ci-icon{font-size:1rem;display:block;margin-bottom:.3rem;line-height:1}
+.ci-stage .ci-name{font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--mu);line-height:1.3}
+.ci-stage .ci-stat{font-size:9px;font-family:'JetBrains Mono',monospace;padding:1px 6px;border-radius:100px;border:1px solid;display:inline-block;margin-top:.3rem}
+.ci-stage.idle .ci-stat{background:rgba(86,100,128,.1);border-color:rgba(86,100,128,.2);color:var(--mu)}
+.ci-stage.running{border-color:var(--am-b);background:rgba(240,170,32,.06)}
+.ci-stage.running .ci-stat{background:var(--am-l);border-color:var(--am-b);color:var(--am)}
+.ci-stage.pass{border-color:var(--gn-b);background:rgba(0,204,122,.06)}
+.ci-stage.pass .ci-stat{background:var(--gn-l);border-color:var(--gn-b);color:var(--gn)}
+.ci-stage.fail{border-color:var(--rd-b);background:rgba(255,61,90,.06)}
+.ci-stage.fail .ci-stat{background:var(--rd-l);border-color:var(--rd-b);color:var(--rd)}
+.ci-stage.skip{opacity:.45}
+.ci-stage.running .ci-icon{animation:ci-pulse .7s ease-in-out infinite}
+@keyframes ci-pulse{0%,100%{transform:scale(1)}50%{transform:scale(.88)}}
+
+/* Server Grid */
+.sg{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;margin:.75rem 0}
+.sv{aspect-ratio:1;border-radius:5px;display:grid;place-items:center;font-size:9px;font-family:'JetBrains Mono',monospace;font-weight:600;border:1px solid;transition:all .35s;position:relative}
+.sv.v1{background:rgba(64,128,255,.14);border-color:rgba(64,128,255,.4);color:var(--bl)}
+.sv.v2{background:rgba(0,204,122,.14);border-color:rgba(0,204,122,.4);color:var(--gn)}
+.sv.dep{background:rgba(240,170,32,.1);border-color:rgba(240,170,32,.4);color:var(--am);animation:sv-dep .6s ease-in-out infinite}
+.sv.dn{background:rgba(255,61,90,.07);border-color:rgba(255,61,90,.3);color:var(--rd);opacity:.55}
+.sv.idle{background:rgba(42,52,72,.5);border-color:var(--dim);color:var(--dim)}
+@keyframes sv-dep{0%,100%{transform:scale(1)}50%{transform:scale(.9)}}
+
+/* Traffic bars */
+.traffic-wrap{height:56px;background:var(--surf);border:1px solid var(--bd);border-radius:8px;overflow:hidden;position:relative;margin:.75rem 0;display:flex}
+.t-bar-v1{background:rgba(64,128,255,.35);transition:width .7s ease;display:flex;align-items:center;justify-content:center}
+.t-bar-v2{background:rgba(0,204,122,.35);transition:width .7s ease;flex:1;display:flex;align-items:center;justify-content:center}
+.t-label{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;padding:0 8px;white-space:nowrap}
+
+/* Metric bars */
+.mbar-row{display:grid;grid-template-columns:80px 1fr 60px;align-items:center;gap:.6rem;margin-bottom:8px}
+.mbar-lbl{font-size:11.5px;color:var(--mu);font-family:'JetBrains Mono',monospace}
+.mbar-track{background:var(--surf);border:1px solid var(--bd);border-radius:3px;height:7px;overflow:hidden}
+.mbar-fill{height:100%;border-radius:3px;transition:width .5s ease,background .5s ease}
+.mbar-val{font-family:'JetBrains Mono',monospace;font-size:11px;text-align:right}
+
+/* Spike chart */
+.spike{display:flex;align-items:flex-end;gap:2px;height:60px;background:var(--surf);border:1px solid var(--bd);border-radius:8px;padding:6px;overflow:hidden;margin:.5rem 0}
+.spike-bar{flex:1;border-radius:2px 2px 0 0;min-height:2px;transition:height .35s ease,background .35s ease}
+
+/* Log */
+.log{background:var(--bg);border:1px solid var(--bd);border-radius:8px;padding:.85rem 1rem;font-family:'JetBrains Mono',monospace;font-size:11.5px;height:110px;overflow-y:auto;margin:.75rem 0;display:flex;flex-direction:column;gap:3px}
+.l-ok{color:var(--gn)}.l-err{color:var(--rd)}.l-info{color:var(--bl)}.l-warn{color:var(--am)}.l-dim{color:var(--mu)}
+
+/* Buttons */
+.btn{padding:7px 15px;font-size:12px;font-family:'JetBrains Mono',monospace;background:transparent;border:1px solid var(--bd2);border-radius:8px;color:var(--tx);cursor:pointer;transition:all .15s}
+.btn:hover{background:var(--bl-l);border-color:var(--bl-b);color:var(--bl)}
+.btn.prim{background:var(--bl);border-color:var(--bl);color:#fff}
+.btn.prim:hover{background:#2860d8}
+.btn.dang{border-color:var(--rd-b);color:var(--rd)}.btn.dang:hover{background:var(--rd-l)}
+.btn:disabled{opacity:.3;cursor:default;pointer-events:none}
+.btn-row{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;margin-top:.75rem}
+
+/* Strategy toggle */
+.strat-tabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:1rem}
+.strat-tab{padding:6px 14px;font-size:12px;font-family:'JetBrains Mono',monospace;background:var(--surf2);border:1px solid var(--bd);border-radius:8px;color:var(--mu);cursor:pointer;transition:all .15s}
+.strat-tab:hover{border-color:var(--bd2);color:var(--tx)}
+.strat-tab.active{background:var(--bl-l);border-color:var(--bl-b);color:var(--bl)}
+.strat-desc{background:var(--surf);border:1px solid var(--bd);border-radius:8px;padding:.9rem 1rem;font-size:13px;color:var(--mu);margin-bottom:.85rem;line-height:1.7;min-height:52px}
+
+/* Stats row */
+.stat-row{display:flex;gap:1.25rem;flex-wrap:wrap;margin:.5rem 0;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--mu)}
+.stat-row span{font-weight:600;color:var(--tx)}
+
+/* Metric cards */
+.mcards{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:.75rem;margin:1rem 0}
+.mcard{background:var(--surf2);border:1px solid var(--bd);border-radius:8px;padding:.85rem;text-align:center}
+.mcard-v{font-family:'JetBrains Mono',monospace;font-size:1.6rem;font-weight:700;line-height:1;margin-bottom:4px}
+.mcard-l{font-size:10px;color:var(--mu);text-transform:uppercase;letter-spacing:.09em}
+.mcard-s{font-size:10px;margin-top:3px}
+
+/* Version history */
+.vhist{display:flex;flex-direction:column}
+.vrow{display:flex;align-items:center;gap:.75rem;padding:.6rem .9rem;background:var(--bg2);border:1px solid var(--bd);border-bottom:none;font-size:12.5px;transition:background .15s}
+.vrow:first-child{border-radius:8px 8px 0 0}.vrow:last-child{border-bottom:1px solid var(--bd);border-radius:0 0 8px 8px}
+.vrow:hover{background:rgba(64,128,255,.04)}
+.vtag{font-family:'JetBrains Mono',monospace;font-size:11px;padding:2px 8px;border-radius:4px;border:1px solid;min-width:56px;text-align:center;flex-shrink:0}
+.vsha{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--mu);flex-shrink:0}
+.vmsg{flex:1;color:var(--tx)}
+.vtime{font-size:11px;color:var(--mu);white-space:nowrap}
+.vbadge{font-size:9px;padding:2px 7px;border-radius:100px;border:1px solid;font-family:'JetBrains Mono',monospace;white-space:nowrap}
+
+/* canary slider */
+input[type=range]{-webkit-appearance:none;width:100%;height:4px;background:var(--bd2);border-radius:2px;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--bl);cursor:pointer}
+
+/* Feature flag dots */
+.ff-grid{display:flex;flex-wrap:wrap;gap:5px;margin:.75rem 0;min-height:80px}
+.ff-dot{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:9px;font-family:'JetBrains Mono',monospace;font-weight:600;border:1px solid;cursor:default;transition:all .3s}
+.ff-on{background:rgba(0,204,122,.14);border-color:rgba(0,204,122,.4);color:var(--gn)}
+.ff-off{background:rgba(42,52,72,.5);border-color:var(--dim);color:var(--dim)}
+
+/* Hotfix timeline */
+.hf-wrap{position:relative;padding:1.5rem 0}
+.hf-track{position:absolute;left:14px;top:24px;bottom:24px;width:2px;background:var(--bd2);border-radius:1px}
+.hf-fill{width:100%;border-radius:1px;background:var(--gn);transition:height .4s ease;height:0%}
+.hf-event{display:flex;align-items:flex-start;gap:1rem;margin-bottom:1.25rem;position:relative}
+.hf-dot{width:30px;height:30px;border-radius:50%;border:2px solid var(--bd2);background:var(--bg2);display:grid;place-items:center;font-size:11px;font-family:'JetBrains Mono',monospace;font-weight:600;flex-shrink:0;z-index:1;transition:all .3s}
+.hf-content{flex:1;background:var(--bg2);border:1px solid var(--bd);border-radius:8px;padding:.75rem 1rem;transition:all .3s}
+.hf-time{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--mu);margin-bottom:.2rem}
+.hf-title{font-size:13px;font-weight:600;margin-bottom:.25rem}
+.hf-desc{font-size:12px;color:var(--mu);line-height:1.65}
+.hf-event.done .hf-dot{background:var(--gn);border-color:var(--gn);color:#fff}
+.hf-event.done .hf-content{border-color:var(--gn-b)}
+.hf-event.active .hf-dot{background:var(--am);border-color:var(--am);color:#fff;animation:hf-pulse .8s ease-in-out infinite}
+.hf-event.active .hf-content{border-color:var(--am-b);background:rgba(240,170,32,.04)}
+.hf-event.error .hf-dot{background:var(--rd);border-color:var(--rd);color:#fff}
+.hf-event.error .hf-content{border-color:var(--rd-b)}
+@keyframes hf-pulse{0%,100%{box-shadow:0 0 0 0 rgba(240,170,32,.4)}50%{box-shadow:0 0 0 6px rgba(240,170,32,.0)}}
+
+footer{background:var(--surf);border-top:1px solid var(--bd);text-align:center;padding:3rem 2rem;color:var(--mu)}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-stripe"></div>
+  <div class="hero-badge">Engineering · DevOps · Deployment</div>
+  <h1><span class="a">From Local Dev</span><span class="b">to Production</span></h1>
+  <p class="hero-sub">Every deployment strategy, pipeline stage, and rollout pattern — with live interactive simulations.</p>
+  <div class="hero-grid">
+    <div class="hg"><div class="hg-v">7</div><div class="hg-l">Simulators</div></div>
+    <div class="hg"><div class="hg-v">6</div><div class="hg-l">Strategies</div></div>
+    <div class="hg"><div class="hg-v">11</div><div class="hg-l">Sections</div></div>
+    <div class="hg"><div class="hg-v">0ms</div><div class="hg-l">Downtime goal</div></div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav id="topnav">
+  <span class="nav-logo">Dev→Prod</span>
+  <a href="#pipeline">Pipeline</a>
+  <a href="#environments">Environments</a>
+  <a href="#strategies">Strategies</a>
+  <a href="#bluegreen">Blue-Green</a>
+  <a href="#canary">Canary</a>
+  <a href="#featureflags">Feature Flags</a>
+  <a href="#hotfix">Hotfixes</a>
+  <a href="#rollback">Rollback</a>
+  <a href="#e2e">End-to-End</a>
+  <a href="#monitoring">Monitoring</a>
+</nav>
+<div class="pbar"><div class="pfill" id="pf"></div></div>
+
+
+<!-- ═══ S1: PIPELINE ═══ -->
+<section id="pipeline">
+<div class="container">
+  <div class="sec-eye">// 01</div>
+  <h2 class="sec-title">The CI/CD Pipeline</h2>
+  <p class="sec-sub">Every commit travels through a sequence of automated gates before it reaches users. Each gate catches a different class of bug — fail at any gate and the pipeline stops.</p>
+
+  <div class="card">
+    <div class="cbar c-gn"></div>
+    <div class="card-hd">
+      <div class="card-ico" style="background:var(--gn-l)">⚙</div>
+      <div class="card-meta"><h2>Live CI Pipeline Simulator</h2><div class="csub">Click Run to watch stages execute — or inject a failure to see what stops the pipeline</div></div>
+    </div>
+    <div class="card-body">
+      <div class="sim">
+        <div class="sim-title">Pipeline — commit <span id="ci-sha" style="color:var(--bl)">sha-a4f2c1d</span></div>
+        <div class="ci-stages" id="ci-stages"></div>
+        <div class="btn-row">
+          <button class="btn prim" onclick="ciRun(false)" id="ci-run">▶ Run Pipeline</button>
+          <button class="btn dang" onclick="ciRun(true)" id="ci-fail">💥 Inject Failure</button>
+          <button class="btn" onclick="ciReset()">↺ Reset</button>
+          <span id="ci-time" style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--mu)"></span>
+        </div>
+        <div class="log" id="ci-log"><span class="l-info">// Ready — click Run Pipeline to start</span></div>
+      </div>
+
+      <p class="prose" style="margin-top:1.25rem;">Each stage has a clear role. <strong>Lint and type-check</strong> run in 30 seconds and catch syntax errors, TypeScript mismatches, and undefined references before any test runs. <strong>Unit tests</strong> validate business logic in isolation — a 247-test suite with 87% coverage. <strong>Integration tests</strong> spin up an ephemeral Postgres container and verify that the services wire together correctly, catching SQL query errors and API contract mismatches. <strong>Security scanning</strong> checks npm packages against the CVE database and runs SAST analysis for injection patterns. <strong>Docker build</strong> verifies the application can be containerised — a stage that catches missing files, wrong base images, and missing environment variables. <strong>Smoke tests</strong> run after staging deploy, hitting 7 critical endpoints to confirm the service actually started successfully.</p>
+
+      <div class="cw">
+        <div class="ch"><div class="clang">yaml — .github/workflows/ci.yml</div><div class="cdots"><div class="cdot" style="background:#ff5f57"></div><div class="cdot" style="background:#ffbd2e"></div><div class="cdot" style="background:#28ca41"></div></div></div>
+        <div class="cb">
+<span class="ln"><span class="n">name</span>: CI/CD Pipeline</span>
+<span class="ln"><span class="n">on</span>:</span>
+<span class="ln">  <span class="n">pull_request</span>: { branches: [<span class="s">main</span>] }</span>
+<span class="ln">  <span class="n">push</span>:         { branches: [<span class="s">main</span>] }</span>
+<span class="ln empty"> </span>
+<span class="ln"><span class="n">jobs</span>:</span>
+<span class="ln">  <span class="n">quality</span>:</span>
+<span class="ln">    <span class="n">runs-on</span>: ubuntu-latest</span>
+<span class="ln">    <span class="n">steps</span>:</span>
+<span class="ln">      - <span class="n">uses</span>: actions/checkout@v4</span>
+<span class="ln">      - <span class="n">run</span>: npm ci</span>
+<span class="ln">      - <span class="n">run</span>: npm run lint && npm run typecheck</span>
+<span class="ln">      - <span class="n">run</span>: npm test -- --coverage --coverageThreshold='{"global":{"lines":<span class="num">80</span>}}'</span>
+<span class="ln">      - <span class="n">run</span>: npm run test:integration</span>
+<span class="ln sep">  <span class="n">build</span>:</span>
+<span class="ln">    <span class="n">needs</span>: quality           <span class="c"># Only runs if quality passes</span></span>
+<span class="ln">    <span class="n">steps</span>:</span>
+<span class="ln">      - <span class="n">run</span>: npm audit --audit-level=high</span>
+<span class="ln">      - <span class="n">run</span>: |</span>
+<span class="ln">          docker build -t myapp:sha-<span class="s">${{ github.sha }}</span> .</span>
+<span class="ln">          docker push $ECR/myapp:sha-<span class="s">${{ github.sha }}</span></span>
+<span class="ln sep">  <span class="n">deploy-staging</span>:</span>
+<span class="ln">    <span class="n">needs</span>: build</span>
+<span class="ln">    <span class="n">if</span>: github.ref == <span class="s">'refs/heads/main'</span></span>
+<span class="ln">    <span class="n">steps</span>:</span>
+<span class="ln">      - <span class="n">run</span>: kubectl set image deployment/api api=myapp:sha-<span class="s">${{ github.sha }}</span></span>
+<span class="ln">      - <span class="n">run</span>: npm run test:smoke -- --url https://staging.myapp.com</span>
+<span class="ln sep">  <span class="n">deploy-production</span>:</span>
+<span class="ln">    <span class="n">needs</span>: deploy-staging</span>
+<span class="ln">    <span class="n">environment</span>: production   <span class="c"># Requires manual approval from release-managers team</span></span>
+<span class="ln">    <span class="n">steps</span>:</span>
+<span class="ln">      - <span class="n">run</span>: ./scripts/canary-deploy.sh --weight <span class="num">10</span> --observe <span class="num">300</span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+
+<!-- ═══ S2: ENVIRONMENTS ═══ -->
+<section id="environments">
+<div class="container">
+  <div class="sec-eye">// 02</div>
+  <h2 class="sec-title">Environment Architecture</h2>
+  <p class="sec-sub">Each environment is a risk gate with a specific audience and a specific class of bugs it catches. Skipping one means that class of bug reaches users instead.</p>
+
+  <div class="card">
+    <div class="cbar c-tl"></div>
+    <div class="card-hd">
+      <div class="card-ico" style="background:var(--tl-l)">🏗</div>
+      <div class="card-meta"><h2>Environment Promotion Flow</h2><div class="csub">Step a build through Dev → QA → Staging → Production</div></div>
+    </div>
+    <div class="card-body">
+      <div class="sim">
+        <div class="sim-title">Build: <span style="color:var(--am)" id="env-tag">myapp:sha-a4f2c1d</span> — click Promote to advance</div>
+        <div style="display:flex;gap:6px;align-items:center;overflow-x:auto;padding:.75rem 0;margin-bottom:.5rem" id="env-stages"></div>
+        <div class="btn-row">
+          <button class="btn prim" onclick="envPromote()" id="env-btn">Promote Build →</button>
+          <button class="btn" onclick="envReset()">↺ Reset</button>
+          <span id="env-msg" style="font-size:12px;color:var(--mu);font-family:'JetBrains Mono',monospace"></span>
+        </div>
+        <div class="log" id="env-log"><span class="l-info">// Build ready. Click Promote to advance through each environment gate.</span></div>
+      </div>
+
+      <div class="ts"><table class="tbl">
+        <thead><tr><th>Environment</th><th>Deployed by</th><th>Data</th><th>Scale</th><th>Gate requirement</th></tr></thead>
+        <tbody>
+          <tr><td class="b">Local</td><td>Developer</td><td>Mocks / fixtures</td><td>Laptop</td><td>Runs without crashing</td></tr>
+          <tr><td class="b">Dev</td><td>CI — every push</td><td>Seeded test data</td><td>1× micro</td><td>Smoke tests pass</td></tr>
+          <tr><td class="t">QA / Integration</td><td>CI — merge to main</td><td>Anonymised prod copy</td><td>2× small</td><td>QA sign-off + regression</td></tr>
+          <tr><td class="t">Staging</td><td>CD — after QA gate</td><td>Masked prod snapshot</td><td>100% prod mirror</td><td>Load test + performance SLO</td></tr>
+          <tr><td class="g">Production</td><td>CD — manual approval</td><td>Live data</td><td>Full scale</td><td>Canary healthy for 5 min</td></tr>
+        </tbody>
+      </table></div>
+
+      <div class="hl hl-bl">
+        <span class="hl-label">// the immutable artifact rule</span>
+        <strong>One image runs everywhere.</strong> The same Docker image SHA that passed CI runs in dev, staging, and production. Environment-specific configuration (database URLs, API keys, feature flag endpoints) is injected via Kubernetes Secrets and ConfigMaps — never baked into the image. Building a "staging Docker image" separately means you haven't tested what you actually ship.
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+
+<!-- ═══ S3: STRATEGIES ═══ -->
+<section id="strategies">
+<div class="container">
+  <div class="sec-eye">// 03 — main focus</div>
+  <h2 class="sec-title">Deployment Strategies</h2>
+  <p class="sec-sub">Six strategies, each making a different trade-off between risk, speed, infrastructure cost, and rollback capability. Choose based on the risk profile of the change.</p>
+
+  <div class="card">
+    <div class="cbar c-pu"></div>
+    <div class="card-hd">
+      <div class="card-ico" style="background:var(--pu-l)">🎮</div>
+      <div class="card-meta"><h2>Strategy Playground — 30 Servers</h2><div class="csub">Select a strategy, click Deploy, and watch the transition pattern across the fleet</div></div>
+    </div>
+    <div class="card-body">
+      <div class="sim">
+        <div class="strat-tabs" id="strat-tabs">
+          <div class="strat-tab active" onclick="selectStrat('recreate',this)">💥 Recreate</div>
+          <div class="strat-tab" onclick="selectStrat('rolling',this)">🔄 Rolling</div>
+          <div class="strat-tab" onclick="selectStrat('bluegreen',this)">🔵🟢 Blue-Green</div>
+          <div class="strat-tab" onclick="selectStrat('canary',this)">🐤 Canary</div>
+        </div>
+        <div class="strat-desc" id="strat-desc">Select a strategy above to see the description.</div>
+        <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin-bottom:.5rem;font-size:11px;color:var(--mu)">
+          <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;border-radius:2px;background:rgba(64,128,255,.35);border:1px solid rgba(64,128,255,.5);display:inline-block"></span>v1 (old)</span>
+          <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;border-radius:2px;background:rgba(0,204,122,.35);border:1px solid rgba(0,204,122,.5);display:inline-block"></span>v2 (new)</span>
+          <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;border-radius:2px;background:rgba(240,170,32,.2);border:1px solid rgba(240,170,32,.5);display:inline-block"></span>deploying</span>
+          <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;border-radius:2px;background:rgba(255,61,90,.1);border:1px solid rgba(255,61,90,.4);display:inline-block"></span>down</span>
+        </div>
+        <div class="sg" id="deploy-grid"></div>
+        <div class="stat-row">
+          <span>v1: <span id="ds-v1">30</span></span>
+          <span>v2: <span id="ds-v2">0</span></span>
+          <span>deploying: <span id="ds-dep">0</span></span>
+          <span>down: <span id="ds-dn">0</span></span>
+          <span>progress: <span id="ds-pct">0%</span></span>
+        </div>
+        <div class="btn-row">
+          <button class="btn prim" onclick="stratDeploy()" id="strat-go">▶ Deploy</button>
+          <button class="btn" onclick="stratReset()">↺ Reset</button>
+        </div>
+      </div>
+
+      <div class="ts" style="margin-top:1.5rem;"><table class="tbl">
+        <thead><tr><th>Strategy</th><th>Downtime</th><th>Rollback</th><th>Infra cost</th><th>Blast radius</th><th>Use when</th></tr></thead>
+        <tbody>
+          <tr><td class="r">Recreate</td><td class="r">Minutes</td><td class="r">Redeploy (slow)</td><td class="g">1×</td><td class="r">100%</td><td>Dev/test envs, non-critical internal tools</td></tr>
+          <tr><td class="b">Rolling</td><td class="g">Zero</td><td class="y">Minutes</td><td class="g">1×</td><td class="y">Partial</td><td>Standard stateless apps, Kubernetes default, low-risk changes</td></tr>
+          <tr><td class="g">Blue-Green</td><td class="g">Zero</td><td class="g">Seconds</td><td class="r">2×</td><td class="g">Zero</td><td>Critical paths (payments, auth), high-stakes releases</td></tr>
+          <tr><td class="t">Canary</td><td class="g">Zero</td><td class="g">Seconds</td><td class="y">1.1×</td><td class="g">1–5%</td><td>High-traffic changes where you want real-user validation</td></tr>
+          <tr><td class="p">A/B Test</td><td class="g">Zero</td><td class="g">Flag flip</td><td class="y">1.5×</td><td class="g">Controlled</td><td>Product experiments measuring business metrics</td></tr>
+          <tr><td class="y">Shadow</td><td class="g">Zero</td><td class="g">Immediate</td><td class="r">2×</td><td class="g">None</td><td>Validating new infrastructure under real traffic without user impact</td></tr>
+        </tbody>
+      </table></div>
+
+      <div class="pcg" style="margin-top:1rem;">
+        <div class="pcb pro">
+          <h4>When to use Blue-Green</h4>
+          <ul>
+            <li>Payment processing changes</li>
+            <li>Authentication system updates</li>
+            <li>Database schema migrations</li>
+            <li>When you need instant rollback</li>
+            <li>Any change where 1% user exposure is too much</li>
+          </ul>
+        </div>
+        <div class="pcb tip">
+          <h4>When to use Canary</h4>
+          <ul>
+            <li>New API endpoints at scale</li>
+            <li>Algorithm changes (ranking, search)</li>
+            <li>Performance-sensitive code</li>
+            <li>New features with uncertain load impact</li>
+            <li>When you want real traffic validation</li>
+          </ul>
+        </div>
+        <div class="pcb note">
+          <h4>When Rolling is fine</h4>
+          <ul>
+            <li>Frontend/UI changes</li>
+            <li>Non-critical backend services</li>
+            <li>Internal tools</li>
+            <li>Low-risk config changes</li>
+            <li>Any stateless service where v1+v2 can coexist</li>
+          </ul>
+        </div>
+        <div class="pcb con">
+          <h4>Avoid Recreate in prod</h4>
+          <ul>
+            <li>Forces real downtime window</li>
+            <li>Users see error pages during deploy</li>
+            <li>No gradual validation</li>
+            <li>Full rollback requires another deploy</li>
+            <li>Acceptable only for dev environments</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+
+<!-- ═══ S4: BLUE-GREEN ═══ -->
+<section id="bluegreen">
+<div class="container">
+  <div class="sec-eye">// 04</div>
+  <h2 class="sec-title">Blue-Green Deployment</h2>
+  <p class="sec-sub">Two identical production environments. Deploy entirely to green, validate, then flip the load balancer. Instant rollback if anything goes wrong.</p>
+
+  <div class="card">
+    <div class="cbar c-gn"></div>
+    <div class="card-hd">
+      <div class="card-ico" style="background:var(--gn-l)">🔵🟢</div>
+      <div class="card-meta"><h2>Blue-Green Traffic Switch</h2><div class="csub">Watch traffic shift from Blue → Green with live health metrics at each step</div></div>
+    </div>
+    <div class="card-body">
+      <div class="sim">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem">
+          <div style="background:var(--surf);border:2px solid var(--bl-b);border-radius:8px;padding:1rem">
+            <div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--bl);font-family:'JetBrains Mono',monospace;margin-bottom:.4rem">🔵 Blue — v2.14</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:1.8rem;font-weight:700;color:var(--bl)" id="bg-blue">100%</div>
+            <div style="font-size:11px;color:var(--mu)">traffic weight</div>
+          </div>
+          <div style="background:var(--surf);border:2px solid var(--gn-b);border-radius:8px;padding:1rem">
+            <div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--gn);font-family:'JetBrains Mono',monospace;margin-bottom:.4rem">🟢 Green — v2.15</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:1.8rem;font-weight:700;color:var(--gn)" id="bg-green">0%</div>
+            <div style="font-size:11px;color:var(--mu)" id="bg-green-sub">idle — not deployed yet</div>
+          </div>
+        </div>
+        <div class="traffic-wrap" id="bg-traffic">
+          <div class="t-bar-v1" id="bg-bar-bl" style="width:100%"><span class="t-label" style="color:rgba(64,128,255,.9)">Blue</span></div>
+          <div class="t-bar-v2" id="bg-bar-gn" style="width:0%"></div>
+        </div>
+        <div class="mbar-row"><span class="mbar-lbl">error rate</span><div class="mbar-track"><div class="mbar-fill" id="bgm-err" style="width:3%;background:var(--gn)"></div></div><span class="mbar-val" id="bgv-err" style="color:var(--gn)">0.03%</span></div>
+        <div class="mbar-row"><span class="mbar-lbl">p99 latency</span><div class="mbar-track"><div class="mbar-fill" id="bgm-lat" style="width:28%;background:var(--gn)"></div></div><span class="mbar-val" id="bgv-lat" style="color:var(--gn)">140ms</span></div>
+        <div class="mbar-row"><span class="mbar-lbl">cpu</span><div class="mbar-track"><div class="mbar-fill" id="bgm-cpu" style="width:38%;background:var(--bl)"></div></div><span class="mbar-val" id="bgv-cpu" style="color:var(--bl)">38%</span></div>
+        <div class="btn-row">
+          <button class="btn prim" onclick="bgStart()" id="bg-go">▶ Deploy &amp; Switch</button>
+          <button class="btn dang" onclick="bgRollback()" id="bg-rb" disabled>↩ Rollback to Blue</button>
+          <button class="btn" onclick="bgReset()">↺ Reset</button>
+        </div>
+        <div class="log" id="bg-log"><span class="l-info">// Blue serves 100% traffic. Green idle. Click Deploy to begin.</span></div>
+      </div>
+
+      <p class="prose" style="margin-top:1rem;">The key insight is that green receives <strong>zero live traffic</strong> during the entire deployment and validation phase. You can run smoke tests, integration checks, and even load tests against green using an internal URL before any user sees it. When you're satisfied, the load balancer switch is a single command that takes effect in milliseconds — and blue remains warm and ready for an instant rollback for the next 24 hours.</p>
+
+      <div class="cw">
+        <div class="ch"><div class="clang">bash — blue-green switch (AWS ALB)</div><div class="cdots"><div class="cdot" style="background:#ff5f57"></div><div class="cdot" style="background:#ffbd2e"></div><div class="cdot" style="background:#28ca41"></div></div></div>
+        <div class="cb">
+<span class="ln"><span class="c"># 1. Deploy v2.15 to Green (zero traffic)</span></span>
+<span class="ln">kubectl set image deployment/api-green api=myapp:sha-b9e3 -n production</span>
+<span class="ln">kubectl rollout status deployment/api-green --timeout=<span class="num">5m</span></span>
+<span class="ln empty"> </span>
+<span class="ln"><span class="c"># 2. Validate against internal green URL</span></span>
+<span class="ln">./smoke-test.sh --url http://green-internal.myapp.com</span>
+<span class="ln empty"> </span>
+<span class="ln"><span class="c"># 3. Gradually shift traffic</span></span>
+<span class="ln"><span class="k">for</span> w in <span class="num">10 25 50 100</span>; <span class="k">do</span></span>
+<span class="ln">  aws elbv2 modify-rule --rule-arn <span class="n">$RULE</span> --actions "[</span>
+<span class="ln">    {\"TargetGroupArn\":\"<span class="n">$BLUE_TG</span>\",\"Weight\":$((100-w))},</span>
+<span class="ln">    {\"TargetGroupArn\":\"<span class="n">$GREEN_TG</span>\",\"Weight\":<span class="n">$w</span>}]"</span>
+<span class="ln">  sleep <span class="num">120</span></span>
+<span class="ln">  ./check-error-rate.sh --threshold <span class="num">0.005</span> || exit <span class="num">1</span></span>
+<span class="ln"><span class="k">done</span></span>
+<span class="ln empty"> </span>
+<span class="ln"><span class="c"># Rollback in 5 seconds if needed:</span></span>
+<span class="ln">aws elbv2 modify-rule --actions <span class="s">'[{"TargetGroupArn":"$BLUE_TG","Weight":100}]'</span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+
+<!-- ═══ S5: CANARY ═══ -->
+<section id="canary">
+<div class="container">
+  <div class="sec-eye">// 05</div>
+  <h2 class="sec-title">Canary Releases</h2>
+  <p class="sec-sub">Start with 1% of real traffic. If metrics stay healthy, expand. If they spike, instant rollback. The blast radius of any bug is tiny.</p>
+
+  <div class="card">
+    <div class="cbar c-tl"></div>
+    <div class="card-hd">
+      <div class="card-ico" style="background:var(--tl-l)">🐤</div>
+      <div class="card-meta"><h2>Canary Traffic Simulator</h2><div class="csub">Drag the slider to shift traffic. Inject a bug in v2 to see the alert trigger.</div></div>
+    </div>
+    <div class="card-body">
+      <div class="sim">
+        <div style="display:flex;align-items:center;gap:1rem;margin-bottom:.75rem;flex-wrap:wrap">
+          <span style="font-size:12px;color:var(--mu);font-family:'JetBrains Mono',monospace">v1:</span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:1.4rem;font-weight:700;color:var(--bl);min-width:46px" id="c-v1">90%</span>
+          <input type="range" id="c-slider" min="0" max="100" value="10" style="flex:1;min-width:120px" oninput="canaryUpdate(this.value)">
+          <span style="font-size:12px;color:var(--mu);font-family:'JetBrains Mono',monospace">v2:</span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:1.4rem;font-weight:700;color:var(--gn);min-width:46px" id="c-v2">10%</span>
+        </div>
+        <div class="traffic-wrap">
+          <div class="t-bar-v1" id="c-bar-v1" style="width:90%"><span class="t-label" id="c-lbl-v1" style="color:rgba(64,128,255,.9)">v1 · 90%</span></div>
+          <div class="t-bar-v2" id="c-bar-v2" style="width:10%"><span class="t-label" id="c-lbl-v2" style="color:rgba(0,204,122,.9)"></span></div>
+        </div>
+        <div style="margin-top:.5rem">
+          <div class="mbar-row"><span class="mbar-lbl">error rate</span><div class="mbar-track"><div class="mbar-fill" id="c-err-bar" style="width:3%;background:var(--gn)"></div></div><span class="mbar-val" id="c-err-val" style="color:var(--gn)">0.03%</span></div>
+          <div class="mbar-row"><span class="mbar-lbl">p99 latency</span><div class="mbar-track"><div class="mbar-fill" id="c-lat-bar" style="width:28%;background:var(--gn)"></div></div><span class="mbar-val" id="c-lat-val" style="color:var(--gn)">140ms</span></div>
+          <div class="mbar-row"><span class="mbar-lbl">req/sec</span><div class="mbar-track"><div class="mbar-fill" id="c-rps-bar" style="width:55%;background:var(--bl)"></div></div><span class="mbar-val" id="c-rps-val" style="color:var(--bl)">8,420</span></div>
+        </div>
+        <div id="c-alert" style="display:none;background:var(--rd-l);border:1px solid var(--rd-b);border-radius:8px;padding:.75rem 1rem;font-size:12.5px;color:var(--rd);margin:.75rem 0;font-family:'JetBrains Mono',monospace">⚠ ALERT: error rate exceeded 1.0% threshold — recommend rollback to v1</div>
+        <div class="btn-row">
+          <button class="btn" onclick="setC(1)">1%</button>
+          <button class="btn" onclick="setC(5)">5%</button>
+          <button class="btn" onclick="setC(10)">10%</button>
+          <button class="btn" onclick="setC(50)">50%</button>
+          <button class="btn" onclick="setC(100)">100%</button>
+          <button class="btn dang" onclick="canaryBugOn()">💥 Bug in v2</button>
+          <button class="btn" onclick="canaryBugOff()">✅ Fix bug</button>
+        </div>
+      </div>
+
+      <p class="prose" style="margin-top:1rem;">Canary releases work because you can <strong>observe real production behaviour</strong> on a small population before committing the full fleet. The typical progression — 1% → 5% → 10% → 25% → 50% → 100% — with 5-minute observation windows between each step. Tools like Argo Rollouts automate this: they query Prometheus metrics at each step and abort automatically if thresholds are exceeded. The automated rollback is the key feature — you do not need an engineer watching dashboards at 3 AM.</p>
+
+      <div class="hl hl-gn">
+        <span class="hl-label">// argo rollouts — automated canary</span>
+        Define your canary strategy in YAML with metric thresholds. Argo Rollouts queries Prometheus every 60 seconds during each step. If <code>errorRate > 0.01</code> triggers 3 consecutive times, it automatically aborts, routes all traffic back to the stable version, and fires a PagerDuty alert. No human needs to be watching.
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+
+<!-- ═══ S6: FEATURE FLAGS ═══ -->
+<section id="featureflags">
+<div class="container">
+  <div class="sec-eye">// 06</div>
+  <h2 class="sec-title">Feature Flags</h2>
+  <p class="sec-sub">Decouple deployment from release. Ship code to production with the feature off, then roll it out to users independently — no new deployment required.</p>
+
+  <div class="card">
+    <div class="cbar c-am"></div>
+    <div class="card-hd">
+      <div class="card-ico" style="background:var(--am-l)">🚩</div>
+      <div class="card-meta"><h2>Feature Flag Rollout — 100 Users</h2><div class="csub">Drag the slider — watch users receive the new feature based on a deterministic hash of their user ID</div></div>
+    </div>
+    <div class="card-body">
+      <div class="sim">
+        <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.5rem;flex-wrap:wrap">
+          <span style="font-size:12px;color:var(--mu)">Rollout:</span>
+          <input type="range" id="ff-slider" min="0" max="100" value="0" style="flex:1;min-width:120px" oninput="ffUpdate(this.value)">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:1.4rem;font-weight:700;color:var(--gn);min-width:50px" id="ff-pct">0%</span>
+        </div>
+        <div class="btn-row" style="margin-bottom:.75rem">
+          <button class="btn" onclick="setFF(0)">0% — off</button>
+          <button class="btn" onclick="setFF(5)">5% — beta</button>
+          <button class="btn" onclick="setFF(25)">25%</button>
+          <button class="btn" onclick="setFF(50)">50%</button>
+          <button class="btn prim" onclick="setFF(100)">100% — all</button>
+        </div>
+        <div style="font-size:11px;color:var(--mu);margin-bottom:.5rem;font-family:'JetBrains Mono',monospace">
+          <span style="color:var(--gn)">● new feature</span> &nbsp;
+          <span style="color:var(--mu)">● old experience</span> &nbsp;&nbsp;
+          <span id="ff-count" style="color:var(--tx);font-weight:600">0 / 100 enabled</span>
+        </div>
+        <div class="ff-grid" id="ff-grid"></div>
+      </div>
+
+      <p class="prose" style="margin-top:1rem;">The core insight is that deployment and release become two separate events. Code is deployed on Tuesday with the flag OFF. The product team enables it for 5% of users on Thursday with no deployment, no risk window, and no engineer involvement. If anything goes wrong, the flag is flipped OFF in 5 seconds — no rollback, no incident. The hash used for bucket assignment must be <strong>deterministic</strong>: <code>hash(flagName + userId) % 100</code> so the same user always sees the same experience across sessions and devices.</p>
+
+      <div class="cw">
+        <div class="ch"><div class="clang">typescript — feature flag service</div><div class="cdots"><div class="cdot" style="background:#ff5f57"></div><div class="cdot" style="background:#ffbd2e"></div><div class="cdot" style="background:#28ca41"></div></div></div>
+        <div class="cb">
+<span class="ln"><span class="k">async function</span> <span class="fn">isEnabled</span>(flag: <span class="n">string</span>, userId: <span class="n">string</span>): <span class="k">Promise</span>&lt;<span class="n">boolean</span>&gt; {</span>
+<span class="ln">  <span class="k">const</span> cfg = <span class="k">await</span> redis.<span class="fn">hGetAll</span>(<span class="s">`ff:${flag}`</span>);</span>
+<span class="ln">  <span class="k">if</span> (!cfg?.enabled || cfg.enabled === <span class="s">'false'</span>) <span class="k">return false</span>;</span>
+<span class="ln empty"> </span>
+<span class="ln">  <span class="c">// Internal team always on (allow-list)</span></span>
+<span class="ln">  <span class="k">if</span> (cfg.allowList?.split(<span class="s">','</span>).<span class="fn">includes</span>(userId)) <span class="k">return true</span>;</span>
+<span class="ln empty"> </span>
+<span class="ln">  <span class="c">// Deterministic percentage bucket</span></span>
+<span class="ln">  <span class="k">const</span> bucket = <span class="fn">murmurHash</span>(<span class="s">`${flag}:${userId}`</span>) % <span class="num">100</span>;</span>
+<span class="ln">  <span class="k">return</span> bucket &lt; <span class="fn">Number</span>(cfg.rolloutPct ?? <span class="num">0</span>);</span>
+<span class="ln">}</span>
+<span class="ln sep"><span class="c">// Usage — wrap new code path, keep old path intact</span></span>
+<span class="ln"><span class="k">const</span> showNewDashboard = <span class="k">await</span> <span class="fn">isEnabled</span>(<span class="s">'new-dashboard'</span>, user.id);</span>
+<span class="ln"><span class="k">return</span> showNewDashboard ? <span class="fn">renderNewDashboard</span>() : <span class="fn">renderOldDashboard</span>();</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+
+<!-- ═══ S7: HOTFIX ═══ -->
+<section id="hotfix">
+<div class="container">
+  <div class="sec-eye">// 07</div>
+  <h2 class="sec-title">Hotfix & Patch Delivery</h2>
+  <p class="sec-sub">Production is on fire at 3 AM. A hotfix bypasses the normal pipeline queue to reach production in minutes — but it must still pass tests.</p>
+
+  <div class="card">
+    <div class="cbar c-rd"></div>
+    <div class="card-hd">
+      <div class="card-ico" style="background:var(--rd-l)">🚨</div>
+      <div class="card-meta"><h2>P0 Incident Timeline — Step Through</h2><div class="csub">27 minutes from PagerDuty alert to production fix — every decision shown</div></div>
+    </div>
+    <div class="card-body">
+      <div class="sim">
+        <div style="font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--mu);margin-bottom:.75rem">Incident: <span style="color:var(--rd)">INC-20241205</span> · Payment service null pointer exception</div>
+        <div class="spike" id="hf-chart"></div>
+        <div style="font-size:10px;color:var(--mu);font-family:'JetBrains Mono',monospace;margin-bottom:1rem">Error rate — advances as you step through the incident</div>
+        <div class="hf-wrap" id="hf-wrap">
+          <div class="hf-track"><div class="hf-fill" id="hf-track-fill"></div></div>
+          <div id="hf-events"></div>
+        </div>
+        <div class="btn-row">
+          <button class="btn prim" onclick="hfNext()" id="hf-btn">Next Step →</button>
+          <button class="btn" onclick="hfReset()">↺ Reset</button>
+        </div>
+      </div>
+
+      <div class="cw" style="margin-top:1rem">
+        <div class="ch"><div class="clang">bash — hotfix workflow</div><div class="cdots"><div class="cdot" style="background:#ff5f57"></div><div class="cdot" style="background:#ffbd2e"></div><div class="cdot" style="background:#28ca41"></div></div></div>
+        <div class="cb">
+<span class="ln"><span class="c"># 1. Branch from the PRODUCTION TAG — not from main</span></span>
+<span class="ln"><span class="c">#    (main may have unreleased features you don't want to ship)</span></span>
+<span class="ln">git checkout -b hotfix/fix-payment-null v2.14.3</span>
+<span class="ln empty"> </span>
+<span class="ln"><span class="c"># 2. Make the targeted fix</span></span>
+<span class="ln"><span class="c"># Before: const amount = order.currency.amount;   ← crashes if null</span></span>
+<span class="ln"><span class="c"># After:  const amount = order.currency?.amount ?? 0;</span></span>
+<span class="ln">git commit -m <span class="s">"fix(payment): null guard on currency in processCharge"</span></span>
+<span class="ln">git tag v2.14.4 && git push origin hotfix/fix-payment-null --tags</span>
+<span class="ln empty"> </span>
+<span class="ln"><span class="c"># 3. CI runs targeted tests only (2 min vs 8 min full suite)</span></span>
+<span class="ln"><span class="c"># 4. Deploy directly to production with abbreviated smoke test</span></span>
+<span class="ln">kubectl set image deployment/api api=myapp:sha-hotfix-v2.14.4 -n production</span>
+<span class="ln empty"> </span>
+<span class="ln"><span class="c"># 5. CRITICAL: cherry-pick back to main — without this, next</span></span>
+<span class="ln"><span class="c">#    regular deploy will re-introduce the bug</span></span>
+<span class="ln">git checkout main && git cherry-pick v2.14.4 && git push origin main</span>
+        </div>
+      </div>
+
+      <div class="hl hl-rd">
+        <span class="hl-label">// the #1 hotfix mistake</span>
+        Forgetting the cherry-pick back to main. The on-call engineer fixes production at 4 AM, breathes a sigh of relief, and goes to sleep. The next morning a routine PR merges, CI runs, and the next deployment <strong>overwrites the hotfix</strong> because it was never committed to the main branch. The same bug returns. This has happened at nearly every engineering team at least once. Some teams automate it: a GitHub Actions workflow opens a cherry-pick PR automatically when a hotfix tag is pushed.
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+
+<!-- ═══ S8: ROLLBACK ═══ -->
+<section id="rollback">
+<div class="container">
+  <div class="sec-eye">// 08</div>
+  <h2 class="sec-title">Rollback Strategies</h2>
+  <p class="sec-sub">Four rollback tiers, each faster than the last. The right one depends on what you deployed and what went wrong.</p>
+
+  <div class="card">
+    <div class="cbar c-or"></div>
+    <div class="card-hd">
+      <div class="card-ico" style="background:var(--or-l)">↩</div>
+      <div class="card-meta"><h2>Error Spike + Rollback Simulator</h2><div class="csub">Deploy a bad version, watch metrics degrade, then execute the rollback of your choice</div></div>
+    </div>
+    <div class="card-body">
+      <div class="sim">
+        <div class="mcards">
+          <div class="mcard"><div class="mcard-v" id="rb-err" style="color:var(--gn)">0.03%</div><div class="mcard-l">Error rate</div><div class="mcard-s" id="rb-err-s" style="color:var(--gn)">✓ healthy</div></div>
+          <div class="mcard"><div class="mcard-v" id="rb-lat" style="color:var(--tx)">142ms</div><div class="mcard-l">P99 latency</div><div class="mcard-s" id="rb-lat-s" style="color:var(--gn)">✓ normal</div></div>
+          <div class="mcard"><div class="mcard-v" id="rb-ver" style="color:var(--bl)">v2.14</div><div class="mcard-l">Live version</div><div class="mcard-s" id="rb-ver-s" style="color:var(--gn)">● stable</div></div>
+        </div>
+        <div class="spike" id="rb-chart"></div>
+        <div style="font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--mu);margin-bottom:.75rem;padding-left:.25rem" id="rb-status">System healthy</div>
+        <div class="btn-row">
+          <button class="btn dang" onclick="rbDeploy()" id="rb-bad">💥 Deploy bad v2.15</button>
+          <button class="btn" onclick="rbRollback('flag',1200)" id="rb-flag" disabled>🚩 Flag kill-switch (~1s)</button>
+          <button class="btn" onclick="rbRollback('lb',2500)" id="rb-lb" disabled>⚖ LB traffic switch (~5s)</button>
+          <button class="btn" onclick="rbRollback('k8s',4000)" id="rb-k8s" disabled>☸ kubectl rollback (~90s)</button>
+          <button class="btn" onclick="rbReset()">↺ Reset</button>
+        </div>
+        <div class="log" id="rb-log"><span class="l-info">// System stable. Deploy a bad version to see the metrics degrade.</span></div>
+      </div>
+
+      <div class="hl hl-am">
+        <span class="hl-label">// expand-contract: the only safe DB migration pattern</span>
+        Rolling back app code is trivial. Rolling back a <strong>dropped column</strong> requires restoring from backup — measured in hours. The expand-contract pattern keeps you safe: <strong>Phase 1</strong> — add the new column with a default, deploy. Old and new code both work. <strong>Phase 2</strong> — deploy code that writes to both columns, backfill existing rows. <strong>Phase 3</strong> — remove old column once no code reads it. Each phase is independently rollback-safe. Never drop a column in the same deploy that removes its code reference.
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+
+<!-- ═══ S9: END-TO-END ═══ -->
+<section id="e2e">
+<div class="container">
+  <div class="sec-eye">// 09 — the full story</div>
+  <h2 class="sec-title">End-to-End: Dark Mode Feature</h2>
+  <p class="sec-sub">JIRA-456 goes from Sarah's first commit to 1.2 million users over 9 days. Every decision, every command, every metric.</p>
+
+  <div class="card">
+    <div class="cbar c-mu"></div>
+    <div class="card-hd">
+      <div class="card-ico" style="background:var(--bl-l)">🌙</div>
+      <div class="card-meta"><h2>Complete Feature Delivery Walkthrough</h2><div class="csub">Trunk-based dev · GitHub Actions CI · Blue-Green deploy · LaunchDarkly flags</div></div>
+    </div>
+    <div class="card-body">
+      <p class="prose">The team uses trunk-based development, Kubernetes on AWS, GitHub Actions, and LaunchDarkly for feature flags. The app has 1.2M daily active users and blue-green deployments via AWS ALB. Dark mode requires a UI component, a backend API, and a new database column.</p>
+
+      <div class="flow">
+        <div class="fstep"><div class="fn">D1</div><div class="fb"><h4>Branch, code, wrap in flag immediately</h4><p>Sarah cuts a branch from main and wraps the DarkModeToggle component in a feature flag on the very first commit — not when the feature is "done." This enables merging incomplete work to main safely. The DB migration is Phase 1 only: ADD COLUMN dark_mode BOOL DEFAULT FALSE (non-locking in MySQL 8).</p></div></div>
+        <div class="fstep"><div class="fn">D1</div><div class="fb"><h4>PR opens — CI runs in 6m 44s</h4><p>Lint (28s), type-check (45s), unit tests 247 tests at 87% coverage (2m14s), integration tests (4m02s), security scan clean. Two engineers review — one change request on the migration script, Sarah fixes, both approve, PR merges to main.</p></div></div>
+        <div class="fstep"><div class="fn">D1</div><div class="fb"><h4>Auto-deploy to Dev — flag stays OFF</h4><p>CI builds myapp:sha-a4f2c1d, pushes to ECR, rolls out to dev namespace, runs smoke tests. All pass. Sarah enables the flag for herself only in LaunchDarkly dev (allow-list: sarah@myapp.com). The toggle appears for her. Zero other users see any change.</p></div></div>
+        <div class="fstep"><div class="fn">D2</div><div class="fb"><h4>QA testing — bug found and fixed</h4><p>Release manager promotes to staging. QA enables the flag for the 10-person QA team. After 3 hours: all pass except one — revenue chart colours invisible in dark mode on Safari 17. Sarah fixes in a follow-up PR, deploys to staging, QA re-tests and approves.</p></div></div>
+        <div class="fstep"><div class="fn">D3</div><div class="fb"><h4>Production deployment — blue-green</h4><p>Migration runs first (0.041s, zero downtime). New image deploys to green (20 pods). Smoke tests pass. Traffic shifts: 10% → observe 5 min (error 0.04% ✓) → 100%. Blue kept warm for 24h. The feature flag is still OFF — zero users see any change. Deployment and release are fully decoupled.</p></div></div>
+        <div class="fstep"><div class="fn">D3–5</div><div class="fb"><h4>Staged flag rollout — no deploys needed</h4><p>Day 3 at 2 PM: 5% rollout → 60,000 users → 12 positive support messages, zero bugs. Day 4: 20% → stable overnight. Day 4 at 3 PM: 50% → slight settings page traffic uptick (users exploring), expected. Day 5: 100% → 1.2M users enabled, blog post and in-app notification published.</p></div></div>
+        <div class="fstep"><div class="fn">D14</div><div class="fb"><h4>Cleanup — flag removed, Blue decommissioned</h4><p>The feature flag wrapper is deleted from the codebase — the component is now always rendered. PR opened, CI passes, deployed without incident. Blue environment decommissioned after 11 days with zero rollback events. JIRA-456 closed. Dark mode adoption: 31% of users enabled it within the first week.</p></div></div>
+      </div>
+
+      <div class="vhist" style="margin-top:1.25rem">
+        <div class="vrow">
+          <span class="vtag" style="background:rgba(0,204,122,.1);border-color:var(--gn-b);color:var(--gn)">main</span>
+          <span class="vsha">a4f2c1d</span>
+          <span class="vmsg">chore(ff): remove dark-mode-v2 flag wrapper (feature at 100%)</span>
+          <span class="vtime">Day 14</span>
+          <span class="vbadge" style="background:var(--gn-l);border-color:var(--gn-b);color:var(--gn)">cleanup</span>
+        </div>
+        <div class="vrow">
+          <span class="vtag" style="background:rgba(64,128,255,.1);border-color:var(--bl-b);color:var(--bl)">v2.15</span>
+          <span class="vsha">b9e3a2f</span>
+          <span class="vmsg">feat(ui): add dark mode toggle + user preference API</span>
+          <span class="vtime">Day 3</span>
+          <span class="vbadge" style="background:var(--am-l);border-color:var(--am-b);color:var(--am)">production</span>
+        </div>
+        <div class="vrow">
+          <span class="vtag" style="background:rgba(42,52,72,.5);border-color:var(--dim);color:var(--mu)">—</span>
+          <span class="vsha">c5d8e3a</span>
+          <span class="vmsg">fix(ui): safari chart colour contrast in dark mode</span>
+          <span class="vtime">Day 2</span>
+          <span class="vbadge" style="background:rgba(42,52,72,.4);border-color:var(--dim);color:var(--mu)">merged</span>
+        </div>
+        <div class="vrow">
+          <span class="vtag" style="background:rgba(64,128,255,.1);border-color:var(--bl-b);color:var(--bl)">v2.14</span>
+          <span class="vsha">e2f9c0a</span>
+          <span class="vmsg">feat(api): add pagination to /products endpoint</span>
+          <span class="vtime">Day 0</span>
+          <span class="vbadge" style="background:var(--am-l);border-color:var(--am-b);color:var(--am)">was production</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+
+<!-- ═══ S10: MONITORING ═══ -->
+<section id="monitoring">
+<div class="container">
+  <div class="sec-eye">// 10</div>
+  <h2 class="sec-title">Post-Deployment Monitoring</h2>
+  <p class="sec-sub">A deployment isn't done when the deploy command finishes. It's done when 48 hours of healthy metrics confirm stability.</p>
+
+  <div class="card">
+    <div class="cbar c-bl"></div>
+    <div class="card-hd">
+      <div class="card-ico" style="background:var(--bl-l)">📊</div>
+      <div class="card-meta"><h2>Four Golden Signals — Live Dashboard</h2><div class="csub">Click Simulate Deploy to see normal behaviour, then inject a spike to trigger alerts</div></div>
+    </div>
+    <div class="card-body">
+      <div class="sim">
+        <div class="mcards">
+          <div class="mcard"><div class="mcard-v" id="m-lat" style="color:var(--tx)">142ms</div><div class="mcard-l">P99 Latency</div><div class="mcard-s" id="m-lat-s" style="color:var(--gn)">● within SLO</div></div>
+          <div class="mcard"><div class="mcard-v" id="m-rps" style="color:var(--bl)">8,421</div><div class="mcard-l">Req/sec</div><div class="mcard-s" id="m-rps-s" style="color:var(--bl)">● normal</div></div>
+          <div class="mcard"><div class="mcard-v" id="m-err" style="color:var(--gn)">0.03%</div><div class="mcard-l">Error rate</div><div class="mcard-s" id="m-err-s" style="color:var(--gn)">● healthy</div></div>
+          <div class="mcard"><div class="mcard-v" id="m-cpu" style="color:var(--or)">38%</div><div class="mcard-l">CPU avg</div><div class="mcard-s" id="m-cpu-s" style="color:var(--or)">● normal</div></div>
+        </div>
+        <div class="spike" id="m-chart"></div>
+        <div class="btn-row">
+          <button class="btn prim" onclick="monStart()" id="m-go">▶ Simulate Deploy</button>
+          <button class="btn dang" onclick="monSpike()" id="m-spike" disabled>💥 Error Spike</button>
+          <button class="btn" onclick="monReset()">↺ Reset</button>
+        </div>
+      </div>
+
+      <div class="ts" style="margin-top:1rem"><table class="tbl">
+        <thead><tr><th>Signal</th><th>Healthy</th><th>Alert</th><th>Auto-rollback</th></tr></thead>
+        <tbody>
+          <tr><td class="b">Error rate</td><td class="g">&lt; 0.1%</td><td class="y">&gt; 0.5% for 2 min</td><td class="r">&gt; 1% for 2 min</td></tr>
+          <tr><td class="b">P99 latency</td><td class="g">&lt; 200ms</td><td class="y">&gt; 300ms for 5 min</td><td class="r">&gt; 500ms for 5 min</td></tr>
+          <tr><td class="b">Request rate</td><td class="g">baseline ±20%</td><td class="y">drop &gt; 20%</td><td class="r">drop &gt; 50%</td></tr>
+          <tr><td class="b">CPU</td><td class="g">&lt; 60%</td><td class="y">&gt; 75% sustained</td><td>scale out</td></tr>
+          <tr><td class="b">Memory</td><td class="g">&lt; 70% limit</td><td class="y">&gt; 85% limit</td><td class="r">OOMKilled pods</td></tr>
+        </tbody>
+      </table></div>
+
+      <div class="hl hl-gn">
+        <span class="hl-label">// deploy on Tuesday, never Friday</span>
+        No production deploys within 48 hours of a weekend. If a Friday 4 PM deploy causes a problem, your on-call engineer is debugging over the weekend with limited team support. <strong>Tuesday–Thursday mid-morning</strong> is the optimal window: full team available, metrics monitored for a full business day, and time to rollback before end of day if needed. This is a cultural rule, not a technical one — but it saves more engineer weekends than any amount of testing.
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<footer>
+  <div style="font-size:1.8rem;font-weight:700;letter-spacing:-.025em;color:var(--bl);margin-bottom:.5rem">From Local Dev to Production</div>
+  <p style="color:var(--mu);font-size:.95rem;margin-bottom:.5rem">CI/CD · Environments · Blue-Green · Canary · Feature Flags · Hotfixes · Rollback · Monitoring</p>
+  <p style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--dim);letter-spacing:.12em">deploy.often() · observe.always() · blame.never()</p>
+</footer>
+
+<script>
+/* ── NAV + PROGRESS ── */
+const navLinks=document.querySelectorAll('nav a[href^="#"]'),sections=document.querySelectorAll('section[id]'),pfill=document.getElementById('pf');
+window.addEventListener('scroll',()=>{const h=document.documentElement.scrollHeight-window.innerHeight;if(pfill&&h>0)pfill.style.width=Math.round(scrollY/h*100)+'%';});
+new IntersectionObserver(ents=>{ents.forEach(e=>{if(e.isIntersecting){navLinks.forEach(l=>l.classList.remove('active'));const a=document.querySelector(`nav a[href="#${e.target.id}"]`);if(a){a.classList.add('active');a.scrollIntoView({inline:'center',block:'nearest'});}}});},{threshold:.2}).observe;
+const sio=new IntersectionObserver(ents=>{ents.forEach(e=>{if(e.isIntersecting){navLinks.forEach(l=>l.classList.remove('active'));const a=document.querySelector(`nav a[href="#${e.target.id}"]`);if(a){a.classList.add('active');a.scrollIntoView({inline:'center',block:'nearest'});}}});},{threshold:.2});
+sections.forEach(s=>sio.observe(s));
+
+/* ─────────────────────────────────
+   CI PIPELINE SIMULATOR
+───────────────────────────────── */
+const CI=[
+  {id:'lint',  icon:'✎', name:'Lint / Types', dur:1200, err:'TypeScript: Property does not exist on type \'Order\''},
+  {id:'unit',  icon:'◉', name:'Unit Tests',   dur:2400, err:'FAIL PaymentService › processCharge › null amount throws'},
+  {id:'integ', icon:'⊞', name:'Integration',  dur:3200, err:'PG error: column "dark_mode" of relation "users" does not exist'},
+  {id:'sec',   icon:'🛡', name:'Security',     dur:1800, err:'Critical CVE-2024-1234 in lodash@4.17.20 (CVSS 9.8)'},
+  {id:'build', icon:'🐳', name:'Docker Build', dur:2800, err:'COPY failed: file src/missing.ts not found in context'},
+  {id:'smoke', icon:'💨', name:'Smoke Tests',  dur:1400, err:'GET /api/health → 503 (pod CrashLoopBackOff)'},
+];
+let ciRunning=false,ciSec=0,ciSecTimer=null;
+
+function ciRenderStages(){
+  document.getElementById('ci-stages').innerHTML=CI.map(s=>`
+    <div class="ci-stage idle" id="ci-${s.id}">
+      <span class="ci-icon">${s.icon}</span>
+      <div class="ci-name">${s.name}</div>
+      <div class="ci-stat">idle</div>
+    </div>`).join('');
+}
+function ciSetStage(id,state,txt){
+  const el=document.getElementById('ci-'+id);
+  if(!el)return;
+  el.className='ci-stage '+state;
+  el.querySelector('.ci-stat').textContent=txt;
+}
+function ciLog(msg,cls){
+  const l=document.getElementById('ci-log');
+  const s=document.createElement('span');s.className=cls||'';s.textContent=msg;
+  l.appendChild(s);l.scrollTop=l.scrollHeight;
+}
+async function ciRun(fail){
+  if(ciRunning)return;
+  ciRunning=true;
+  document.getElementById('ci-run').disabled=true;
+  document.getElementById('ci-fail').disabled=true;
+  document.getElementById('ci-log').innerHTML='';
+  ciSec=0;
+  document.getElementById('ci-sha').textContent='sha-'+Math.random().toString(16).slice(2,9);
+  ciSecTimer=setInterval(()=>{ciSec++;document.getElementById('ci-time').textContent=ciSec+'s';},1000);
+  const failAt=fail?Math.floor(Math.random()*CI.length):-1;
+  ciLog('[0s] Pipeline triggered','l-info');
+  for(let i=0;i<CI.length;i++){
+    const s=CI[i];
+    ciSetStage(s.id,'running','running…');
+    ciLog(`[${ciSec}s] Starting ${s.name}…`,'l-dim');
+    await new Promise(r=>setTimeout(r,s.dur));
+    if(i===failAt){
+      ciSetStage(s.id,'fail','failed ✗');
+      ciLog(`[${ciSec}s] ✗ FAILED: ${s.err}`,'l-err');
+      ciLog(`[${ciSec}s] Pipeline stopped. Remaining stages skipped.`,'l-err');
+      CI.slice(i+1).forEach(r=>ciSetStage(r.id,'skip','skipped'));
+      break;
+    }
+    ciSetStage(s.id,'pass','passed ✓');
+    ciLog(`[${ciSec}s] ✓ ${s.name} passed`,'l-ok');
+  }
+  if(failAt<0)ciLog(`[${ciSec}s] ✅ All stages passed. Deploying to staging…`,'l-ok');
+  clearInterval(ciSecTimer);document.getElementById('ci-time').textContent='';
+  document.getElementById('ci-run').disabled=false;document.getElementById('ci-fail').disabled=false;
+  ciRunning=false;
+}
+function ciReset(){
+  clearInterval(ciSecTimer);ciRunning=false;ciSec=0;
+  document.getElementById('ci-time').textContent='';
+  document.getElementById('ci-log').innerHTML='<span class="l-info">// Ready — click Run Pipeline to start</span>';
+  document.getElementById('ci-run').disabled=false;document.getElementById('ci-fail').disabled=false;
+  ciRenderStages();
+}
+ciRenderStages();
+
+/* ─────────────────────────────────
+   ENVIRONMENT PROMOTION
+───────────────────────────────── */
+const ENVS=[
+  {id:'dev',  name:'Dev',        badge:'auto', color:'var(--bl)',  bg:'var(--bl-l)', bd:'var(--bl-b)', gate:'Smoke tests'},
+  {id:'qa',   name:'QA',         badge:'qa gate',color:'var(--tl)', bg:'var(--tl-l)', bd:'var(--tl-b)', gate:'Regression suite'},
+  {id:'stg',  name:'Staging',    badge:'perf',  color:'var(--pu)', bg:'var(--pu-l)', bd:'var(--pu-b)', gate:'Load test SLO'},
+  {id:'prod', name:'Production', badge:'⚡ live', color:'var(--gn)', bg:'var(--gn-l)', bd:'var(--gn-b)', gate:'Canary metrics'},
+];
+const ENV_MSGS=[
+  'Running smoke tests on Dev (https://dev.myapp.com)…',
+  'QA regression suite: 347 tests running against anonymised data…',
+  'Load test at 2× production traffic: p99 latency 188ms ✓',
+  'Release manager approved. Running blue-green canary (10% for 5 min)…',
+  '✅ v2.15 is live in production.',
+];
+let envIdx=-1;
+
+function envRender(){
+  const el=document.getElementById('env-stages');
+  el.innerHTML=ENVS.map((e,i)=>`
+    ${i>0?'<span style="color:var(--dim);font-size:18px;padding:0 4px;flex-shrink:0">→</span>':''}
+    <div style="flex-shrink:0;width:120px;padding:.8rem .6rem;border-radius:8px;border:1px solid var(--bd);background:var(--surf2);text-align:center;transition:all .3s" id="env-${e.id}">
+      <div style="font-size:11px;font-weight:600;font-family:'JetBrains Mono',monospace;color:var(--mu);margin-bottom:.2rem" id="env-name-${e.id}">${e.name}</div>
+      <div style="font-size:10px;color:var(--mu);line-height:1.3;margin-bottom:.35rem">${e.gate}</div>
+      <div style="font-size:9px;padding:1px 6px;border-radius:100px;border:1px solid rgba(46,52,72,.4);background:rgba(42,52,72,.4);color:var(--mu);display:inline-block;font-family:'JetBrains Mono',monospace" id="env-stat-${e.id}">idle</div>
+    </div>`).join('');
+}
+function envLog(msg,cls){
+  const l=document.getElementById('env-log');
+  const s=document.createElement('span');s.className=cls||'';s.textContent=msg;
+  l.appendChild(s);l.scrollTop=l.scrollHeight;
+}
+async function envPromote(){
+  const btn=document.getElementById('env-btn');
+  if(envIdx>=ENVS.length-1)return;
+  btn.disabled=true;
+  envIdx++;
+  const e=ENVS[envIdx];
+  const box=document.getElementById('env-'+e.id);
+  const nm=document.getElementById('env-name-'+e.id);
+  const st=document.getElementById('env-stat-'+e.id);
+  box.style.borderColor=e.bd;box.style.background=e.bg+'33';
+  nm.style.color=e.color;
+  st.style.background=`${e.am_l||'rgba(240,170,32,.08)'}`;st.style.borderColor='rgba(240,170,32,.3)';st.style.color='var(--am)';st.textContent='deploying…';
+  document.getElementById('env-msg').textContent=ENV_MSGS[envIdx];
+  envLog(`→ Promoting to ${e.name}…`+(envIdx===3?' (awaiting approval)':''),'l-dim');
+  await new Promise(r=>setTimeout(r,2000));
+  st.style.background=e.bg;st.style.borderColor=e.bd;st.style.color=e.color;st.textContent='✓ live';
+  envLog(`✓ ${e.name} gate passed`,'l-ok');
+  if(envIdx===ENVS.length-1){envLog('🚀 All gates cleared. Feature is live in production.','l-ok');document.getElementById('env-msg').textContent=ENV_MSGS[4];}
+  else btn.disabled=false;
+}
+function envReset(){
+  envIdx=-1;
+  document.getElementById('env-msg').textContent='';
+  document.getElementById('env-log').innerHTML='<span class="l-info">// Build ready. Click Promote to advance.</span>';
+  document.getElementById('env-btn').disabled=false;
+  envRender();
+}
+envRender();
+
+/* ─────────────────────────────────
+   DEPLOY STRATEGY SIMULATOR
+───────────────────────────────── */
+const STRATS={
+  recreate:'💥 Recreate — All 30 old servers shut down simultaneously. New servers start only after all old ones are gone. There is a real downtime gap between shutdown and startup. Never use for production user-facing services.',
+  rolling:'🔄 Rolling Update — Replace one server at a time. The load balancer drains connections before replacement. At every moment some servers run v1, some run v2 — ensure your code handles both versions coexisting. Zero downtime, 1× infra cost.',
+  bluegreen:'🔵🟢 Blue-Green — All 30 servers are Blue (v1). A second identical Green fleet (v2) is deployed and validated with zero live traffic. Then the load balancer flips instantly. Instant rollback by flipping back. 2× infra cost while both fleets run.',
+  canary:'🐤 Canary — 1 server upgraded to v2 first. Real traffic observation. Then gradual batches. If metrics degrade at any step, stop and rollback immediately. Blast radius of any bug is tiny. Slowest to reach 100% but safest.',
+};
+let deployServers=Array(30).fill('v1'),deployRunning=false,currentStrat='recreate';
+
+function deployRender(){
+  const g=document.getElementById('deploy-grid');
+  g.innerHTML=deployServers.map((s,i)=>`<div class="sv ${s}" title="Server ${i+1}">${s==='v1'?'v1':s==='v2'?'v2':s==='dep'?'…':'✗'}</div>`).join('');
+  const cv1=deployServers.filter(s=>s==='v1').length;
+  const cv2=deployServers.filter(s=>s==='v2').length;
+  const cdep=deployServers.filter(s=>s==='dep').length;
+  const cdn=deployServers.filter(s=>s==='dn').length;
+  document.getElementById('ds-v1').textContent=cv1;
+  document.getElementById('ds-v2').textContent=cv2;
+  document.getElementById('ds-dep').textContent=cdep;
+  document.getElementById('ds-dn').textContent=cdn;
+  document.getElementById('ds-pct').textContent=Math.round(cv2/30*100)+'%';
+}
+function selectStrat(s,btn){
+  currentStrat=s;
+  document.querySelectorAll('.strat-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('strat-desc').textContent=STRATS[s];
+  stratReset();
+}
+async function stratDeploy(){
+  if(deployRunning)return;
+  deployRunning=true;
+  document.getElementById('strat-go').disabled=true;
+  const delay=ms=>new Promise(r=>setTimeout(r,ms));
+  if(currentStrat==='recreate'){
+    deployServers=deployServers.map(()=>'dn');deployRender();
+    await delay(700);
+    for(let i=0;i<30;i++){deployServers[i]='dep';deployRender();await delay(60);}
+    await delay(400);
+    deployServers=deployServers.map(()=>'v2');deployRender();
+  }else if(currentStrat==='rolling'){
+    for(let i=0;i<30;i++){
+      deployServers[i]='dep';deployRender();await delay(160);
+      deployServers[i]='v2';deployRender();
+    }
+  }else if(currentStrat==='bluegreen'){
+    // Deploy green alongside blue
+    const temp=Array(30).fill('idle');
+    for(let i=0;i<30;i++){temp[i]='dep';deployRender();await delay(55);}
+    // Show both blue + green briefly
+    await delay(600);
+    deployServers=deployServers.map(()=>'v2');deployRender();
+  }else if(currentStrat==='canary'){
+    const steps=[1,2,5,10,20,30];let done=0;
+    for(const target of steps){
+      while(done<target){deployServers[done]='dep';deployRender();await delay(120);deployServers[done]='v2';deployRender();done++;}
+      await delay(500);
+    }
+  }
+  deployRunning=false;document.getElementById('strat-go').disabled=false;
+}
+function stratReset(){
+  deployRunning=false;deployServers=Array(30).fill('v1');
+  document.getElementById('strat-go').disabled=false;deployRender();
+}
+document.getElementById('strat-desc').textContent=STRATS['recreate'];
+deployRender();
+
+/* ─────────────────────────────────
+   BLUE-GREEN SIMULATOR
+───────────────────────────────── */
+let bgRunning=false;
+function bgLog(msg,cls){
+  const l=document.getElementById('bg-log');
+  const s=document.createElement('span');s.className=cls||'';s.textContent=msg;
+  l.appendChild(s);l.scrollTop=l.scrollHeight;
+}
+function bgSetTraffic(blPct,gnPct){
+  document.getElementById('bg-blue').textContent=blPct+'%';
+  document.getElementById('bg-green').textContent=gnPct+'%';
+  document.getElementById('bg-bar-bl').style.width=blPct+'%';
+  document.getElementById('bg-bar-gn').style.width=gnPct+'%';
+  if(gnPct>0){
+    const bar=document.getElementById('bg-bar-gn');
+    bar.innerHTML=`<span class="t-label" style="color:rgba(0,204,122,.9)">${gnPct>12?'Green · '+gnPct+'%':''}</span>`;
+  }
+}
+async function bgStart(){
+  if(bgRunning)return;bgRunning=true;
+  document.getElementById('bg-go').disabled=true;
+  document.getElementById('bg-rb').disabled=true;
+  const steps=[
+    [0,100,'Deploying v2.15 to Green (20 pods)… smoke tests running…','l-dim'],
+    [10,90,'Green smoke tests ✓ — shifting 10% traffic to Green','l-ok'],
+    [10,90,'Observing 2 min… error 0.04% ✓ p99 143ms ✓','l-ok'],
+    [25,75,'Metrics healthy — shifting 25% to Green','l-ok'],
+    [50,50,'50% on Green. Error 0.04% ✓ p99 144ms ✓','l-ok'],
+    [100,0,'✅ 100% traffic on Green. Blue kept warm (24h rollback window).','l-ok'],
+  ];
+  for(const [gn,bl,msg,cls] of steps){
+    await new Promise(r=>setTimeout(r,1300));
+    bgSetTraffic(bl,gn);
+    document.getElementById('bg-green-sub').textContent=gn>0?'healthy · receiving traffic':'idle';
+    bgLog(msg,cls);
+    if(gn>0&&gn<100){
+      document.getElementById('bgm-err').style.width='4%';document.getElementById('bgv-err').textContent='0.04%';
+    }
+  }
+  document.getElementById('bg-rb').disabled=false;
+  bgRunning=false;
+}
+function bgRollback(){
+  bgLog('↩ Rollback initiated — routing 100% back to Blue…','l-warn');
+  setTimeout(()=>{
+    bgSetTraffic(100,0);document.getElementById('bg-green-sub').textContent='idle — traffic removed';
+    bgLog('✅ Rollback complete. v2.14 (Blue) serving 100%. Time: ~5s.','l-ok');
+  },1000);
+}
+function bgReset(){
+  bgRunning=false;bgSetTraffic(100,0);
+  document.getElementById('bg-green-sub').textContent='idle — not deployed yet';
+  document.getElementById('bg-go').disabled=false;document.getElementById('bg-rb').disabled=true;
+  document.getElementById('bg-log').innerHTML='<span class="l-info">// Blue serves 100% traffic. Green idle. Click Deploy to begin.</span>';
+  document.getElementById('bgm-err').style.width='3%';document.getElementById('bgv-err').textContent='0.03%';
+}
+
+/* ─────────────────────────────────
+   CANARY SIMULATOR
+───────────────────────────────── */
+let cBugActive=false;
+function canaryUpdate(val){
+  const v=parseInt(val),old=100-v;
+  document.getElementById('c-v1').textContent=old+'%';
+  document.getElementById('c-v2').textContent=v+'%';
+  document.getElementById('c-bar-v1').style.width=old+'%';
+  document.getElementById('c-bar-v2').style.width=v+'%';
+  document.getElementById('c-lbl-v1').textContent=old>10?'v1 · '+old+'%':'';
+  document.getElementById('c-lbl-v2').textContent=v>10?'v2 · '+v+'%':'';
+  const errBase=cBugActive?Math.min(v*0.09+0.03,9):0.03;
+  const latBase=cBugActive?Math.min(140+v*1.5,800):140;
+  const isAlert=cBugActive&&v>=20;
+  const errColor=isAlert?'var(--rd)':errBase>0.5?'var(--or)':'var(--gn)';
+  const latColor=latBase>300?'var(--or)':'var(--gn)';
+  document.getElementById('c-err-bar').style.width=Math.min(errBase*10,100)+'%';
+  document.getElementById('c-err-bar').style.background=errColor;
+  document.getElementById('c-err-val').textContent=errBase.toFixed(2)+'%';
+  document.getElementById('c-err-val').style.color=errColor;
+  document.getElementById('c-lat-bar').style.width=Math.min(latBase/600*100,100)+'%';
+  document.getElementById('c-lat-bar').style.background=latColor;
+  document.getElementById('c-lat-val').textContent=Math.round(latBase)+'ms';
+  document.getElementById('c-lat-val').style.color=latColor;
+  document.getElementById('c-rps-val').textContent=(8400+Math.floor(Math.random()*300)).toLocaleString();
+  document.getElementById('c-alert').style.display=isAlert?'block':'none';
+}
+function setC(v){document.getElementById('c-slider').value=v;canaryUpdate(v);}
+function canaryBugOn(){cBugActive=true;canaryUpdate(document.getElementById('c-slider').value);}
+function canaryBugOff(){cBugActive=false;canaryUpdate(document.getElementById('c-slider').value);}
+
+/* ─────────────────────────────────
+   FEATURE FLAG SIMULATOR
+───────────────────────────────── */
+let ffPct=0;
+function murmurSim(id){return(id*2654435761>>>0)%100;}
+function ffRender(){
+  const g=document.getElementById('ff-grid');
+  let n=0;
+  g.innerHTML=Array.from({length:100},(_,i)=>{
+    const on=murmurSim(i)<ffPct;if(on)n++;
+    return `<div class="ff-dot ${on?'ff-on':'ff-off'}" title="User ${i+1}">${i+1}</div>`;
+  }).join('');
+  document.getElementById('ff-count').textContent=n+' / 100 enabled';
+  document.getElementById('ff-pct').textContent=ffPct+'%';
+}
+function ffUpdate(v){ffPct=parseInt(v);ffRender();}
+function setFF(v){ffPct=v;document.getElementById('ff-slider').value=v;ffRender();}
+ffRender();
+
+/* ─────────────────────────────────
+   HOTFIX TIMELINE
+───────────────────────────────── */
+const HF=[
+  {time:'03:47',title:'PagerDuty alert fires',desc:'Error rate 8.2% (threshold 1%). On-call paged. Incident channel #inc-20241205 opened.',type:'error'},
+  {time:'03:51',title:'Investigation begins',desc:'Jaeger traces show PaymentService.processCharge() throwing NullPointerException on line 47. Affects ~8% of checkouts.',type:'step'},
+  {time:'03:58',title:'Root cause identified',desc:'Git bisect traces to commit b4a3f2d (yesterday, 14:22). Null check on currency field removed during refactor. Fix is one line.',type:'step'},
+  {time:'04:05',title:'Hotfix branch from production tag',desc:'git checkout -b hotfix/fix-payment-null v2.14.3 (not from main — main has 3 unreleased features)',type:'step'},
+  {time:'04:09',title:'Fix committed, fast-track CI starts',desc:'order.currency?.amount ?? 0. Targeted test suite only (2 min vs 8 min). PR opened, senior engineer reviews.',type:'step'},
+  {time:'04:17',title:'CI passes, deploy to production',desc:'kubectl set image… 3 pods rolling out. Health checks passing. Error rate beginning to drop.',type:'step'},
+  {time:'04:21',title:'Error rate normalises',desc:'Back to 0.04% within 4 minutes of deploy. Incident resolved. Duration: 34 minutes.',type:'resolved'},
+  {time:'04:25',title:'Cherry-pick to main',desc:'git cherry-pick v2.14.4 && git push origin main — without this, the next deploy will reintroduce the bug.',type:'step'},
+];
+let hfStep=-1;
+
+function hfBuildChart(step){
+  const el=document.getElementById('hf-chart');
+  el.innerHTML='';
+  for(let i=0;i<28;i++){
+    const d=document.createElement('div');
+    d.className='spike-bar';
+    let h,bg;
+    if(step<1){h=i<18?4+Math.random()*4:50+Math.random()*40;bg=i<18?'var(--gn)':'var(--rd)';}
+    else if(step<6){h=i<16?4+Math.random()*4:i<25?50+Math.random()*40:20+Math.random()*20;bg=i<16?'var(--gn)':i<25?'var(--rd)':'var(--or)';}
+    else{h=4+Math.random()*5;bg='var(--gn)';}
+    d.style.height=Math.round(h)+'%';d.style.background=bg;
+    el.appendChild(d);
+  }
+}
+function hfRenderEvents(){
+  const el=document.getElementById('hf-events');
+  el.innerHTML=HF.map((h,i)=>{
+    let state='';
+    if(i<hfStep)state='done';
+    else if(i===hfStep)state=h.type==='error'?'error':h.type==='resolved'?'done':'active';
+    const dotColor=state==='done'||state==='error'?state==='error'?'var(--rd)':'var(--gn)':state==='active'?'var(--am)':'var(--bd2)';
+    const dotBg=state==='done'||state==='error'?state==='error'?'var(--rd)':'var(--gn)':state==='active'?'var(--am)':'var(--bg2)';
+    return `<div class="hf-event ${state}">
+      <div class="hf-dot" style="border-color:${dotColor};background:${dotBg};color:${state?'#fff':'var(--dim)'}">${state==='done'?'✓':i+1}</div>
+      <div class="hf-content">
+        <div class="hf-time">${h.time} UTC</div>
+        <div class="hf-title">${h.title}</div>
+        <div class="hf-desc">${h.desc}</div>
+      </div>
+    </div>`;
+  }).join('');
+  const pct=hfStep<0?0:Math.round(hfStep/HF.length*100);
+  document.getElementById('hf-track-fill').style.height=pct+'%';
+}
+function hfNext(){
+  hfStep++;
+  if(hfStep>=HF.length){hfStep=HF.length-1;document.getElementById('hf-btn').textContent='Complete ✓';return;}
+  hfBuildChart(hfStep);hfRenderEvents();
+}
+function hfReset(){hfStep=-1;hfBuildChart(-1);hfRenderEvents();document.getElementById('hf-btn').textContent='Next Step →';}
+hfBuildChart(-1);hfRenderEvents();
+
+/* ─────────────────────────────────
+   ROLLBACK SIMULATOR
+───────────────────────────────── */
+let rbHistory=Array(20).fill(2),rbTimer=null,rbDegraded=false;
+function rbRenderChart(){
+  const el=document.getElementById('rb-chart');el.innerHTML='';
+  rbHistory.forEach(v=>{
+    const d=document.createElement('div');d.className='spike-bar';
+    d.style.height=Math.min(v*8,100)+'%';
+    d.style.background=v>12?'var(--rd)':v>4?'var(--or)':'var(--gn)';
+    el.appendChild(d);
+  });
+}
+function rbSetMetrics(err,lat,ver,verStatus,errStatus){
+  const ec=parseFloat(err)>1?'var(--rd)':parseFloat(err)>0.4?'var(--or)':'var(--gn)';
+  const lc=parseInt(lat)>300?'var(--or)':'var(--tx)';
+  document.getElementById('rb-err').textContent=err;document.getElementById('rb-err').style.color=ec;
+  document.getElementById('rb-err-s').textContent=errStatus;document.getElementById('rb-err-s').style.color=ec;
+  document.getElementById('rb-lat').textContent=lat;document.getElementById('rb-lat').style.color=lc;
+  document.getElementById('rb-lat-s').textContent=parseInt(lat)>300?'⚠ elevated':'✓ normal';document.getElementById('rb-lat-s').style.color=parseInt(lat)>300?'var(--or)':'var(--gn)';
+  document.getElementById('rb-ver').textContent=ver;
+  document.getElementById('rb-ver-s').textContent=verStatus;
+  const statusEl=document.getElementById('rb-status');
+  if(parseFloat(err)>1){statusEl.textContent='🚨 Alert: error rate above threshold — rollback recommended';statusEl.style.color='var(--rd)';}
+  else if(parseFloat(err)>0.4){statusEl.textContent='⚠ Warning: elevated error rate — monitor closely';statusEl.style.color='var(--or)';}
+  else{statusEl.textContent='System healthy — '+ver+' stable';statusEl.style.color='var(--gn)';}
+}
+function rbLog(msg,cls){
+  const l=document.getElementById('rb-log');
+  const s=document.createElement('span');s.className=cls||'';s.textContent=msg;
+  l.appendChild(s);l.scrollTop=l.scrollHeight;
+}
+function rbDeploy(){
+  document.getElementById('rb-bad').disabled=true;
+  [document.getElementById('rb-flag'),document.getElementById('rb-lb'),document.getElementById('rb-k8s')].forEach(b=>b.disabled=false);
+  rbLog('Deploying v2.15…','l-dim');
+  let t=0;rbDegraded=true;
+  rbTimer=setInterval(()=>{
+    t++;
+    const err=Math.min(0.04+t*0.35,9);
+    const lat=Math.min(142+t*18,900);
+    rbHistory.push(err);rbHistory.shift();rbRenderChart();
+    rbSetMetrics(err.toFixed(2)+'%',Math.round(lat)+'ms','v2.15','⚠ degraded',err>1?'✗ alert!':'⚠ rising');
+    if(t===2)rbLog('Error rate rising: '+err.toFixed(2)+'%','l-warn');
+    if(t===4){rbLog('🚨 ALERT: '+err.toFixed(2)+'% — exceeded 1% threshold','l-err');clearInterval(rbTimer);}
+  },900);
+}
+function rbRollback(type,dur){
+  clearInterval(rbTimer);
+  const labels={'flag':'Feature flag kill-switch','lb':'Load balancer traffic revert','k8s':'kubectl rollout undo'};
+  const speeds={'flag':'~1s','lb':'~5s','k8s':'~90s'};
+  rbLog(`↩ ${labels[type]} initiated (${speeds[type]})…`,'l-warn');
+  [document.getElementById('rb-flag'),document.getElementById('rb-lb'),document.getElementById('rb-k8s')].forEach(b=>b.disabled=true);
+  setTimeout(()=>{
+    rbDegraded=false;rbHistory=Array(20).fill(2);rbRenderChart();
+    rbSetMetrics('0.03%','142ms','v2.14','● restored','✓ healthy');
+    rbLog(`✅ ${labels[type]} complete. v2.14 restored. Error rate normalised.`,'l-ok');
+  },dur);
+}
+function rbReset(){
+  clearInterval(rbTimer);rbDegraded=false;rbHistory=Array(20).fill(2);rbRenderChart();
+  rbSetMetrics('0.03%','142ms','v2.14','● stable','✓ healthy');
+  document.getElementById('rb-bad').disabled=false;
+  [document.getElementById('rb-flag'),document.getElementById('rb-lb'),document.getElementById('rb-k8s')].forEach(b=>b.disabled=true);
+  document.getElementById('rb-log').innerHTML='<span class="l-info">// System stable. Deploy a bad version to see metrics degrade.</span>';
+}
+rbRenderChart();rbSetMetrics('0.03%','142ms','v2.14','● stable','✓ healthy');
+
+/* ─────────────────────────────────
+   MONITORING SIMULATOR
+───────────────────────────────── */
+let mHistory=Array(20).fill(2),mTimer=null,mRunning=false;
+function mRenderChart(){
+  const el=document.getElementById('m-chart');el.innerHTML='';
+  mHistory.forEach(v=>{
+    const d=document.createElement('div');d.className='spike-bar';
+    d.style.height=Math.min(v*8,100)+'%';
+    d.style.background=v>12?'var(--rd)':v>4?'var(--or)':'var(--gn)';
+    el.appendChild(d);
+  });
+}
+function mSetMetrics(lat,rps,err,cpu){
+  const lc=parseInt(lat)>300?'var(--or)':'var(--tx)';
+  const ec=parseFloat(err)>1?'var(--rd)':parseFloat(err)>0.4?'var(--or)':'var(--gn)';
+  document.getElementById('m-lat').textContent=lat+'ms';document.getElementById('m-lat').style.color=lc;
+  document.getElementById('m-lat-s').textContent=parseInt(lat)>300?'⚠ above SLO':'● within SLO';document.getElementById('m-lat-s').style.color=parseInt(lat)>300?'var(--or)':'var(--gn)';
+  document.getElementById('m-rps').textContent=typeof rps==='number'?rps.toLocaleString():rps;
+  document.getElementById('m-err').textContent=err+'%';document.getElementById('m-err').style.color=ec;
+  document.getElementById('m-err-s').textContent=parseFloat(err)>1?'✗ alert!':parseFloat(err)>0.4?'⚠ elevated':'● healthy';document.getElementById('m-err-s').style.color=ec;
+  document.getElementById('m-cpu').textContent=cpu+'%';document.getElementById('m-cpu').style.color=parseInt(cpu)>75?'var(--or)':'var(--or)';
+  document.getElementById('m-cpu-s').textContent=parseInt(cpu)>75?'⚠ high':'● normal';
+}
+function monStart(){
+  document.getElementById('m-go').disabled=true;document.getElementById('m-spike').disabled=false;
+  mRunning=true;
+  mTimer=setInterval(()=>{
+    const err=(0.03+Math.random()*0.02).toFixed(2);
+    const lat=138+Math.floor(Math.random()*12);
+    mHistory.push(parseFloat(err));mHistory.shift();mRenderChart();
+    mSetMetrics(lat,8400+Math.floor(Math.random()*300),err,34+Math.floor(Math.random()*8));
+  },1100);
+}
+function monSpike(){
+  clearInterval(mTimer);let t=0;
+  mTimer=setInterval(()=>{
+    t++;
+    const err=Math.min(0.04+t*0.38,9);
+    mHistory.push(err);mHistory.shift();mRenderChart();
+    mSetMetrics(140+t*15,8400,err.toFixed(2),35+t*4);
+    if(t>=8){clearInterval(mTimer);document.getElementById('m-spike').disabled=true;}
+  },700);
+}
+function monReset(){
+  clearInterval(mTimer);mRunning=false;mHistory=Array(20).fill(2);mRenderChart();
+  mSetMetrics(142,8421,'0.03',38);
+  document.getElementById('m-go').disabled=false;document.getElementById('m-spike').disabled=true;
+}
+mRenderChart();
+</script>
+</body>
+</html>
