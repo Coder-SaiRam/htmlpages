@@ -3,7 +3,7 @@ import re
 from collections import defaultdict
 
 INDEX_FILE = "index.html"
-SOURCE_DIR = "pages"
+SOURCE_DIR = "/pages"
 
 START_MARKER = "<!-- AUTO-CARDS-START -->"
 END_MARKER = "<!-- AUTO-CARDS-END -->"
@@ -40,12 +40,12 @@ for root, dirs, files in os.walk(SOURCE_DIR):
 
         full_path = os.path.join(root, file)
 
-        # relative path from "source"
-        relative_path = os.path.relpath(full_path, "source")
+        # relative path from "pages"
+        relative_path = os.path.relpath(full_path, "pages")
 
         parts = relative_path.split(os.sep)
 
-        # ✅ Only allow source/pages/<folder>/<file>.html
+        # ✅ Only allow /pages/<folder>/<file>.html
         if len(parts) != 3:
             continue
 
