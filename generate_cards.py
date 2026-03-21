@@ -3,7 +3,7 @@ import re
 from collections import defaultdict
 
 INDEX_FILE = "index.html"
-SOURCE_DIR = "source/pages"
+SOURCE_DIR = "pages"
 
 START_MARKER = "<!-- AUTO-CARDS-START -->"
 END_MARKER = "<!-- AUTO-CARDS-END -->"
