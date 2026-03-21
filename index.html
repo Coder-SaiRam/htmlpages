@@ -9,55 +9,73 @@
     <style>
 
         body{
-        margin:0;
-        font-family:Arial, Helvetica, sans-serif;
-        background:linear-gradient(135deg,#1e293b,#0f172a);
-        color:white;
-        text-align:center;
+            margin:0;
+            font-family:Arial, Helvetica, sans-serif;
+            background:linear-gradient(135deg,#1e293b,#0f172a);
+            color:white;
+            text-align:center;
         }
 
         h1{
-        margin-top:40px;
-        margin-bottom:40px;
-        font-size:36px;
+            margin-top:40px;
+            margin-bottom:40px;
+            font-size:36px;
         }
 
-        .container{
-        display:grid;
-        grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
-        gap:30px;
-        width:80%;
-        margin:auto;
-        max-width:1000px;
+        /* Sections wrapper */
+        #sections{
+            width:100%;
+        }
+
+        .section{
+            margin-bottom:50px;
+        }
+
+        .section-title{
+            margin:30px auto 15px;
+            font-size:24px;
+            text-align:left;
+            width:80%;
+            max-width:1000px;
+        }
+
+        /* Grid layout per section */
+        .card-container{
+            display:grid;
+            grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+            gap:30px;
+            width:80%;
+            margin:auto;
+            max-width:1000px;
         }
 
         .card{
-        background:#1f2937;
-        padding:25px;
-        border-radius:12px;
-        cursor:pointer;
-        transition:transform 0.25s, box-shadow 0.25s;
+            background:#1f2937;
+            padding:25px;
+            border-radius:12px;
+            cursor:pointer;
+            transition:transform 0.25s, box-shadow 0.25s;
         }
 
         .card:hover{
-        transform:translateY(-6px);
-        box-shadow:0 12px 25px rgba(0,0,0,0.4);
+            transform:translateY(-6px);
+            box-shadow:0 12px 25px rgba(0,0,0,0.4);
         }
 
         .card-icon{
-        font-size:40px;
-        margin-bottom:10px;
+            font-size:40px;
+            margin-bottom:10px;
         }
 
         .card-title{
-        font-size:20px;
-        font-weight:bold;
-        margin-bottom:10px;
+            font-size:20px;
+            font-weight:bold;
+            margin-bottom:10px;
         }
 
         .card-desc{
-        font-size:14px;
-        opacity:0.8;
+            font-size:14px;
+            opacity:0.8;
         }
 
     </style>
@@ -68,159 +86,16 @@
 
 <h1>🚀 Sai's Tech Deep Dives</h1>
 
-<div class="container">
+<div id="sections">
 
-    
-
-
-
-
-
-
-
-
-
-
-
-<!-- AUTO-CARDS-START -->
-
-
-<div class="card" onclick="openPage('source/pages/docker-complete-guide.html')">
-    <div class="card-icon">🐳</div>
-    <div class="card-title">Docker Complete Guide</div>
-    <div class="card-desc">
-        Deep dive documentation for Docker Complete Guide
-    </div>
-</div>
-
-
-<div class="card" onclick="openPage('source/pages/graph-patterns-guide.html')">
-    <div class="card-icon">📈</div>
-    <div class="card-title">Graph Patterns Guide</div>
-    <div class="card-desc">
-        Deep dive documentation for Graph Patterns Guide
-    </div>
-</div>
-
-
-<div class="card" onclick="openPage('source/pages/java-features-guide.html')">
-    <div class="card-icon">☕</div>
-    <div class="card-title">Java Features Guide</div>
-    <div class="card-desc">
-        Deep dive documentation for Java Features Guide
-    </div>
-</div>
-
-
-<div class="card" onclick="openPage('source/pages/java-threads-complete-guide.html')">
-    <div class="card-icon">🧶</div>
-    <div class="card-title">Java Threads Complete Guide</div>
-    <div class="card-desc">
-        Deep dive documentation for Java Threads Complete Guide
-    </div>
-</div>
-
-
-<div class="card" onclick="openPage('source/pages/kubernetes-architecture.html')">
-    <div class="card-icon">☸️</div>
-    <div class="card-title">Kubernetes Architecture</div>
-    <div class="card-desc">
-        Deep dive documentation for Kubernetes Architecture
-    </div>
-</div>
-
-
-<div class="card" onclick="openPage('source/pages/odata-deep-dive.html')">
-    <div class="card-icon">🪟</div>
-    <div class="card-title">Odata Deep Dive</div>
-    <div class="card-desc">
-        Deep dive documentation for Odata Deep Dive
-    </div>
-</div>
-
-
-<div class="card" onclick="openPage('source/pages/recursion-mastery-guide.html')">
-    <div class="card-icon">🔄</div>
-    <div class="card-title">Recursion Mastery Guide</div>
-    <div class="card-desc">
-        Deep dive documentation for Recursion Mastery Guide
-    </div>
-</div>
-
-
-<div class="card" onclick="openPage('source/pages/solid-design-patterns-guide.html')">
-    <div class="card-icon">🏗️</div>
-    <div class="card-title">Solid Design Patterns Guide</div>
-    <div class="card-desc">
-        Deep dive documentation for Solid Design Patterns Guide
-    </div>
-</div>
-
-
-<div class="card" onclick="openPage('source/pages/spring-data-jpa-guide.html')">
-    <div class="card-icon">🌱</div>
-    <div class="card-title">Spring Data Jpa Guide</div>
-    <div class="card-desc">
-        Deep dive documentation for Spring Data Jpa Guide
-    </div>
-</div>
-
-
-<div class="card" onclick="openPage('source/pages/spring-security-guide.html')">
-    <div class="card-icon">🌱</div>
-    <div class="card-title">Spring Security Guide</div>
-    <div class="card-desc">
-        Deep dive documentation for Spring Security Guide
-    </div>
-</div>
-
-
-<div class="card" onclick="openPage('source/pages/springboot-core-guide.html')">
-    <div class="card-icon">🌱</div>
-    <div class="card-title">Springboot Core Guide</div>
-    <div class="card-desc">
-        Deep dive documentation for Springboot Core Guide
-    </div>
-</div>
-
-
-<div class="card" onclick="openPage('source/pages/sql-ultimate-guide.html')">
-    <div class="card-icon">🗄️</div>
-    <div class="card-title">Sql Ultimate Guide</div>
-    <div class="card-desc">
-        Deep dive documentation for Sql Ultimate Guide
-    </div>
-</div>
-
-
-<div class="card" onclick="openPage('source/pages/trees-mastery-guide.html')">
-    <div class="card-icon">🌳</div>
-    <div class="card-title">Trees Mastery Guide</div>
-    <div class="card-desc">
-        Deep dive documentation for Trees Mastery Guide
-    </div>
-</div>
-
-
-<!-- AUTO-CARDS-END -->
-
-
-
-
-
-
-
-
-
-
-
-
+    <!-- AUTO-CARDS-START -->
+    <!-- AUTO-CARDS-END -->
 
 </div>
 
 <script>
     function openPage(url){
-    window.open(url,"_blank");
+        window.open(url,"_blank");
     }
 </script>
 

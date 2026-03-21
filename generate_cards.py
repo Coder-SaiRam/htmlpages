@@ -1,5 +1,6 @@
 import os
 import re
+from collections import defaultdict
 
 INDEX_FILE = "index.html"
 SOURCE_DIR = "source/pages"
@@ -26,25 +27,41 @@ print("Reading index.html...")
 with open(INDEX_FILE, "r", encoding="utf-8") as f:
     html = f.read()
 
-cards = []
+print("Scanning pages directory (recursive)...")
 
-print("Scanning pages directory...")
+# 👉 folder → list of cards
+grouped_cards = defaultdict(list)
 
-for file in sorted(os.listdir(SOURCE_DIR)):
+for root, dirs, files in os.walk(SOURCE_DIR):
+    for file in files:
 
-    if not file.endswith(".html"):
-        continue
+        if not file.endswith(".html"):
+            continue
 
-    title = file.replace(".html", "").replace("-", " ").title()
+        full_path = os.path.join(root, file)
 
-    icon = "🪟"
-    for key in icons:
-        if key in file.lower():
-            icon = icons[key]
-            break
+        # relative path from "source"
+        relative_path = os.path.relpath(full_path, "source")
 
-    card = f"""
-<div class="card" onclick="openPage('source/pages/{file}')">
+        # Decide folder
+        parts = relative_path.split(os.sep)
+
+        if len(parts) == 2:
+            folder = "General"
+        else:
+            folder = parts[1].replace("-", " ").title()
+
+        title = file.replace(".html", "").replace("-", " ").title()
+
+        # icon logic (same as yours)
+        icon = "🪟"
+        for key in icons:
+            if key in file.lower():
+                icon = icons[key]
+                break
+
+        card = f"""
+<div class="card" onclick="openPage('{relative_path}')">
     <div class="card-icon">{icon}</div>
     <div class="card-title">{title}</div>
     <div class="card-desc">
@@ -53,14 +70,31 @@ for file in sorted(os.listdir(SOURCE_DIR)):
 </div>
 """
 
-    cards.append(card)
+        grouped_cards[folder].append(card)
 
-cards_html = "\n".join(cards)
+print("Generating sections...")
+
+sections = []
+
+for folder in sorted(grouped_cards.keys()):
+    cards_html = "\n".join(sorted(grouped_cards[folder]))
+
+    section = f"""
+<div class="section">
+    <h2 class="section-title">{folder}</h2>
+    <div class="card-container">
+        {cards_html}
+    </div>
+</div>
+"""
+    sections.append(section)
+
+final_html = "\n".join(sections)
 
 new_section = f"""
 {START_MARKER}
 
-{cards_html}
+{final_html}
 
 {END_MARKER}
 """
@@ -77,4 +111,4 @@ print("Writing updated index.html...")
 with open(INDEX_FILE, "w", encoding="utf-8") as f:
     f.write(html)
 
-print(f"Generated {len(cards)} cards successfully.")
+print(f"Generated sections: {len(grouped_cards)} 🚀")
