@@ -3,7 +3,7 @@ import re
 from collections import defaultdict
 
 INDEX_FILE = "index.html"
-SOURCE_DIR = "/pages"
+SOURCE_DIR = "pages"   # ✅ fixed (no leading /)
 
 START_MARKER = "<!-- AUTO-CARDS-START -->"
 END_MARKER = "<!-- AUTO-CARDS-END -->"
@@ -27,9 +27,8 @@ print("Reading index.html...")
 with open(INDEX_FILE, "r", encoding="utf-8") as f:
     html = f.read()
 
-print("Scanning pages directory (ONLY nested folders)...")
+print("Scanning pages directory (nested folders only)...")
 
-# folder → list of cards
 grouped_cards = defaultdict(list)
 
 for root, dirs, files in os.walk(SOURCE_DIR):
@@ -40,22 +39,19 @@ for root, dirs, files in os.walk(SOURCE_DIR):
 
         full_path = os.path.join(root, file)
 
-        # relative path from "pages"
-        relative_path = os.path.relpath(full_path, "pages")
+        # ✅ relative path from project root (for browser usage)
+        relative_path = full_path.replace("\\", "/")
 
-        parts = relative_path.split(os.sep)
+        # Example: pages/systemdesign/sharding.html
+        parts = relative_path.split("/")
 
-        # ✅ Only allow /pages/<folder>/<file>.html
+        # ✅ Only allow pages/<folder>/<file>.html
         if len(parts) != 3:
             continue
 
-        # folder name
         folder = parts[1].replace("-", " ").title()
-
-        # title from file
         title = file.replace(".html", "").replace("-", " ").title()
 
-        # icon detection
         icon = "🪟"
         for key in icons:
             if key in file.lower():
